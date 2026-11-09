@@ -12,7 +12,7 @@ Status keys: `todo` · `doing` · `done` · `blocked` · ⏸ = needs user
 | 0.4 Inspect raw CSVs with DuckDB → docs/data_inventory.md | done | 32 files via pipeline/00_inventory.py; 11 flags recorded (no NRT type col, no archive/NRT overlap, Rodrigues, S-NPP Jul-2022 gap…) |
 | 0.5 pipeline/config.yaml (regions + clip boxes) | done | YAML loads; 4 regions; thresholds/windows from CLAUDE.md |
 | 0.6 Scaffold web/ (Vite+React+TS+Tailwind v4, tokens, AppShell, routes) | done | Vite 8 / React 19 / TS 7 / Tailwind 4.3; build OK (JS 84 kB gz, CSS 7 kB gz); oxlint clean; preview: /, /r/punjab, /proof, /data, /ask all 200; all §4.2 tokens present in built CSS; vercel.json SPA rewrite |
-| 0.7 ⏸ Push + Vercel import steps; user confirms live URL | todo | |
+| 0.7 ⏸ Push + Vercel import steps; user confirms live URL | blocked | push 403: Git Credential Manager is signed in as Murugun-Sharma-Roma-Rishi, not Muru265. 6 local commits waiting. |
 
 ## Phase 1 — Data in
 | Task | Status | Notes |

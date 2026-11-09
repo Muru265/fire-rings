@@ -7,3 +7,6 @@ __pycache__/
 *.zip
 dist/
 .vercel/
+.pytest_cache/
+test-results/
+playwright-report/
