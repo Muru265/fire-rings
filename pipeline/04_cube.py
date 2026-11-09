@@ -23,7 +23,7 @@ from pathlib import Path
 import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import config, connect, path, sql_path, write_json  # noqa: E402
+from lib.common import config, connect, data_end, path, sql_path, write_json  # noqa: E402
 from lib.coverage import adjust, days_covered, regional_gaps  # noqa: E402
 
 STREAM_OF_SAT = {"Terra": "TERRA", "Aqua": "AQUA", "SNPP": "SNPP", "N20": "N20", "N21": "N21"}
@@ -32,9 +32,8 @@ AQUA_FIRST = dt.date(2002, 7, 4)
 
 
 def operating_days(con, raw: Path, out: Path) -> pl.DataFrame:
-    if out.exists():
-        return pl.read_parquet(out)
-    files = sorted(raw.glob("*/*/fire_*.csv"))
+    """Recomputed every run (a few seconds) so new NRT/API files are always included."""
+    files = sorted(raw.glob("*/*/fire_*.csv")) + sorted((raw.parent / "raw_api").glob("*/*/fire_*.csv"))
     union = " UNION ".join(
         f"SELECT DISTINCT satellite, CAST(acq_date AS DATE) d FROM read_csv('{sql_path(f)}', all_varchar=true)"
         for f in files)
@@ -141,12 +140,12 @@ def build(con, region: str, op: pl.DataFrame, data_end: dt.date, min_ratio: floa
 def main(regions: list[str]) -> None:
     cfg = config()
     cube, out = path("cube"), path("out")
-    data_end = dt.date.fromisoformat(cfg["record"]["data_end"])
     con = connect()
     op = operating_days(con, path("raw"), cube / "operating_days.parquet")
     print("operating days per stream:", dict(op.group_by("stream").len().sort("stream").iter_rows()))
     for region in regions or list(cfg["regions"]):
-        summ = build(con, region, op, data_end, cfg["cube"]["coverage_min_ratio"], cube)
+        summ = build(con, region, op, data_end(region), cfg["cube"]["coverage_min_ratio"], cube)
+        summ["data_end"] = str(data_end(region))
         write_json(out / f"cube_{region}.json", summ)
         print(f"{region:<13} months={summ['months']} adjusted={summ['adjusted_months']} "
               f"insufficient={len(summ['insufficient'])} cell-days={summ['cell_days_total']}", flush=True)

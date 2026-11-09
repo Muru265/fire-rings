@@ -22,6 +22,8 @@ interface Props {
   centerLabel?: string
   /** draw cells (on first mount) from the centre outward */
   drawIn?: boolean
+  /** story mode: cells for which this returns false are faded */
+  emphasis?: (y: number, m: number) => boolean
   active: Cell | null
   onActive: (c: Cell | null) => void
   onSelect: (c: Cell) => void
@@ -29,7 +31,7 @@ interface Props {
 }
 
 /** Radial calendar: years are rings (first year at the centre), months run clockwise from 12 o'clock. */
-export default function FireRings({ grid, colorOf, mode, active, onActive, onSelect, label, centerLabel, drawIn }: Props) {
+export default function FireRings({ grid, colorOf, mode, active, onActive, onSelect, label, centerLabel, drawIn, emphasis }: Props) {
   const uid = useId().replace(/:/g, '')
   const { years, byKey } = grid
   const w = (R1 - R0) / years.length
@@ -102,7 +104,7 @@ export default function FireRings({ grid, colorOf, mode, active, onActive, onSel
                 const r = byKey.get(key(y, m))
                 if (!r) return null
                 const fill = colorOf(r) ?? `url(#${uid}-nodata)`
-                const dim = active && active.y !== y && active.m !== m
+                const dim = (active && active.y !== y && active.m !== m) || (emphasis && !emphasis(y, m))
                 const isActive = active?.y === y && active?.m === m
                 const isFocus = focus.y === y && focus.m === m
                 const provisional = r.flags.includes('provisional') || r.flags.includes('mtd')

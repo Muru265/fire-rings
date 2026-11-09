@@ -53,6 +53,17 @@
 input.seam::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--text); border: 3px solid var(--accent); box-shadow: 0 0 0 4px rgba(255,122,69,.18); }
 input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 3px solid var(--accent); }
 
+.starfield {
+  background:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,.45), transparent 60%),
+    radial-gradient(1px 1px at 72% 12%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1px 1px at 38% 68%, rgba(255,255,255,.3), transparent 60%),
+    radial-gradient(1px 1px at 88% 58%, rgba(255,255,255,.4), transparent 60%),
+    radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,.25), transparent 60%),
+    radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,.3), transparent 60%),
+    var(--bg);
+}
+
 @layer components {
   .card {
     background: var(--surface);

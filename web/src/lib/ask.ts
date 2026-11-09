@@ -1,0 +1,45 @@
+import { fetchJson } from './api'
+
+export type Voice = 'responder' | 'scientist'
+export interface TraceItem { tool: string; args: Record<string, unknown>; result_summary: string; result?: unknown }
+export interface Answer {
+  question: string
+  region?: string
+  voice: Voice
+  answer: string
+  caveat: string
+  trace: TraceItem[]
+  model?: string
+  verified?: boolean
+  source: 'live' | 'cache'
+  generated?: string
+}
+
+export const CHIPS = ['Is this month unusual?', 'Worst year on record?', 'When does the season peak?', 'How reliable is this?']
+
+interface CacheDoc { data_end: string; chips: string[]; entries: Record<string, Omit<Answer, 'source' | 'voice'> & { generated: string }> }
+
+async function fromCache(question: string, region?: string): Promise<Answer | null> {
+  if (!region) return null
+  try {
+    const c = await fetchJson<CacheDoc>('ask_cache.json')
+    const e = c.entries[`${region}|${question}`]
+    return e ? { ...e, voice: 'responder', source: 'cache' } : null
+  } catch {
+    return null
+  }
+}
+
+/** Ask the live analyst; on any error fall back to the precomputed answer for chip questions. */
+export async function askFireRings(question: string, region: string | undefined, voice: Voice): Promise<Answer> {
+  try {
+    const r = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question, region, voice }) })
+    const j = await r.json().catch(() => ({}))
+    if (!r.ok || j.error) throw new Error(j.message || j.error || `HTTP ${r.status}`)
+    return { ...j, question, region, voice, source: 'live' }
+  } catch (e) {
+    const cached = await fromCache(question, region)
+    if (cached) return cached
+    throw e
+  }
+}

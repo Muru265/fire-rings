@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
 import { fmtInt, fmtRatio } from '../lib/format'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
+import CountUp from './CountUp'
 
-function Card({ label, value, sub, badge }: { label: string; value: string; sub: string; badge?: string }) {
+function Card({ label, value, sub, badge }: { label: string; value: ReactNode; sub: string; badge?: string }) {
   return (
     <div className="card flex flex-col gap-1 !p-4">
       <div className="flex items-center justify-between gap-2">
@@ -39,13 +41,13 @@ export default function KpiCards({ doc }: { doc: RegionDoc }) {
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <Card
         label="This month"
-        value={lt?.value != null ? fmtInt(lt.value) : '—'}
+        value={lt?.value != null ? <CountUp value={lt.value} format={fmtInt} /> : '—'}
         sub={lt ? `${MONTHS[lt.m - 1]} ${lt.y}${lt.mtd ? ` · days 1–${lt.days}` : ''} · 90% ${fmtInt(lt.lo)}–${fmtInt(lt.hi)} fire-days` : 'no data'}
         badge={lt?.provisional ? 'provisional' : undefined}
       />
       <Card
         label="Year to date"
-        value={ytdOk && ytdMed > 0 ? fmtRatio(ytd / ytdMed) : '—'}
+        value={ytdOk && ytdMed > 0 ? <CountUp value={ytd / ytdMed} format={fmtRatio} /> : '—'}
         sub={ytdOk ? `Jan–${MONTHS[lastFull - 1]} ${ly}: ${fmtInt(ytd)} vs typical ${fmtInt(ytdMed)} fire-days` : 'not enough complete months'}
       />
       <Card
@@ -55,7 +57,7 @@ export default function KpiCards({ doc }: { doc: RegionDoc }) {
       />
       <Card
         label="Static sources removed"
-        value={q ? fmtInt(q.masked_static_total) : '—'}
+        value={q ? <CountUp value={q.masked_static_total} format={fmtInt} /> : '—'}
         sub={q ? `${((100 * q.masked_static_total) / q.rows_unified).toFixed(1)}% of detections (flares, kilns, industry) · ${fmtInt(q.dropped_low_conf)} low-confidence dropped` : ''}
       />
     </div>

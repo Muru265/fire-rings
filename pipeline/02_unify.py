@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import ROOT, config, connect, path, sql_path, write_json  # noqa: E402
+from lib.common import ROOT, api_files, config, connect, path, sql_path, write_json  # noqa: E402
 
 STREAMS = {"Terra": "TERRA", "Aqua": "AQUA", "SNPP": "SNPP", "N20": "N20", "N21": "N21"}
 
@@ -143,7 +143,9 @@ def main(regions: list[str]) -> None:
         rc = cfg["regions"][region]
         t0 = time.time()
         con = connect()
-        counts = unify(con, source_files(raw, rc["source"]), region, rc.get("bbox"), sensor_stream_map())
+        files = source_files(raw, rc["source"]) + api_files(region)
+        counts = unify(con, files, region, rc.get("bbox"), sensor_stream_map())
+        counts["api_files"] = [str(f[0].relative_to(ROOT)) for f in api_files(region)]
         dest = clean / f"{region}.parquet"
         con.execute(f"COPY (SELECT * FROM unified ORDER BY solar_date, stream) TO '{sql_path(dest)}' "
                     f"(FORMAT parquet, COMPRESSION zstd)")

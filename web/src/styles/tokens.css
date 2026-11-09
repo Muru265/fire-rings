@@ -17,6 +17,9 @@
 
 /* Additions (master plan §4.3 typography, §4.5 motion). */
 :root{
+  /* Accessibility override: the §4.2 value #5D6B7E is 2.6–3.6:1 on our surfaces; #8492A6 is ≥4.5:1 on all of them
+     (web/scripts/contrast.mjs). Required by the master plan's own 4.5:1 quality bar (§10). */
+  --text-faint:#8492A6;
   --font-display:'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
   --font-body:'Inter Variable', 'Inter', system-ui, sans-serif;
   --font-mono:'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;

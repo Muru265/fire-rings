@@ -3,6 +3,7 @@ import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 const NAV = [
   { to: '/r/punjab', label: 'Explore', match: '/r/' },
   { to: '/proof', label: 'Proof' },
+  { to: '/story/madagascar', label: 'Story', match: '/story/' },
   { to: '/data', label: 'Data' },
   { to: '/ask', label: 'Ask' },
 ]

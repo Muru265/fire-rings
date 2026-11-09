@@ -26,6 +26,7 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.common import config, path, read_json, write_json  # noqa: E402
+from lib.common import data_end as region_end  # noqa: E402
 
 
 def weibull_pct(x: float, base: np.ndarray) -> float:
@@ -59,8 +60,8 @@ def main() -> None:
     st = cfg["stats"]
     b0, b1 = st["baseline"]
     out = path("out")
-    data_end = dt.date.fromisoformat(cfg["record"]["data_end"])
     for region in cfg["regions"]:
+        data_end = region_end(region)
         h = pl.read_parquet(out / f"harmonized_{region}.parquet")
         draws = np.load(out / f"hdraws_{region}.npy")
         method = read_json(out / f"validation_{region}.json")["summary"]["method"]

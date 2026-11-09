@@ -23,6 +23,7 @@ import type { Cell } from '../lib/useCellNav'
 
 const MapView = lazy(() => import('../components/MapView'))
 const MonthDrawer = lazy(() => import('../components/MonthDrawer'))
+const AskDrawer = lazy(() => import('../components/AskDrawer'))
 
 export default function Region() {
   const { regionId } = useParams()
@@ -59,6 +60,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
   const [selected, setSelected] = useState<Cell | null>(null)
   const [focusMonth, setFocusMonth] = useState<Cell | null>(null)
   const [table, setTable] = useState(false)
+  const [ask, setAsk] = useState<{ q?: string } | null>(null)
   const ringsRef = useRef<HTMLDivElement>(null)
 
   const applyBox = useCallback((b: Box | null) => {
@@ -237,10 +239,11 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
             <h2 id="ask-h" className="eyebrow">Ask Fire Rings</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {['Is this month unusual?', 'Worst year on record?', 'When does the season peak?', 'How reliable is this?'].map((q) => (
-                <Link key={q} to={`/ask?region=${regionDoc.id}&q=${encodeURIComponent(q)}`}
-                  className="rounded-full border border-border-strong px-3 py-1.5 text-xs text-text no-underline hover:bg-surface-2">{q}</Link>
+                <button key={q} onClick={() => setAsk({ q })}
+                  className="rounded-full border border-border-strong px-3 py-1.5 text-xs text-text hover:bg-surface-2">{q}</button>
               ))}
             </div>
+            <button onClick={() => setAsk({})} className="mt-3 text-xs text-accent-2 hover:underline">Ask your own question →</button>
           </section>
 
           <section className="card text-xs text-muted" aria-labelledby="prov-h">
@@ -260,7 +263,13 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
 
       {selected && selRec && (
         <Suspense fallback={null}>
-          <MonthDrawer doc={doc} rec={selRec} onClose={() => setSelected(null)} />
+          <MonthDrawer doc={doc} rec={selRec} onClose={() => setSelected(null)}
+            onAsk={() => { const r = selRec; setSelected(null); setAsk({ q: `How unusual was ${new Date(Date.UTC(r.y, r.m - 1, 1)).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' })} ${r.y}?` }) }} />
+        </Suspense>
+      )}
+      {ask && (
+        <Suspense fallback={null}>
+          <AskDrawer region={regionDoc.id} question={ask.q} onClose={() => setAsk(null)} />
         </Suspense>
       )}
     </div>

@@ -23,7 +23,7 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.calib import bootstrap_ratios, choose_tau, ratios  # noqa: E402
-from lib.common import config, path, write_json  # noqa: E402
+from lib.common import config, data_end, path, write_json  # noqa: E402
 
 METHODS = ("monthly", "pooled")
 
@@ -90,9 +90,10 @@ def main(regions: list[str]) -> None:
     assert ym(cc["window"][1]) <= (2019, 12), "calibration window must end by Dec 2019 (MODIS orbit drift)"
     segs = cfg["harmonized_segments"]
     start_y = int(cfg["record"]["start"][:4])
-    end_y, end_m = ym(cfg["record"]["data_end"])
     out = path("out")
     for region in regions or list(cfg["regions"]):
+        de = data_end(region)
+        end_y, end_m = de.year, de.month
         cube = load(region)
         summary: dict = {"region": region, "window": cc["window"], "q_window": cc["q_window"],
                          "kprime_window": cc["kprime_window"], "methods": {}}

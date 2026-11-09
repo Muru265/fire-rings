@@ -41,5 +41,23 @@ def read_json(p: Path):
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+def data_end(region: str):
+    """Last day of data for a region: the global record end, extended for a region with a fresher FIRMS API pull."""
+    import datetime as dt
+    end = dt.date.fromisoformat(config()["record"]["data_end"])
+    f = ROOT / "data" / "out" / "nrt_fetch.json"
+    if f.exists():
+        j = read_json(f)
+        if j.get("region") == region and j.get("data_end"):
+            end = max(end, dt.date.fromisoformat(j["data_end"]))
+    return end
+
+
+def api_files(region: str) -> list[tuple[Path, str, str]]:
+    """Extra NRT CSVs pulled by 01_fetch_nrt.py for a region: [(path, sensor, 'NRT')]."""
+    base = ROOT / "data" / "raw_api" / region
+    return [(p, p.parent.name, "NRT") for p in sorted(base.glob("*/fire_nrt_api.csv"))]
+
+
 def sql_path(p: Path) -> str:
     return p.as_posix().replace("'", "''")

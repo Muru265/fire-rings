@@ -23,6 +23,7 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.common import config, connect, path, read_json, sql_path, write_json  # noqa: E402
+from lib.common import data_end as region_end  # noqa: E402
 
 PROVISIONAL_AFTER = {"MODIS": dt.date(2026, 8, 31), "VIIRS": dt.date(2026, 7, 31)}  # archive ends → NRT after
 CITATION = ("Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. "
@@ -272,8 +273,8 @@ def write_dataset(regs: list[dict], web: Path) -> None:
 def main() -> None:
     cfg = config()
     web = path("web")
-    data_end = dt.date.fromisoformat(cfg["record"]["data_end"])
-    regs = [export_region(r, rc, data_end, web) for r, rc in cfg["regions"].items()]
+    data_end = max(region_end(r) for r in cfg["regions"])
+    regs = [export_region(r, rc, region_end(r), web) for r, rc in cfg["regions"].items()]
     write_dataset(regs, web)
     write_json(web / "meta.json", {
         "version": cfg["version"], "data_end": str(data_end), "citation": CITATION,
