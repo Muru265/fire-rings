@@ -7,6 +7,8 @@ const FLAG_TEXT: Record<string, string> = {
   provisional: 'provisional (near-real-time data)',
   mtd: 'month to date',
   uncertain: 'uncertain (wide interval)',
+  terra_only: 'Terra only — wider uncertainty; not ranked',
+  overpass_timing: 'detected at satellite overpass times; burning has reportedly shifted to late afternoon, so this may be undercounted',
 }
 
 export interface CellText {

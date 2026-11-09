@@ -29,6 +29,9 @@ PROVISIONAL_AFTER = {"MODIS": dt.date(2026, 8, 31), "VIIRS": dt.date(2026, 7, 31
 CITATION = ("Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. "
             "Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.")
 HOTSPOT_MONTHS = 2
+TIMING_CAVEAT_REGIONS = {"punjab"}
+TIMING_CAVEAT = ("Detected at satellite overpass times; burning has reportedly shifted to late afternoon, "
+                 "so recent seasons may be undercounted.")
 
 
 def segment(y: int, m: int) -> str:
@@ -119,6 +122,10 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
             h = harm.get((y, m), {})
             if h.get("uncertain"):
                 flags.append("uncertain")
+            if seg == "T":
+                flags.append("terra_only")       # Terra × q, before Aqua: shown, hatched, never ranked
+            if region in TIMING_CAVEAT_REGIONS and m in (10, 11) and y >= 2022:
+                flags.append("overpass_timing")  # docs/punjab_timing.md — documented limitation, numbers unchanged
             s = pm.get((y, m), {})
             months.append({
                 "y": y, "m": m,
@@ -217,6 +224,8 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "similar_detail": stats.get("similar_detail"),
         "daily": {latest_key: side.get(latest_key, {})},
         "quality": quality(region),
+        "caveats": {"overpass_timing": TIMING_CAVEAT if region in TIMING_CAVEAT_REGIONS else None,
+                    "terra_only": "Terra only (before Aqua, Jan 2001 – Jun 2002) — wider uncertainty; not ranked"},
         "hotspot_months": [f"{r['y']:04d}-{r['m']:02d}" for r in months[-HOTSPOT_MONTHS:]],
         "hex_years": sorted({r["y"] for r in months}),
         "harmonized": bool(harm),
@@ -268,6 +277,9 @@ def write_dataset(regs: list[dict], web: Path) -> None:
         fh.write(pl.DataFrame(krows).write_csv())
     val = {r["id"]: opt_json(path("out") / f"validation_{r['id']}.json") for r in regs}
     write_json(ds / "validation_v1.json", {"version": "v1", "regions": val})
+    timing = opt_json(path("out") / "punjab_timing.json")
+    if timing:
+        write_json(ds / "punjab_timing_v1.json", {"caveat": TIMING_CAVEAT, "checks": timing}, compact=True)
 
 
 def main() -> None:

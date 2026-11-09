@@ -83,13 +83,19 @@ def main() -> None:
         last = rows[-1]
         mtd = (last["y"], last["m"]) == (data_end.year, data_end.month) and data_end.day < 28
         per_month = []
+        src = {(r["y"], r["m"]): r["src"] for r in rows}
         for r in rows:
             key = (r["y"], r["m"])
             s = month_stats(r["H"], draws[idx[key]], base[r["m"]], st["guard_median_lt"], st["guard_value_lt"])
+            # Terra-only months (2001-01 – 2002-06, Terra × q) are shown but never ranked / given return periods
             col = [H[(y, r["m"])] for y in range(int(cfg["record"]["start"][:4]), data_end.year + 1)
-                   if H.get((y, r["m"])) is not None and not (mtd and (y, r["m"]) == (last["y"], last["m"]))]
-            s["rank"] = (int(np.sum(np.array(col) > r["H"])) + 1) if r["H"] is not None else None
-            s["rank_of"] = len(col)
+                   if H.get((y, r["m"])) is not None and src.get((y, r["m"])) != "T"
+                   and not (mtd and (y, r["m"]) == (last["y"], last["m"]))]
+            if r["src"] == "T":
+                s.update({"rank": None, "rank_of": len(col), "return_period": None, "beyond_record": False, "terra_only": True})
+            else:
+                s["rank"] = (int(np.sum(np.array(col) > r["H"])) + 1) if r["H"] is not None else None
+                s["rank_of"] = len(col)
             per_month.append({"y": r["y"], "m": r["m"], **s})
 
         # month-to-date for the latest partial month: same days in baseline years, harmonized daily cell-days
@@ -131,8 +137,10 @@ def main() -> None:
                 continue
             tot = np.nansum(draws[[idx[k_] for k_ in ks]], axis=0)
             lo, hi = np.percentile(tot, [5, 95])
+            t_only = sum(1 for k_ in ks if src.get(k_) == "T")
             annual.append({"y": y, "H": round(float(sum(vals)), 1), "lo": round(float(lo), 1), "hi": round(float(hi), 1),
-                           "complete": complete, "months": len(ks)})
+                           "complete": complete, "months": len(ks), "terra_only_months": t_only,
+                           "rankable": complete and t_only == 0})
 
         # similar years: YTD curve over complete months of the latest year
         ly = last["y"]
@@ -144,6 +152,8 @@ def main() -> None:
                 other = np.array([H.get((y, m)) for m in range(1, upto + 1)], float)
                 if np.isnan(other).any() or np.isnan(cur).any() or np.std(other) == 0:
                     continue
+                if any(src.get((y, m)) == "T" for m in range(1, upto + 1)):
+                    continue   # Terra-only months are not used as analogues
                 sims.append((y, float(np.corrcoef(cur, other)[0, 1])))
         sims.sort(key=lambda t: -t[1])
         similar = [{"y": y, "r": round(r, 3)} for y, r in sims[: st["similar_years_top"]]]

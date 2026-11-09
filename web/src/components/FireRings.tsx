@@ -128,7 +128,7 @@ export default function FireRings({ grid, colorOf, mode, active, onActive, onSel
                       onFocus={() => { setFocus({ y, m }); onActive({ y, m }) }}
                       onClick={() => { setFocus({ y, m }); onSelect({ y, m }) }}
                     />
-                    {r.flags.includes('uncertain') && <path d={d} fill={`url(#${uid}-hatch)`} pointerEvents="none" />}
+                    {(r.flags.includes('uncertain') || r.flags.includes('terra_only')) && <path d={d} fill={`url(#${uid}-hatch)`} pointerEvents="none" />}
                   </g>
                 )
               })}

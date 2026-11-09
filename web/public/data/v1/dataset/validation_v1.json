@@ -81,8 +81,8 @@
     "v1_pass": true,
     "v3_pass": true,
     "v9": {
-     "season_def": "Jul–Jun",
-     "n_seasons": 24,
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
      "top3_harmonized": [
       "2016–17",
       "2007–08",
@@ -120,10 +120,9 @@
       "2002": 19,
       "2019": 20,
       "2004": 21,
-      "2001": 22,
-      "2023": 23,
-      "2024": 24,
-      "2025": 25
+      "2023": 22,
+      "2024": 23,
+      "2025": 24
      }
     }
    },
@@ -391,8 +390,8 @@
       "post2020_mean_rel_pct": -3.4
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
        "2016–17",
        "2007–08",
@@ -430,10 +429,9 @@
        "2002": 19,
        "2019": 20,
        "2004": 21,
-       "2001": 22,
-       "2023": 23,
-       "2024": 24,
-       "2025": 25
+       "2023": 22,
+       "2024": 23,
+       "2025": 24
       }
      }
     },
@@ -700,12 +698,12 @@
       "post2020_mean_rel_pct": -3.4
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
-       "2001–02",
        "2016–17",
-       "2007–08"
+       "2007–08",
+       "2021–22"
       ],
       "top3_raw": [
        "2016–17",
@@ -740,9 +738,8 @@
        "2004": 20,
        "2019": 21,
        "2023": 22,
-       "2001": 23,
-       "2024": 24,
-       "2025": 25
+       "2024": 23,
+       "2025": 24
       }
      }
     }
@@ -828,12 +825,12 @@
     "v1_pass": true,
     "v3_pass": true,
     "v9": {
-     "season_def": "Jul–Jun",
-     "n_seasons": 24,
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
      "top3_harmonized": [
-      "2001–02",
       "2016–17",
-      "2019–20"
+      "2019–20",
+      "2007–08"
      ],
      "top3_raw": [
       "2016–17",
@@ -1106,12 +1103,12 @@
       "post2020_mean_rel_pct": -4.8
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
-       "2001–02",
        "2016–17",
-       "2019–20"
+       "2019–20",
+       "2007–08"
       ],
       "top3_raw": [
        "2016–17",
@@ -1383,12 +1380,12 @@
       "post2020_mean_rel_pct": -4.8
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
-       "2001–02",
        "2016–17",
-       "2015–16"
+       "2015–16",
+       "2007–08"
       ],
       "top3_raw": [
        "2016–17",
@@ -1479,8 +1476,8 @@
     "v1_pass": true,
     "v3_pass": true,
     "v9": {
-     "season_def": "Jul–Jun",
-     "n_seasons": 24,
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
      "top3_harmonized": [
       "2019–20",
       "2002–03",
@@ -1760,12 +1757,12 @@
       "post2020_mean_rel_pct": -2.9
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
        "2019–20",
        "2002–03",
-       "2001–02"
+       "2003–04"
       ],
       "top3_raw": [
        "2019–20",
@@ -2040,8 +2037,8 @@
       "post2020_mean_rel_pct": -2.9
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
        "2019–20",
        "2002–03",
@@ -2139,12 +2136,12 @@
     "v1_pass": false,
     "v3_pass": true,
     "v9": {
-     "season_def": "Jul–Jun",
-     "n_seasons": 24,
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
      "top3_harmonized": [
-      "2001–02",
       "2013–14",
-      "2006–07"
+      "2006–07",
+      "2010–11"
      ],
      "top3_raw": [
       "2013–14",
@@ -2417,12 +2414,12 @@
       "post2020_mean_rel_pct": -19.4
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
-       "2001–02",
        "2013–14",
-       "2006–07"
+       "2006–07",
+       "2010–11"
       ],
       "top3_raw": [
        "2013–14",
@@ -2694,12 +2691,12 @@
       "post2020_mean_rel_pct": -19.4
      },
      "V9": {
-      "season_def": "Jul–Jun",
-      "n_seasons": 24,
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
       "top3_harmonized": [
-       "2001–02",
        "2013–14",
-       "2006–07"
+       "2006–07",
+       "2010–11"
       ],
       "top3_raw": [
        "2013–14",

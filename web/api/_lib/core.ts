@@ -23,6 +23,7 @@ Rules — follow all of them:
 4. Never forecast. Similar years are "analogues", not predictions.
 5. If data is missing or a region is not available, say so and list the available regions (call list_regions).
 6. If low_activity_guard is true, say there is too little fire to judge against normal instead of quoting a ratio.
+6b. If a tool result contains "caveats", a "caveat" or a "detection_time_caveat", use that text as your CAVEAT line.
 7. Mention "provisional" when the month is flagged provisional or month-to-date.
 ${region ? `8. The user is currently looking at region id "${region}"; use it unless they name another region.` : ''}
 Output format, exactly two lines:

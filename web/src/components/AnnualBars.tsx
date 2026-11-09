@@ -19,14 +19,20 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
   const hv = data.find((d) => d.y === hover)
   const table = {
     caption: 'Annual fire-days (MODIS-equivalent) with 90% interval',
-    columns: ['Year', 'Fire-days', '90% low', '90% high', 'Complete'],
-    rows: data.map((d) => [d.y, fmtInt(d.H), fmtInt(d.lo), fmtInt(d.hi), d.complete ? 'yes' : 'partial']),
+    columns: ['Year', 'Fire-days', '90% low', '90% high', 'Complete', 'Ranked'],
+    rows: data.map((d) => [d.y, fmtInt(d.H), fmtInt(d.lo), fmtInt(d.hi), d.complete ? 'yes' : 'partial',
+      d.rankable === false ? (d.terra_only_months ? 'no (Terra only)' : 'no') : 'yes']),
   }
   return (
     <ChartCard id="annual" title="Annual totals" table={table}
-      subtitle="Harmonized fire-days per year · whiskers: 90% interval · hollow: incomplete year">
+      subtitle="Harmonized fire-days per year · whiskers: 90% interval · hollow: incomplete year · hatched: Terra-only months (not ranked)">
       <div ref={ref} className="relative">
         <svg width={w} height={H} role="img" aria-label="Annual totals bar chart. Use View as table for values.">
+          <defs>
+            <pattern id="annual-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="5" stroke="#E55C30" strokeWidth="1.6" />
+            </pattern>
+          </defs>
           {y.ticks(4).map((t) => (
             <g key={t}>
               <line x1={M.l} x2={w - M.r} y1={y(t)} y2={y(t)} stroke="var(--border)" />
@@ -48,8 +54,8 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
                 onClick={() => onSelectYear?.(d.y)} className={onSelectYear ? 'cursor-pointer' : undefined}>
                 <rect x={bx - 1} y={M.t} width={bw + 2} height={H - M.b - M.t} fill="transparent" />
                 <rect x={bx} y={y(d.H!)} width={bw} height={y(0) - y(d.H!)} rx={Math.min(3, bw / 3)}
-                  fill={d.complete ? (sel ? 'var(--accent)' : '#E55C30') : 'transparent'}
-                  stroke={d.complete ? 'none' : '#E55C30'} strokeWidth={1.2} opacity={hover && hover !== d.y ? 0.55 : 1} />
+                  fill={d.complete && d.rankable !== false ? (sel ? 'var(--accent)' : '#E55C30') : d.terra_only_months ? 'url(#annual-hatch)' : 'transparent'}
+                  stroke={d.complete && d.rankable !== false ? 'none' : '#E55C30'} strokeWidth={1.2} opacity={hover && hover !== d.y ? 0.55 : 1} />
                 {d.lo != null && d.hi != null && (
                   <line x1={bx + bw / 2} x2={bx + bw / 2} y1={y(d.lo)} y2={y(d.hi)} stroke="var(--text)" strokeWidth={1.2} />
                 )}

@@ -50,6 +50,8 @@ export default function Proof() {
       {val.status === 'error' && <EmptyState title="Validation data unavailable"><p className="num text-xs">{val.error}</p></EmptyState>}
       {val.status === 'ready' && <ProofBody val={val.data} rid={rid} doc={doc.status === 'ready' ? doc.data : null} />}
 
+      <DetectionTiming />
+
       <section aria-labelledby="lim-h">
         <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -268,7 +270,50 @@ function Outages({ doc }: { doc: RegionDoc }) {
   )
 }
 
+interface TimingSeries { y: number; snpp_day: number; aqua_snpp: number | null; aqua_snpp_rel: number | null; aqua_n20_rel: number | null; terra_snpp_rel: number | null; night_share_rel: number | null }
+interface TimingDoc { caveat: string; checks: Record<string, { region: string; season: string; series: TimingSeries[]; aqua_rel_2022_2026: number; terra_rel_2022_2026: number; night_rel_2022_2026: number; aqua_n20_rel_2022_2026: number }> }
+
+function DetectionTiming() {
+  const t = useJson<TimingDoc>('dataset/punjab_timing_v1.json')
+  if (t.status !== 'ready') return t.status === 'loading' ? <div className="card h-[300px] animate-pulse" /> : null
+  const c = t.data.checks
+  const p = c['punjab|Oct–Nov (rice residue)']
+  const style: Record<string, Pick<Series, 'color' | 'dashed' | 'width'>> = {
+    'punjab|Oct–Nov (rice residue)': { color: C_HARM, width: 3 },
+    'punjab|Apr–May (wheat residue)': { color: C_RAW, dashed: true },
+    'madagascar|Sep–Oct': { color: C_MODIS },
+    'se_australia|Oct–Dec': { color: '#8492A6', dashed: true, width: 1.5 },
+  }
+  const names: Record<string, string> = { punjab: 'Punjab', madagascar: 'Madagascar', se_australia: 'SE Australia' }
+  const series: Series[] = Object.entries(c).map(([k, v]) => ({
+    id: k, label: `${names[v.region]} ${v.season.split(' (')[0]}`, ...style[k],
+    points: v.series.map((s) => ({ x: s.y, y: s.aqua_snpp_rel })),
+  }))
+  const years = p.series.map((s) => s.y)
+  const table = {
+    caption: 'Daytime Aqua ÷ S-NPP fire cell-day ratio relative to 2013–2019, by season',
+    columns: ['Year', ...series.map((s) => s.label), 'Punjab Oct–Nov S-NPP day cell-days'],
+    rows: years.map((y, i) => [y, ...series.map((s) => s.points[i]?.y?.toFixed(2) ?? null), fmtInt(p.series[i].snpp_day)]),
+  }
+  const last = p.series.filter((s) => s.aqua_snpp_rel != null)
+  return (
+    <ChartCard id="timing" title="Detection-time caveat: Punjab's late-afternoon burning" table={table}
+      subtitle={<>Polar-orbiting satellites only see fires burning at their overpass (~13:30 for VIIRS). Since Dec 2021 Aqua passes later in the afternoon. In Punjab's Oct–Nov season, Aqua now sees
+        <strong className="text-text"> ×{p.aqua_rel_2022_2026}</strong> as much relative to VIIRS as in 2013–2019 (×{p.aqua_n20_rel_2022_2026} vs NOAA-20), rising to ×{last[last.length - 1].aqua_snpp_rel?.toFixed(1)} in {last[last.length - 1].y};
+        other seasons stay flat. VIIRS night detections rose ×{p.night_rel_2022_2026}. Together this supports reports (ISRO 2025, iFOREST 2025, NASA's H. Jethva) that burning moved after ~3 pm.</>}>
+      <LineChart series={series} yFormat={(v) => `×${v.toFixed(1)}`} height={280} xBand={[2012.5, 2019.5, '2013–19 = ×1.0']}
+        annotations={[{ x: 2021.95, label: 'Aqua drifts later' }]} yLabel="Aqua ÷ S-NPP vs 2013–19" />
+      <p className="mt-3 rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn">
+        Shown on Punjab Oct–Nov from 2022: “{t.data.caveat}” Harmonized numbers are <strong>not</strong> adjusted — we can't measure burning between overpasses.
+        Recent years rest on few fires (S-NPP day cell-days: {p.series.filter((s) => s.y >= 2024).map((s) => `${s.y} ${fmtInt(s.snpp_day)}`).join(', ')}). Details: docs/punjab_timing.md.
+      </p>
+    </ChartCard>
+  )
+}
+
 const LIMITS = [
+  { t: 'Fires lit after the overpass are missed', p: 'Polar orbiters see a place about twice a day. In Punjab, burning has shifted to late afternoon since 2022, after the ~13:30 VIIRS overpass, so recent Oct–Nov seasons are likely undercounted.',
+    m: 'Measured from the data (Aqua÷VIIRS rise after Aqua drifted later), shown as a caveat on every affected month and in AI answers; numbers are not adjusted.' },
   { t: 'MODIS is ending and drifting', p: 'Terra (from 2020) and Aqua (from Dec 2021) drift to different overpass times, so MODIS counts after 2020 are not comparable with earlier years.',
     m: 'Calibration uses Jul 2012 – Dec 2019 only. After 2012 the record is VIIRS-based, so MODIS drift never enters it; the drift chart shows the evidence.' },
   { t: "You can't add detail to old data", p: 'VIIRS sees fires MODIS never could. Harmonized values are in MODIS-equivalent units, so small fires seen only by VIIRS are scaled away.',

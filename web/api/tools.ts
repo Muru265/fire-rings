@@ -66,6 +66,10 @@ function monthView(doc: any, rec: any) {
     raw_hotspots: { modis: rec.hot_modis, viirs: rec.y >= 2012 ? rec.hot_viirs : null },
     source: { T: 'Terra MODIS scaled to Terra+Aqua', M: 'MODIS Terra+Aqua', V: 'VIIRS S-NPP calibrated to MODIS', V2: 'VIIRS NOAA-20 calibrated to MODIS' }[rec.src as string],
     units: 'fire-days = H3 hexagons (~36 km²) with ≥1 detection per day, MODIS-equivalent',
+    caveats: [
+      ...(rec.flags.includes('overpass_timing') && doc.caveats?.overpass_timing ? [doc.caveats.overpass_timing] : []),
+      ...(rec.flags.includes('terra_only') ? ['Terra only (before Aqua, Jan 2001 – Jun 2002): wider uncertainty, not ranked'] : []),
+    ],
   }
 }
 
@@ -110,14 +114,18 @@ export async function runTool(load: Loader, name: string, args: any): Promise<an
       const doc = await region(load, args.region)
       if (doc.error) return doc
       if (args.by === 'month' && args.month) {
-        const rows = doc.months.filter((x: any) => x.m === args.month && x.H != null && !x.flags.includes('mtd'))
+        const rows = doc.months.filter((x: any) => x.m === args.month && x.H != null && !x.flags.includes('mtd') && x.src !== 'T')
           .sort((a: any, b: any) => b.H - a.H)
         return { region: doc.name, month: MONTHS[args.month - 1], years_ranked: rows.length,
+          note: 'Terra-only months (2001 – Jun 2002) are excluded from rankings',
+          ...(doc.caveats?.overpass_timing && (args.month === 10 || args.month === 11) ? { caveat_2022_onwards: doc.caveats.overpass_timing } : {}),
           highest: rows.slice(0, 5).map((x: any, i: number) => ({ rank: i + 1, year: x.y, fire_days: r0(x.H), interval_90: [r0(x.lo), r0(x.hi)], provisional: x.flags.includes('provisional') })),
           lowest: rows.slice(-3).reverse().map((x: any, i: number) => ({ rank: rows.length - i, year: x.y, fire_days: r0(x.H) })) }
       }
-      const yrs = doc.annual.filter((a: any) => a.complete && a.H != null).sort((a: any, b: any) => b.H - a.H)
-      return { region: doc.name, complete_years_ranked: yrs.length, note: 'complete calendar years only; the current year is excluded',
+      const yrs = doc.annual.filter((a: any) => a.complete && a.rankable !== false && a.H != null).sort((a: any, b: any) => b.H - a.H)
+      return { region: doc.name, complete_years_ranked: yrs.length,
+        note: 'complete calendar years only; the current year and years with Terra-only months (2001, 2002) are excluded',
+        ...(doc.caveats?.overpass_timing ? { caveat: `Oct–Nov from 2022: ${doc.caveats.overpass_timing}` } : {}),
         highest: yrs.slice(0, 5).map((a: any, i: number) => ({ rank: i + 1, year: a.y, fire_days: r0(a.H), interval_90: [r0(a.lo), r0(a.hi)] })),
         lowest: yrs.slice(-3).reverse().map((a: any, i: number) => ({ rank: yrs.length - i, year: a.y, fire_days: r0(a.H) })),
         units: 'fire-days per year (MODIS-equivalent)' }
@@ -153,7 +161,18 @@ export async function runTool(load: Loader, name: string, args: any): Promise<an
             black_summer_2019_20_rank_raw: v.v9.black_summer_rank_raw } : {}),
           ...(v.v9.octnov_top3_harmonized ? { oct_nov_crop_burning_top3_years: v.v9.octnov_top3_harmonized } : {}),
         } : null,
-        notes: ['Aug–Nov 2026 are near-real-time (provisional)', 'MODIS orbit drift after 2020 is excluded from calibration', 'values are MODIS-equivalent; VIIRS-only small fires are scaled away'] }
+        notes: ['Aug–Nov 2026 are near-real-time (provisional)', 'MODIS orbit drift after 2020 is excluded from calibration',
+          'values are MODIS-equivalent; VIIRS-only small fires are scaled away',
+          'Jan 2001 – Jun 2002 are Terra-only (scaled to Terra+Aqua): wider uncertainty, excluded from rankings'],
+        ...(doc.caveats?.overpass_timing ? { detection_time_caveat: {
+          applies_to: 'October–November from 2022', text: doc.caveats.overpass_timing,
+          evidence: await load('dataset/punjab_timing_v1.json').then((t: any) => {
+            const p = t.checks['punjab|Oct–Nov (rice residue)']
+            return { aqua_to_viirs_ratio_2022_2026_vs_2013_2019: p.aqua_rel_2022_2026, same_vs_noaa20: p.aqua_n20_rel_2022_2026,
+              punjab_apr_may_same_ratio: t.checks['punjab|Apr–May (wheat residue)'].aqua_rel_2022_2026,
+              madagascar_same_ratio: t.checks['madagascar|Sep–Oct'].aqua_rel_2022_2026, viirs_night_share_change: p.night_rel_2022_2026,
+              note: 'Aqua passes later in the afternoon since Dec 2021; numbers are not adjusted' }
+          }).catch(() => null) } } : {}) }
     }
     default:
       return { error: `unknown tool ${name}` }

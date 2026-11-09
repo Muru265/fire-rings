@@ -155,8 +155,12 @@ def validate(region: str, method: str, cube: dict, calib: dict, cfg: dict) -> di
 
     # ---- V9 famous seasons ------------------------------------------------------------------------------------
     seasons = []
+    srcmap = {(r["y"], r["m"]): r["src"] for r in h.iter_rows(named=True)}
+    terra_only = lambda ks: any(srcmap.get(k) == "T" for k in ks)  # noqa: E731  (Terra-only months not ranked)
     for y in range(2001, 2026):          # season y = Jul y … Jun y+1 (complete through Jun 2026)
         months = [(y, m) for m in range(7, 13)] + [(y + 1, m) for m in range(1, 7)]
+        if terra_only(months):
+            continue
         hs = [hmap.get(k) for k in months]
         raws = []
         for (yy, mm) in months:
@@ -170,7 +174,7 @@ def validate(region: str, method: str, cube: dict, calib: dict, cfg: dict) -> di
     by_raw = sorted([s for s in seasons if s["raw"] is not None], key=lambda s: -s["raw"])
     rank_h = {s["start"]: i + 1 for i, s in enumerate(by_h)}
     rank_raw = {s["start"]: i + 1 for i, s in enumerate(by_raw)}
-    v9 = {"season_def": "Jul–Jun", "n_seasons": len(seasons),
+    v9 = {"season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)", "n_seasons": len(seasons),
           "top3_harmonized": [s["season"] for s in by_h[:3]], "top3_raw": [s["season"] for s in by_raw[:3]]}
     if region == "se_australia":
         v9["black_summer_rank_harmonized"] = rank_h.get(2019)
@@ -180,7 +184,7 @@ def validate(region: str, method: str, cube: dict, calib: dict, cfg: dict) -> di
         on = []
         for y in range(2001, 2026):
             v = [hmap.get((y, 10)), hmap.get((y, 11))]
-            if None not in v:
+            if None not in v and not terra_only([(y, 10), (y, 11)]):
                 on.append((y, sum(v)))
         on.sort(key=lambda t: -t[1])
         v9["octnov_top3_harmonized"] = [y for y, _ in on[:3]]

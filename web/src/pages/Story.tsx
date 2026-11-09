@@ -38,7 +38,7 @@ function StoryView({ mg, mu }: { mg: RegionDoc; mu: RegionDoc | null }) {
     const peak3 = order.slice(0, 3).map(([, i]) => i + 1).sort((a, b) => a - b)
     const totMed = c.median.reduce((a, b) => a + b, 0)
     const peakShare = Math.round((100 * peak3.reduce((a, m) => a + c.median[m - 1], 0)) / totMed)
-    const yrs = mg.annual.filter((a) => a.complete && a.H != null).sort((a, b) => b.H! - a.H!)
+    const yrs = mg.annual.filter((a) => a.complete && a.rankable !== false && a.H != null).sort((a, b) => b.H! - a.H!)
     const top = yrs.slice(0, 3)
     const low = yrs.slice(-1)[0]
     const lc = mg.latest_complete

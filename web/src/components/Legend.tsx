@@ -38,7 +38,7 @@ export default function Legend({ scale, unit, mode = 'counts', vertical }: { sca
         <li className="flex items-center gap-2">
           <span className="h-3 w-5 rounded-[3px]" aria-hidden="true"
             style={{ background: 'repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 1.4px, var(--surface-3) 1.4px 5px)' }} />
-          <span className="text-muted">Uncertain (wide 90% interval)</span>
+          <span className="text-muted">Uncertain (wide 90% interval) or Terra only (2001 – Jun 2002)</span>
         </li>
         <li className="flex items-center gap-2">
           <span className="h-3 w-5 rounded-[3px] bg-surface-3" style={{ outline: '1px dotted var(--text)', outlineOffset: '-1px' }} aria-hidden="true" />

@@ -1,6 +1,6 @@
 // Mirrors the region JSON contract (master plan §6.3) written by pipeline/08_export.py.
 
-export type Flag = 'uncertain' | 'provisional' | 'insufficient' | 'mtd'
+export type Flag = 'uncertain' | 'provisional' | 'insufficient' | 'mtd' | 'terra_only' | 'overpass_timing'
 export type SrcCode = 'T' | 'M' | 'V' | 'V2'
 
 export interface MonthRec {
@@ -32,6 +32,8 @@ export interface AnnualRec {
   hi: number | null
   complete?: boolean
   months?: number
+  terra_only_months?: number
+  rankable?: boolean
 }
 
 export interface Ratios {
@@ -128,6 +130,7 @@ export interface RegionDoc {
   similar_detail?: { months: string; years: { y: number; r: number }[] } | null
   daily: Record<string, { modis?: number[]; viirs?: number[] }>
   quality: Quality | null
+  caveats?: { overpass_timing: string | null; terra_only: string }
   hotspot_months: string[]
   hex_years: number[]
   harmonized: boolean

@@ -106,7 +106,7 @@ export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onA
                     <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[9px] leading-none text-text"
                       style={{ textShadow: '0 0 2px #000' }}>{glyph}</span>
                   )}
-                  {r.flags.includes('uncertain') && (
+                  {(r.flags.includes('uncertain') || r.flags.includes('terra_only')) && (
                     <span className="absolute inset-0 rounded-[3px]" style={{ background: 'repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 1.4px, transparent 1.4px 5px)' }} />
                   )}
                 </div>

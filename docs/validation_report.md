@@ -23,9 +23,9 @@ Method choice:
 ## V9 famous seasons
 
 - punjab: top-3 Jul–Jun seasons harmonized ['2016–17', '2007–08', '2021–22'], raw ['2016–17', '2021–22', '2017–18'] · Oct–Nov crop-burning top 3 (harmonized): [2016, 2005, 2021]
-- madagascar: top-3 Jul–Jun seasons harmonized ['2001–02', '2016–17', '2019–20'], raw ['2016–17', '2015–16', '2019–20']
+- madagascar: top-3 Jul–Jun seasons harmonized ['2016–17', '2019–20', '2007–08'], raw ['2016–17', '2015–16', '2019–20']
 - se_australia: top-3 Jul–Jun seasons harmonized ['2019–20', '2002–03', '2003–04'], raw ['2019–20', '2017–18', '2016–17'] · **Black Summer 2019–20 rank: 1 harmonized (raw: 1)** ✅
-- mauritius: top-3 Jul–Jun seasons harmonized ['2001–02', '2013–14', '2006–07'], raw ['2013–14', '2014–15', '2016–17']
+- mauritius: top-3 Jul–Jun seasons harmonized ['2013–14', '2006–07', '2010–11'], raw ['2013–14', '2014–15', '2016–17']
 
 ## Both methods side by side
 
