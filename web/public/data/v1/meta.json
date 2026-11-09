@@ -1,0 +1,236 @@
+{
+ "version": "v1",
+ "data_end": "2026-11-08",
+ "citation": "Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.",
+ "generated": "2026-11-09T15:30Z",
+ "regions": [
+  {
+   "id": "punjab",
+   "name": "Punjab–Haryana",
+   "bbox": [
+    73.8,
+    27.6,
+    77.6,
+    32.6
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 0.22,
+    "median": 2388.5,
+    "pct": [
+     0,
+     0
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 21,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 520.2,
+    "lo": 485.9,
+    "hi": 554.7,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 0.08,
+    "median": 4903.7,
+    "pct": [
+     0,
+     0
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 26,
+    "rank_of": 26,
+    "value": 392.3,
+    "lo": 370.5,
+    "hi": 416.9,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "madagascar",
+   "name": "Madagascar",
+   "bbox": [
+    43.24,
+    -25.58,
+    50.47,
+    -11.96
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 0.96,
+    "median": 1800.0,
+    "pct": [
+     38,
+     48
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 12,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 1723.0,
+    "lo": 1624.9,
+    "hi": 1807.0,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 0.72,
+    "median": 7759.9,
+    "pct": [
+     5,
+     5
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 24,
+    "rank_of": 26,
+    "value": 5612.0,
+    "lo": 5463.9,
+    "hi": 5739.1,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "se_australia",
+   "name": "SE Australia (NSW + VIC)",
+   "bbox": [
+    140.9,
+    -39.2,
+    153.7,
+    -28.1
+   ],
+   "months": 311,
+   "method": "pooled",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 1.39,
+    "median": 79.5,
+    "pct": [
+     57,
+     76
+    ],
+    "return_period": 3.0,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 8,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 110.5,
+    "lo": 96.2,
+    "hi": 124.4,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 0.57,
+    "median": 502.0,
+    "pct": [
+     10,
+     14
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 24,
+    "rank_of": 26,
+    "value": 283.9,
+    "lo": 256.0,
+    "hi": 312.5,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "mauritius",
+   "name": "Mauritius (incl. Rodrigues)",
+   "bbox": [
+    57.34,
+    -20.51,
+    63.49,
+    -19.68
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 0.46,
+    "median": 1.0,
+    "pct": [
+     14,
+     43
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": true,
+    "rank": 16,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 0.5,
+    "lo": 0.1,
+    "hi": 1.0,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 0.59,
+    "median": 6.7,
+    "pct": [
+     10,
+     43
+    ],
+    "return_period": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 19,
+    "rank_of": 26,
+    "value": 4.0,
+    "lo": 2.3,
+    "hi": 5.8,
+    "mtd": false,
+    "provisional": true
+   }
+  }
+ ]
+}

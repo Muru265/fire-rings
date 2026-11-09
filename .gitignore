@@ -1,6 +1,8 @@
 ﻿.env
-data/
-DATA/
+.env.*
+# raw/intermediate data live only at the repo root (web/public/data/ IS committed)
+/data/
+/DATA/
 node_modules/
 .venv/
 __pycache__/
