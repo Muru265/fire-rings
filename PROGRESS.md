@@ -52,7 +52,14 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 | Remove fake data | done | none was ever created; src/dev removed |
 | Screens + self-review | done | docs/screens/*; fixed mobile horizontal overflow (charts at 600px → min-w-0), "0th percentile" wording. `node web/scripts/e2e.mjs`: 7/7 interaction checks pass, 0 console errors. Main bundle 119 kB gz (map/hex/drawer lazy) |
 
-## Phase 5 — Proof + Data · Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
+## Phase 5 — Proof + Data ✅
+| Task | Status | Notes |
+|---|---|---|
+| Proof page | done | region tabs; V1/V3/shape/V9 cards with pass/fail; before/after annual chart (raw dashed vs MODIS-only vs harmonized, step annotation); drift chart (calibration band, Terra 2020 / Aqua Dec 2021 / MODIS 6.03→61.03 2023 annotations); k by month with CI + unshrunk ratio + overlap counts; known outages table (global + regional) + static-source counts; 6 limitation cards with mitigations; method summary → METHODS.md. Chart palette validated with the dataviz validator (dark): #D97706 / #3B8FCC / #B45A93 all checks pass |
+| Data page | done | downloads (dataset CSV/Parquet, calibration CSV, validation JSON, meta, per-region JSON), data dictionary, static JSON API + curl example, CITATION.cff block with copy, licences (MIT code, CC BY 4.0 data), FIRMS acknowledgement, changelog |
+| METHODS.md, CITATION.cff | done | full method incl. MODIS version change, regional gap rule, fallback rule |
+
+## Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
 todo
 
 ## Decisions for Muru to review
