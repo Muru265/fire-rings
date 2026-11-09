@@ -19,6 +19,7 @@ STEPS = [
     ("04_cube", [PIPE / "04_cube.py"]),
     ("05_calibrate", [PIPE / "05_calibrate.py"]),
     ("06_validate", [PIPE / "06_validate.py"]),
+    ("snpp_check", [PIPE / "tools" / "snpp_endcheck.py"]),
     ("07_stats", [PIPE / "07_stats.py"]),
     ("08_export", [PIPE / "08_export.py"]),
 ]

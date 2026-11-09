@@ -8,10 +8,14 @@ export type Voice = 'responder' | 'scientist'
 export interface TraceItem { tool: string; args: Record<string, unknown>; result_summary: string; result: unknown }
 export interface AskResult { answer: string; caveat: string; trace: TraceItem[]; model: string; verified: boolean; unverified_numbers?: string[] }
 
-export const FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash']
+// Tested 2026-11-09 with this key (scripts/gemini_try.ts): gemini-flash-latest / gemini-3.8-flash returned 503 (high demand),
+// gemini-2.5-flash 404 (retired for new keys); these answered function calls within seconds.
+export const FALLBACK_MODELS = ['gemini-3-flash-preview', 'gemini-3.6-flash', 'gemini-3.5-flash-lite']
 
-function systemPrompt(voice: Voice, region?: string) {
-  return `You are "Ask Fire Rings", an analyst for a harmonized 25-year satellite fire record (NASA FIRMS MODIS + VIIRS).
+function systemPrompt(voice: Voice, region?: string, dataEnd?: string) {
+  const now = dataEnd ? `\nData run through ${dataEnd}. "This month" means the latest month in the data (call get_month without year/month); "this year" means ${dataEnd.slice(0, 4)}; "last October" etc. means the most recent such month before the latest one.` : ''
+  return `You are "Ask Fire Rings", an analyst for a harmonized 25-year satellite fire record (NASA FIRMS MODIS + VIIRS).${now}
+For famous fire seasons (e.g. Black Summer 2019–20) use get_quality, which reports validated Jul–Jun season ranks.
 Rules — follow all of them:
 1. Call tools to get data before answering. Use ONLY numbers that appear in tool results in this conversation. Never compute new numbers (no sums, differences, percentages or unit conversions of your own). Never round to a different value than the tool gave. If a number is not in a tool result, do not write it.
 2. Units: say "fire-days" (MODIS-equivalent). Ratios like "0.1× typical". Percentiles as given (e.g. "88th–97th percentile").
@@ -70,11 +74,32 @@ function parse(text: string): { answer: string; caveat: string } {
   return { answer: (a?.[1] ?? text).trim(), caveat: (c?.[1] ?? '').trim() }
 }
 
-export async function ask(opts: { apiKey: string; models: string[]; load: Loader; question: string; voice: Voice; region?: string; maxSteps?: number }): Promise<AskResult> {
-  const ai = new GoogleGenAI({ apiKey: opts.apiKey })
+export async function ask(opts: { apiKey: string; models: string[]; load: Loader; question: string; voice: Voice; region?: string; maxSteps?: number;
+  perModelMs?: number; budgetMs?: number }): Promise<AskResult> {
+  // Time budget: each model attempt ≤ 12 s (all its steps), whole request ≤ 25 s. No SDK retries.
+  const PER = opts.perModelMs ?? 12_000
+  const TOTAL = opts.budgetMs ?? 25_000
+  const t0 = Date.now()
+  let mStart = t0
+  const left = () => Math.min(PER - (Date.now() - mStart), TOTAL - (Date.now() - t0))
+  const ai = new GoogleGenAI({ apiKey: opts.apiKey, httpOptions: { retryOptions: { attempts: 1 } } as never })
+  const gen = async (model: string, contents: any[], config: any) => {
+    const ms = left()
+    if (ms < 1500) throw new Error('timeout: budget exhausted')
+    const ac = new AbortController()
+    const timer = setTimeout(() => ac.abort(), ms)
+    try {
+      return await Promise.race([
+        ai.models.generateContent({ model, contents, config: { ...config, abortSignal: ac.signal } }),
+        new Promise<never>((_, rej) => ac.signal.addEventListener('abort', () => rej(new Error(`timeout after ${ms} ms`)))),
+      ])
+    } finally {
+      clearTimeout(timer)
+    }
+  }
   const trace: TraceItem[] = []
   const config = {
-    systemInstruction: systemPrompt(opts.voice, opts.region),
+    systemInstruction: systemPrompt(opts.voice, opts.region, await opts.load('meta.json').then((m: any) => m.data_end).catch(() => undefined)),
     tools: [{ functionDeclarations: TOOL_DECLARATIONS as any }],
     temperature: 0.2,
   }
@@ -82,12 +107,14 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
   let lastErr: unknown = null
 
   for (const model of opts.models) {
+    if (TOTAL - (Date.now() - t0) < 3000) break
+    mStart = Date.now()
     try {
       trace.length = 0
       contents.length = 1
       let text = ''
       for (let step = 0; step < (opts.maxSteps ?? 6); step++) {
-        const res = await ai.models.generateContent({ model, contents, config })
+        const res = await gen(model, contents, config)
         const calls = res.functionCalls ?? []
         if (!calls.length) { text = res.text ?? ''; break }
         contents.push(res.candidates?.[0]?.content ?? { role: 'model', parts: calls.map((c) => ({ functionCall: c })) })
@@ -100,14 +127,16 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
         contents.push({ role: 'user', parts })
       }
       let out = parse(text)
+      if (!out.answer) throw new Error('empty answer from model') // retryable: try the next model
       const allowed = allowedNumbers(trace, opts.question)
       let bad = unverified(`${out.answer} ${out.caveat}`, allowed)
       if (bad.length) {
         // one correction round, then give up honestly
         contents.push({ role: 'model', parts: [{ text }] })
         contents.push({ role: 'user', parts: [{ text: `Your answer used numbers that are not in any tool result: ${bad.join(', ')}. Rewrite it using only numbers that appear verbatim in the tool results. Keep the two-line format.` }] })
-        const res = await ai.models.generateContent({ model, contents, config: { ...config, tools: undefined } })
+        const res = await gen(model, contents, { ...config, tools: undefined })
         out = parse(res.text ?? '')
+        if (!out.answer) throw new Error('empty answer from model after correction')
         bad = unverified(`${out.answer} ${out.caveat}`, allowed)
       }
       if (bad.length) {
@@ -118,7 +147,7 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
     } catch (e) {
       lastErr = e
       const msg = String((e as Error)?.message ?? e)
-      if (!/503|429|404|UNAVAILABLE|RESOURCE_EXHAUSTED|NOT_FOUND|overloaded|high demand/i.test(msg)) throw e
+      if (!/503|504|429|404|UNAVAILABLE|RESOURCE_EXHAUSTED|NOT_FOUND|DEADLINE|overloaded|high demand|timed? ?out|abort|empty answer|budget/i.test(msg)) throw e
     }
   }
   throw lastErr ?? new Error('all models failed')

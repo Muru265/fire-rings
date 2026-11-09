@@ -8,6 +8,13 @@ export type Loader = (path: string) => Promise<any>
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const r0 = (v: number | null | undefined) => (v == null ? null : Math.round(v))
 const r1 = (v: number | null | undefined) => (v == null ? null : Math.round(v * 10) / 10)
+const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd']; const v = n % 100; return `${n}${s[(v - 20) % 10] || s[v] || s[0]}` }
+/** Percentile range as words, so the model never writes "0th–0th". Baseline has 20 years → max Weibull pct is 95. */
+function pctText(p: [number, number]): string {
+  if (p[1] === 0) return 'below every year in the 2003–2022 baseline'
+  if (p[0] >= 95) return 'above every year in the 2003–2022 baseline'
+  return p[0] === p[1] ? `${ord(p[0])} percentile` : `${ord(p[0])}–${ord(p[1])} percentile`
+}
 
 export const TOOL_DECLARATIONS = [
   { name: 'list_regions', description: 'List the regions available in Fire Rings with their record period and latest month.', parameters: { type: 'object', properties: {} } },
@@ -49,7 +56,7 @@ function monthView(doc: any, rec: any) {
     fire_days: r0(rec.H), interval_90: rec.lo != null ? [r0(rec.lo), r0(rec.hi)] : null,
     typical_fire_days_baseline_median: r0(median),
     ratio_to_typical: rec.guard ? null : r1(rec.ratio),
-    percentile_range: rec.guard ? null : rec.pct,
+    percentile: rec.guard || !rec.pct ? null : pctText(rec.pct),
     return_period_years: rec.guard || rec.rp == null ? null : r0(rec.rp),
     beyond_baseline_record: !!rec.beyond,
     rank_among_years_for_this_month: rec.rank ?? null,
@@ -140,6 +147,12 @@ export async function runTool(load: Loader, name: string, args: any): Promise<an
         uncertain_months_in_record: doc.months.filter((x: any) => x.flags.includes('uncertain')).length,
         provisional_months: doc.months.filter((x: any) => x.flags.includes('provisional')).map((x: any) => `${MONTHS[x.m - 1]} ${x.y}`),
         static_source_detections_removed: q?.masked_static_total, data_through: doc.data_end,
+        famous_seasons: v?.v9 ? {
+          season_definition: 'July–June', seasons_ranked: v.v9.n_seasons, top3_seasons_harmonized: v.v9.top3_harmonized,
+          ...(v.v9.black_summer_rank_harmonized != null ? { black_summer_2019_20_rank_harmonized: v.v9.black_summer_rank_harmonized,
+            black_summer_2019_20_rank_raw: v.v9.black_summer_rank_raw } : {}),
+          ...(v.v9.octnov_top3_harmonized ? { oct_nov_crop_burning_top3_years: v.v9.octnov_top3_harmonized } : {}),
+        } : null,
         notes: ['Aug–Nov 2026 are near-real-time (provisional)', 'MODIS orbit drift after 2020 is excluded from calibration', 'values are MODIS-equivalent; VIIRS-only small fires are scaled away'] }
     }
     default:

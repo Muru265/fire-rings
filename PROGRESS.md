@@ -59,8 +59,26 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 | Data page | done | downloads (dataset CSV/Parquet, calibration CSV, validation JSON, meta, per-region JSON), data dictionary, static JSON API + curl example, CITATION.cff block with copy, licences (MIT code, CC BY 4.0 data), FIRMS acknowledgement, changelog |
 | METHODS.md, CITATION.cff | done | full method incl. MODIS version change, regional gap rule, fallback rule |
 
-## Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
-todo
+## Phase 6 — Ask Fire Rings (AI) ✅ (cache pending — see TODO)
+| Task | Status | Notes |
+|---|---|---|
+| web/api/ask.ts + tools.ts | done | 6 tools over the published region JSON (list_regions, get_month, get_season, get_rankings, get_similar_years, get_quality incl. famous seasons). Gemini function calling, model chain + time budget (≤12 s per model, ≤25 s per request, maxDuration 30 s), per-IP rate limit (8/min, 60/h). The server checks every number in the answer against the tool results and does one correction round; if a number still isn't found, the answer is withheld |
+| AskDrawer/AnswerCard/AskPanel | done | collapsible "Numbers used" trace, Responder/Scientist, 4 chips, free text, /ask page + drawer from region chips and month drawer; 30 s client abort → "AI temporarily unavailable" (never an endless spinner); cache fallback |
+| 30-question eval | done | `web/scripts/ask_eval.ts` → docs/ask_eval.md. Run 1: 29/30 answered, **0 invented numbers**, 1 timeout; found 2 empty answers + date confusion + Black Summer by calendar year → fixed (empty = retry next model, data-end in prompt, famous seasons in get_quality). Run 2 results: see docs/ask_eval.md |
+| ask_cache.json | todo | see TODO at top |
+
+## Phase 7 — Wow + polish
+| Task | Status | Notes |
+|---|---|---|
+| SensorTimeline | done | landing; data spans from inventory, drift hatched, calibration window band |
+| Globe landing | done | MapLibre 6 globe (OpenFreeMap dark), hero regions glow with monthly harmonized fire-days (relative to each region's max, labelled), scrubber 2001→2026, play/pause, 1×/4×, month-year counter, auto-rotate 0.6°/s stops on interaction / reduced motion; region cards with mini rings + live headline. Fixed: MapLibre CSS overriding absolute container (canvas 300 px) |
+| Madagascar story | done | scrollama, 6 steps (§5 S5), all numbers computed from the data (peak months share, top years, raw vs harmonized step, Mauritius guard, last month) |
+| 01_fetch_nrt.py | done | NOAA-20/21 NRT for Punjab, last 60 days via FIRMS Area API (13,713 rows) → clipped to India footprint (4,869 dropped) → Punjab data through 2026-11-09 (Nov 1–9 month-to-date, provisional) |
+| S-NPP end check (Muru item 1) | done | docs/snpp_endcheck.md: Oct 2026 agrees across S-NPP / NOAA-20 / NOAA-21 → headline is genuine (Decision 13) |
+| Motion | done | ring draw-in (40 ms stagger), count-ups (600 ms), fade-ups; all off under prefers-reduced-motion |
+| Accessibility | done | keyboard: skip link, focus-visible ring, roving tabindex grids (e2e 7/7), Enter/Esc drawers, map box via inputs; aria grid/row/gridcell labels; "View as table" on every chart; contrast: all text tokens ≥4.5:1 after `--text-faint` fix (scripts/contrast.mjs); colour-blind: inferno (CVD-safe sequential), RdBu (blue/red diverging), categorical palette validated with the dataviz CVD validator; never colour-only (▲▼, ~, hatch, dotted, dashed raw line, direct labels) |
+| Mobile 360 px | done | no horizontal overflow on all 7 routes (scripts/overflow.mjs); rings readout panel instead of tooltip on narrow screens |
+| Performance | done | pages code-split, map/hex/drawer/PNG lazy, hero JSON preloaded; main JS 117 kB gz; time-to-rings on throttled 4G: 1.0 s local preview, 1.2–2.3 s live (includes real network RTT to Vercel; preload not yet deployed at measure time) |
 
 ## Decisions for Muru to review
 1. **Python 3.11** instead of 3.12. Approved by Muru.
@@ -77,6 +95,12 @@ todo
 10. **Limitation: seasons before July 2002 rest on Terra alone (×q).** In V9, 2001–02 ranks #1 harmonized in Madagascar and Mauritius. Terra alone did record its biggest early season then (Madagascar Terra 15,810 cell-days vs 10–14k in the following seasons), and q (≈3.4) scales it up. It could still be partly an early-Terra sensitivity effect. The bootstrap interval includes the uncertainty in q. I'll state this on the Proof page as a limitation rather than change the method.
 11. **The partial month (Nov 2026)** is judged against the same days 1–8 of baseline years, both in `latest` and in that month's entry in `months[]`.
 12. **Hotspot CSVs** are exported only for the latest 2 months (about 12.6 MB). Older months use H3 cell aggregates (`hexes/`) for maps, which keeps the repo small.
+
+13. **Punjab October 2026 = 0.08× median is genuine (Muru item 1).** Cross-sensor check (`docs/snpp_endcheck.md`): October 2026 MODIS-equivalent fire-days are k·S-NPP 392, k·k′·NOAA-20 438 and k·k″·NOAA-21 368. S-NPP sits between the other two (−10% / +7%). Madagascar agrees within ±4%, and SE Australia within about −12% to +7%. S-NPP did **not** degrade before shutdown, so the harmonized source stays S-NPP through Oct 2026. Using NOAA-20 instead would give about 0.09×, still the lowest October on record. Raw MODIS shows 716 because its drifting afternoon overpass now catches more crop fires. That's exactly why MODIS isn't used after 2012.
+14. **FIRMS API rows clipped to the India footprint.** My first comparison showed S-NPP 52% below NOAA-20 in Punjab. The cause was the API's plain bounding box, which also covers Pakistani Punjab; the archive download is India-only. API rows are now kept only inside H3 res-7 cells that have detections in the downloaded files. This dropped 4,869 of 13,713 rows. *Alternative:* a proper country polygon (needs a boundary file; DATA\raw\boundaries is empty).
+15. **`--text-faint` raised from #5D6B7E to #8492A6.** The plan's value is only 2.6–3.6:1 on our surfaces; the new one is ≥4.5:1 on all four (`web/scripts/contrast.mjs`). The master plan token block is kept verbatim; the override lives in the additions block.
+16. **Gemini models.** With this key on 2026-11-09, `gemini-flash-latest` (GEMINI_MODEL) and `gemini-3.8-flash` returned 503/504 (high demand), and `gemini-2.5-flash` returned 404 (retired for new keys). The chain is now GEMINI_MODEL → `gemini-3-flash-preview` → `gemini-3.6-flash` → `gemini-3.5-flash-lite`, with ≤12 s per model attempt, ≤25 s per request, `maxDuration` 30 s and a client abort at 30 s.
+17. **Plan mode skipped for multi-file tasks during the unattended run** (you said not to wait for approval). The design notes are in commit messages and this file.
 
 ## Blockers
 none

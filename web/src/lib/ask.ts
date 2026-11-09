@@ -32,14 +32,18 @@ async function fromCache(question: string, region?: string): Promise<Answer | nu
 
 /** Ask the live analyst; on any error fall back to the precomputed answer for chip questions. */
 export async function askFireRings(question: string, region: string | undefined, voice: Voice): Promise<Answer> {
+  const ac = new AbortController()
+  const timer = setTimeout(() => ac.abort(), 30_000) // server budget is 25 s; never wait forever
   try {
-    const r = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question, region, voice }) })
+    const r = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question, region, voice }), signal: ac.signal })
     const j = await r.json().catch(() => ({}))
-    if (!r.ok || j.error) throw new Error(j.message || j.error || `HTTP ${r.status}`)
+    if (!r.ok || j.error) throw new Error(r.status === 429 ? 'Too many questions — please wait a minute' : 'AI temporarily unavailable')
     return { ...j, question, region, voice, source: 'live' }
   } catch (e) {
     const cached = await fromCache(question, region)
     if (cached) return cached
-    throw e
+    throw new Error((e as Error).name === 'AbortError' ? 'AI temporarily unavailable (no answer within 30 seconds)' : (e as Error).message || 'AI temporarily unavailable')
+  } finally {
+    clearTimeout(timer)
   }
 }

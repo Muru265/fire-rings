@@ -24,7 +24,7 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
       setAnswers((xs) => [a, ...xs])
       setQ('')
     } catch (e) {
-      setErr(`${(e as Error).message}. Try one of the suggested questions — they work offline too.`)
+      setErr(`${(e as Error).message}. The charts and numbers on every page still work; the suggested questions may have saved answers.`)
     } finally {
       setBusy(false)
     }

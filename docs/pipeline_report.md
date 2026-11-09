@@ -15,7 +15,7 @@ Rule: keep type 2 in Punjab only if ratio > 2 for both sensors. **Decision: `dro
 
 | region | read (all files) | in clip box | NRT dropped (date covered by archive) | exact duplicates | out | solar-date range |
 |---|---:|---:|---:|---:|---:|---|
-| punjab | 18,015,596 | 2,776,560 | 0 | 0 | 2,776,560 | 2000-11-01 → 2026-11-09 |
+| punjab | 18,029,309 | 2,790,273 | 0 | 8,196 | 2,777,208 | 2000-11-01 → 2026-11-09 |
 | madagascar | 11,050,258 | 11,050,258 | 0 | 2 | 11,050,256 | 2000-11-01 → 2026-11-09 |
 | se_australia | 39,464,067 | 4,005,565 | 0 | 2 | 4,005,563 | 2000-11-01 → 2026-11-09 |
 | mauritius | 6,058 | 6,058 | 0 | 0 | 6,058 | 2000-11-15 → 2026-11-08 |
@@ -32,15 +32,15 @@ Masked H3 r9 cells: known-static 5,627 · persistence 5 (of which also known-sta
 |---|---:|---:|---:|---:|---:|---:|
 | AQUA/NRT | 4,438 | 4,272 | 4,272 | 4,245 | 4,245 | 95.7% |
 | AQUA/SP | 366,834 | 354,012 | 348,785 | 348,127 | 348,127 | 94.9% |
-| N20/NRT | 4,458 | 4,275 | 4,275 | 4,002 | 4,002 | 89.8% |
+| N20/NRT | 4,897 | 4,698 | 4,698 | 4,419 | 4,419 | 90.2% |
 | N20/SP | 721,514 | 621,447 | 614,743 | 608,391 | 608,391 | 84.3% |
-| N21/NRT | 4,038 | 3,678 | 3,678 | 3,381 | 3,381 | 83.7% |
+| N21/NRT | 4,247 | 3,874 | 3,874 | 3,576 | 3,576 | 84.2% |
 | N21/SP | 186,305 | 148,770 | 145,820 | 144,069 | 144,069 | 77.3% |
 | SNPP/NRT | 2,450 | 2,332 | 2,332 | 2,091 | 2,091 | 85.3% |
 | SNPP/SP | 1,378,386 | 1,212,868 | 1,200,138 | 1,189,790 | 1,189,790 | 86.3% |
 | TERRA/NRT | 73 | 69 | 69 | 67 | 67 | 91.8% |
 | TERRA/SP | 108,064 | 106,413 | 104,155 | 103,801 | 103,801 | 96.1% |
-| **total** | **2,776,560** | **2,458,136** | **2,428,267** | **2,407,964** | **2,407,964** | 86.7% |
+| **total** | **2,777,208** | **2,458,755** | **2,428,886** | **2,408,576** | **2,408,576** | 86.7% |
 
 ### madagascar
 
@@ -102,8 +102,8 @@ NRT files carry no `type` column, so these rows could only be caught by the arch
 | region | stream | NRT rows in | removed by known-static | removed by known-static + persistence |
 |---|---|---:|---:|---:|
 | punjab | AQUA | 4,438 | 27 | 27 |
-| punjab | N20 | 4,458 | 273 | 273 |
-| punjab | N21 | 4,038 | 297 | 297 |
+| punjab | N20 | 4,897 | 279 | 279 |
+| punjab | N21 | 4,247 | 298 | 298 |
 | punjab | SNPP | 2,450 | 241 | 241 |
 | punjab | TERRA | 73 | 2 | 2 |
 | madagascar | AQUA | 15,810 | 33 | 33 |
@@ -123,7 +123,7 @@ NRT files carry no `type` column, so these rows could only be caught by the arch
 
 | region | NRT rows in (all streams) | removed by known-static | share |
 |---|---:|---:|---:|
-| punjab | 15,457 | 840 | 5.4% |
+| punjab | 16,105 | 847 | 5.3% |
 | madagascar | 528,798 | 1,002 | 0.2% |
 | se_australia | 59,887 | 3,008 | 5.0% |
 | mauritius | 218 | 1 | 0.5% |

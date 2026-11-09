@@ -26,6 +26,18 @@ Data quirks found during inventory (details in `docs/data_inventory.md`):
 - The MODIS archive's processing label changes **6.03 → 61.03 on 2023-01-01** (same C6.1 product, same columns and confidence scale).
 - S-NPP's `instrument` field reads "SNPP", so streams are derived from `satellite`, never `instrument`.
 
+**Live near-real-time pull (`01_fetch_nrt.py`).** NOAA-20 and NOAA-21 NRT detections for the Punjab box are pulled from
+the FIRMS Area API (last 60 days). The API returns a plain bounding box, whereas the archive download is clipped to the
+country (India), so API rows are kept only inside the region's historical footprint (H3 res-7 cells, ~5 km², that have
+detections in the downloaded files); this removed 4,869 of 13,713 rows (Pakistani Punjab). Exact duplicates of rows already
+in the downloaded NRT files are removed, and Punjab's record is extended to the last fetched day (per-region `data_end`).
+
+**S-NPP end-of-life check (`tools/snpp_endcheck.py`, `docs/snpp_endcheck.md`).** S-NPP stopped delivering data in early
+November 2026. We checked whether it degraded in its final months by comparing Aug–Oct 2026 MODIS-equivalent values from
+S-NPP (k·S-NPP), NOAA-20 (k·k′·N20) and NOAA-21 (k·k″·N21). In October 2026 they agree within about ±11 % in Punjab
+(392 / 438 / 368 fire-days) and ±4 % in Madagascar, so S-NPP is kept as the source through October 2026 and NOAA-20 takes
+over from November 2026 as planned.
+
 ## 2. Unify (`02_unify.py`)
 
 One schema for all files: `lat, lon, t_utc, solar_date, stream, conf, frp, daynight, type, product, region, h3r9, h3r6`.

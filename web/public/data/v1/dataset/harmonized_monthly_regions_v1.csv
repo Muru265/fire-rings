@@ -1,4 +1,4 @@
-# Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0. Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day). Regions: punjab, madagascar, se_australia, mauritius. Data through 2026-11-08. Dictionary: /data page.
+# Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0. Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day). Regions: punjab, madagascar, se_australia, mauritius. Data through 2026-11-09. Dictionary: /data page.
 region,year,month,H,H_lo,H_hi,raw_modis_celldays,raw_viirs_celldays,hotspots_modis,hotspots_viirs,coverage_modis,coverage_viirs,source,flags,ratio_to_median,pct_lo,pct_hi,method,calib_version
 punjab,2001,1,206.0,162.7,257.8,53.0,,59,,1.0,,T,"",1.96,75,90,monthly,v1
 punjab,2001,2,264.1,223.9,317.0,118.0,,133,,1.0,,T,"",1.97,90,95,monthly,v1
@@ -310,7 +310,7 @@ punjab,2026,7,21.3,14.5,32.5,9.0,67.0,10,66,1.0,0.8065,V,uncertain,1.39,43,71,mo
 punjab,2026,8,22.2,13.8,34.1,3.0,18.6,3,19,1.0,0.9677,V,provisional|uncertain,1.63,48,90,monthly,v1
 punjab,2026,9,26.9,21.6,33.1,32.0,187.0,37,238,1.0,1.0,V,provisional,0.59,10,38,monthly,v1
 punjab,2026,10,392.3,370.5,416.9,716.0,1096.0,980,1459,1.0,1.0,V,provisional,0.08,0,0,monthly,v1
-punjab,2026,11,520.2,485.9,554.7,1732.0,1422.0,3295,2040,1.0,1.0,V2,mtd|provisional,0.22,0,0,monthly,v1
+punjab,2026,11,614.9,577.3,654.4,1948.5,1681.0,3295,2405,0.8889,1.0,V2,mtd|provisional,0.24,0,0,monthly,v1
 madagascar,2001,1,208.1,157.4,275.1,43.0,,53,,1.0,,T,uncertain,0.8,15,55,monthly,v1
 madagascar,2001,2,18.7,6.9,34.5,5.0,,5,,1.0,,T,uncertain,0.25,0,10,monthly,v1
 madagascar,2001,3,130.2,97.5,164.9,40.0,,50,,1.0,,T,uncertain,1.29,48,67,monthly,v1

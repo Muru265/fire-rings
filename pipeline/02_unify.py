@@ -99,9 +99,24 @@ def unify(con, files: list[tuple[Path, str, str]], region: str, bbox: list[float
                              WHEN CAST(confidence AS INT) < {hi} THEN 'N' ELSE 'H' END
                       ELSE upper(confidence) END conf,
                  TRY_CAST(frp AS DOUBLE) frp, daynight,
-                 TRY_CAST(type AS TINYINT) type, product, sensor
+                 TRY_CAST(type AS TINYINT) type,
+                 CASE WHEN product = 'API' THEN 'NRT' ELSE product END product, product = 'API' AS is_api, sensor
           FROM raw) {clip}""")
     counts["in_box"] = con.execute("SELECT count(*) FROM typed").fetchone()[0]
+
+    # FIRMS API rows come from a plain bounding box, while the archive download is clipped to the country.
+    # Keep API rows only inside the region's historical footprint (H3 res-7 cells with detections in the downloaded
+    # files), so e.g. Pakistani Punjab inside the Punjab box is not added to an India-only record.
+    n_api = con.execute("SELECT count(*) FROM typed WHERE is_api").fetchone()[0]
+    if n_api:
+        con.execute("""
+            CREATE OR REPLACE TEMP TABLE typed AS
+            WITH fp AS (SELECT DISTINCT h3_latlng_to_cell(lat, lon, 7) c FROM typed WHERE NOT is_api)
+            SELECT t.* FROM typed t
+            WHERE NOT t.is_api OR h3_latlng_to_cell(t.lat, t.lon, 7) IN (SELECT c FROM fp)""")
+        kept = con.execute("SELECT count(*) FROM typed WHERE is_api").fetchone()[0]
+        counts["api_rows"] = n_api
+        counts["api_outside_footprint_dropped"] = n_api - kept
 
     # --- dedupe: (1) NRT rows on dates the archive already covers for that stream; (2) exact duplicates
     con.execute("""
@@ -119,7 +134,7 @@ def unify(con, files: list[tuple[Path, str, str]], region: str, bbox: list[float
         CREATE OR REPLACE TEMP TABLE unified AS
         SELECT lat, lon, t_utc,
                CAST(t_utc + to_microseconds(CAST(round(lon / 15.0 * 3600e6) AS BIGINT)) AS DATE) solar_date,
-               stream, conf, frp, daynight, type, product, '{region}' AS region,
+               stream, conf, frp, daynight, type, product, '{region}' AS region, is_api,
                h3_latlng_to_cell(lat, lon, 9) h3r9, h3_latlng_to_cell(lat, lon, 6) h3r6
         FROM nodup
         QUALIFY row_number() OVER (PARTITION BY stream, lat, lon, t_utc ORDER BY product) = 1""")

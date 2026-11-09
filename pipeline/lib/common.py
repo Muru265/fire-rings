@@ -54,9 +54,9 @@ def data_end(region: str):
 
 
 def api_files(region: str) -> list[tuple[Path, str, str]]:
-    """Extra NRT CSVs pulled by 01_fetch_nrt.py for a region: [(path, sensor, 'NRT')]."""
+    """Extra NRT CSVs pulled by 01_fetch_nrt.py for a region: [(path, sensor, 'API')] (treated as NRT in 02_unify)."""
     base = ROOT / "data" / "raw_api" / region
-    return [(p, p.parent.name, "NRT") for p in sorted(base.glob("*/fire_nrt_api.csv"))]
+    return [(p, p.parent.name, "API") for p in sorted(base.glob("*/fire_nrt_api.csv"))]
 
 
 def sql_path(p: Path) -> str:
