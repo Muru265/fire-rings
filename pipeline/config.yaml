@@ -1,0 +1,76 @@
+# Fire Rings pipeline configuration (SOLO SCOPE — see CLAUDE.md)
+version: v1
+paths:
+  raw: data/raw
+  clean: data/clean
+  cube: data/cube
+  out: data/out
+  web: web/public/data/v1
+
+# Sensor folders → FIRMS file codes. Stream is derived from the `satellite` column, never `instrument`.
+sensors:
+  modis:  {code: M-C61,  satellites: {Terra: TERRA, Aqua: AQUA}}
+  snpp:   {code: SV-C2,  satellites: {SNPP: SNPP}}
+  noaa20: {code: J1V-C2, satellites: {N20: N20}}
+  noaa21: {code: J2V-C2, satellites: {N21: N21}}
+
+# bbox = [W, S, E, N]; null = keep the whole source file (already clipped to the country by FIRMS)
+regions:
+  punjab:
+    name: Punjab–Haryana
+    source: india
+    bbox: [73.8, 27.6, 77.6, 32.6]
+  madagascar:
+    name: Madagascar
+    source: madagascar
+    bbox: null
+  se_australia:
+    name: SE Australia (NSW + VIC)
+    source: australia
+    bbox: [140.9, -39.2, 153.7, -28.1]
+  mauritius:
+    name: Mauritius
+    source: mauritius
+    bbox: null
+    note: Republic of Mauritius as delivered by FIRMS (includes Rodrigues, excludes Réunion)
+
+filters:
+  drop_conf: [L]           # MODIS 0–29, VIIRS 'l'
+  drop_types: [1, 2, 3]    # archive only; NRT has no type column (kept as NULL)
+  modis_conf_bins: [30, 80] # <30 L, 30–79 N, >=80 H
+
+mask:
+  h3_res: 9
+  min_detection_days: 16
+  min_years: 3
+  max_seasonality: 0.3
+
+cube:
+  h3_res: 6
+  coverage_min_ratio: 0.6
+  operating_days_source: australia   # largest file → per-stream operating-days proxy
+
+calibration:
+  window: ["2012-07", "2019-12"]
+  q_window: ["2002-07", "2019-12"]
+  kprime_window: ["2018-04", "2026-07"]
+  tau_grid: [10, 30, 100, 300]
+  bootstrap_n: 500
+  uncertain_rel_width: 0.5
+  seed: 20261114
+
+harmonized_segments:      # inclusive month ranges
+  - {from: "2001-01", to: "2002-06", src: T}    # q · Terra
+  - {from: "2002-07", to: "2011-12", src: M}    # Terra ∪ Aqua
+  - {from: "2012-01", to: "2026-10", src: V}    # k · S-NPP
+  - {from: "2026-11", to: null,      src: V2}   # k · k' · NOAA-20
+
+stats:
+  baseline: [2003, 2022]
+  guard_median_lt: 5
+  guard_value_lt: 10
+  similar_years_top: 3
+
+record:
+  start: "2001-01"
+  data_end: "2026-11-08"
