@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const out = resolve(here, '../../docs/screens')
 mkdirSync(out, { recursive: true })
 const PORT = 4179
-const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/r/punjab', '/r/madagascar', '/r/se_australia', '/r/mauritius', '/proof', '/data', '/ask']
+const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/r/punjab', '/r/madagascar', '/r/se_australia', '/r/mauritius', '/proof', '/data', '/ask', '/story/madagascar', '/does-not-exist']
 const widths = [{ w: 1440, h: 900, tag: 'desktop' }, { w: 390, h: 844, tag: 'mobile' }]
 
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
