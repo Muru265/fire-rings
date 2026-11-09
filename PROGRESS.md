@@ -7,11 +7,11 @@ Status keys: `todo` · `doing` · `done` · `blocked` · ⏸ = needs user
 | Task | Status | Notes |
 |---|---|---|
 | 0.1 Toolchain check | done | Python 3.11.0, Node v20.20.2, npm 10.8.2, git 2.50.1 |
-| 0.2 ⏸ GitHub username → git init, pull `fire-rings`, verify clean staging | blocked | waiting for GitHub username |
-| 0.3 .venv + pipeline/requirements.txt, verify imports | todo | |
-| 0.4 Inspect raw CSVs with DuckDB → docs/data_inventory.md | todo | |
-| 0.5 pipeline/config.yaml (regions + clip boxes) | todo | |
-| 0.6 Scaffold web/ (Vite+React+TS+Tailwind v4, tokens, AppShell, routes) | todo | |
+| 0.2 ⏸ GitHub username → git init, pull `fire-rings`, verify clean staging | done | Muru265/fire-rings, main; pulled README+LICENSE; staged set verified (4 files, no .env/data/zips); claude.md→CLAUDE.md |
+| 0.3 .venv + pipeline/requirements.txt, verify imports | done | pinned versions; all imports OK; h3 v4 latlng_to_cell works |
+| 0.4 Inspect raw CSVs with DuckDB → docs/data_inventory.md | done | 32 files via pipeline/00_inventory.py; 11 flags recorded (no NRT type col, no archive/NRT overlap, Rodrigues, S-NPP Jul-2022 gap…) |
+| 0.5 pipeline/config.yaml (regions + clip boxes) | done | YAML loads; 4 regions; thresholds/windows from CLAUDE.md |
+| 0.6 Scaffold web/ (Vite+React+TS+Tailwind v4, tokens, AppShell, routes) | done | Vite 8 / React 19 / TS 7 / Tailwind 4.3; build OK (JS 84 kB gz, CSS 7 kB gz); oxlint clean; preview: /, /r/punjab, /proof, /data, /ask all 200; all §4.2 tokens present in built CSS; vercel.json SPA rewrite |
 | 0.7 ⏸ Push + Vercel import steps; user confirms live URL | todo | |
 
 ## Phase 1 — Data in
@@ -41,6 +41,8 @@ todo
 
 ## Log
 - 2026-11-09 — Read CLAUDE.md + master plan. Toolchain checked (0.1). Note: Python 3.11 installed vs 3.12 in CLAUDE.md — all pipeline libs support 3.11, so proceeding with 3.11 unless told otherwise. Waiting on GitHub username (0.2).
+
+- 2026-11-09 — 0.2–0.5 done (see table). Coverage plan: per-stream operating-days proxy from the Australia file (inventory flag 8).
 
 ## Decisions / open questions
 - Python 3.11 used instead of 3.12 (no functional impact expected).

@@ -42,7 +42,16 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 | pytest | 9.2.0 | MIT | Tests |
 
 ## Software — web
-_Added in Phase 0.6._
+
+| Library | Version | Licence | Use |
+|---|---|---|---|
+| Vite | 8.3.7 | MIT | Build tool / dev server |
+| React + React DOM | 19.3.1 | MIT | UI |
+| React Router | 7.18.5 | MIT | Routing |
+| Tailwind CSS (+ @tailwindcss/vite) | 4.3.5 | MIT | Styling via design tokens |
+| TypeScript | 7.0.2 | Apache-2.0 | Types |
+| oxlint | 1.93.0 | MIT | Linting |
+| Space Grotesk, Inter, JetBrains Mono (via Fontsource variable packages 5.3.0) | — | SIL Open Font License 1.1 (fonts), MIT (packages) | Typography, self-hosted |
 
 ## AI tools disclosure
 - Claude Code (Anthropic) used as an AI coding assistant to build this repository.

@@ -1,0 +1,29 @@
+/* Fire Rings design tokens — "Night Earth".
+   The first :root block is copied verbatim from docs/FIRE_RINGS_MASTER_PLAN.md §4.2. Do not edit it here
+   without updating the master plan. */
+:root{
+  --bg:#0A0E14; --surface:#111822; --surface-2:#18212E; --surface-3:#202B3A;
+  --border:#263142; --border-strong:#34425A;
+  --text:#E8EEF5; --text-muted:#93A1B3; --text-faint:#5D6B7E;
+  --accent:#FF7A45;        /* UI accent only (buttons, focus), never data */
+  --accent-2:#5AC8FA;      /* links, info */
+  --ok:#3DDC97; --warn:#FFC145; --danger:#FF5C6C;
+  --focus:0 0 0 3px rgba(255,122,69,.55);
+  --zero:#1C2533;          /* zero-activity cells */
+  --nodata:transparent;    /* + cross-hatch pattern */
+  --radius:14px; --radius-sm:8px;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+}
+
+/* Additions (master plan §4.3 typography, §4.5 motion). */
+:root{
+  --font-display:'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+  --font-body:'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-mono:'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --dur-fast:180ms; --dur-slow:420ms;
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-fast:0ms; --dur-slow:0ms; }
+}
