@@ -46,8 +46,9 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 24px;
+    padding: 16px;
   }
+  @media (min-width: 640px) { .card { padding: 24px; } }
   .num {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
