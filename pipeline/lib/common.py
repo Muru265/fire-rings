@@ -30,9 +30,11 @@ def connect(threads: int = 8) -> duckdb.DuckDBPyConnection:
     return con
 
 
-def write_json(p: Path, obj) -> None:
+def write_json(p: Path, obj, compact: bool = False) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(obj, indent=1, default=str), encoding="utf-8")
+    text = (json.dumps(obj, separators=(",", ":"), default=str, ensure_ascii=False) if compact
+            else json.dumps(obj, indent=1, default=str, ensure_ascii=False))
+    p.write_text(text, encoding="utf-8")
 
 
 def read_json(p: Path):

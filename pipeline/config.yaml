@@ -29,7 +29,7 @@ regions:
     source: australia
     bbox: [140.9, -39.2, 153.7, -28.1]
   mauritius:
-    name: Mauritius
+    name: Mauritius (incl. Rodrigues)
     source: mauritius
     bbox: null
     note: Republic of Mauritius as delivered by FIRMS (includes Rodrigues, excludes Réunion)
