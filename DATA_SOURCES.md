@@ -53,6 +53,16 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 | TypeScript | 7.0.2 | Apache-2.0 | Types |
 | oxlint | 1.93.0 | MIT | Linting |
 | Space Grotesk, Inter, JetBrains Mono (via Fontsource variable packages 5.3.0) | — | SIL Open Font License 1.1 (fonts), MIT (packages) | Typography, self-hosted |
+| D3 (d3-scale, d3-shape, d3-array, d3-interpolate, d3-scale-chromatic) | 7.9.2 | ISC | Scales, arcs, inferno ramp |
+| MapLibre GL JS | 6.17.0 | BSD-3-Clause | Interactive map |
+| h3-js | 4.5.0 | Apache-2.0 | H3 cell boundaries/centroids in the browser |
+| html-to-image | 1.11.13 | MIT | PNG export |
+| Playwright | (dev) | Apache-2.0 | Screenshots + interaction smoke tests |
+
+## Basemap and design references
+- **OpenFreeMap** "dark" style (https://openfreemap.org), no key. Map data © **OpenStreetMap contributors** (ODbL), tiles via OpenMapTiles schema.
+- **ColorBrewer** RdBu diverging scheme (Cynthia Brewer, Apache-2.0 style licence) for the anomaly ramp; **inferno** colormap (Smith & van der Walt, CC0) for counts.
+- **H3** hierarchical hexagonal grid (Uber Technologies, Apache-2.0); resolution 6 average cell area ≈ 36 km² (h3geo.org resolution table).
 
 ## AI tools disclosure
 - Claude Code (Anthropic) used as an AI coding assistant to build this repository.

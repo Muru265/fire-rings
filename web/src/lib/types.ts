@@ -17,6 +17,12 @@ export interface MonthRec {
   cov_viirs: number | null
   src: SrcCode
   flags: Flag[]
+  ratio?: number | null
+  pct?: [number, number] | null
+  rp?: number | null
+  beyond?: boolean | null
+  rank?: number | null
+  guard?: boolean | null
 }
 
 export interface AnnualRec {
@@ -24,6 +30,76 @@ export interface AnnualRec {
   H: number | null
   lo: number | null
   hi: number | null
+  complete?: boolean
+  months?: number
+}
+
+export interface Ratios {
+  month: number[]
+  lo: number[]
+  hi: number[]
+  pool: number
+  B?: number[]
+  A?: number[]
+  raw_month?: number[]
+  tau?: number
+}
+
+export interface LatestStats {
+  y: number
+  m: number
+  mtd: boolean
+  value: number | null
+  lo: number | null
+  hi: number | null
+  median?: number
+  ratio: number | null
+  pct: [number, number] | null
+  return_period: number | null
+  beyond_record: boolean
+  rank?: number
+  rank_of?: number
+  guard: boolean | null
+  provisional?: boolean
+  days?: number
+  baseline_kind?: string
+}
+
+export interface Validation {
+  method: string
+  method_reason: string
+  low_activity: boolean
+  loyo_err_pct: number
+  loyo_bias_pct: number
+  step_raw_pct: number
+  step_harm_pct: number
+  step_modis_pct: number
+  step_harm_ci: [number, number]
+  step_p: number
+  step_p_raw: number
+  shape_r: number
+  drift: { y: number; ratio: number | null }[]
+  drift_post2020_rel_pct: number | null
+  v1_pass: boolean
+  v3_pass: boolean
+  v9: Record<string, unknown>
+}
+
+export interface Quality {
+  rows_unified: number
+  rows_kept: number
+  dropped_low_conf: number
+  dropped_type: number
+  dropped_known_static: number
+  dropped_persistent: number
+  masked_static_total: number
+  known_static_cells: number
+  persistent_cells: number
+  nrt_rows: number
+  nrt_removed_known_static: number
+  global_outages: Record<string, [string, string, number][]> | null
+  regional_gaps: Record<string, [string, string, number][]> | null
+  insufficient_months: string[] | null
 }
 
 export interface RegionDoc {
@@ -38,14 +114,22 @@ export interface RegionDoc {
   data_end: string
   units: { H: string; raw: string; hot: string }
   method: string | null
+  method_reason?: string | null
   months: MonthRec[]
-  k: { month: number[]; lo: number[]; hi: number[]; B: number[] }
-  validation: Record<string, unknown> | null
-  climatology: { median: number[]; p10: number[]; p90: number[] } | null
-  latest: Record<string, unknown> | null
+  k: Ratios
+  q: Ratios | null
+  kprime: Ratios | null
+  validation: Validation | null
+  climatology: { median: number[]; p10: number[]; p90: number[]; n: number[] } | null
+  latest: LatestStats | null
+  latest_complete: LatestStats | null
   annual: AnnualRec[]
   similar_years: number[]
+  similar_detail?: { months: string; years: { y: number; r: number }[] } | null
   daily: Record<string, { modis?: number[]; viirs?: number[] }>
+  quality: Quality | null
+  hotspot_months: string[]
+  hex_years: number[]
   harmonized: boolean
 }
 
@@ -53,8 +137,21 @@ export interface MetaDoc {
   version: string
   data_end: string
   generated: string
-  regions: { id: string; name: string; bbox: number[]; months: number; harmonized: boolean; first: string; last: string }[]
+  citation: string
+  regions: {
+    id: string
+    name: string
+    bbox: number[]
+    months: number
+    method: string | null
+    harmonized: boolean
+    first: string
+    last: string
+    latest: LatestStats | null
+    latest_complete: LatestStats | null
+  }[]
 }
 
 /** Which series the calendar shows. */
 export type ViewMode = 'raw' | 'harmonized'
+export type CalMode = 'counts' | 'anomaly'

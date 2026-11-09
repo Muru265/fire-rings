@@ -60,6 +60,28 @@ def opt_json(p: Path):
     return read_json(p) if p.exists() else None
 
 
+def quality(region: str) -> dict | None:
+    """Filter/mask row counts (03_mask) and detected outages/gaps (04_cube) for the dashboard and Proof page."""
+    out = path("out")
+    mk, cb, un = (opt_json(out / f"{n}_{region}.json") for n in ("mask", "cube", "unify"))
+    if not mk:
+        return None
+    tot = {s: sum(v[s] for v in mk["steps"].values()) for s in ("in", "conf", "type", "known", "persist")}
+    nrt_in = sum(v["in"] for k, v in mk["steps"].items() if k.endswith("/NRT"))
+    nrt_known = sum(v["type"] - v["known"] for k, v in mk["steps"].items() if k.endswith("/NRT"))
+    return {
+        "rows_unified": tot["in"], "rows_kept": tot["persist"],
+        "dropped_low_conf": tot["in"] - tot["conf"], "dropped_type": tot["conf"] - tot["type"],
+        "dropped_known_static": tot["type"] - tot["known"], "dropped_persistent": tot["known"] - tot["persist"],
+        "masked_static_total": (tot["conf"] - tot["type"]) + (tot["type"] - tot["persist"]),
+        "known_static_cells": mk["cells"]["known"], "persistent_cells": mk["cells"]["persist"],
+        "nrt_rows": nrt_in, "nrt_removed_known_static": nrt_known,
+        "global_outages": (cb or {}).get("global_outages"), "regional_gaps": (cb or {}).get("regional_gaps"),
+        "insufficient_months": (cb or {}).get("insufficient"),
+        "nrt_overlap_dropped": (un or {}).get("nrt_overlap_dropped"),
+    }
+
+
 def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
     cube, out = path("cube"), path("out")
     mon = pl.read_parquet(cube / f"{region}_monthly.parquet")
@@ -193,6 +215,7 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "similar_years": stats.get("similar_years", []),
         "similar_detail": stats.get("similar_detail"),
         "daily": {latest_key: side.get(latest_key, {})},
+        "quality": quality(region),
         "hotspot_months": [f"{r['y']:04d}-{r['m']:02d}" for r in months[-HOTSPOT_MONTHS:]],
         "hex_years": sorted({r["y"] for r in months}),
         "harmonized": bool(harm),

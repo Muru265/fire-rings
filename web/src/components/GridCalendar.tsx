@@ -3,15 +3,15 @@ import { describe } from '../lib/describe'
 import { fmtCompact } from '../lib/format'
 import { MONTH_INITIALS, MONTHS, VIIRS_START, key, valueOf } from '../lib/series'
 import type { Grid } from '../lib/series'
-import type { ClassScale } from '../lib/scales'
-import type { ViewMode } from '../lib/types'
+import type { MonthRec, ViewMode } from '../lib/types'
 import { useCellNav } from '../lib/useCellNav'
 import type { Cell } from '../lib/useCellNav'
 import Tooltip from './Tooltip'
 
 interface Props {
   grid: Grid
-  scale: ClassScale
+  colorOf: (r: MonthRec) => string | null
+  glyphOf?: (r: MonthRec) => string | null
   mode: ViewMode
   active: Cell | null
   onActive: (c: Cell | null) => void
@@ -20,7 +20,7 @@ interface Props {
 }
 
 /** Year × month grid. Rows are years (oldest at top); last column is the year total of the shown series. */
-export default function GridCalendar({ grid, scale, mode, active, onActive, onSelect, label }: Props) {
+export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onActive, onSelect, label }: Props) {
   const uid = useId().replace(/:/g, '')
   const { years, byKey } = grid
   const last = useMemo(() => {
@@ -77,8 +77,8 @@ export default function GridCalendar({ grid, scale, mode, active, onActive, onSe
               const m = mi + 1
               const r = byKey.get(key(y, m))
               if (!r) return <div key={m} role="gridcell" aria-label={`${MONTHS[mi]} ${y}: outside record`} />
-              const v = valueOf(r, mode)
-              const color = scale.colorOf(v)
+              const color = colorOf(r)
+              const glyph = glyphOf?.(r)
               const provisional = r.flags.includes('provisional') || r.flags.includes('mtd')
               const isFocus = focus.y === y && focus.m === m
               const dim = active && active.y !== y && active.m !== m
@@ -98,10 +98,14 @@ export default function GridCalendar({ grid, scale, mode, active, onActive, onSe
                     background: color ?? `repeating-linear-gradient(45deg, var(--border-strong) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, var(--border-strong) 0 1px, transparent 1px 4px)`,
                     outline: provisional ? '1px dotted var(--text)' : undefined,
                     outlineOffset: provisional ? '-1px' : undefined,
-                    boxShadow: [color === 'var(--zero)' ? 'inset 0 0 0 1px var(--border)' : '', y === VIIRS_START ? '0 -2px 0 0 var(--bg), 0 -3.5px 0 0 var(--text-muted)' : '']
+                    boxShadow: [color === '#1C2533' ? 'inset 0 0 0 1px var(--border)' : '', y === VIIRS_START ? '0 -2px 0 0 var(--bg), 0 -3.5px 0 0 var(--text-muted)' : '']
                       .filter(Boolean).join(', ') || undefined,
                   }}
                 >
+                  {glyph && (
+                    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[9px] leading-none text-text"
+                      style={{ textShadow: '0 0 2px #000' }}>{glyph}</span>
+                  )}
                   {r.flags.includes('uncertain') && (
                     <span className="absolute inset-0 rounded-[3px]" style={{ background: 'repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 1.4px, transparent 1.4px 5px)' }} />
                   )}

@@ -1,17 +1,28 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import AnnualBars from '../components/AnnualBars'
 import CalendarTable from '../components/CalendarTable'
 import EmptyState from '../components/EmptyState'
 import FireRings from '../components/FireRings'
+import Gauge from '../components/Gauge'
 import GridCalendar from '../components/GridCalendar'
+import KpiCards from '../components/KpiCards'
 import Legend from '../components/Legend'
+import SeamSlider from '../components/SeamSlider'
+import SeasonalityChart from '../components/SeasonalityChart'
 import { useRegion } from '../lib/api'
-import { fmtCompact, fmtInt } from '../lib/format'
+import { makeColorer } from '../lib/colors'
+import { calendarCsv, downloadPng, downloadText } from '../lib/exporters'
+import { fmtInt } from '../lib/format'
+import type { Box } from '../lib/hexes'
+import { headline, judgeMonth } from '../lib/headline'
 import { REGIONS, findRegion } from '../lib/regions'
-import { MONTHS, toGrid, valueOf } from '../lib/series'
-import { quantileScale } from '../lib/scales'
-import type { RegionDoc, ViewMode } from '../lib/types'
+import { MONTHS, toGrid } from '../lib/series'
+import type { CalMode, RegionDoc } from '../lib/types'
 import type { Cell } from '../lib/useCellNav'
+
+const MapView = lazy(() => import('../components/MapView'))
+const MonthDrawer = lazy(() => import('../components/MonthDrawer'))
 
 export default function Region() {
   const { regionId } = useParams()
@@ -23,10 +34,7 @@ export default function Region() {
       <EmptyState title="Region not found">
         Available regions:{' '}
         {REGIONS.map((r, i) => (
-          <span key={r.id}>
-            {i > 0 && ' · '}
-            <Link to={`/r/${r.id}`}>{r.name}</Link>
-          </span>
+          <span key={r.id}>{i > 0 && ' · '}<Link to={`/r/${r.id}`}>{r.name}</Link></span>
         ))}
       </EmptyState>
     )
@@ -36,88 +44,236 @@ export default function Region() {
     return (
       <EmptyState title="Couldn't load this region's data">
         <p className="num text-xs">{doc.error}</p>
-        <button onClick={doc.retry} className="mt-3 rounded-sm border border-border-strong px-3 py-1.5 text-sm text-text hover:bg-surface-2">
-          Retry
-        </button>
+        <button onClick={doc.retry} className="mt-3 rounded-sm border border-border-strong px-3 py-1.5 text-sm text-text hover:bg-surface-2">Retry</button>
       </EmptyState>
     )
   return <RegionView key={region.id} doc={doc.data} />
 }
 
-function RegionView({ doc }: { doc: RegionDoc }) {
-  const mode: ViewMode = doc.harmonized ? 'harmonized' : 'raw'
-  const grid = useMemo(() => toGrid(doc.months), [doc])
-  const scale = useMemo(() => quantileScale(doc.months.map((r) => valueOf(r, mode)), fmtCompact), [doc, mode])
+function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
+  const [box, setBox] = useState<Box | null>(null)
+  const [boxState, setBoxState] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; months?: RegionDoc['months']; cells?: number; error?: string }>({ status: 'idle' })
+  const [t, setT] = useState(regionDoc.harmonized ? 1 : 0)
+  const [mode, setMode] = useState<CalMode>('counts')
   const [active, setActive] = useState<Cell | null>(null)
   const [selected, setSelected] = useState<Cell | null>(null)
+  const [focusMonth, setFocusMonth] = useState<Cell | null>(null)
   const [table, setTable] = useState(false)
+  const ringsRef = useRef<HTMLDivElement>(null)
+
+  const applyBox = useCallback((b: Box | null) => {
+    setBox(b)
+    setBoxState(b ? { status: 'loading' } : { status: 'idle' })
+  }, [])
+
+  useEffect(() => {
+    if (!box) return
+    let alive = true
+    import('../lib/hexes').then((h) => h.boxRecord(regionDoc, box))
+      .then((r) => alive && setBoxState({ status: 'ready', months: r.months, cells: r.cells }))
+      .catch((e: Error) => alive && setBoxState({ status: 'error', error: e.message }))
+    return () => { alive = false }
+  }, [box, regionDoc])
+
+  const boxed = box && boxState.status === 'ready' && boxState.months
+  const doc: RegionDoc = useMemo(() => (boxed ? { ...regionDoc, months: boxState.months! } : regionDoc), [boxed, regionDoc, boxState.months])
+  const effMode: CalMode = boxed ? 'counts' : mode
+  const colorer = useMemo(() => makeColorer(doc, effMode, t), [doc, effMode, t])
+  const grid = useMemo(() => toGrid(doc.months), [doc])
+  const viewMode = t >= 0.5 ? 'harmonized' : 'raw'
+  const scale = t >= 0.5 ? colorer.harmScale : colorer.rawScale
+  const unit = viewMode === 'raw' ? 'Fire-days (raw cell-days)' : 'Fire-days (MODIS-equivalent)'
+  const label = `${doc.name}${boxed ? ' (box)' : ''}, ${viewMode} monthly fire-days`
+
+  // insight month: selected/focused month, else the last complete month
+  const lc = regionDoc.latest_complete
+  const insightCell = focusMonth ?? (lc ? { y: lc.y, m: lc.m } : null)
+  const insightRec = insightCell ? regionDoc.months.find((r) => r.y === insightCell.y && r.m === insightCell.m) : undefined
+  const j = insightRec ? judgeMonth(regionDoc, insightRec) : null
+  const lt = regionDoc.latest
+  const mtdRec = lt?.mtd ? regionDoc.months.find((r) => r.y === lt.y && r.m === lt.m) : undefined
+  const head = j ? headline(j) : null
+
+  const onSelect = useCallback((c: Cell) => { setSelected(c); setFocusMonth(c) }, [])
+  const selRec = selected ? doc.months.find((r) => r.y === selected.y && r.m === selected.m) : undefined
   const first = doc.months[0]
   const last = doc.months[doc.months.length - 1]
-  const unit = mode === 'raw' ? 'Fire-days (raw cell-days)' : 'Fire-days (MODIS-equivalent)'
-  const label = `${doc.name}, ${mode === 'raw' ? 'raw' : 'harmonized'} monthly fire-days`
+  const v = regionDoc.validation
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* header */}
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">
-            {doc.area_km2 ? `${fmtInt(doc.area_km2)} km² ${doc.area_note}` : doc.area_note} · {MONTHS[first.m - 1]} {first.y} – {MONTHS[last.m - 1]} {last.y}
+            {regionDoc.area_km2 ? `${fmtInt(regionDoc.area_km2)} km² ${regionDoc.area_note}` : regionDoc.area_note} · {MONTHS[first.m - 1]} {first.y} – {MONTHS[last.m - 1]} {last.y}
           </p>
-          <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">{doc.name}</h1>
+          <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">{regionDoc.name}</h1>
         </div>
-        <span className="rounded-full border border-warn/40 bg-warn/10 px-3 py-1 text-xs text-warn">
-          {mode === 'raw' ? 'Raw view: not harmonized yet' : 'Harmonized'}
-        </span>
+        <div className="flex flex-wrap gap-2 text-xs">
+          {regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok">Harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}
+          {v && <Link to="/proof" className="rounded-full border border-border-strong px-3 py-1 text-muted no-underline hover:text-text">
+            Validated: {v.low_activity ? 'low-activity region' : `${v.loyo_err_pct}% out-of-sample error`}
+          </Link>}
+        </div>
       </header>
 
-      {mode === 'raw' && (
-        <p className="max-w-3xl text-sm text-muted">
-          This is the <strong className="text-text">naive</strong> record: MODIS fire cell-days up to 2011, VIIRS from 2012. VIIRS sees
-          smaller fires and splits large ones, so the jump at the dashed ring is the satellite changing, not the fire.
-          Harmonization (Phase 3) converts VIIRS into MODIS-equivalent units.
+      {/* headline */}
+      {head && (
+        <p className="fade-up max-w-4xl font-display text-xl leading-snug sm:text-[28px]">
+          <span className="text-text">{head.lead}</span> <span className="text-muted">{head.rest}</span>
         </p>
       )}
+      {regionDoc.harmonized && <KpiCards doc={regionDoc} />}
 
-      <section aria-labelledby="rings-h" className="card grid items-center gap-8 lg:grid-cols-[minmax(0,620px)_minmax(0,1fr)] lg:justify-center xl:gap-14">
-        <h2 id="rings-h" className="sr-only">Fire Rings</h2>
-        <FireRings grid={grid} scale={scale} mode={mode} active={active} onActive={setActive} onSelect={setSelected} label={label} />
-        <div className="grid gap-8 sm:grid-cols-2 lg:max-w-[460px] lg:grid-cols-1 xl:grid-cols-2">
-          <Legend scale={scale} unit={unit} vertical />
-          <div className="text-sm text-muted">
-            <p className="eyebrow mb-2">How to read</p>
-            <ul className="space-y-2">
-              <li><span className="text-text">Rings are years:</span> {grid.years[0]} at the centre, {grid.years[grid.years.length - 1]} at the edge.</li>
-              <li><span className="text-text">Months run clockwise</span> from January at 12 o'clock.</li>
-              <li><span className="text-text">Brighter means more fire-days.</span> One fire-day is one ~36 km² hexagon with at least one detection on one day.</li>
-              <li>Hover or use the arrow keys to read any month.</li>
-            </ul>
-            {selected && (
-              <p className="mt-4 text-xs" aria-live="polite">
-                Selected {MONTHS[selected.m - 1]} {selected.y}. Month drill-down arrives in Phase 4.
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        {/* centre */}
+        <div className="min-w-0 space-y-6">
+          {boxed && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-accent-2/40 bg-accent-2/10 px-4 py-2.5 text-sm">
+              <span className="text-text">Box view: {fmtInt(boxState.cells ?? 0)} hexagons in [{box!.map((x) => x.toFixed(2)).join(', ')}]. Calibration from {regionDoc.name}; no intervals or percentiles for boxes.</span>
+              <button onClick={() => applyBox(null)} className="rounded-sm border border-border-strong px-3 py-1 text-xs text-text hover:bg-surface-2">Back to whole region</button>
+            </div>
+          )}
+          {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing 2001–2026 for the box…</p>}
+          {box && boxState.status === 'error' && <p className="text-sm text-danger">Box failed: {boxState.error}</p>}
+
+          <section aria-labelledby="rings-h" className="card">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 id="rings-h" className="font-display text-lg font-semibold">Fire Rings</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <div role="group" aria-label="Colour mode" className="flex rounded-sm border border-border p-0.5 text-xs">
+                  {(['counts', 'anomaly'] as CalMode[]).map((md) => (
+                    <button key={md} onClick={() => { setMode(md); if (md === 'anomaly') setT(1) }} aria-pressed={effMode === md} disabled={!!boxed && md === 'anomaly'}
+                      className={`rounded-[6px] px-3 py-1 capitalize ${effMode === md ? 'bg-surface-3 text-text' : 'text-muted hover:text-text'} disabled:opacity-40`}>
+                      {md === 'counts' ? 'Fire-days' : 'vs typical'}
+                    </button>
+                  ))}
+                </div>
+                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), doc.months, 'fire-days (MODIS-equivalent) + raw cell-days'))}
+                  onPng={() => ringsRef.current && downloadPng(ringsRef.current, `fire-rings_${doc.id}.png`)} />
+              </div>
+            </div>
+            <div ref={ringsRef} className="grid items-center gap-6 bg-surface lg:grid-cols-[minmax(0,1fr)_220px]">
+              <FireRings grid={grid} colorOf={colorer.colorOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} drawIn
+                centerLabel={effMode === 'anomaly' ? 'vs typical' : t <= 0 ? 'Raw' : t >= 1 ? 'Harmonized' : 'Morphing'} />
+              <div className="space-y-5">
+                <Legend scale={scale} unit={unit} mode={effMode} vertical />
+                <p className="text-[10px] text-faint">Fire Rings · {doc.name}{boxed ? ' (box)' : ''} · {MONTHS[first.m - 1]} {first.y}–{MONTHS[last.m - 1]} {last.y} · {effMode === 'anomaly' ? 'ratio to 2003–2022 median' : unit} · NASA FIRMS MODIS + VIIRS · fire-rings.vercel.app</p>
+              </div>
+            </div>
+            <div className="mt-5 border-t border-border pt-4">
+              <SeamSlider value={t} onChange={setT} disabled={effMode === 'anomaly' || !regionDoc.harmonized} />
+              <p className="mt-2 text-xs text-muted">
+                {t < 0.5
+                  ? 'Raw: MODIS cell-days to 2011, VIIRS after. The jump at the dashed ring is the satellite changing, not the fire.'
+                  : 'Harmonized: VIIRS converted to MODIS-equivalent fire-days with ratios fitted on Jul 2012 – Dec 2019 only.'}
               </p>
-            )}
-          </div>
-        </div>
-      </section>
+            </div>
+          </section>
 
-      <section aria-labelledby="grid-h" className="card">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 id="grid-h" className="font-display text-lg font-semibold">Calendar</h2>
-          <button onClick={() => setTable((v) => !v)} aria-pressed={table}
-            className="rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text hover:bg-surface-2">
-            {table ? 'View as chart' : 'View as table'}
-          </button>
-        </div>
-        {table ? (
-          <CalendarTable grid={grid} mode={mode} caption={`${label}, by year and month (${unit})`} />
-        ) : (
-          <GridCalendar grid={grid} scale={scale} mode={mode} active={active} onActive={setActive} onSelect={setSelected} label={label} />
-        )}
-      </section>
+          <section aria-labelledby="grid-h" className="card">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 id="grid-h" className="font-display text-lg font-semibold">Calendar</h2>
+              <button onClick={() => setTable((x) => !x)} aria-pressed={table}
+                className="rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text hover:bg-surface-2">{table ? 'View as chart' : 'View as table'}</button>
+            </div>
+            {table
+              ? <CalendarTable grid={grid} mode={viewMode} caption={`${label}, by year and month (${unit})`} />
+              : <GridCalendar grid={grid} colorOf={colorer.colorOf} glyphOf={colorer.glyphOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} />}
+          </section>
 
-      <p className="text-xs text-faint">
-        Data through {doc.data_end} · exported {doc.updated} · units: {doc.units.raw}. Source: NASA FIRMS.
-      </p>
+          {!boxed && regionDoc.harmonized && (
+            <div className="grid gap-6 2xl:grid-cols-2">
+              <SeasonalityChart doc={regionDoc} year={insightCell?.y ?? last.y} />
+              <AnnualBars doc={regionDoc} selectedYear={insightCell?.y} />
+            </div>
+          )}
+
+          <Suspense fallback={<div className="card h-[520px] animate-pulse" aria-label="Loading map" />}>
+            <MapView doc={regionDoc} y={(selected ?? insightCell ?? last).y} m={(selected ?? insightCell ?? last).m} box={box} onBox={applyBox} />
+          </Suspense>
+        </div>
+
+        {/* insight panel */}
+        <aside className="space-y-6" aria-label="Insights">
+          {j && (
+            <section className="card" aria-labelledby="normal-h">
+              <h2 id="normal-h" className="eyebrow">Is this normal?</h2>
+              <p className="mt-1 font-display text-lg font-semibold">{MONTHS[j.m - 1]} {j.y}{j.provisional ? <span className="ml-2 rounded-full border border-border-strong px-1.5 py-px align-middle font-mono text-[10px] font-normal text-muted">provisional</span> : null}</p>
+              <div className="mt-3"><Gauge j={j} /></div>
+              <p className="mt-3 text-center text-xs text-muted">vs {MONTHS[j.m - 1]} in {regionDoc.baseline[0]}–{regionDoc.baseline[1]} (median {fmtInt(j.median)} fire-days)</p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
+                {mtdRec && <button onClick={() => setFocusMonth({ y: mtdRec.y, m: mtdRec.m })}
+                  className={`rounded-sm border px-2.5 py-1 ${insightCell?.y === mtdRec.y && insightCell.m === mtdRec.m ? 'border-accent text-accent' : 'border-border-strong text-muted hover:text-text'}`}>
+                  {MONTHS[mtdRec.m - 1]} so far</button>}
+                {lc && <button onClick={() => setFocusMonth({ y: lc.y, m: lc.m })}
+                  className={`rounded-sm border px-2.5 py-1 ${insightCell?.y === lc.y && insightCell.m === lc.m ? 'border-accent text-accent' : 'border-border-strong text-muted hover:text-text'}`}>
+                  Last full month</button>}
+                {insightRec && <button onClick={() => setSelected({ y: insightRec.y, m: insightRec.m })}
+                  className="rounded-sm border border-border-strong px-2.5 py-1 text-muted hover:text-text">Details →</button>}
+              </div>
+            </section>
+          )}
+
+          {regionDoc.similar_years.length > 0 && (
+            <section className="card" aria-labelledby="sim-h">
+              <h2 id="sim-h" className="eyebrow">Similar years</h2>
+              <p className="mt-2 text-sm text-muted">Months {regionDoc.similar_detail?.months.replace(/–(\d+)$/, (_, mm) => `–${MONTHS[Number(mm) - 1]}`)} {last.y} look most like:</p>
+              <ol className="mt-3 flex gap-2">
+                {(regionDoc.similar_detail?.years ?? regionDoc.similar_years.map((y) => ({ y, r: NaN }))).map((s) => (
+                  <li key={s.y}><button onClick={() => setFocusMonth({ y: s.y, m: lc?.m ?? 1 })}
+                    className="rounded-sm bg-surface-2 px-3 py-2 text-left hover:bg-surface-3">
+                    <span className="num block text-base text-text">{s.y}</span>
+                    {Number.isFinite(s.r) && <span className="num text-[10px] text-faint">r = {s.r.toFixed(2)}</span>}
+                  </button></li>
+                ))}
+              </ol>
+              <p className="mt-3 text-[11px] text-faint">Analogues by shape of the year so far, not a forecast.</p>
+            </section>
+          )}
+
+          <section className="card" aria-labelledby="ask-h">
+            <h2 id="ask-h" className="eyebrow">Ask Fire Rings</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {['Is this month unusual?', 'Worst year on record?', 'When does the season peak?', 'How reliable is this?'].map((q) => (
+                <Link key={q} to={`/ask?region=${regionDoc.id}&q=${encodeURIComponent(q)}`}
+                  className="rounded-full border border-border-strong px-3 py-1.5 text-xs text-text no-underline hover:bg-surface-2">{q}</Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="card text-xs text-muted" aria-labelledby="prov-h">
+            <h2 id="prov-h" className="eyebrow mb-2">Provenance</h2>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+              <dt className="text-faint">Data</dt><dd>NASA FIRMS MODIS C6.1 (Terra, Aqua), VIIRS 375 m (S-NPP, NOAA-20, NOAA-21)</dd>
+              <dt className="text-faint">Through</dt><dd className="num">{regionDoc.data_end} (Aug–Nov 2026 provisional NRT)</dd>
+              <dt className="text-faint">Unit</dt><dd>fire-day = one H3 res-6 hexagon (~36 km²) with ≥1 detection on one solar day</dd>
+              <dt className="text-faint">Calibration</dt><dd>Jul 2012 – Dec 2019 · {regionDoc.method === 'pooled' ? `single ratio ${regionDoc.k.pool}` : `monthly ratios ${Math.min(...regionDoc.k.month).toFixed(2)}–${Math.max(...regionDoc.k.month).toFixed(2)}`}</dd>
+              <dt className="text-faint">Baseline</dt><dd>{regionDoc.baseline[0]}–{regionDoc.baseline[1]}</dd>
+              <dt className="text-faint">Updated</dt><dd className="num">{regionDoc.updated}</dd>
+            </dl>
+            <Link to="/proof" className="mt-3 inline-block">How we know it works →</Link>
+          </section>
+        </aside>
+      </div>
+
+      {selected && selRec && (
+        <Suspense fallback={null}>
+          <MonthDrawer doc={doc} rec={selRec} onClose={() => setSelected(null)} />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+
+function ExportMenu({ onCsv, onPng }: { onCsv: () => void; onPng: () => void }) {
+  const [busy, setBusy] = useState(false)
+  return (
+    <div className="flex gap-1 text-xs" role="group" aria-label="Export">
+      <button onClick={onCsv} className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">CSV</button>
+      <button disabled={busy} onClick={async () => { setBusy(true); try { await onPng() } finally { setBusy(false) } }}
+        className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2 disabled:opacity-50">{busy ? '…' : 'PNG'}</button>
     </div>
   )
 }
@@ -135,3 +291,4 @@ function RegionSkeleton({ name }: { name: string }) {
     </div>
   )
 }
+

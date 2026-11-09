@@ -39,7 +39,20 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 | 3.4 full 08_export.py + run_all.py | done | regions/*.json (harmonized + per-month stats), daily/, hexes/{region}/{year}.json (H3 r6 cell-days, primary stream), hotspots/{region}_{YYYY-MM}.csv (latest 2 months, header comment), dataset/ (CSV + Parquet + calibration_k_v1.csv + validation_v1.json), meta.json. `python pipeline/run_all.py` reruns raw → web in 47 s, then pytest (26 pass) |
 | 3.5 validation decision (no stop) | done | See validation table in Summary. Active regions pass V1 + V3; SE Australia on fallback 1 (pooled); Mauritius low-activity (reported, not judged) |
 
-## Phase 4 — Region dashboard · Phase 5 — Proof + Data · Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
+## Phase 4 — Region dashboard ✅
+| Task | Status | Notes |
+|---|---|---|
+| SeamSlider + colour morph | done | interpolates each cell between the raw and harmonized quantile colours; centre label Raw/Morphing/Harmonized |
+| Headline + 4 KPI cards + Gauge | done | headline from per-month stats (ratio, pct range, rank "lowest/highest on record", 1-in-N, provisional/uncertain); KPIs: this month (MTD + CI), YTD vs typical, peak month, static sources removed; gauge = percentile range arc + needle |
+| Anomaly mode, hatching, provisional | done | RdBu-7 reversed on log2(H/median), ▲▼ glyphs in grid, guard grey "~"; diagonal hatch = uncertain; dotted outline = provisional/MTD |
+| MonthDrawer | done | daily bars vs baseline P10–P90 band + median, dot plot of baseline Months, SVG mini hex map, hotspot CSV (latest months) + daily CSV, Esc/focus handling |
+| SeasonalityChart, AnnualBars | done | with tooltips + View as table |
+| MapView | done | MapLibre 6 + OpenFreeMap dark, month hexes, region presets, rectangle draw, W/S/E/N inputs → box recomputes the whole calendar from H3 cells with the region's k/q/k′ + coverage (no CIs for boxes, stated in UI). Fixed MapLibre 6 worker URL under Vite |
+| CSV + PNG export, View as table, states | done | calendar CSV with header comment line; PNG of rings card with legend + caption; table toggle on every chart; skeleton/error/empty states |
+| Remove fake data | done | none was ever created; src/dev removed |
+| Screens + self-review | done | docs/screens/*; fixed mobile horizontal overflow (charts at 600px → min-w-0), "0th percentile" wording. `node web/scripts/e2e.mjs`: 7/7 interaction checks pass, 0 console errors. Main bundle 119 kB gz (map/hex/drawer lazy) |
+
+## Phase 5 — Proof + Data · Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
 todo
 
 ## Decisions for Muru to review

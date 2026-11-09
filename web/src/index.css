@@ -41,6 +41,18 @@
   ::selection { background: rgba(255, 122, 69, .35); }
 }
 
+@keyframes ring-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ring-in { animation: ring-in 380ms var(--ease) both; transform-origin: 0 0; }
+.fade-up { animation: fade-up var(--dur-slow) var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  .ring-in, .fade-up { animation: none; }
+  *, *::before, *::after { transition-duration: 0ms !important; }
+}
+
+input.seam::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--text); border: 3px solid var(--accent); box-shadow: 0 0 0 4px rgba(255,122,69,.18); }
+input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 3px solid var(--accent); }
+
 @layer components {
   .card {
     background: var(--surface);
@@ -49,6 +61,7 @@
     padding: 16px;
   }
   @media (min-width: 640px) { .card { padding: 24px; } }
+  .card svg { max-width: 100%; }
   .num {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;

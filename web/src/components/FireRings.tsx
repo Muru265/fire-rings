@@ -1,10 +1,9 @@
 import { arc as d3arc } from 'd3-shape'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { describe } from '../lib/describe'
-import { MONTHS, VIIRS_START, key, valueOf } from '../lib/series'
+import { MONTHS, VIIRS_START, key } from '../lib/series'
 import type { Grid } from '../lib/series'
-import type { ClassScale } from '../lib/scales'
-import type { ViewMode } from '../lib/types'
+import type { MonthRec, ViewMode } from '../lib/types'
 import { useCellNav } from '../lib/useCellNav'
 import type { Cell } from '../lib/useCellNav'
 import Patterns from './Patterns'
@@ -18,8 +17,11 @@ const TAU = Math.PI * 2
 
 interface Props {
   grid: Grid
-  scale: ClassScale
+  colorOf: (r: MonthRec) => string | null
   mode: ViewMode
+  centerLabel?: string
+  /** draw cells (on first mount) from the centre outward */
+  drawIn?: boolean
   active: Cell | null
   onActive: (c: Cell | null) => void
   onSelect: (c: Cell) => void
@@ -27,7 +29,7 @@ interface Props {
 }
 
 /** Radial calendar: years are rings (first year at the centre), months run clockwise from 12 o'clock. */
-export default function FireRings({ grid, scale, mode, active, onActive, onSelect, label }: Props) {
+export default function FireRings({ grid, colorOf, mode, active, onActive, onSelect, label, centerLabel, drawIn }: Props) {
   const uid = useId().replace(/:/g, '')
   const { years, byKey } = grid
   const w = (R1 - R0) / years.length
@@ -93,13 +95,13 @@ export default function FireRings({ grid, scale, mode, active, onActive, onSelec
         <Patterns id={uid} />
         <g transform={`translate(${C},${C})`}>
           {years.map((y, i) => (
-            <g key={y} role="row" aria-label={String(y)}>
+            <g key={y} role="row" aria-label={String(y)}
+              className={drawIn ? 'ring-in' : undefined} style={drawIn ? { animationDelay: `${i * 40}ms` } : undefined}>
               {MONTHS.map((_, mi) => {
                 const m = mi + 1
                 const r = byKey.get(key(y, m))
                 if (!r) return null
-                const v = valueOf(r, mode)
-                const fill = scale.colorOf(v) ?? `url(#${uid}-nodata)`
+                const fill = colorOf(r) ?? `url(#${uid}-nodata)`
                 const dim = active && active.y !== y && active.m !== m
                 const isActive = active?.y === y && active?.m === m
                 const isFocus = focus.y === y && focus.m === m
@@ -171,7 +173,7 @@ export default function FireRings({ grid, scale, mode, active, onActive, onSelec
           <g aria-hidden="true">
             <circle r={R0 - 6} fill="var(--surface-2)" stroke="var(--border)" />
             <text y={-8} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[10px] uppercase tracking-[0.12em]">
-              {mode === 'raw' ? 'Raw' : 'Harmonized'}
+              {centerLabel ?? (mode === 'raw' ? 'Raw' : 'Harmonized')}
             </text>
             <text y={9} textAnchor="middle" className="fill-[var(--text)] font-display text-[13px] font-semibold">
               {years[0]}–{String(years[years.length - 1]).slice(2)}

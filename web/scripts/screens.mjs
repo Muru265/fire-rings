@@ -30,8 +30,9 @@ try {
     page.on('pageerror', (e) => errors.push(String(e)))
     page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
     for (const p of pages) {
-      await page.goto(base + p, { waitUntil: 'networkidle' })
-      await page.waitForTimeout(400)
+      await page.goto(base + p, { waitUntil: 'load' })
+      if (p.startsWith('/r/')) await page.waitForSelector('svg[role="grid"]', { timeout: 15000 }).catch(() => {})
+      await page.waitForTimeout(p.startsWith('/r/') || p === '/' ? 3500 : 800)
       const name = (p === '/' ? 'landing' : p.slice(1).replace(/\//g, '_')) + `_${tag}.png`
       await page.screenshot({ path: resolve(out, name), fullPage: true })
       console.log('saved', name)
