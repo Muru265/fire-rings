@@ -4,6 +4,55 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## ⚠ TODO for Muru
+- **ask_cache: 15 of 16 answers cached.** The Gemini free-tier quota (429) blocked *Mauritius · "Is this month unusual?"*. Tomorrow run `cd web; npx tsx --env-file=../.env scripts/ask_cache.ts` (about 2 minutes), then commit `web/public/data/v1/ask_cache.json`. Until then that one chip shows "AI temporarily unavailable" when the live API fails.
+- **Gemini quota.** At the end of tonight's run most models returned 429 (quota). `gemini-3.5-flash-lite` still answered. To keep the demo smooth, consider a paid key or a quota increase before Saturday.
+
+## Summary for Muru (2026-11-09, end of unattended run)
+
+**Live:** https://fire-rings.vercel.app. Tags `v0.9` and `v1.0` pushed. Pages: Landing (globe time-lapse, sensor timeline, region cards) · `/r/{punjab,madagascar,se_australia,mauritius}` (full dashboard) · `/proof` · `/data` · `/ask` · `/story/madagascar`.
+
+**Done:** Phases 0–8. The pipeline rebuilds everything from raw in about 50 s (`python pipeline/run_all.py`, 26 tests pass). Data runs to 2026-11-08, and Punjab to 2026-11-09 via the FIRMS API.
+
+**Validation** (docs/validation_report.md; calibration on Jul 2012 – Dec 2019 only):
+
+| Region | Method | V1 out-of-sample annual error (bias) | V3 step at 2012: raw → harmonized (MODIS alone) | Pettitt p raw → harm | Verdict |
+|---|---|---:|---|---|---|
+| Punjab–Haryana | monthly ratios (τ=10) | 5.6% (−0.0%) | +199% → +3.1% (+4.2%) | 0.005 → 0.92 | ✅ V1 ✅ V3 |
+| Madagascar | monthly ratios (τ=300) | 2.8% (0.0%) | +294% → +2.9% (+3.0%) | 0.005 → 1.0 | ✅ V1 ✅ V3 |
+| SE Australia | **single ratio (fallback 1)** | 9.2% (+3.4%) | +168% → +9.2% (+10.2%) | 0.005 → 0.61 | ✅ V1 ✅ V3 · Black Summer #1 ✅ (monthly method failed V3 narrowly → Decision 8) |
+| Mauritius | monthly ratios | 24.4% (+10.7%) | +405% → +11.1% (+5.9%) | 0.005 → 0.86 | low-activity: reported, not judged |
+
+**Headline check (your item 1):** Punjab October 2026 = 0.08× median, the lowest October on record. It's genuine: S-NPP / NOAA-20 / NOAA-21 give 392 / 438 / 368 fire-days (Decision 13, docs/snpp_endcheck.md). The check also exposed a bug I've fixed: the API bbox included Pakistani Punjab (Decision 14).
+
+**AI:** 30-question eval: **30/30 answered, 0 numbers outside tool results** (docs/ask_eval.md). Live `/api/ask` answered in 5.6 s. The time budget caps every call at about 26 s, and the UI shows "AI temporarily unavailable" plus cached answers.
+
+**Decisions to review:** 1–17 below. The most important are #3 (persistence rule reading), #6 (regional gap detection), #8 (SE Australia fallback), #10 (pre-2002 Terra-only limitation), #13–14 (headline + API clipping), #15 (`--text-faint` contrast override) and #16 (Gemini model chain).
+
+**Blocked / not done:** backup demo recording (needs you); the 2026 Submission/Judging guide check (released 13 Nov); one cached AI answer (see TODO). Not built (per SOLO SCOPE): compare page, global cube, multilingual, burned-area cross-check.
+
+**Next 5 things I'd do:**
+1. Rerun `scripts/ask_cache.ts` (with a quota bump), then `scripts/ask_eval.ts` once more on the final model.
+2. On Saturday morning: `python pipeline/01_fetch_nrt.py && python pipeline/run_all.py --from 02_unify`, check the "provisional" labels, and push (it auto-deploys).
+3. Record the backup demo video and screenshots; rehearse with the 3-minute choreography (master plan §9.1).
+4. Do a user test at the venue (non-tech person + mentor) and fix the top confusions. Candidates: the "vs typical" mode wording and the seam slider discoverability on mobile.
+5. Optional science: replace the H3 footprint clip with a real India polygon, and add drift-chart annotations for each region on the Proof page.
+
+## Phase 8 — Ship ✅ — master plan §10 checklist
+| Item | Result | Evidence |
+|---|---|---|
+| Every brief item visible in the demo | ✅ | harmonized record (regions), Fire Rings + grid, seam slider, "is this normal" headline + gauge, map with presets/box, Proof, exports, Ask with trace, Data page; wow: globe, story, sensor timeline, similar years, live NRT |
+| V1 and V3 numbers real and shown in the app | ✅ | /proof cards and charts read `dataset/validation_v1.json`; region header badge shows out-of-sample error |
+| No number without unit, source badge and CI | ✅ with one exception | tooltips: unit + source + 90% interval + flags; KPIs/drawer show intervals; box view has no CI (stated in the UI banner) |
+| Rings + grid usable by keyboard; screen-reader labels; table view | ✅ | `web/scripts/e2e.mjs` 7/7 (arrows, Enter, Esc); role=grid/row/gridcell with aria-labels; "View as table" on every chart |
+| Colour-blind simulator + 4.5:1 contrast | ✅ | `docs/screens/cvd_*` (deuteranopia/protanopia/tritanopia, counts + anomaly); `web/scripts/contrast.mjs`: all text tokens ≥4.5:1 after Decision 15 |
+| Hero region < 2 s on 4G; works at 360 px | ✅ (median) | `web/scripts/perf.mjs` live: 2.1 / 1.2 / 1.6 s (median 1.6 s; coldest run 2.1 s); local 1.0 s. `overflow.mjs`: all 7 routes 360 px wide |
+| AI answers 30 test questions without inventing a number | ✅ | docs/ask_eval.md: 30/30, 0 unverified; server rejects unverified numbers anyway |
+| CSV opens cleanly in Excel with a header comment | ✅ (note) | calendar/dataset/hotspot CSVs start with one `# Fire Rings v1 · region · dates · citation` line. Excel shows it as the first row; parsers use `comment='#'` |
+| Deployed URL + backup recording + offline fallback JSON | ⚠ partial | URL ✅; ask_cache.json 15/16 ✅; backup recording ❌ (needs Muru) |
+| README with GIF, METHODS.md, DATA_SOURCES.md, CITATION.cff, LICENSE | ✅ | all in repo root; GIF `docs/screens/seam.gif` |
+| Submission meets 2026 guide limits | ❌ not checked | guide is released 13 Nov |
+
 ## Phase 0 — Foundations ✅
 | Task | Status | Notes |
 |---|---|---|
@@ -107,4 +156,5 @@ none
 
 ## Log
 - 2026-11-09 — Phase 0 done. Toolchain, repo, venv, inventory, config, web scaffold, Vercel live.
+- 2026-11-09 (late) — Phases 2–8 done in the unattended run; v0.9 and v1.0 tagged. Muru's mid-run notes handled: headline verified (13), API footprint fix (14), pipeline rerun with Punjab NRT to 9 Nov, Gemini budget + graceful fallback (16), stuck eval killed and rerun (30/30, 0 invented).
 - 2026-11-09 — Phase 1 done. Unify (DuckDB + H3 community extension), masks, reports. 10 pytest tests pass. Note: Terra NRT is sparse (Punjab 73 rows vs Aqua 4,438); to check in 2.1 coverage.

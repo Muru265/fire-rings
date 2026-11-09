@@ -58,6 +58,15 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 | h3-js | 4.5.0 | Apache-2.0 | H3 cell boundaries/centroids in the browser |
 | html-to-image | 1.11.13 | MIT | PNG export |
 | Playwright | (dev) | Apache-2.0 | Screenshots + interaction smoke tests |
+| @google/genai (Google Gen AI SDK) | 2.32.0 | Apache-2.0 | Gemini function calling in web/api/ask.ts |
+| scrollama | 3.2.0 | MIT | Story mode scroll steps |
+| tsx | (dev) | MIT | Running TypeScript scripts (AI eval, cache) |
+| gifenc, pngjs | (dev) | MIT | Seam-slider GIF for the README |
+
+## Services
+- **NASA FIRMS Area API** (https://firms.modaps.eosdis.nasa.gov/api/area/) — near-real-time VIIRS NOAA-20/21 for Punjab (`pipeline/01_fetch_nrt.py`, MAP_KEY).
+- **Google Gemini API** — in-app analyst (models listed in PROGRESS.md Decision 16); answers grounded only in Fire Rings data.
+- **Vercel** — hosting and serverless functions.
 
 ## Basemap and design references
 - **OpenFreeMap** "dark" style (https://openfreemap.org), no key. Map data © **OpenStreetMap contributors** (ODbL), tiles via OpenMapTiles schema.
