@@ -66,6 +66,8 @@ Test on: desktop 1440 px and phone 390 px (Chrome device toolbar), live site htt
 | 23 | PROVENANCE | right panel | read | sources, data end, unit, calibration window + ratios, baseline, updated time | Best Use of Science: validated out of sample, honest limits | `data_end` = 2026-11-09 |
 | 24 | Month drawer (click any cell) | opens from the right | click Nov 2019; Esc to close | headline for that month; daily bars vs baseline band; dot plot of every baseline November; "Where" mini map; "Download daily CSV"; hotspot CSV for the latest months only | Challenge: "is this month normal?" for users; Best Use of Data (accessible); Challenge: export CSV; Best Use of Data (give data back) | `daily/punjab.json → "2019-11"` |
 
+![Punjab–Haryana map](screens/r_punjab_desktop_map.png)
+
 
 ## 2.2 Region `/r/madagascar` — Madagascar
 
@@ -98,6 +100,8 @@ Test on: desktop 1440 px and phone 390 px (Chrome device toolbar), live site htt
 | 23 | PROVENANCE | right panel | read | sources, data end, unit, calibration window + ratios, baseline, updated time | Best Use of Science: validated out of sample, honest limits | `data_end` = 2026-11-08 |
 | 24 | Month drawer (click any cell) | opens from the right | click Nov 2019; Esc to close | headline for that month; daily bars vs baseline band; dot plot of every baseline November; "Where" mini map; "Download daily CSV"; hotspot CSV for the latest months only | Challenge: "is this month normal?" for users; Best Use of Data (accessible); Challenge: export CSV; Best Use of Data (give data back) | `daily/madagascar.json → "2019-11"` |
 
+![Madagascar map](screens/r_madagascar_desktop_map.png)
+
 
 ## 2.3 Region `/r/se_australia` — SE Australia (NSW + VIC)
 
@@ -129,6 +133,8 @@ Test on: desktop 1440 px and phone 390 px (Chrome device toolbar), live site htt
 | 22 | ASK FIRE RINGS chips | right panel | click "Is this month unusual?" | drawer opens and answers within ~25 s; "Numbers used" expands; if the AI is unavailable a saved answer or "AI temporarily unavailable" appears | Best Use of Data (accessible): plain-English answers grounded in the data | `ask_cache.json → entries["se_australia|Is this month unusual?"]` |
 | 23 | PROVENANCE | right panel | read | sources, data end, unit, calibration window + ratios, baseline, updated time | Best Use of Science: validated out of sample, honest limits | `data_end` = 2026-11-08 |
 | 24 | Month drawer (click any cell) | opens from the right | click Nov 2019; Esc to close | headline for that month; daily bars vs baseline band; dot plot of every baseline November; "Where" mini map; "Download daily CSV"; hotspot CSV for the latest months only | Challenge: "is this month normal?" for users; Best Use of Data (accessible); Challenge: export CSV; Best Use of Data (give data back) | `daily/se_australia.json → "2019-11"` |
+
+![SE Australia (NSW + VIC) map](screens/r_se_australia_desktop_map.png)
 
 
 ## 2.4 Region `/r/mauritius` — Mauritius (incl. Rodrigues)
@@ -219,6 +225,8 @@ Test on: desktop 1440 px and phone 390 px (Chrome device toolbar), live site htt
 | 2 | Explore Madagascar / Ask Fire Rings | step 6 | click | opens the region / the AI page | Local Impact: Indian Ocean / Madagascar / Mauritius | — |
 
 ## 7. 404
+
+![404](screens/does-not-exist_desktop.png)
 
 | # | On-screen label | Where | Do | Should happen | Why it exists | Verify it is real (file → key = current value) |
 |---:|---|---|---|---|---|---|

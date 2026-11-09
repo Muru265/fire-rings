@@ -24,7 +24,12 @@ the same ruler. It then answers one question for responders and land managers: *
 - **Open data**: harmonized CSV + Parquet, calibration and validation files, a static JSON API, and a citation (CC BY 4.0).
 - **Ask Fire Rings**: a Gemini analyst that may only state numbers looked up from the record. Every answer shows the
   "numbers used", and a server-side check rejects any number not in the lookups.
-- **Globe time-lapse**, a **Madagascar story** and a **live NRT pull** of NOAA-20/21 for Punjab.
+- **Live layer**: the last 72 h of NOAA-20/21 near-real-time detections from NASA FIRMS (`/api/live`), filtered like the
+  record, with a "LIVE · last satellite pass X h ago · N detections" badge and a separate provisional map layer. It is never
+  mixed into the harmonized numbers.
+- **Globe time-lapse**, a **Madagascar story** and a **60-day NRT pull** of NOAA-20/21 for Punjab.
+- **QA**: `docs/QA_WALKTHROUGH.md` (click-by-click test script with the expected value and JSON path for every element)
+  and `npm run test:e2e` (keyboard/drawer/box checks + a claims check comparing 93 on-screen numbers with the published JSON).
 
 | Region dashboard | Proof |
 |---|---|

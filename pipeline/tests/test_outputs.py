@@ -40,6 +40,18 @@ def test_overpass_caveat_only_on_punjab_oct_nov_2022_on():
     assert doc("punjab")["caveats"]["overpass_timing"]
 
 
+@pytest.mark.parametrize("region", REGIONS)
+def test_geo_anchor_on_land_inside_view_and_live_file(region):
+    g = doc(region)["geo"]
+    (lon, lat), v = g["anchor"], g["view_bbox"]
+    assert v[0] <= lon <= v[2] and v[1] <= lat <= v[3]
+    live = json.loads((WEB / "live" / f"{region}.json").read_text(encoding="utf-8"))
+    assert live["footprint"] and live["footprint_res"] in (6, 7)
+    if region == "mauritius":
+        assert g["small"] and g["inset"]["name"] == "Rodrigues" and g["inset"]["bbox"][0] > 63
+        assert 57.3 < lon < 57.9   # main island, not the ocean between it and Rodrigues
+
+
 def test_timing_check_signal_is_punjab_specific():
     t = json.loads((OUT / "punjab_timing.json").read_text(encoding="utf-8"))
     p = t["punjab|Oct–Nov (rice residue)"]["aqua_rel_2022_2026"]

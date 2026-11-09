@@ -27,7 +27,7 @@ export default function Landing() {
           <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
         </div>
         <div className="pointer-events-none absolute inset-y-0 left-0 w-full bg-gradient-to-r from-bg via-bg/50 to-transparent lg:w-[55%]" />
-        <div className="pointer-events-auto absolute top-8 left-4 max-w-[520px] sm:top-14 sm:left-10">
+        <div className="pointer-events-auto absolute top-6 right-3 left-3 max-w-[520px] rounded-card bg-bg/80 p-4 backdrop-blur-sm sm:right-auto sm:top-14 sm:left-10 sm:p-0 lg:bg-transparent lg:backdrop-blur-none">
           <p className="eyebrow">MODIS + VIIRS · NASA FIRMS · 2001–2026</p>
           <h1 className="mt-3 text-[40px] leading-[1.02] font-bold sm:text-[64px]">25 years of fire.<br /><span className="text-muted">One honest record.</span></h1>
           <p className="mt-5 max-w-md text-base text-muted">Two generations of satellites see fire differently. Fire Rings converts the new one into the old one's units, so every month since 2001 uses the same ruler — and tells you whether this month is normal.</p>
@@ -46,7 +46,10 @@ export default function Landing() {
               const d = docs?.find((x) => x.id === r.id)
               const lc = d?.latest_complete
               const rec = lc && d ? d.months.find((x) => x.y === lc.y && x.m === lc.m) : undefined
-              const h = rec && d ? headline(judgeMonth(d, rec)) : null
+              const j = rec && d ? judgeMonth(d, rec) : null
+              // cards stay short: the full detection-time caveat lives on the region page; here a flag
+              const h = j ? headline({ ...j, timingCaveat: null }) : null
+              const flagged = !!j?.timingCaveat
               return (
                 <li key={r.id}>
                   <Link to={`/r/${r.id}`} className="card flex h-full items-start gap-4 no-underline transition-colors duration-[var(--dur-fast)] hover:border-border-strong hover:bg-surface-2">
@@ -54,6 +57,7 @@ export default function Landing() {
                     <div className="min-w-0">
                       <span className="font-display text-lg font-semibold text-text">{d?.name ?? r.name}</span>
                       <span className="mt-1 block text-xs text-muted">{h ? `${h.lead} ${h.rest}` : r.country}</span>
+                      {flagged && <span className="mt-1.5 block text-[11px] text-warn">⚑ Detection-time caveat: may be undercounted</span>}
                     </div>
                   </Link>
                 </li>

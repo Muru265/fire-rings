@@ -64,7 +64,10 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 | gifenc, pngjs | (dev) | MIT | Seam-slider GIF for the README |
 
 ## Services
-- **NASA FIRMS Area API** (https://firms.modaps.eosdis.nasa.gov/api/area/) — near-real-time VIIRS NOAA-20/21 for Punjab (`pipeline/01_fetch_nrt.py`, MAP_KEY).
+- **NASA FIRMS Area API** (https://firms.modaps.eosdis.nasa.gov/api/area/) — near-real-time VIIRS NOAA-20/21:
+  (a) `pipeline/01_fetch_nrt.py` (last 60 days for Punjab, folded into the record as provisional NRT);
+  (b) `web/api/live.ts` live layer (last 72 h, all regions, `VIIRS_NOAA20_NRT` + `VIIRS_NOAA21_NRT`, cached 45 min,
+  shown separately as "near-real-time, provisional", never added to the harmonized numbers). MAP_KEY is server-side only (Vercel env `FIRMS_MAP_KEY`).
 - **Google Gemini API** — in-app analyst (models listed in PROGRESS.md Decision 16); answers grounded only in Fire Rings data.
 - **Vercel** — hosting and serverless functions.
 

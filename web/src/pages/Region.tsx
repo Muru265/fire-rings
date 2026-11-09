@@ -97,7 +97,8 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
   const j = insightRec ? judgeMonth(regionDoc, insightRec) : null
   const lt = regionDoc.latest
   const mtdRec = lt?.mtd ? regionDoc.months.find((r) => r.y === lt.y && r.m === lt.m) : undefined
-  const head = j ? headline(j) : null
+  // big headline = the claim; the detection-time caveat goes on its own smaller line below
+  const head = j ? headline({ ...j, timingCaveat: null }) : null
 
   const onSelect = useCallback((c: Cell) => { setSelected(c); setFocusMonth(c) }, [])
   const selRec = selected ? doc.months.find((r) => r.y === selected.y && r.m === selected.m) : undefined
@@ -126,9 +127,17 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
 
       {/* headline */}
       {head && (
-        <p className="fade-up max-w-4xl font-display text-xl leading-snug sm:text-[28px]">
-          <span className="text-text">{head.lead}</span> <span className="text-muted">{head.rest}</span>
-        </p>
+        <div className="fade-up max-w-4xl">
+          <p className="font-display text-xl leading-snug sm:text-[28px]">
+            <span className="text-text">{head.lead}</span> <span className="text-muted">{head.rest}</span>
+          </p>
+          {j?.timingCaveat && (
+            <p data-caveat="overpass_timing" className="mt-2 flex gap-2 text-sm text-warn">
+              <span aria-hidden="true">⚑</span>
+              <span>{j.timingCaveat} <Link to="/proof" className="text-warn underline">Why</Link></span>
+            </p>
+          )}
+        </div>
       )}
       {regionDoc.harmonized && <KpiCards doc={regionDoc} />}
 

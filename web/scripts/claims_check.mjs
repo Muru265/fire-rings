@@ -51,7 +51,11 @@ try {
     check(P, 'headline month', head, `${FULL[lc.m - 1]} ${lc.y}`)
     if (lcRec.guard) check(P, 'headline guard', head, 'too little fire to judge')
     else check(P, 'headline ratio', head, `${fmtRatio(lcRec.ratio)} a typical ${FULL[lc.m - 1]}`)
-    if (lcRec.flags.includes('overpass_timing')) check(P, 'headline overpass caveat', head, d.caveats.overpass_timing)
+    if (lcRec.flags.includes('overpass_timing')) {
+      check(P, 'headline overpass caveat', await page.locator('[data-caveat="overpass_timing"]').first().innerText(), d.caveats.overpass_timing)
+    } else {
+      check(P, 'no overpass caveat outside Punjab Oct–Nov 2022+', String(await page.locator('[data-caveat="overpass_timing"]').count()), '0')
+    }
     // KPI cards
     const card = (label) => page.locator('.card').filter({ has: page.locator('span.eyebrow', { hasText: label }) }).first().innerText()
     const lt = d.latest

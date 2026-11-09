@@ -153,6 +153,20 @@ This supports late-afternoon burning that the 13:30 overpasses increasingly miss
 carry the caveat "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons
 may be undercounted" in the app, the AI tools and the Proof page.
 
+## 8c. Live layer (`web/api/live.ts`) — separate from the record
+
+For each region the server fetches the last 3 days of `VIIRS_NOAA20_NRT` and `VIIRS_NOAA21_NRT` from the FIRMS Area API
+(region bounding box, 10 s timeout, cached 45 min in memory and at the CDN). It applies the record's filters: low-confidence
+detections dropped; detections in known-static H3 r9 cells (from `03_mask.py`) dropped; detections outside the region's
+historical footprint dropped (H3 res-7 for Punjab, so Pakistani Punjab inside the box is excluded; res-6 elsewhere). The
+footprint and static cells ship as `web/public/data/v1/live/{region}.json`. Results are shown as a "LIVE" badge and a
+provisional map layer only; they never enter the harmonized values, statistics or rankings.
+
+**Map geography.** Globe markers sit at the median position of a region's detections (on the main landmass — e.g. the main
+island of Mauritius rather than the ocean between it and Rodrigues). Country-file regions open on the 1.5–98.5 percentile box
+of their detections; detections more than one view-width away form an inset (Rodrigues). Regions whose view is under
+10,000 km² (Mauritius) publish every detection as map points; larger regions show points for the latest months from zoom 9.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and
