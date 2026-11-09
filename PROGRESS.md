@@ -1,48 +1,57 @@
 # Fire Rings — PROGRESS
 
 Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUDE.md first).
-Status keys: `todo` · `doing` · `done` · `blocked` · ⏸ = needs user
+Status keys: `todo` · `doing` · `done` · `blocked`
+Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
-## Phase 0 — Foundations
+## Phase 0 — Foundations ✅
 | Task | Status | Notes |
 |---|---|---|
 | 0.1 Toolchain check | done | Python 3.11.0, Node v20.20.2, npm 10.8.2, git 2.50.1 |
-| 0.2 ⏸ GitHub username → git init, pull `fire-rings`, verify clean staging | done | Muru265/fire-rings, main; pulled README+LICENSE; staged set verified (4 files, no .env/data/zips); claude.md→CLAUDE.md |
-| 0.3 .venv + pipeline/requirements.txt, verify imports | done | pinned versions; all imports OK; h3 v4 latlng_to_cell works |
-| 0.4 Inspect raw CSVs with DuckDB → docs/data_inventory.md | done | 32 files via pipeline/00_inventory.py; 11 flags recorded (no NRT type col, no archive/NRT overlap, Rodrigues, S-NPP Jul-2022 gap…) |
-| 0.5 pipeline/config.yaml (regions + clip boxes) | done | YAML loads; 4 regions; thresholds/windows from CLAUDE.md |
-| 0.6 Scaffold web/ (Vite+React+TS+Tailwind v4, tokens, AppShell, routes) | done | Vite 8 / React 19 / TS 7 / Tailwind 4.3; build OK (JS 84 kB gz, CSS 7 kB gz); oxlint clean; preview: /, /r/punjab, /proof, /data, /ask all 200; all §4.2 tokens present in built CSS; vercel.json SPA rewrite |
-| 0.7 ⏸ Push + Vercel import steps; user confirms live URL | blocked | push 403: Git Credential Manager is signed in as Murugun-Sharma-Roma-Rishi, not Muru265. 6 local commits waiting. |
+| 0.2 git init + pull `fire-rings` | done | Muru265/fire-rings, main; staged set verified (no .env/data/zips); claude.md→CLAUDE.md |
+| 0.3 .venv + requirements | done | pinned versions; imports OK |
+| 0.4 Raw CSV inventory | done | docs/data_inventory.md via pipeline/00_inventory.py; 11 flags |
+| 0.5 config.yaml | done | 4 regions; thresholds/windows from CLAUDE.md |
+| 0.6 web scaffold | done | Vite 8 / React 19 / TS 7 / Tailwind 4.3; build + lint OK; all routes 200 |
+| 0.7 Push + Vercel | done | Muru confirmed live at https://fire-rings.vercel.app |
 
-## Phase 1 — Data in
+## Phase 1 — Data in ✅
 | Task | Status | Notes |
 |---|---|---|
-| 1.1 02_unify.py + tests | todo | |
-| 1.2 03_mask.py + docs/mask_check.md | todo | |
-| 1.3 docs/pipeline_report.md | todo | |
+| 1.1 02_unify.py + tests | done | 4 regions → data/clean/{region}.parquet. Punjab 2,776,560 · Madagascar 11,050,256 · SE Aus 4,005,563 · Mauritius 6,058 rows. 0 NRT/archive overlap, ≤2 exact dups. Spot checks: solar_date crosses midnight correctly, coords inside box, no null H3. 8 tests |
+| 1.2 03_mask.py + mask_check.md | done | conf → type → known-static → persistence. Kept: Punjab 2,407,964 · Madagascar 9,504,201 · SE Aus 3,692,034 · Mauritius 5,039. Top masked cells = Port Kembla steelworks, Altona refinery, Hunter industrial, Hisar steel (no cropland). 2 tests |
+| 1.3 pipeline_report.md | done | rows per region × stream × step + NRT removed by known-static (Punjab 840/15,457 = 5.4%) |
 
 ## Phase 2 — Raw calendar on screen
-| 2.1 04_cube.py | todo | |
+| Task | Status | Notes |
 |---|---|---|
+| 2.1 04_cube.py | todo | |
 | 2.2 interim 08_export.py (raw) | todo | |
 | 2.3 FireRings + GridCalendar + Legend on real JSON | todo | |
 | 2.4 Playwright screenshots + review | todo | |
 
 ## Phase 3 — Harmonization + validation
-| 3.1 05_calibrate.py | todo | |
+| Task | Status | Notes |
 |---|---|---|
+| 3.1 05_calibrate.py | todo | |
 | 3.2 06_validate.py | todo | |
 | 3.3 07_stats.py | todo | |
 | 3.4 full 08_export.py + run_all.py | todo | |
-| 3.5 ⏸ validation review with user | todo | |
+| 3.5 validation decision (no stop) | todo | |
 
 ## Phase 4 — Region dashboard · Phase 5 — Proof + Data · Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
 todo
 
+## Decisions for Muru to review
+1. **Python 3.11** instead of 3.12. Approved by Muru.
+2. **Punjab type 2: dropped as planned** (review item 2). Oct+Nov share of type-2 vs type-0: MODIS 0.558 vs 0.728 (ratio 0.77), S-NPP 0.210 vs 0.651 (ratio 0.32). Both are far below the 2× threshold, so type 2 doesn't follow the crop season. Data: data/out/punjab_type2.json, docs/pipeline_report.md.
+3. **Persistence rule reading.** "≥16 detection-days in ≥3 years" is implemented as *≥16 detection-days in each of at least 3 years* (plus S < 0.3), with detection-days pooled across sensors. *Why:* the looser reading (16 days total across ≥3 years) would put many Punjab crop cells over the threshold, and two crop seasons (Apr–May + Oct–Nov) can bring S close to 0.3, so it risks masking real fire. *Effect:* our rule adds no cells beyond FIRMS' own static flags (5 cells in Punjab and 5 in SE Australia, all already known-static). *Alternative:* the looser reading. It's a one-line change in `build_masks`.
+4. **Known-static mask** = any H3 r9 cell with ≥1 archive row of type 2 or 3, pooled across sensors (review item 1). It drops all rows in those cells, including type-0 archive rows and NRT rows. Punjab has 5,627 such cells, and the mask removes 20,303 rows beyond the type filter (0.8%). *Alternative:* require ≥2 type-2/3 rows per cell, which would be less aggressive.
+5. **Coverage operating-days proxy**: a stream counts as operating on a day if it has ≥1 detection anywhere in the full Australia file. Small regions alone can't tell an outage from "no fire".
+
+## Blockers
+none
+
 ## Log
-- 2026-11-09 — Read CLAUDE.md + master plan. Toolchain checked (0.1). Note: Python 3.11 installed vs 3.12 in CLAUDE.md — all pipeline libs support 3.11, so proceeding with 3.11 unless told otherwise. Waiting on GitHub username (0.2).
-
-- 2026-11-09 — 0.2–0.5 done (see table). Coverage plan: per-stream operating-days proxy from the Australia file (inventory flag 8).
-
-## Decisions / open questions
-- Python 3.11 used instead of 3.12 (no functional impact expected).
+- 2026-11-09 — Phase 0 done. Toolchain, repo, venv, inventory, config, web scaffold, Vercel live.
+- 2026-11-09 — Phase 1 done. Unify (DuckDB + H3 community extension), masks, reports. 10 pytest tests pass. Note: Terra NRT is sparse (Punjab 73 rows vs Aqua 4,438); to check in 2.1 coverage.
