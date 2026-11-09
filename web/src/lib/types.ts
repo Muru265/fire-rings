@@ -131,6 +131,14 @@ export interface RegionDoc {
   daily: Record<string, { modis?: number[]; viirs?: number[] }>
   quality: Quality | null
   caveats?: { overpass_timing: string | null; terra_only: string }
+  geo?: {
+    anchor: [number, number]
+    view_bbox: [number, number, number, number]
+    inset: { name: string; bbox: [number, number, number, number]; detections: number } | null
+    view_area_km2: number
+    small: boolean
+    points_years?: number[]
+  }
   hotspot_months: string[]
   hex_years: number[]
   harmonized: boolean

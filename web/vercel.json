@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/ask.ts": { "maxDuration": 30, "includeFiles": "public/data/v1/{meta.json,regions/*.json,dataset/punjab_timing_v1.json}" }
+    "api/ask.ts": { "maxDuration": 30, "includeFiles": "public/data/v1/{meta.json,regions/*.json,dataset/punjab_timing_v1.json}" },
+    "api/live.ts": { "maxDuration": 15, "includeFiles": "public/data/v1/live/*.json" }
   },
   "rewrites": [{ "source": "/((?!api/|data/|assets/).*)", "destination": "/index.html" }]
 }

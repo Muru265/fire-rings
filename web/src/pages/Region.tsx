@@ -11,6 +11,8 @@ import Legend from '../components/Legend'
 import SeamSlider from '../components/SeamSlider'
 import SeasonalityChart from '../components/SeasonalityChart'
 import { useRegion } from '../lib/api'
+import { useLive } from '../lib/live'
+import LiveBadge from '../components/LiveBadge'
 import { makeColorer } from '../lib/colors'
 import { calendarCsv, downloadPng, downloadText } from '../lib/exporters'
 import { fmtInt } from '../lib/format'
@@ -61,6 +63,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
   const [focusMonth, setFocusMonth] = useState<Cell | null>(null)
   const [table, setTable] = useState(false)
   const [ask, setAsk] = useState<{ q?: string } | null>(null)
+  const live = useLive(regionDoc.id)
   const ringsRef = useRef<HTMLDivElement>(null)
 
   const applyBox = useCallback((b: Box | null) => {
@@ -113,6 +116,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
           <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">{regionDoc.name}</h1>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
+          <LiveBadge live={live} />
           {regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok">Harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}
           {v && <Link to="/proof" className="rounded-full border border-border-strong px-3 py-1 text-muted no-underline hover:text-text">
             Validated: {v.low_activity ? 'low-activity region' : `${v.loyo_err_pct}% out-of-sample error`}
@@ -193,7 +197,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
           )}
 
           <Suspense fallback={<div className="card h-[520px] animate-pulse" aria-label="Loading map" />}>
-            <MapView doc={regionDoc} y={(selected ?? insightCell ?? last).y} m={(selected ?? insightCell ?? last).m} box={box} onBox={applyBox} />
+            <MapView doc={regionDoc} y={(selected ?? insightCell ?? last).y} m={(selected ?? insightCell ?? last).m} box={box} onBox={applyBox} live={live} />
           </Suspense>
         </div>
 

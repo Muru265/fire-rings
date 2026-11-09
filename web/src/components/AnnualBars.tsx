@@ -17,6 +17,20 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
   const x = scaleBand<number>().domain(data.map((d) => d.y)).range([M.l, w - M.r]).padding(0.22)
   const y = scaleLinear().domain([0, Math.max(...data.map((d) => d.hi ?? d.H ?? 0)) * 1.05]).nice(4).range([H - M.b, M.t])
   const hv = data.find((d) => d.y === hover)
+  // x labels: every 5th year plus the last one, dropped when it would collide (needs ~34 px between label centres)
+  const labelYears = new Set<number>()
+  let lastX = -Infinity
+  const lastY = data[data.length - 1].y
+  for (const d of data) {
+    if (d.y % 5 !== 0 && d.y !== lastY) continue
+    const cx = (x(d.y) ?? 0) + x.bandwidth() / 2
+    if (cx - lastX >= 34) { labelYears.add(d.y); lastX = cx }
+    else if (d.y === lastY) { /* keep the newest year; drop the colliding one before it */
+      const prev = [...labelYears].pop()
+      if (prev != null) labelYears.delete(prev)
+      labelYears.add(d.y); lastX = cx
+    }
+  }
   const table = {
     caption: 'Annual fire-days (MODIS-equivalent) with 90% interval',
     columns: ['Year', 'Fire-days', '90% low', '90% high', 'Complete', 'Ranked'],
@@ -59,7 +73,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
                 {d.lo != null && d.hi != null && (
                   <line x1={bx + bw / 2} x2={bx + bw / 2} y1={y(d.lo)} y2={y(d.hi)} stroke="var(--text)" strokeWidth={1.2} />
                 )}
-                {(d.y % 5 === 0 || d.y === data[data.length - 1].y) && (
+                {labelYears.has(d.y) && (
                   <text x={bx + bw / 2} y={H - 8} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[10px]">{d.y}</text>
                 )}
               </g>

@@ -4,15 +4,31 @@ import type { GeoJSONSource } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { fmtInt } from '../lib/format'
+import { agoText } from '../lib/live'
+import type { LiveData } from '../lib/live'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 
 setWorkerUrl(workerUrl)
 
-interface Props { docs: RegionDoc[] }
+interface Props { docs: RegionDoc[]; live?: Record<string, LiveData | null> }
+
+function LivePanelLine({ docs, live }: { docs: RegionDoc[]; live: Record<string, LiveData | null> }) {
+  const ok = docs.map((d) => live[d.id]).filter((l): l is LiveData => !!l?.ok)
+  if (!Object.values(live).some(Boolean)) return <div className="mt-1.5 text-[11px] text-faint">LIVE · checking NASA FIRMS…</div>
+  if (!ok.length) return <div className="mt-1.5 text-[11px] text-faint">LIVE · feed temporarily unavailable</div>
+  const last = ok.map((l) => l.last_acq_utc).filter(Boolean).sort().pop() ?? null
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-accent-2">
+      <span><strong>LIVE</strong> · last satellite pass {agoText(last)} · detections in 72 h:</span>
+      {docs.map((d) => <span key={d.id}>{d.name.split(' (')[0]} <span className="num">{live[d.id]?.ok ? fmtInt(live[d.id]!.count) : '—'}</span></span>)}
+      <span className="text-faint">near-real-time, provisional, not in the record</span>
+    </div>
+  )
+}
 
 /** 3D globe; hero regions glow with their monthly harmonized fire-days, played 2001 → 2026. */
-export default function GlobeTimelapse({ docs }: Props) {
+export default function GlobeTimelapse({ docs, live }: Props) {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<MlMap | null>(null)
   const [ready, setReady] = useState(false)
@@ -72,8 +88,11 @@ export default function GlobeTimelapse({ docs }: Props) {
       const r = d.months.find((x) => x.y === f.y && x.m === f.m)
       const t = r?.H != null ? Math.sqrt(r.H / maxH[d.id]) : 0
       const [w, s, e, n] = d.bbox
+      // marker on the main landmass: median detection position from the pipeline (not the bbox centre, which for
+      // Mauritius incl. Rodrigues falls in the ocean)
+      const at: [number, number] = d.geo?.anchor ?? [(w + e) / 2, (s + n) / 2]
       const c = t > 0.66 ? '#FCFFA4' : t > 0.4 ? '#FCA50A' : t > 0.2 ? '#DD513A' : '#932667'
-      return { type: 'Feature' as const, properties: { t, c, name: d.name.split(' (')[0] }, geometry: { type: 'Point' as const, coordinates: [(w + e) / 2, (s + n) / 2] } }
+      return { type: 'Feature' as const, properties: { t, c, name: d.name.split(' (')[0] }, geometry: { type: 'Point' as const, coordinates: at } }
     })
     ;(map.current.getSource('fire') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features })
   }, [ready, i, frames, docs, maxH])
@@ -110,6 +129,7 @@ export default function GlobeTimelapse({ docs }: Props) {
             })}
             <span className="text-faint">fire-days (MODIS-equivalent) · glow relative to each region's own maximum · hero regions only</span>
           </div>
+          {live && <LivePanelLine docs={docs} live={live} />}
         </div>
       )}
     </div>

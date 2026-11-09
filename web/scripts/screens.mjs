@@ -37,6 +37,13 @@ try {
       await page.screenshot({ path: resolve(out, name), fullPage: true })
       console.log('saved', name)
       if (p.startsWith('/r/') && tag === 'desktop') {
+        const mapSec = page.locator('section[aria-labelledby="map-h"]')
+        await mapSec.waitFor({ timeout: 15000 }).catch(() => {})
+        if (await mapSec.count()) {
+          await mapSec.scrollIntoViewIfNeeded()
+          await page.waitForTimeout(2500)
+          await mapSec.screenshot({ path: resolve(out, name.replace('.png', '_map.png')) })
+        }
         const cell = page.locator('svg [role="gridcell"][aria-label^="Nov 2019"]').first()
         if (await cell.count()) {
           await cell.focus() // same tooltip + spoke/ring highlight as hover; also exercises keyboard path

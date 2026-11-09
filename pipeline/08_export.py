@@ -86,6 +86,57 @@ def quality(region: str) -> dict | None:
     }
 
 
+def pad_box(b: list[float], f: float = 0.08) -> list[float]:
+    dx, dy = (b[2] - b[0]) * f, (b[3] - b[1]) * f
+    return [round(b[0] - dx, 3), round(b[1] - dy, 3), round(b[2] + dx, 3), round(b[3] + dy, 3)]
+
+
+def geography(region: str, rc: dict, web: Path) -> dict:
+    """Map helpers derived from the detections themselves (no hand-placed coordinates):
+    anchor    median detection position → globe marker on the main landmass
+    view_bbox default map view: the clip box, or (country files) the 1.5–98.5 percentile box of detections, padded
+    inset     detections outside view_bbox (e.g. Rodrigues) as a secondary view, named in config
+    small     view area < 10,000 km² → detection points are exported for every month (points/{region}/{year}.json)
+    Also writes live/{region}.json for /api/live: region footprint (H3 cells with historical detections; res from config
+    `footprint_res`, 7 for Punjab so the India–Pakistan border stays sharp, 6 otherwise) and the known-static r9 cells."""
+    con = connect()
+    src = sql_path(path("clean") / f"{region}.parquet")
+    filt = sql_path(path("clean") / f"{region}_filtered.parquet")
+    med_lat, med_lon, x0, x1, y0, y1 = con.execute(f"""
+        SELECT median(lat), median(lon), quantile_cont(lon, 0.015), quantile_cont(lon, 0.985),
+               quantile_cont(lat, 0.015), quantile_cont(lat, 0.985) FROM '{filt}'""").fetchone()
+    view = rc["bbox"] if rc.get("bbox") else pad_box([x0, y0, x1, y1])
+    out: dict = {"anchor": [round(med_lon, 4), round(med_lat, 4)], "view_bbox": view, "inset": None}
+    if rc.get("inset_name"):
+        wx, wy = view[2] - view[0], view[3] - view[1]   # "far outside" = more than one view-width away (a separate island)
+        r = con.execute(f"""SELECT count(*), min(lon), min(lat), max(lon), max(lat) FROM '{filt}'
+                            WHERE lon NOT BETWEEN {view[0] - wx} AND {view[2] + wx} OR lat NOT BETWEEN {view[1] - wy} AND {view[3] + wy}""").fetchone()
+        if r[0]:
+            out["inset"] = {"name": rc["inset_name"], "bbox": pad_box([r[1], r[2], r[3], r[4]], 0.6), "detections": r[0]}
+    out["view_area_km2"] = bbox_area_km2(view)
+    out["small"] = out["view_area_km2"] < 10_000
+    if out["small"]:
+        rows = con.execute(f"""SELECT year(solar_date) y, month(solar_date) m, round(lat, 4), round(lon, 4),
+                                      CASE WHEN stream IN ('TERRA','AQUA') THEN 0 ELSE 1 END s, day(solar_date) d
+                               FROM '{filt}' WHERE year(solar_date) >= 2001 ORDER BY 1, 2""").fetchall()
+        by_year: dict = {}
+        for y, m, la, lo, s, d in rows:
+            by_year.setdefault(y, [[] for _ in range(12)])[m - 1].append([la, lo, s, d])
+        for y, months in by_year.items():
+            write_json(web / "points" / region / f"{y}.json", {"y": y, "fields": ["lat", "lon", "sensor(0=MODIS,1=VIIRS)", "day"], "m": months}, compact=True)
+        out["points_years"] = sorted(by_year)
+    res = int(rc.get("footprint_res", 6))   # 7 where a national border crosses the box (Punjab)
+    fp = [c for (c,) in con.execute(f"""SELECT DISTINCT h3_h3_to_string(h3_latlng_to_cell(lat, lon, {res})) FROM '{src}'
+                                        WHERE NOT is_api ORDER BY 1""").fetchall()]
+    static = [c for (c,) in con.execute(f"""SELECT h3_h3_to_string(h3r9) FROM '{sql_path(path('clean') / (region + '_mask.parquet'))}'
+                                            ORDER BY 1""").fetchall()]
+    bbox = rc.get("bbox") or [round(x, 2) for x in con.execute(f"SELECT min(lon), min(lat), max(lon), max(lat) FROM '{src}'").fetchone()]
+    write_json(web / "live" / f"{region}.json", {"region": region, "bbox": bbox, "footprint_res": res, "footprint": fp,
+                                                  "static_r9": static}, compact=True)
+    con.close()
+    return out
+
+
 def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
     cube, out = path("cube"), path("out")
     mon = pl.read_parquet(cube / f"{region}_monthly.parquet")
@@ -224,6 +275,7 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "similar_detail": stats.get("similar_detail"),
         "daily": {latest_key: side.get(latest_key, {})},
         "quality": quality(region),
+        "geo": geography(region, rc, web),
         "caveats": {"overpass_timing": TIMING_CAVEAT if region in TIMING_CAVEAT_REGIONS else None,
                     "terra_only": "Terra only (before Aqua, Jan 2001 – Jun 2002) — wider uncertainty; not ranked"},
         "hotspot_months": [f"{r['y']:04d}-{r['m']:02d}" for r in months[-HOTSPOT_MONTHS:]],

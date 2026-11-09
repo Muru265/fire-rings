@@ -20,6 +20,7 @@ regions:
     name: Punjab–Haryana
     source: india
     bbox: [73.8, 27.6, 77.6, 32.6]
+    footprint_res: 7    # India-only footprint for live/API rows (box also covers Pakistani Punjab)
   madagascar:
     name: Madagascar
     source: madagascar
@@ -33,6 +34,7 @@ regions:
     source: mauritius
     bbox: null
     note: Republic of Mauritius as delivered by FIRMS (includes Rodrigues, excludes Réunion)
+    inset_name: Rodrigues
 
 filters:
   drop_conf: [L]           # MODIS 0–29, VIIRS 'l'

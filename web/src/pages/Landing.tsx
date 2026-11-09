@@ -6,21 +6,25 @@ import { fetchJson, useMeta } from '../lib/api'
 import { headline, judgeMonth } from '../lib/headline'
 import { REGIONS } from '../lib/regions'
 import type { RegionDoc } from '../lib/types'
+import { fetchLive } from '../lib/live'
+import type { LiveData } from '../lib/live'
 
 const GlobeTimelapse = lazy(() => import('../components/GlobeTimelapse'))
 
 export default function Landing() {
   const meta = useMeta()
   const [docs, setDocs] = useState<RegionDoc[] | null>(null)
+  const [live, setLive] = useState<Record<string, LiveData | null>>({})
   useEffect(() => {
     Promise.all(REGIONS.map((r) => fetchJson<RegionDoc>(`regions/${r.id}.json`))).then(setDocs).catch(() => setDocs([]))
+    REGIONS.forEach((r) => fetchLive(r.id).then((l) => setLive((x) => ({ ...x, [r.id]: l }))))
   }, [])
 
   return (
     <div className="-mx-4 -mt-8 sm:-mx-6">
       <section className="starfield relative h-[78vh] min-h-[520px] overflow-hidden border-b border-border">
         <div className="absolute inset-0 lg:left-[28%]">
-          <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} />}</Suspense>
+          <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
         </div>
         <div className="pointer-events-none absolute inset-y-0 left-0 w-full bg-gradient-to-r from-bg via-bg/50 to-transparent lg:w-[55%]" />
         <div className="pointer-events-auto absolute top-8 left-4 max-w-[520px] sm:top-14 sm:left-10">
