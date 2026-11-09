@@ -1,5 +1,7 @@
 // POST /api/ask  { question, region?, voice?: 'responder' | 'scientist' }  →  { answer, caveat, trace, model, verified }
 // Gemini function calling over the published region JSON. Key only from Vercel env (GEMINI_API_KEY, GEMINI_MODEL).
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { FALLBACK_MODELS, ask } from './_lib/core.js'
 import type { Voice } from './_lib/core.js'
 
@@ -27,13 +29,21 @@ export async function POST(req: Request): Promise<Response> {
   const region = body.region && /^[a-z_]{2,32}$/.test(body.region) ? body.region : undefined
   const origin = new URL(req.url).origin
   const load = async (p: string) => {
-    const r = await fetch(`${origin}/data/v1/${p}`)
+    // data is bundled with the function (vercel.json includeFiles); fall back to a short-timeout fetch
+    for (const base of [join(process.cwd(), 'public', 'data', 'v1'), join(process.cwd(), 'web', 'public', 'data', 'v1')]) {
+      try { return JSON.parse(await readFile(join(base, p), 'utf-8')) } catch { /* try next */ }
+    }
+    const r = await fetch(`${origin}/data/v1/${p}`, { signal: AbortSignal.timeout(5000) })
     if (!r.ok) throw new Error(`data ${p}: ${r.status}`)
     return r.json()
   }
   const models = [...new Set([process.env.GEMINI_MODEL, ...FALLBACK_MODELS].filter(Boolean) as string[])]
   try {
-    const out = await ask({ apiKey: key, models, load, question, voice, region })
+    // hard ceiling below maxDuration (30 s) no matter what the SDK does
+    const out = await Promise.race([
+      ask({ apiKey: key, models, load, question, voice, region }),
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('request budget exceeded')), 26_000)),
+    ])
     return Response.json(out, { headers: { 'cache-control': 'no-store' } })
   } catch (e) {
     console.error('ask failed', (e as Error).message)
