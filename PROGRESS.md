@@ -35,9 +35,9 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 |---|---|---|
 | 3.1 05_calibrate.py | done | k/q/k′ per region × month, τ by LOYO Poisson deviance (Punjab 10, Madagascar 300, SE Aus 300, Mauritius 30), bootstrap ×500 + Poisson. Pooled k: Punjab 0.347, Madagascar 0.262, SE Aus 0.410, Mauritius 0.212. k′ (S-NPP/N20) ≈ 0.96–0.97 (Mauritius 0.85). Window end asserted ≤ Dec 2019. 8 calib tests |
 | 3.2 06_validate.py | done | docs/validation_report.md + data/out/validation_{region}.json. All active regions pass V1 (MAPE 2.8–9.2 %) and V3 (raw step +168…+294 % → harmonized +3…+9 %, matching MODIS-only). Black Summer = #1 harmonized. SE Australia uses fallback 1 (pooled) — see Decisions |
-| 3.3 07_stats.py | todo | |
-| 3.4 full 08_export.py + run_all.py | todo | |
-| 3.5 validation decision (no stop) | todo | |
+| 3.3 07_stats.py | done | Baseline 2003–2022 climatology (median/p10/p90), per-month ratio, Weibull percentile range over bootstrap, return period (no extrapolation, `beyond_record`), rank, guard, MTD vs same days, similar years (Pearson YTD), annual totals + CI. Punjab Oct 2026 = 0.08× median, lowest October on record; confirmed by all 3 VIIRS satellites (real decline: S-NPP Oct cell-days 16,155 in 2016 → 1,096 in 2026) |
+| 3.4 full 08_export.py + run_all.py | done | regions/*.json (harmonized + per-month stats), daily/, hexes/{region}/{year}.json (H3 r6 cell-days, primary stream), hotspots/{region}_{YYYY-MM}.csv (latest 2 months, header comment), dataset/ (CSV + Parquet + calibration_k_v1.csv + validation_v1.json), meta.json. `python pipeline/run_all.py` reruns raw → web in 47 s, then pytest (26 pass) |
+| 3.5 validation decision (no stop) | done | See validation table in Summary. Active regions pass V1 + V3; SE Australia on fallback 1 (pooled); Mauritius low-activity (reported, not judged) |
 
 ## Phase 4 — Region dashboard · Phase 5 — Proof + Data · Phase 6 — Ask AI · Phase 7 — Wow + polish (v0.9) · Phase 8 — Ship (v1.0)
 todo
@@ -53,6 +53,10 @@ todo
 7. **V3 is tested out of sample.** In-sample, H for 2012–2019 equals k·S-NPP, which matches MODIS by construction, so the step test would be circular. V3 therefore uses leave-one-year-out ratios for 2012–2019. It passes if (a) Pettitt p > 0.05 on the harmonized 2003–2019 annual series and (b) the MODIS-only step lies inside the harmonized step's 90% bootstrap interval. That makes MODIS-only the "true change" reference.
 8. **SE Australia uses fallback 1 (a single region-wide ratio).** The monthly method passes V1 (MAPE 8.5%) but narrowly fails V3: the MODIS-only step of +10.2% sits just outside the harmonized interval (−0.9 to +10.0). The pooled method passes both (MAPE 9.2%, step +9.2% with CI 1.6–18.5). I applied the default rule (use whichever validates better). The method is recorded in the JSON and will be shown on the Proof page. *Alternative:* keep monthly for SE Australia; it's arguably better on seasonal shape.
 9. **Low-activity rule for regions.** A region counts as low-activity when its median baseline month (2003–2022) is under 5 MODIS cell-days, the same threshold as the month guard. Only Mauritius qualifies (V1 MAPE 24%). Its targets are reported but not judged.
+
+10. **Limitation: seasons before July 2002 rest on Terra alone (×q).** In V9, 2001–02 ranks #1 harmonized in Madagascar and Mauritius. Terra alone did record its biggest early season then (Madagascar Terra 15,810 cell-days vs 10–14k in the following seasons), and q (≈3.4) scales it up. It could still be partly an early-Terra sensitivity effect. The bootstrap interval includes the uncertainty in q. I'll state this on the Proof page as a limitation rather than change the method.
+11. **The partial month (Nov 2026)** is judged against the same days 1–8 of baseline years, both in `latest` and in that month's entry in `months[]`.
+12. **Hotspot CSVs** are exported only for the latest 2 months (about 12.6 MB). Older months use H3 cell aggregates (`hexes/`) for maps, which keeps the repo small.
 
 ## Blockers
 none

@@ -51,8 +51,8 @@ refineries, volcanoes. Red flag: cropland or sugarcane (would mean we are maskin
 | known | 125 | -18.19804, 49.36052 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-18.19804,49.36052&zoom=17&basemap=satellite) |
 | known | 47 | -19.45404, 44.72602 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.45404,44.72602&zoom=17&basemap=satellite) |
 | known | 39 | -19.51216, 44.6963 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.51216,44.6963&zoom=17&basemap=satellite) |
-| known | 38 | -19.54582, 44.71027 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.54582,44.71027&zoom=17&basemap=satellite) |
-| known | 38 | -19.49126, 44.72142 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.49126,44.72142&zoom=17&basemap=satellite) |
+| known | 38 | -17.0132, 44.3344 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-17.0132,44.3344&zoom=17&basemap=satellite) |
+| known | 38 | -19.56581, 44.70884 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.56581,44.70884&zoom=17&basemap=satellite) |
 
 ### se_australia
 
