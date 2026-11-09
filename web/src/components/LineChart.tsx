@@ -22,7 +22,7 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
 }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hx, setHx] = useState<number | null>(null)
-  const M = { t: 26, r: 92, b: 26, l: 52 }
+  const M = { t: 26, r: 118, b: 26, l: 52 }
   const xs = series.flatMap((s) => s.points.map((p) => p.x))
   const ys = series.flatMap((s) => s.points.map((p) => p.y).filter((v): v is number => v != null))
   const x = scaleLinear().domain([Math.min(...xs), Math.max(...xs)]).range([M.l, w - M.r])

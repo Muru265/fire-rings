@@ -41,6 +41,12 @@ the same ruler. It then answers one question for responders and land managers: *
 
 Calibration uses **July 2012 – December 2019 only**: MODIS orbits drift after 2020 (Terra) and Dec 2021 (Aqua).
 
+**Known limitation, measured:** Punjab's autumn stubble burning has shifted to late afternoon, after the ~13:30 overpasses.
+In our data, daytime Aqua÷VIIRS (Aqua now passes later) rose ×1.46 in Punjab Oct–Nov for 2022–26 vs 2013–19, but stayed
+flat in Punjab Apr–May (×0.95), Madagascar (×1.02) and SE Australia (×0.86) ([docs/punjab_timing.md](docs/punjab_timing.md)).
+Recent Punjab seasons may be undercounted; the app shows this caveat and does not adjust the numbers.
+Months before July 2002 (Terra only) are shown but not ranked; Madagascar's biggest seasons are 2016–17, 2019–20, 2007–08.
+
 ## How it works (short)
 
 1. Unify 5 satellite streams from NASA FIRMS (archive + near-real-time) into one schema, using the local solar day.

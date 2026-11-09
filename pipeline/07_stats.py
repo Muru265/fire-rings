@@ -132,7 +132,8 @@ def main() -> None:
             vals = [H[k_] for k_ in ks]
             complete = len(ks) == 12 and None not in vals and not (mtd and y == last["y"])
             if None in vals:
-                annual.append({"y": y, "H": None, "lo": None, "hi": None, "complete": False,
+                annual.append({"y": y, "H": None, "lo": None, "hi": None, "complete": False, "rankable": False,
+                               "terra_only_months": sum(1 for k_ in ks if src.get(k_) == "T"),
                                "missing_months": [k_[1] for k_ in ks if H[k_] is None]})
                 continue
             tot = np.nansum(draws[[idx[k_] for k_ in ks]], axis=0)

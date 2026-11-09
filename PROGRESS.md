@@ -5,8 +5,14 @@ Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
 ## ⚠ TODO for Muru
-- **ask_cache: 15 of 16 answers cached.** The Gemini free-tier quota (429) blocked *Mauritius · "Is this month unusual?"*. Tomorrow run `cd web; npx tsx --env-file=../.env scripts/ask_cache.ts` (about 2 minutes), then commit `web/public/data/v1/ask_cache.json`. Until then that one chip shows "AI temporarily unavailable" when the live API fails.
-- **Gemini quota.** At the end of tonight's run most models returned 429 (quota). `gemini-3.5-flash-lite` still answered. To keep the demo smooth, consider a paid key or a quota increase before Saturday.
+- ~~ask_cache missing entry~~ **done**: 16/16 cached (Mauritius chip regenerated with gemini-3.5-flash-lite; Punjab chips regenerated so they carry the detection-time caveat).
+- **Gemini quota.** Most models hit 429 (free-tier quota) yesterday; `gemini-3.5-flash-lite` still works and is first in the cache script. For a smooth live demo, consider a paid key or a quota increase before Saturday.
+
+## Update — follow-up run (detection-time check, Terra-only rule)
+- **Punjab satellite-evasion check: the signal is clear and specific to Punjab's autumn.** Daytime Aqua÷S-NPP fire cell-days relative to 2013–2019, Punjab Oct–Nov: 2022 ×1.05 · 2023 ×1.13 · 2024 ×1.28 · 2025 ×1.83 · 2026 ×2.02 (2022–26 mean ×1.46; ×1.34 against NOAA-20). Comparison seasons stay flat: Punjab Apr–May ×0.95, Madagascar Sep–Oct ×1.02, SE Australia Oct–Dec ×0.86. VIIRS night share in Punjab Oct–Nov rose ×6.2, and morning Terra fell ×0.35. Aqua passes later in the afternoon since Dec 2021, so this supports reports that burning moved after ~3 pm. Caveat: 2025–26 rest on few fires (4,257 and 1,138 S-NPP day cell-days). docs/punjab_timing.md · Decision 18.
+  - The app now shows "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted" on Punjab Oct–Nov 2022+. It appears on headlines, tooltips, the drawer, a new Proof card with chart, and in `get_month`/`get_rankings`/`get_quality`. **The harmonized numbers are unchanged.**
+- **Terra-only months (2001-01 → 2002-06)** are now hatched, labelled "Terra only — wider uncertainty", and excluded from ranks, return periods, V9 season ranks, annual rankings and similar years. **Madagascar's top Jul–Jun seasons are now 2016–17, 2019–20, 2007–08** (2001–02 was #1 before). Mauritius: 2013–14, 2006–07, 2010–11. SE Australia (Black Summer #1) and Punjab (Oct–Nov top 3: 2016, 2005, 2021) are unchanged. Decision 19.
+- Full rerun from raw: 73 s; **36 tests pass** (10 new output checks); e2e 7/7; lint and build clean.
 
 ## Summary for Muru (2026-11-09, end of unattended run)
 
@@ -29,10 +35,10 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 
 **Decisions to review:** 1–17 below. The most important are #3 (persistence rule reading), #6 (regional gap detection), #8 (SE Australia fallback), #10 (pre-2002 Terra-only limitation), #13–14 (headline + API clipping), #15 (`--text-faint` contrast override) and #16 (Gemini model chain).
 
-**Blocked / not done:** backup demo recording (needs you); the 2026 Submission/Judging guide check (released 13 Nov); one cached AI answer (see TODO). Not built (per SOLO SCOPE): compare page, global cube, multilingual, burned-area cross-check.
+**Blocked / not done:** backup demo recording (needs you); the 2026 Submission/Judging guide check (released 13 Nov). Not built (per SOLO SCOPE): compare page, global cube, multilingual, burned-area cross-check.
 
 **Next 5 things I'd do:**
-1. Rerun `scripts/ask_cache.ts` (with a quota bump), then `scripts/ask_eval.ts` once more on the final model.
+1. Rerun `scripts/ask_eval.ts` once more with the final model and quota (the cache is complete; regenerate with `--only "region|*"` after any data change).
 2. On Saturday morning: `python pipeline/01_fetch_nrt.py && python pipeline/run_all.py --from 02_unify`, check the "provisional" labels, and push (it auto-deploys).
 3. Record the backup demo video and screenshots; rehearse with the 3-minute choreography (master plan §9.1).
 4. Do a user test at the venue (non-tech person + mentor) and fix the top confusions. Candidates: the "vs typical" mode wording and the seam slider discoverability on mobile.
@@ -49,7 +55,7 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 | Hero region < 2 s on 4G; works at 360 px | ✅ (median) | `web/scripts/perf.mjs` live: 2.1 / 1.2 / 1.6 s (median 1.6 s; coldest run 2.1 s); local 1.0 s. `overflow.mjs`: all 7 routes 360 px wide |
 | AI answers 30 test questions without inventing a number | ✅ | docs/ask_eval.md: 30/30, 0 unverified; server rejects unverified numbers anyway |
 | CSV opens cleanly in Excel with a header comment | ✅ (note) | calendar/dataset/hotspot CSVs start with one `# Fire Rings v1 · region · dates · citation` line. Excel shows it as the first row; parsers use `comment='#'` |
-| Deployed URL + backup recording + offline fallback JSON | ⚠ partial | URL ✅; ask_cache.json 15/16 ✅; backup recording ❌ (needs Muru) |
+| Deployed URL + backup recording + offline fallback JSON | ⚠ partial | URL ✅; ask_cache.json 16/16 ✅; backup recording ❌ (needs Muru) |
 | README with GIF, METHODS.md, DATA_SOURCES.md, CITATION.cff, LICENSE | ✅ | all in repo root; GIF `docs/screens/seam.gif` |
 | Submission meets 2026 guide limits | ❌ not checked | guide is released 13 Nov |
 
@@ -150,6 +156,8 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 15. **`--text-faint` raised from #5D6B7E to #8492A6.** The plan's value is only 2.6–3.6:1 on our surfaces; the new one is ≥4.5:1 on all four (`web/scripts/contrast.mjs`). The master plan token block is kept verbatim; the override lives in the additions block.
 16. **Gemini models.** With this key on 2026-11-09, `gemini-flash-latest` (GEMINI_MODEL) and `gemini-3.8-flash` returned 503/504 (high demand), and `gemini-2.5-flash` returned 404 (retired for new keys). The chain is now GEMINI_MODEL → `gemini-3-flash-preview` → `gemini-3.6-flash` → `gemini-3.5-flash-lite`, with ≤12 s per model attempt, ≤25 s per request, `maxDuration` 30 s and a client abort at 30 s.
 17. **Plan mode skipped for multi-file tasks during the unattended run** (you said not to wait for approval). The design notes are in commit messages and this file.
+18. **Detection-time caveat, not a correction.** Test (`pipeline/tools/punjab_timing.py`): daytime-only cell-days, ratios relative to each season's own 2013–2019 mean (NOAA-20 vs 2018–19), and every stream compared on the same days up to 2026-11-01. That date cut fixes a bias: without it, 2026 showed Aqua÷S-NPP ×5.6 because S-NPP stops on 2 Nov while Aqua continues. Result: Punjab Oct–Nov ×1.46 vs flat elsewhere (details in the update above). Caveat flag `overpass_timing` on Punjab Oct–Nov, 2022 onwards. *Why 2022:* it's the year the published reports name, and our ratio starts rising in 2022–23. *Alternatives:* start the flag in 2024, when the rise becomes clear (×1.28); or try a correction model (no ground truth, so not done).
+19. **Terra-only months excluded from rankings** (your rule). This applies to per-month rank and return period (`terra_only` flag), annual `rankable: false` for 2001 and 2002, V9 seasons containing any Terra-only month (2001–02), Punjab Oct–Nov ranking, similar-year analogues and the AI `get_rankings`. The months are still displayed, with intervals.
 
 ## Blockers
 none

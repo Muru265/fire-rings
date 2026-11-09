@@ -129,6 +129,29 @@ Baseline 2003–2022, same calendar month:
 - rank among all years; **low-activity guard**: baseline median < 5 and value < 10 → "too little fire to judge";
 - the current partial month is compared with the **same days** of baseline years (month to date);
 - similar years = top-3 Pearson correlation of the year-to-date monthly curve (analogues, not forecasts).
+- **Terra-only months (2001-01 – 2002-06, Terra × q)** are shown, hatched and labelled "Terra only — wider uncertainty",
+  but are excluded from rankings, return periods, Jul–Jun season ranks (V9), annual "worst year" rankings and similar-year
+  analogues. (Before this rule, 2001–02 ranked #1 in Madagascar; the top three are now 2016–17, 2019–20, 2007–08.)
+
+## 8b. Detection-time check: Punjab's late-afternoon burning (`tools/punjab_timing.py`, `docs/punjab_timing.md`)
+
+Polar orbiters only see fires burning at overpass time (~13:30 for VIIRS and, originally, Aqua). Reports (ISRO 2025, iFOREST
+Dec 2025, NASA's H. Jethva) say Punjab/Haryana stubble burning shifted to after ~15:00 from 2022. Aqua's overpass has drifted
+later since Dec 2021, so if fires are lit later, Aqua should now see relatively more of them than VIIRS. We computed daytime
+Aqua ÷ S-NPP cell-day ratios per season (same days only, up to S-NPP's last day), relative to 2013–2019:
+
+| season | Aqua ÷ S-NPP, 2022–26 vs 2013–19 | Aqua ÷ NOAA-20 (vs 2018–19) |
+|---|---:|---:|
+| Punjab Oct–Nov (rice residue) | ×1.46 (2022 ×1.05 → 2025 ×1.83 → 2026 ×2.02) | ×1.34 |
+| Punjab Apr–May (wheat residue) | ×0.95 | ×0.90 |
+| Madagascar Sep–Oct | ×1.02 | ×1.06 |
+| SE Australia Oct–Dec | ×0.86 | ×0.71 |
+
+The rise is specific to Punjab's autumn season; VIIRS night detections there also rose ×6.2 and morning Terra fell ×0.35.
+This supports late-afternoon burning that the 13:30 overpasses increasingly miss. The 2025–26 ratios rest on few fires.
+**Harmonized values are not adjusted** (burning between overpasses cannot be measured); Punjab Oct–Nov months from 2022
+carry the caveat "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons
+may be undercounted" in the app, the AI tools and the Proof page.
 
 ## 9. Lat/lon boxes in the app
 
@@ -137,8 +160,9 @@ coverage factors. Boxes have no bootstrap interval or percentiles (stated in the
 
 ## 10. Limitations
 
-MODIS drift and end of life; MODIS-equivalent units hide small fires that only VIIRS sees; ratios vary with fire type
-and season; pre-July-2002 months rely on Terra × q; Aug–Nov 2026 are provisional NRT without FIRMS static flags;
+MODIS drift and end of life; fires burning between overpasses are missed (measured for Punjab, §8b); MODIS-equivalent
+units hide small fires that only VIIRS sees; ratios vary with fire type and season; pre-July-2002 months rely on Terra × q
+(not ranked); Aug–Nov 2026 are provisional NRT without FIRMS static flags;
 low-fire regions are noisy. Each is mitigated as described on the app's Proof page.
 
 ## 11. Reproducibility

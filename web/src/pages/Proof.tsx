@@ -299,8 +299,8 @@ function DetectionTiming() {
   return (
     <ChartCard id="timing" title="Detection-time caveat: Punjab's late-afternoon burning" table={table}
       subtitle={<>Polar-orbiting satellites only see fires burning at their overpass (~13:30 for VIIRS). Since Dec 2021 Aqua passes later in the afternoon. In Punjab's Oct–Nov season, Aqua now sees
-        <strong className="text-text"> ×{p.aqua_rel_2022_2026}</strong> as much relative to VIIRS as in 2013–2019 (×{p.aqua_n20_rel_2022_2026} vs NOAA-20), rising to ×{last[last.length - 1].aqua_snpp_rel?.toFixed(1)} in {last[last.length - 1].y};
-        other seasons stay flat. VIIRS night detections rose ×{p.night_rel_2022_2026}. Together this supports reports (ISRO 2025, iFOREST 2025, NASA's H. Jethva) that burning moved after ~3 pm.</>}>
+        <strong className="text-text"> ×{p.aqua_rel_2022_2026.toFixed(1)}</strong> as much relative to VIIRS as in 2013–2019 (×{p.aqua_n20_rel_2022_2026.toFixed(1)} vs NOAA-20), rising to ×{last[last.length - 1].aqua_snpp_rel?.toFixed(1)} in {last[last.length - 1].y};
+        other seasons stay flat. VIIRS night detections rose ×{p.night_rel_2022_2026.toFixed(1)}. Together this supports reports (ISRO 2025, iFOREST 2025, NASA's H. Jethva) that burning moved after ~3 pm.</>}>
       <LineChart series={series} yFormat={(v) => `×${v.toFixed(1)}`} height={280} xBand={[2012.5, 2019.5, '2013–19 = ×1.0']}
         annotations={[{ x: 2021.95, label: 'Aqua drifts later' }]} yLabel="Aqua ÷ S-NPP vs 2013–19" />
       <p className="mt-3 rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn">
@@ -321,7 +321,7 @@ const LIMITS = [
   { t: 'Ratios vary with fire type', p: 'The MODIS/VIIRS ratio depends on fire size and season (e.g. small crop fires vs large forest fires), so one number per region can be biased in some months.',
     m: 'Monthly ratios with shrinkage, chosen by out-of-sample tests; regions fall back to a single ratio only when it validates better (recorded per region).' },
   { t: 'Before July 2002 there is only Terra', p: 'Aqua launched in mid-2002. Earlier months are Terra scaled by a Terra→Terra+Aqua ratio, so 2001–Jun 2002 rankings are less certain.',
-    m: 'The ratio is fitted on 2002–2019 and its uncertainty is in the bootstrap interval; those months carry wider intervals.' },
+    m: 'The ratio is fitted on 2002–2019 and its uncertainty is in the bootstrap interval. These months are shown hatched and labelled "Terra only", and are excluded from rankings, return periods, season ranks and similar years.' },
   { t: 'Recent months are provisional', p: 'Aug–Nov 2026 come from near-real-time files, which lack FIRMS static-source flags and may be revised.',
     m: 'Marked "provisional" everywhere; static locations learned from the archive are masked in NRT rows too.' },
   { t: 'Little fire, big percentages', p: 'In low-fire places (e.g. Mauritius) a handful of detections can swing a ratio wildly.',
