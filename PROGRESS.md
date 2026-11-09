@@ -4,6 +4,14 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## ⚠ BLOCKER: live layer needs FIRMS_MAP_KEY in Vercel Production
+Production `/api/live?region=punjab` currently returns `{"ok":false,"error":"not_configured"}`. The deployed function can't see `FIRMS_MAP_KEY` (deploy `cfe4170`, built after the push). The code works: locally with the same key it returns Punjab 1,921 and Madagascar 9,236 detections. The UI shows "LIVE · feed temporarily unavailable" as designed.
+**To fix (2 min):**
+1. Vercel → project **fire-rings** → **Settings → Environment Variables**.
+2. Check that a variable named exactly `FIRMS_MAP_KEY` (no spaces) exists, with **Production** ticked. Add it if missing, using the value from your local `.env`.
+3. **Deployments** → latest → **⋯ → Redeploy**. Env changes only apply to new deployments.
+4. Check https://fire-rings.vercel.app/api/live?region=punjab: you should see `"ok":true` and a `count`.
+
 ## ⚠ TODO for Muru
 - ~~ask_cache missing entry~~ **done**: 16/16 cached (Mauritius chip regenerated with gemini-3.5-flash-lite; Punjab chips regenerated so they carry the detection-time caveat).
 - **Gemini quota.** Most models hit 429 (free-tier quota) yesterday; `gemini-3.5-flash-lite` still works and is first in the cache script. For a smooth live demo, consider a paid key or a quota increase before Saturday.
@@ -20,7 +28,8 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 - **Live layer:** `/api/live?region=` returns the last 72 h of VIIRS NOAA-20/21 NRT from FIRMS (key server-side). It uses the same filters as the record (low confidence, known-static r9, region footprint: res-7 for Punjab drops Pakistani Punjab), a 45-min cache, a 10 s timeout and an empty state. The LIVE badge appears on region pages and the globe panel; points are cyan rings labelled "near-real-time, provisional". **Never mixed into the record.** Local check, 9 Nov: Punjab 1,921 detections in 72 h (381 outside India dropped), Madagascar 9,236, SE Australia 647, Mauritius 2.
 - **QA:** `docs/QA_WALKTHROUGH.md` is generated from the JSON (`node web/scripts/qa_doc.mjs`, every expected value current). `web/scripts/claims_check.mjs` checks **93/93 on-screen numbers** against the published JSON; it's part of `npm run test:e2e`. An injected wrong value is caught, after I fixed a substring-matching flaw in the first version. Decision 20.
 - Checked and not a bug: bright Punjab hexagons near the "Lahore" map label are Amritsar/Tarn Taran (India). Zero Pakistan-side detections exist in any raw file.
-- Tests: **40 pytest** · e2e 7/7 · claims 93/93 · all routes fit at 360 px.
+- Tests: **40 pytest** · e2e 7/7 · claims 93/93 locally **and on production** · all routes fit at 360 px.
+- Live check on production: blocked by the missing Vercel env var (see BLOCKER at the top); the graceful empty state was verified live.
 
 ## Update — follow-up run (detection-time check, Terra-only rule)
 - **Punjab satellite-evasion check: the signal is clear and specific to Punjab's autumn.** Daytime Aqua÷S-NPP fire cell-days relative to 2013–2019, Punjab Oct–Nov: 2022 ×1.05 · 2023 ×1.13 · 2024 ×1.28 · 2025 ×1.83 · 2026 ×2.02 (2022–26 mean ×1.46; ×1.34 against NOAA-20). Comparison seasons stay flat: Punjab Apr–May ×0.95, Madagascar Sep–Oct ×1.02, SE Australia Oct–Dec ×0.86. VIIRS night share in Punjab Oct–Nov rose ×6.2, and morning Terra fell ×0.35. Aqua passes later in the afternoon since Dec 2021, so this supports reports that burning moved after ~3 pm. Caveat: 2025–26 rest on few fires (4,257 and 1,138 S-NPP day cell-days). docs/punjab_timing.md · Decision 18.
