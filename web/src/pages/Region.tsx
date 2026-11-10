@@ -26,6 +26,7 @@ import type { CalMode, DataMode, RegionDoc } from '../lib/types'
 import { hasDetail, toDetail } from '../lib/detail'
 import { useMode } from '../lib/mode'
 import LineChart from '../components/LineChart'
+import Help from '../components/Help'
 import type { Series } from '../components/LineChart'
 import type { Cell } from '../lib/useCellNav'
 
@@ -139,7 +140,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
           <LiveBadge live={live} />
           {detail
             ? <span className="rounded-full border border-accent-2/50 bg-accent-2/10 px-3 py-1 text-accent-2" data-testid="mode-chip">High detail · native VIIRS 375 m · 2012–now</span>
-            : regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok" data-testid="mode-chip">Long-term · harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}
+            : regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok" data-testid="mode-chip">Long-term · harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}<Help id="header-badges" />
           {v && <Link to="/proof" className="rounded-full border border-border-strong px-3 py-1 text-muted no-underline hover:text-text">
             Validated: {v.low_activity ? 'low-activity region' : `${v.loyo_err_pct}% out-of-sample error`}
           </Link>}
@@ -151,7 +152,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
         <div className="fade-up max-w-4xl">
           <p className="font-display text-xl leading-snug sm:text-[28px]">
             <span className="mr-2 align-middle font-mono text-xs font-normal tracking-wider text-faint uppercase">
-              {focusMonth ? 'Picked month' : j?.mtd ? 'This month so far' : 'Last full month'}
+              {focusMonth ? 'Picked month' : j?.mtd ? 'This month so far' : 'Last full month'}<Help id="headline" />
             </span>
             <span className="text-text">{head.lead}</span> <span className="text-muted">{head.rest}</span>
           </p>
@@ -186,7 +187,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
 
           <section aria-labelledby="rings-h" className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 id="rings-h" className="font-display text-lg font-semibold">Fire Rings</h2>
+              <h2 id="rings-h" className="font-display text-lg font-semibold">Fire Rings<Help id="fire-rings" /></h2>
               <div className="flex flex-wrap items-center gap-2">
                 <div role="group" aria-label="Colour mode" className="flex rounded-sm border border-border p-0.5 text-xs">
                   {(['counts', 'anomaly'] as CalMode[]).map((md) => (
@@ -228,7 +229,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
 
           <section aria-labelledby="grid-h" className="card">
             <div className="mb-4 flex items-center justify-between gap-4">
-              <h2 id="grid-h" className="font-display text-lg font-semibold">Calendar</h2>
+              <h2 id="grid-h" className="font-display text-lg font-semibold">Calendar<Help id="calendar" /></h2>
               <button onClick={() => setTable((x) => !x)} aria-pressed={table}
                 className="rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text hover:bg-surface-2">{table ? 'View as chart' : 'View as table'}</button>
             </div>
@@ -253,7 +254,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
         <aside className="space-y-6" aria-label="Insights">
           {j && (
             <section className="card" aria-labelledby="normal-h">
-              <h2 id="normal-h" className="eyebrow">Is this normal?</h2>
+              <h2 id="normal-h" className="eyebrow">Is this normal?<Help id="gauge" /></h2>
               <p className="mt-1 font-display text-lg font-semibold">{MONTHS[j.m - 1]} {j.y}{j.provisional ? <span className="ml-2 rounded-full border border-border-strong px-1.5 py-px align-middle font-mono text-[10px] font-normal text-muted">provisional</span> : null}</p>
               <div className="mt-3"><Gauge j={j} /></div>
               <p className="mt-3 text-center text-xs text-muted">vs {MONTHS[j.m - 1]} in {regionDoc.baseline[0]}–{regionDoc.baseline[1]} (median {fmtInt(j.median)} fire-days)</p>
@@ -285,7 +286,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
 
           {regionDoc.similar_years.length > 0 && (
             <section className="card" aria-labelledby="sim-h">
-              <h2 id="sim-h" className="eyebrow">Similar years</h2>
+              <h2 id="sim-h" className="eyebrow">Similar years<Help id="similar-years" /></h2>
               <p className="mt-2 text-sm text-muted">{regionDoc.name.split(' (')[0]} {last.y} so far ({regionDoc.similar_detail?.months.replace(/(\d+)$/, (mm) => MONTHS[Number(mm) - 1]).replace('Jan', 'Jan')}) looks most like:</p>
               <ol className="mt-3 flex flex-wrap gap-2">
                 {(regionDoc.similar_detail?.years ?? regionDoc.similar_years.map((y) => ({ y, r: NaN }))).map((s) => (
@@ -304,7 +305,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
           {baseDoc.detail && <AddsCard doc={baseDoc} />}
 
           <section className="card" aria-labelledby="ask-h">
-            <h2 id="ask-h" className="eyebrow">Ask Fire Rings</h2>
+            <h2 id="ask-h" className="eyebrow">Ask Fire Rings<Help id="ask-chips" /></h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {['Is this month unusual?', 'Worst year on record?', 'When does the season peak?', 'How reliable is this?'].map((q) => (
                 <button key={q} onClick={() => setAsk({ q })}
@@ -315,7 +316,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
           </section>
 
           <section className="card text-xs text-muted" aria-labelledby="prov-h">
-            <h2 id="prov-h" className="eyebrow mb-2">Provenance</h2>
+            <h2 id="prov-h" className="eyebrow mb-2">Provenance<Help id="provenance" /></h2>
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
               <dt className="text-faint">Data</dt><dd>NASA FIRMS MODIS C6.1 (Terra, Aqua), VIIRS 375 m (S-NPP, NOAA-20, NOAA-21)</dd>
               <dt className="text-faint">Through</dt><dd><span className="num">{new Date(regionDoc.data_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> · Aug–Nov 2026 are NRT = quick-look data, replaced by NASA’s final data about 5 months later</dd>
@@ -360,7 +361,7 @@ function ModeToggle({ mode, onChange }: { mode: DataMode; onChange: (m: DataMode
           {label}
         </button>
       ))}
-      <Link to="/proof#two-views" className="text-[11px] text-faint no-underline hover:text-text" title="Two views of the same data">ⓘ which one?</Link>
+      <Help id="mode-toggle" label="Which mode?" />
     </div>
   )
 }
@@ -376,7 +377,7 @@ function AddsCard({ doc }: { doc: RegionDoc }) {
   ]
   return (
     <section className="card" aria-labelledby="adds-h" data-testid="adds-card">
-      <h2 id="adds-h" className="eyebrow">What the new satellite adds</h2>
+      <h2 id="adds-h" className="eyebrow">What the new satellite adds<Help id="adds-card" /></h2>
       <p className="mt-2 text-sm text-text">
         In {doc.name.split(' (')[0]}, VIIRS sees about <strong className="num">{a.ratio != null ? `${a.ratio.toFixed(1)}×` : '—'}</strong> more fire-days than the
         old-camera equivalent ({a.years[0]}–{a.years[1]}) — mostly small fires MODIS misses.
@@ -409,7 +410,7 @@ function CalibrationText({ doc }: { doc: RegionDoc }) {
 function ExportMenu({ onCsv, onPng }: { onCsv: () => void; onPng: () => void }) {
   const [busy, setBusy] = useState(false)
   return (
-    <div className="flex gap-1 text-xs" role="group" aria-label="Export">
+    <div className="flex items-center gap-1 text-xs" role="group" aria-label="Export"><Help id="export" label="CSV and PNG export" />
       <button onClick={onCsv} className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">CSV</button>
       <button disabled={busy} onClick={async () => { setBusy(true); try { await onPng() } finally { setBusy(false) } }}
         className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2 disabled:opacity-50">{busy ? '…' : 'PNG'}</button>

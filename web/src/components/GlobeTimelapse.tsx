@@ -9,6 +9,7 @@ import type { LiveData } from '../lib/live'
 import { MONTHS } from '../lib/series'
 import { tidyBasemap } from '../lib/mapStyle'
 import { fetchJson } from '../lib/api'
+import Help from './Help'
 import { cellToBoundary, cellToLatLng } from 'h3-js'
 import type { RegionDoc } from '../lib/types'
 
@@ -25,7 +26,7 @@ function LivePanelLine({ docs, live }: { docs: RegionDoc[]; live: Record<string,
     <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-accent-2">
       <span><strong>LIVE</strong> · raw detections, last 72 h (not fire-days) · last satellite pass {agoText(last)}:</span>
       {docs.map((d) => <span key={d.id}>{d.name.split(' (')[0]} <span className="num">{live[d.id]?.ok ? fmtInt(live[d.id]!.count) : '—'}</span></span>)}
-      <span className="text-faint">near-real-time, provisional, not in the record</span>
+      <span className="text-faint">near-real-time, provisional, not in the record<Help id="live-line" /></span>
     </div>
   )
 }

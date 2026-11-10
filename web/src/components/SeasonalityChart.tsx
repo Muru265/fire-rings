@@ -49,7 +49,7 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
       ...(cy ? [cy[i]?.H != null ? fmtInt(cy[i]!.H) : null] : [])]),
   }
   return (
-    <ChartCard id="season" title="Seasonality" table={table}
+    <ChartCard id="season" help="seasonality" title="Seasonality" table={table}
       subtitle={<span data-testid="season-takeaway">{takeaway(doc, year)}</span>}>
       <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted" aria-label="Legend">
         <li className="flex items-center gap-1.5"><span className="h-3 w-4 rounded-[3px] bg-surface-3" />normal range (8 of 10 years, {doc.baseline[0]}–{doc.baseline[1]})</li>

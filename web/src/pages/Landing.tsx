@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MiniRings from '../components/MiniRings'
+import Help from '../components/Help'
 import SensorTimeline from '../components/SensorTimeline'
 import { fetchJson, useMeta } from '../lib/api'
 import { headline, judgeMonth } from '../lib/headline'
@@ -41,7 +42,7 @@ export default function Landing() {
 
       <div className="mx-auto max-w-[1440px] space-y-12 px-4 py-10 sm:px-6">
         <section aria-labelledby="regions-h">
-          <h2 id="regions-h" className="eyebrow">Hero regions</h2>
+          <h2 id="regions-h" className="eyebrow">Hero regions<Help id="region-cards" /></h2>
           <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {REGIONS.map((r) => {
               const d = docs?.find((x) => x.id === r.id)
@@ -74,7 +75,7 @@ export default function Landing() {
         <section aria-labelledby="sensors-h" className="card">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 id="sensors-h" className="font-display text-lg font-semibold">Five satellites, one record</h2>
+              <h2 id="sensors-h" className="font-display text-lg font-semibold">Five satellites, one record<Help id="satellite-timeline" /></h2>
               <p className="mt-0.5 text-xs text-muted">MODIS is drifting and ending; Suomi-NPP's data stopped this month. Fire Rings calibrates VIIRS to MODIS while both were stable, then follows NOAA-20.</p>
             </div>
             <Link to="/proof" className="text-sm">The evidence →</Link>

@@ -8,6 +8,7 @@ import { makeColorer } from '../lib/colors'
 import { fmtInt, fmtRatio } from '../lib/format'
 import { MONTHS, toGrid } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
+import Help from '../components/Help'
 
 /** Madagascar story mode: sticky rings + 6 scroll steps (master plan §5 S5). All numbers are read from the data. */
 export default function Story() {
@@ -73,7 +74,7 @@ function StoryView({ mg, mu }: { mg: RegionDoc; mu: RegionDoc | null }) {
     <div className="space-y-6">
       <header className="max-w-2xl">
         <p className="eyebrow">Story · Indian Ocean</p>
-        <h1 className="mt-2 text-[28px] font-bold sm:text-[40px]">Madagascar's fire calendar</h1>
+        <h1 className="mt-2 text-[28px] font-bold sm:text-[40px]">Madagascar's fire calendar<Help id="story" /></h1>
       </header>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
         <div className="top-20 self-start lg:sticky">

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import Help from './Help'
 
 /** Before fix (raw) ↔ After fix (harmonized). Only the two ends are real data; in-between is a colour blend shown
  *  while animating, so releasing the handle snaps to the nearest end (QA #10). "▶ Show the fix" animates raw → fixed. */
@@ -30,7 +31,7 @@ export default function SeamSlider({ value, onChange, disabled }: { value: numbe
   return (
     <div className={`flex flex-col gap-2 ${disabled ? 'opacity-40' : ''}`} data-testid="seam">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <label htmlFor={id} className="eyebrow">Raw ↔ Fixed</label>
+        <label htmlFor={id} className="eyebrow">Raw ↔ Fixed</label><Help id="seam-slider" />
         <span className="text-muted" aria-live="polite">{state}</span>
       </div>
       <div className="flex items-center gap-3">

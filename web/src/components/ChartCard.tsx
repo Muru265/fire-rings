@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import Help from './Help'
 
 export interface TableSpec {
   caption: string
@@ -8,15 +9,17 @@ export interface TableSpec {
 }
 
 /** Card with a title and a "View as table" toggle (every chart has a table twin). */
-export default function ChartCard({ title, subtitle, table, children, actions, id }: {
+export default function ChartCard({ title, subtitle, table, children, actions, id, help }: {
   title: string; subtitle?: ReactNode; table: TableSpec; children: ReactNode; actions?: ReactNode; id?: string
+  /** guide entry id for the ⓘ next to the title (QA #9) */
+  help?: string
 }) {
   const [asTable, setAsTable] = useState(false)
   return (
     <section className="card min-w-0" aria-labelledby={id ? `${id}-h` : undefined}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id={id ? `${id}-h` : undefined} className="font-display text-lg font-semibold">{title}</h2>
+          <h2 id={id ? `${id}-h` : undefined} className="font-display text-lg font-semibold">{title}{help && <Help id={help} label={title} />}</h2>
           {subtitle && <p className="mt-0.5 text-xs text-muted">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2">

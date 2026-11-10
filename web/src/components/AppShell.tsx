@@ -6,6 +6,7 @@ const NAV = [
   { to: '/story/madagascar', label: 'Story', match: '/story/' },
   { to: '/data', label: 'Data' },
   { to: '/ask', label: 'Ask' },
+  { to: '/guide', label: 'Guide' },
 ]
 
 /** "Explore" opens the last-viewed region (QA #5). */
@@ -29,15 +30,15 @@ export default function AppShell() {
             <img src="/favicon.svg" alt="" width={28} height={28} />
             <span className="font-display text-lg font-bold tracking-[0.14em] text-text">FIRE RINGS</span>
           </Link>
-          <nav aria-label="Main">
-            <ul className="flex items-center gap-1 text-sm">
+          <nav aria-label="Main" className="-mr-2 max-w-full overflow-x-auto sm:mr-0">
+            <ul className="flex items-center gap-0 text-[13px] sm:gap-1 sm:text-sm">
               {NAV.map((n) => (
                 <li key={n.to}>
                   <NavLink
                     to={n.label === 'Explore' ? `/r/${lastRegion()}` : n.to}
                     className={({ isActive }) =>
                       [
-                        'rounded-sm px-3 py-2 no-underline transition-colors duration-[var(--dur-fast)]',
+                        'rounded-sm px-[7px] py-2 whitespace-nowrap no-underline sm:px-3 transition-colors duration-[var(--dur-fast)]',
                         isActive || (n.match && pathname.startsWith(n.match))
                           ? 'bg-surface-2 text-text'
                           : 'text-muted hover:text-text',

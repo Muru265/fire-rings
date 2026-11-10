@@ -12,6 +12,7 @@ import { MONTHS, VIIRS_START } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import { calibrationSummary } from '../lib/calibration'
+import Help from '../components/Help'
 
 const C_HARM = '#D97706'
 const C_MODIS = '#3B8FCC'
@@ -63,7 +64,7 @@ export default function Proof() {
       <DetectionTiming />
 
       <section aria-labelledby="lim-h">
-        <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them</h2>
+        <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them<Help id="limitations" /></h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {LIMITS.map((l) => (
             <article key={l.t} className="card flex flex-col gap-3">
@@ -138,7 +139,7 @@ function Stat({ label, value, sub, plain, status, children }: { label: string; v
   return (
     <div className="card flex flex-col gap-1" data-status={status}>
       <div className="flex items-start justify-between gap-2">
-        <span className="eyebrow !text-[11px]">{label}</span>
+        <span className="eyebrow !text-[11px]">{label}<Help id={label.includes('V1') ? 'v1-error' : label.includes('V3') ? 'v3-step' : label.includes('V9') ? 'v9-peaks' : 'seasonal-shape'} label={label} /></span>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${cls}`}>{txt}</span>
       </div>
       <span className="font-display text-[28px] font-semibold text-text">{value}</span>
@@ -249,7 +250,7 @@ function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
     ...(before && after ? [{ id: 'bridge', label: '', color: C_RAW, legend: false, dash: '1 4', width: 2, points: [before, after] } as Series] : []),
   ]
   return (
-    <ChartCard id="ba" title="Before / after: the 2012 step disappears" table={table}
+    <ChartCard id="ba" help="before-after" title="Before / after: the 2012 step disappears" table={table}
       subtitle={<>Annual fire-days (complete years). Raw jumps <strong className="text-text">{v3.step_raw_pct > 0 ? '+' : ''}{fmtInt(v3.step_raw_pct)}%</strong> when VIIRS arrives; harmonized changes {v3.step_harm_pct > 0 ? '+' : ''}{v3.step_harm_pct}% (90% range {v3.step_harm_ci[0]} to {v3.step_harm_ci[1]}), in line with MODIS alone ({v3.step_modis_pct > 0 ? '+' : ''}{v3.step_modis_pct}%). Step = mean 2012–19 vs 2003–11.</>}>
       <div className="mb-2 flex flex-wrap items-center gap-3">
         <button onClick={play} data-testid="ba-show-fix" aria-pressed={t > 0.5}
@@ -283,7 +284,7 @@ function MethodFlow({ doc }: { doc: RegionDoc | null }) {
   ]
   return (
     <section className="card" aria-labelledby="method-h">
-      <h2 id="method-h" className="font-display text-xl font-semibold">Method in six steps{doc ? ` — ${doc.name}` : ''}</h2>
+      <h2 id="method-h" className="font-display text-xl font-semibold">Method in six steps{doc ? ` — ${doc.name}` : ''}<Help id="method-steps" /></h2>
       <p className="mt-1 text-xs text-muted">The data funnel with the real counts from the pipeline for the selected region.</p>
       <ol className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {steps.map((s, i) => (
@@ -314,7 +315,7 @@ function Drift({ v4 }: { v4: V4 }) {
     rows: v4.drift.map((d) => [d.y, d.ratio?.toFixed(3) ?? null, d.rel_pct != null ? `${d.rel_pct}%` : null, d.terra?.toFixed(3) ?? null, d.aqua?.toFixed(3) ?? null]),
   }
   return (
-    <ChartCard id="drift" title="Why calibration stops at 2019: orbit drift" table={table}
+    <ChartCard id="drift" help="orbit-drift" title="Why calibration stops at 2019: orbit drift" table={table}
       subtitle={<>The ratio says: for every 100 fire-days the new satellite (S-NPP) sees, the old ones see about {Math.round(v4.window_mean_ratio * 100)} (2013–2019 average).
         Terra’s orbit began drifting in 2020 and Aqua’s in December 2021, so they now pass at a different time of day.{' '}
         <strong className="text-text">After the drift the ratio changed by only {v4.post2020_mean_rel_pct}% on average — small, but we still freeze the exchange rate before it, to be safe.</strong></>}>
@@ -339,7 +340,7 @@ function KChart({ doc }: { doc: RegionDoc }) {
     rows: MONTHS.map((mn, i) => [mn, k.month[i].toFixed(3), k.lo[i].toFixed(3), k.hi[i].toFixed(3), k.raw_month?.[i]?.toFixed(3) ?? null, fmtInt(k.B?.[i] ?? null), fmtInt(k.A?.[i] ?? null)]),
   }
   return (
-    <ChartCard id="k" title="Calibration ratio by month" table={table}
+    <ChartCard id="k" help="calibration-ratio-by-month" title="Calibration ratio by month" table={table}
       subtitle={<>k = MODIS ÷ VIIRS S-NPP fire-days, Jul 2012 – Dec 2019, with 90% bootstrap interval. {doc.method === 'pooled' ? `This region uses one ratio (${k.pool}) — see method note above.` : `Shrinkage τ = ${k.tau} toward the region-wide ratio ${k.pool}.`} Grey numbers: S-NPP fire-days behind each ratio.</>}>
       <div ref={ref}>
         <svg width={w} height={H} role="img" aria-label="Calibration ratio by month with intervals. Use View as table for values.">
@@ -392,7 +393,7 @@ function Outages({ doc }: { doc: RegionDoc }) {
   rows.sort((r1, r2) => r1[1].localeCompare(r2[1]))
   return (
     <section className="card" aria-labelledby="out-h">
-      <h2 id="out-h" className="font-display text-lg font-semibold">Known outages detected and handled</h2>
+      <h2 id="out-h" className="font-display text-lg font-semibold">Known outages detected and handled<Help id="outages" /></h2>
       <p className="mt-1 text-sm text-text">Sometimes a satellite stops sending data for a few days. We find those gaps in the data itself. If a month still has at least 60% of its days, we scale it up fairly; if not, we show “not enough data” instead of guessing.</p>
       <p className="mt-1 text-xs text-muted">Whole-system outages = no detections anywhere for ≥5 days; regional gaps = no detections over this region for ≥7 days while the sister satellite saw fire.</p>
       <OutageTimeline rows={rows} />
@@ -409,7 +410,7 @@ function Outages({ doc }: { doc: RegionDoc }) {
         </table>
       </div>
       <p className="mt-3 text-sm text-muted">
-        <strong className="text-text">Static sources.</strong> In {doc.name} we removed <span className="num text-text">{fmtInt(q.masked_static_total)}</span> detections at{' '}
+        <strong className="text-text">Static sources.</strong><Help id="static-sources" /> In {doc.name} we removed <span className="num text-text">{fmtInt(q.masked_static_total)}</span> detections at{' '}
         <span className="num text-text">{fmtInt(q.known_static_cells)}</span> places that are hot all the time (factories, brick kilns, gas flares), so they aren’t counted as fires.{' '}
         <span className="num text-text">{fmtInt(q.nrt_removed_known_static)}</span> recent quick-look detections had no NASA flag, so we caught them with our own list. <Link to="/data">Pipeline row counts →</Link>
       </p>
@@ -473,7 +474,7 @@ function DetectionTiming() {
   }
   const last = p.series.filter((s) => s.aqua_snpp_rel != null)
   return (
-    <ChartCard id="timing" title="Detection-time caveat: Punjab's late-afternoon burning" table={table}
+    <ChartCard id="timing" help="detection-time" title="Detection-time caveat: Punjab's late-afternoon burning" table={table}
       subtitle={<>Polar-orbiting satellites only see fires burning at their overpass (~13:30 for VIIRS). Since Dec 2021 Aqua passes later in the afternoon. In Punjab's Oct–Nov season, Aqua now sees
         <strong className="text-text"> ×{p.aqua_rel_2022_2026.toFixed(1)}</strong> as much relative to VIIRS as in 2013–2019 (×{p.aqua_n20_rel_2022_2026.toFixed(1)} vs NOAA-20), rising to ×{last[last.length - 1].aqua_snpp_rel?.toFixed(1)} in {last[last.length - 1].y};
         other seasons stay flat. Fires seen at the ~1:30 am VIIRS pass rose ×{p.night_rel_2022_2026.toFixed(1)}. Together this supports independent reports (below) that burning moved after ~3 pm.</>}>

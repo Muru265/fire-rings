@@ -4,12 +4,13 @@ import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import CountUp from './CountUp'
 import { ratioWords } from '../lib/plain'
+import Help from './Help'
 
 function Card({ label, value, sub, badge, plain }: { label: string; value: ReactNode; sub: string; badge?: string; plain?: string }) {
   return (
     <div className="card flex flex-col gap-1 !p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="eyebrow !text-[11px]">{label}</span>
+        <span className="eyebrow !text-[11px]">{label}</span><Help id="kpi-cards" label={label} />
         {badge && <span className="rounded-full border border-border-strong px-1.5 py-px font-mono text-[10px] text-muted">{badge}</span>}
       </div>
       <span className="font-display text-2xl font-semibold text-text">{value}</span>

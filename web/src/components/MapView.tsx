@@ -13,6 +13,7 @@ import type { LiveData } from '../lib/live'
 import { REGIONS } from '../lib/regions'
 import { MAP_COLORS } from '../lib/scales'
 import { tidyBasemap } from '../lib/mapStyle'
+import Help from './Help'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 
@@ -243,7 +244,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
     <section className="card" aria-labelledby="map-h">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id="map-h" className="font-display text-lg font-semibold">Map · {MONTHS[m - 1]} {y}</h2>
+          <h2 id="map-h" className="font-display text-lg font-semibold">Map · {MONTHS[m - 1]} {y}<Help id="map" /></h2>
           <p className="mt-0.5 text-xs text-muted">
             Each hexagon ({res === 7 ? '~5 km², High detail' : '~36 km²'}) is coloured by its fire-days this month ({doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'})
             {stats ? <> · <strong className="text-text">{fmtInt(stats.cells)}</strong> hexagons had fire</> : ''}

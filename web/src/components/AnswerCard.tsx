@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Help from './Help'
 import type { Answer } from '../lib/ask'
 import { REGIONS } from '../lib/regions'
 
@@ -33,7 +34,7 @@ export default function AnswerCard({ a }: { a: Answer }) {
       <div className="mt-3 border-t border-border pt-2">
         <button onClick={() => setOpen((o) => !o)} aria-expanded={open} className="text-xs text-accent-2 hover:underline">
           {open ? '▾' : '▸'} Numbers used ({a.trace.length} {a.trace.length === 1 ? 'lookup' : 'lookups'}){a.verified ? ' · every number verified against these' : ''}
-        </button>
+        </button><Help id="numbers-used" />
         {open && (
           <ol className="mt-2 space-y-2">
             {a.trace.map((t, i) => (

@@ -13,6 +13,7 @@ import type { MonthRec, RegionDoc } from '../lib/types'
 import { downloadText } from '../lib/exporters'
 import { DataTable } from './ChartCard'
 import { unitOf } from '../lib/mode'
+import Help from './Help'
 
 type Daily = Record<string, { modis?: number[]; viirs?: number[]; off?: number[] }>
 
@@ -70,7 +71,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
       <aside className="fade-up relative flex h-full w-full max-w-[520px] flex-col overflow-y-auto border-l border-border bg-surface shadow-card">
         <header className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-surface/95 px-5 py-4 backdrop-blur">
           <div>
-            <p className="eyebrow">{doc.name}</p>
+            <p className="eyebrow">{doc.name}<Help id="month-drawer" label="Month drawer" /></p>
             <h2 id="drawer-h" className="mt-1 font-display text-2xl font-bold">{MONTHS[rec.m - 1]} {rec.y}</h2>
           </div>
           <button ref={closeRef} onClick={onClose} className="rounded-sm border border-border-strong px-2.5 py-1 text-sm text-muted hover:text-text" aria-label="Close (Esc)">✕</button>
@@ -97,7 +98,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
 
           <section aria-labelledby="daily-h">
             <div className="mb-2 flex items-center justify-between">
-              <h3 id="daily-h" className="font-display text-sm font-semibold">Daily fire-days</h3>
+              <h3 id="daily-h" className="font-display text-sm font-semibold">Daily fire-days<Help id="daily-fire-days" /></h3>
               <button onClick={() => setTable((t) => !t)} className="text-xs text-accent-2 hover:underline" aria-pressed={table}>{table ? 'View as chart' : 'View as table'}</button>
             </div>
             {daily.status === 'loading' && <div className="h-[170px] animate-pulse rounded-sm bg-surface-2" />}
@@ -113,12 +114,12 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
           </section>
 
           <section aria-labelledby="dots-h">
-            <h3 id="dots-h" className="mb-2 font-display text-sm font-semibold">Every {MONTHS[rec.m - 1]} in the baseline</h3>
+            <h3 id="dots-h" className="mb-2 font-display text-sm font-semibold">Every {MONTHS[rec.m - 1]} in the baseline<Help id="baseline-strip" /></h3>
             <DotPlot vals={baseVals} rec={rec} median={doc.climatology?.median[rec.m - 1] ?? null} unit={unitOf(doc)} />
           </section>
 
           <section aria-labelledby="mini-h">
-            <h3 id="mini-h" className="mb-2 font-display text-sm font-semibold">Where</h3>
+            <h3 id="mini-h" className="mb-2 font-display text-sm font-semibold">Where<Help id="where-map" /></h3>
             <MiniHexMap doc={doc} y={rec.y} m={rec.m} />
           </section>
 

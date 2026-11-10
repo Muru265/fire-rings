@@ -55,7 +55,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
       d.rankable === false ? (d.terra_only_months ? 'no (Terra only)' : 'no') : 'yes']),
   }
   return (
-    <ChartCard id="annual" title="Annual totals" table={table}
+    <ChartCard id="annual" help="annual-totals" title="Annual totals" table={table}
       subtitle={<span data-testid="annual-takeaway">{takeaway(doc)}</span>}>
       <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted" aria-label="Legend">
         <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] bg-[#E55C30]" />{unitOf(doc)} per year</li>

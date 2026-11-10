@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMeta } from '../lib/api'
+import Help from '../components/Help'
 
 const REPO = 'https://github.com/Muru265/fire-rings'
 const SITE = 'https://fire-rings.vercel.app'
@@ -54,7 +55,7 @@ export default function Data() {
     <div className="space-y-10">
       <header className="max-w-3xl">
         <p className="eyebrow">Open data</p>
-        <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">Fire Rings Harmonized Hotspot Record v1.0</h1>
+        <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">Fire Rings Harmonized Hotspot Record v1.0<Help id="data-page" /></h1>
         <p className="mt-4 text-muted">Open, versioned, citable. 25 years of MODIS and VIIRS active-fire detections in one consistent monthly unit, with uncertainty, for anyone to build on.</p>
         {meta.status === 'ready' && (
           <p className="num mt-3 text-xs text-faint">Data through {meta.data.data_end} · generated {meta.data.generated} · {meta.data.regions.length} regions · version {meta.data.version}</p>
