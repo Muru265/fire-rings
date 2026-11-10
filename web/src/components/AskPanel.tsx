@@ -4,29 +4,30 @@ import type { Answer, Voice } from '../lib/ask'
 import { REGIONS } from '../lib/regions'
 import AnswerCard from './AnswerCard'
 
+/** One question and what happened to it — errors stay attached to their own question (QA #58). */
+interface Turn { id: number; question: string; region: string; voice: Voice; status: 'loading' | 'done' | 'error'; answer?: Answer; error?: string }
+
 /** Chat with the grounded analyst. Used in the region drawer and on /ask. */
 export default function AskPanel({ initialRegion, initialQuestion, compact }: { initialRegion?: string; initialQuestion?: string; compact?: boolean }) {
   const [region, setRegion] = useState(initialRegion ?? 'punjab')
   const [voice, setVoice] = useState<Voice>('responder')
   const [q, setQ] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-  const [answers, setAnswers] = useState<Answer[]>([])
+  const [turns, setTurns] = useState<Turn[]>([])
   const asked = useRef(false)
+  const nextId = useRef(1)
+  const busy = turns.some((t) => t.status === 'loading')
 
   const send = async (question: string) => {
     const text = question.trim()
     if (!text || busy) return
-    setBusy(true)
-    setErr(null)
+    const id = nextId.current++
+    setTurns((ts) => [{ id, question: text, region, voice, status: 'loading' }, ...ts])
+    setQ('')
     try {
       const a = await askFireRings(text, region, voice)
-      setAnswers((xs) => [a, ...xs])
-      setQ('')
+      setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'done', answer: a } : t)))
     } catch (e) {
-      setErr(`${(e as Error).message}. The charts and numbers on every page still work; the suggested questions may have saved answers.`)
-    } finally {
-      setBusy(false)
+      setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'error', error: (e as Error).message } : t)))
     }
   }
 
@@ -64,9 +65,25 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
           {busy ? 'Thinking…' : 'Ask'}
         </button>
       </form>
-      {busy && <div className="h-20 animate-pulse rounded-sm bg-surface-2" aria-label="Waiting for answer" />}
-      {err && <p className="rounded-sm border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger" role="alert">{err}</p>}
-      <div className="space-y-3">{answers.map((a, i) => <AnswerCard key={answers.length - i} a={a} />)}</div>
+      <div className="space-y-3" aria-live="polite">
+        {turns.map((t) => (
+          <div key={t.id} data-turn={t.status} className="space-y-2">
+            {t.status === 'loading' && (
+              <div className="rounded-sm border border-border bg-surface-2 p-4 text-sm text-muted">
+                <span className="text-faint">You asked:</span> {t.question}
+                <div className="mt-2 flex items-center gap-2 text-xs"><span className="h-2 w-2 animate-pulse rounded-full bg-accent" />Thinking… looking up numbers</div>
+              </div>
+            )}
+            {t.status === 'error' && (
+              <div className="rounded-sm border border-border bg-surface-2 p-4 text-sm" role="alert">
+                <span className="text-faint">You asked:</span> <span className="text-text">{t.question}</span>
+                <p className="mt-2 text-muted">{t.error}. The charts and numbers on every page still work; the suggested questions have saved answers.</p>
+              </div>
+            )}
+            {t.status === 'done' && t.answer && <AnswerCard a={t.answer} />}
+          </div>
+        ))}
+      </div>
       <p className="text-[11px] text-faint">Answers come from Google Gemini using only numbers looked up from the Fire Rings record (see "Numbers used"). No forecasts.</p>
     </div>
   )

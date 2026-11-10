@@ -56,6 +56,23 @@ try {
   check('seam at raw labels center', (await page.locator('svg[role="grid"] text').evaluateAll((els) => els.map((e) => e.textContent ?? ''))).some((t) => t.toLowerCase().includes('raw')))
   await slider.fill('100')
 
+  // QA #12: table → chart keeps the chart at full card width (every ChartCard on the page)
+  const cards = page.locator('section.card:has([data-chart-body])')
+  const nCards = await cards.count()
+  let shrunk = 0
+  for (let i = 0; i < nCards; i++) {
+    const c = cards.nth(i)
+    await c.scrollIntoViewIfNeeded()
+    const btn = c.getByRole('button', { name: 'View as table' })
+    if (!(await btn.count())) continue
+    await btn.click(); await page.waitForTimeout(150)
+    await c.getByRole('button', { name: 'View as chart' }).click(); await page.waitForTimeout(300)
+    const cw = (await c.boundingBox()).width
+    const svg = c.locator('[data-chart-body] svg').first()
+    if (await svg.count()) { const sw = (await svg.boundingBox()).width; if (sw < cw * 0.75) shrunk++ }
+  }
+  check(`table→chart keeps width on ${nCards} chart cards`, nCards >= 2 && shrunk === 0)
+
   // lat/lon box (Ludhiana–Sangrur area)
   const inputs = page.locator('input[aria-label$="bound (decimal degrees)"]')
   await inputs.nth(0).fill('75.0'); await inputs.nth(1).fill('29.8'); await inputs.nth(2).fill('76.2'); await inputs.nth(3).fill('31.0')
@@ -63,6 +80,14 @@ try {
   await page.waitForSelector('text=Box view:', { timeout: 20000 })
   check('box view applied', await page.getByText('Box view:').isVisible())
   await page.waitForTimeout(800)
+  // QA #15: every chart card still renders with non-zero size in box view
+  const sizes = await page.locator('[data-testid="charts"] section.card').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))
+  check(`box view keeps ${sizes.length} chart cards visible`, sizes.length === 2 && sizes.every((h) => h > 100))
+  // QA #16: a box far outside the region is clipped, never applied raw
+  await inputs.nth(0).fill('60'); await inputs.nth(1).fill('20'); await inputs.nth(2).fill('76.5'); await inputs.nth(3).fill('31')
+  await page.getByRole('button', { name: 'Apply box' }).click()
+  await page.waitForTimeout(400)
+  check('box outside region is clipped with a warning', await page.getByText('box clipped to').isVisible())
   await page.screenshot({ path: resolve(out, 'e2e_box.png'), fullPage: false })
 } catch (e) {
   console.log('FAIL  exception', e.message)

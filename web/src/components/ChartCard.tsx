@@ -27,7 +27,9 @@ export default function ChartCard({ title, subtitle, table, children, actions, i
           </button>
         </div>
       </div>
-      {asTable ? <DataTable spec={table} /> : children}
+      {/* keep the chart mounted (hidden) while the table shows, so it never re-measures at the wrong width (QA #12) */}
+      <div hidden={asTable} data-chart-body>{children}</div>
+      {asTable && <DataTable spec={table} />}
     </section>
   )
 }

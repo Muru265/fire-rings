@@ -15,6 +15,7 @@ import { useLive } from '../lib/live'
 import LiveBadge from '../components/LiveBadge'
 import { makeColorer } from '../lib/colors'
 import { calibrationSummary } from '../lib/calibration'
+import { boxDerived } from '../lib/boxDerived'
 import { calendarCsv, downloadPng, downloadText } from '../lib/exporters'
 import { fmtInt } from '../lib/format'
 import type { Box } from '../lib/hexes'
@@ -76,13 +77,17 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
     if (!box) return
     let alive = true
     import('../lib/hexes').then((h) => h.boxRecord(regionDoc, box))
-      .then((r) => alive && setBoxState({ status: 'ready', months: r.months, cells: r.cells }))
+      .then((r) => alive && setBoxState(r.cells > 0
+        ? { status: 'ready', months: r.months, cells: r.cells }
+        : { status: 'error', error: `No fire hexagons of ${regionDoc.name} fall inside this box since 2001 — showing the whole region.` }))
       .catch((e: Error) => alive && setBoxState({ status: 'error', error: e.message }))
     return () => { alive = false }
   }, [box, regionDoc])
 
   const boxed = box && boxState.status === 'ready' && boxState.months
-  const doc: RegionDoc = useMemo(() => (boxed ? { ...regionDoc, months: boxState.months! } : regionDoc), [boxed, regionDoc, boxState.months])
+  const doc: RegionDoc = useMemo(() => (boxed
+    ? { ...regionDoc, months: boxState.months!, ...boxDerived(regionDoc, boxState.months!) }
+    : regionDoc), [boxed, regionDoc, boxState.months])
   const effMode: CalMode = boxed ? 'counts' : mode
   const colorer = useMemo(() => makeColorer(doc, effMode, t), [doc, effMode, t])
   const grid = useMemo(() => toGrid(doc.months), [doc])
@@ -152,7 +157,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
             </div>
           )}
           {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing 2001–2026 for the box…</p>}
-          {box && boxState.status === 'error' && <p className="text-sm text-danger">Box failed: {boxState.error}</p>}
+          {box && boxState.status === 'error' && <p className="rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn" role="status">{boxState.error}</p>}
 
           <section aria-labelledby="rings-h" className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -199,10 +204,10 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
               : <GridCalendar grid={grid} colorOf={colorer.colorOf} glyphOf={colorer.glyphOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} />}
           </section>
 
-          {!boxed && regionDoc.harmonized && (
-            <div className="grid gap-6 2xl:grid-cols-2">
-              <SeasonalityChart doc={regionDoc} year={insightCell?.y ?? last.y} />
-              <AnnualBars doc={regionDoc} selectedYear={insightCell?.y} />
+          {regionDoc.harmonized && (
+            <div className="grid gap-6 2xl:grid-cols-2" data-testid="charts">
+              <SeasonalityChart doc={doc} year={insightCell?.y ?? last.y} />
+              <AnnualBars doc={doc} selectedYear={insightCell?.y} />
             </div>
           )}
 

@@ -83,6 +83,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const navigate = useNavigate()
   const drawRef = useRef(false)
   drawRef.current = drawing
+  const [note, setNote] = useState<string | null>(null)
+  const submitRef = useRef<(b: Box) => void>(() => {})
 
   useEffect(() => {
     if (!el.current) return
@@ -140,10 +142,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       start = null
       mp.dragPan.enable()
       setDrawing(false)
-      if (b[2] - b[0] > 0.02 && b[3] - b[1] > 0.02) {
-        setInputs(b.map((v) => v.toFixed(2)))
-        onBox(b)
-      }
+      if (b[2] - b[0] > 0.02 && b[3] - b[1] > 0.02) submitRef.current(b)
     })
     return () => { mp.remove(); map.current = null }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -198,13 +197,28 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
 
   useEffect(() => { if (map.current) map.current.getCanvas().style.cursor = drawing ? 'crosshair' : '' }, [drawing])
 
+  // QA #16: a box can only cover data that exists → clip it to the region's data area; refuse boxes outside it
+  const clip = (b: Box): Box | null => {
+    const r = doc.bbox
+    const c: Box = [Math.max(b[0], r[0]), Math.max(b[1], r[1]), Math.min(b[2], r[2]), Math.min(b[3], r[3])]
+    return c[0] < c[2] && c[1] < c[3] ? c : null
+  }
+  const submit = (b: Box) => {
+    const c = clip(b)
+    if (!c) { setErr(`This box is outside ${doc.name}. Only data inside the dotted data area is available.`); setNote(null); return }
+    const changed = c.some((v, i) => Math.abs(v - b[i]) > 1e-6)
+    setErr(null)
+    setNote(changed ? `Only data inside ${doc.name} is available — box clipped to ${c.map((v) => v.toFixed(2)).join(', ')}.` : null)
+    setInputs(c.map((v) => v.toFixed(2)))
+    onBox(c)
+    map.current?.fitBounds(c as [number, number, number, number], { padding: 40 })
+  }
   const apply = () => {
     const v = inputs.map(Number)
-    if (v.some((x) => !Number.isFinite(x)) || v[0] >= v[2] || v[1] >= v[3]) { setErr('Box must be W < E and S < N (decimal degrees).'); return }
-    setErr(null)
-    onBox(v as Box)
-    map.current?.fitBounds(v as [number, number, number, number], { padding: 40 })
+    if (v.some((x) => !Number.isFinite(x)) || v[0] >= v[2] || v[1] >= v[3]) { setErr('Box must be West < East and South < North (decimal degrees).'); return }
+    submit(v as Box)
   }
+  submitRef.current = submit
   const inset = doc.geo?.inset
   const toggleInset = () => {
     if (!inset || !map.current) return
@@ -274,7 +288,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           </label>
         ))}
         <button onClick={apply} className="rounded-sm bg-accent px-3 py-1.5 font-semibold text-bg hover:brightness-110">Apply box</button>
-        {box && <button onClick={() => { onBox(null); setInputs(view.map((v) => v.toFixed(2))) }}
+        {box && <button onClick={() => { onBox(null); setNote(null); setInputs(view.map((v) => v.toFixed(2))) }}
           className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">Clear</button>}
         {live?.ok && (
           <label className="ml-auto flex items-center gap-1.5 text-muted">
@@ -283,6 +297,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           </label>
         )}
       </div>
+      {note && <p className="mt-2 rounded-sm border border-warn/40 bg-warn/10 px-3 py-1.5 text-xs text-warn" role="status">{note}</p>}
       <p className="mt-2 text-xs text-muted">Hexagons are ~36 km² on purpose: counting presence per hexagon lets old and new satellites be compared fairly. Zoom in to see individual detections.</p>
       <p className="mt-1 text-xs text-faint">
         {small ? 'Detections are shown for every month in this small region.' : pts?.available ? `Individual detections appear from zoom ${POINT_ZOOM}.` : `Individual detections are published for the latest months (${doc.hotspot_months.join(', ')}); older months show hexagons only.`}
