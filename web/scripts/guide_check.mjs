@@ -33,7 +33,7 @@ try {
   check(`worked example readings from data (${examples})`, examples >= 15)
 
   // every ⓘ on the site points at an existing guide anchor; every chart card title has one
-  const pages = ['/', '/r/punjab', '/r/punjab?mode=detail', '/proof', '/data', '/ask', '/story/madagascar']
+  const pages = ['/', '/r/punjab', '/r/punjab?mode=detail', '/proof', '/data', '/ask', '/story', '/story/punjab']
   const helpIds = new Set()
   for (const p of pages) {
     await page.goto(B + p, { waitUntil: 'load' })

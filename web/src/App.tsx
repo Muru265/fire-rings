@@ -22,6 +22,7 @@ export default function App() {
         <Route path="data" element={page(<Data />)} />
         <Route path="ask" element={page(<Ask />)} />
         <Route path="guide" element={page(<Guide />)} />
+        <Route path="story" element={page(<Story />)} />
         <Route path="story/:regionId" element={page(<Story />)} />
         <Route path="*" element={<NotFound />} />
       </Route>

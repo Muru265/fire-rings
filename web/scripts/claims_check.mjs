@@ -121,6 +121,35 @@ try {
     check(P, 'detail: record starts 2012', firstRing ?? '', '2012')
   }
 
+  // ---- stories (QA #51): numbers in the steps match the JSON -------------------------------------------------------
+  {
+    const P = '/story/punjab'
+    const d = J('regions/punjab.json')
+    await page.goto(base + P, { waitUntil: 'load' })
+    await page.waitForSelector('[data-step]')
+    const txt = (await page.locator('[data-step]').allInnerTexts()).join(' ')
+    const yrs = d.annual.filter((a) => a.complete && a.rankable !== false && a.H != null)
+    const peak = [...yrs].sort((a, b) => b.H - a.H)[0]
+    check(P, 'story: biggest year', txt, `${peak.y} (${fmtInt(peak.H)} fire-days`)
+    check(P, 'story: raw jump', txt, `+${fmtInt(d.validation.step_raw_pct)}%`)
+    check(P, 'story: last year', txt, `${fmtInt(yrs.at(-1).H)} in ${yrs.at(-1).y}`)
+    const S = '/story/se_australia'
+    const a = J('regions/se_australia.json')
+    await page.goto(base + S, { waitUntil: 'load' })
+    await page.waitForSelector('[data-step]')
+    const t2 = (await page.locator('[data-step]').allInnerTexts()).join(' ')
+    const dec = a.months.find((r) => r.y === 2019 && r.m === 12)
+    check(S, 'story: Dec 2019 fire-days', t2, `December 2019 had ${fmtInt(dec.H)} fire-days`)
+    check(S, 'story: Dec 2019 ratio', t2, `${fmtRatio(dec.ratio)} a typical December`)
+    const M = '/story/mauritius'
+    const mu = J('regions/mauritius.json')
+    await page.goto(base + M, { waitUntil: 'load' })
+    await page.waitForSelector('[data-step]')
+    const t3 = (await page.locator('[data-step]').allInnerTexts()).join(' ')
+    const g = mu.months.filter((r) => !r.flags.includes('mtd')).slice(-24).filter((r) => r.guard).length
+    check(M, 'story: guarded months', t3, `last 24 complete months, ${g} were`)
+  }
+
   // ---- landing: globe panel + region cards ---------------------------------------------------------------------
   await page.goto(base + '/', { waitUntil: 'load' })
   await page.waitForTimeout(3500)
