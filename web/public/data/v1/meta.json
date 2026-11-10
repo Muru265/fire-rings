@@ -2,7 +2,7 @@
  "version": "v1",
  "data_end": "2026-11-09",
  "citation": "Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.",
- "generated": "2026-11-10T11:47Z",
+ "generated": "2026-11-10T12:00Z",
  "regions": [
   {
    "id": "punjab",

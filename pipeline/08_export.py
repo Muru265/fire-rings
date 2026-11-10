@@ -259,6 +259,28 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
             mm[r["m"] - 1] += [cid[r["h3r6"]], int(r["n_days"])]
         write_json(web / "hexes" / region / f"{y}.json", {"y": y, "m": mm}, compact=True)
 
+    # ---- globe layer (QA #1): H3 res 4 (~1,770 km²) monthly MODIS-equivalent fire-days: res-6 cell-days of the primary
+    # stream summed per parent, then scaled so each month's parents add up to H (the ratio and the coverage adjustment
+    # C·D/O at once) — the glow uses exactly the published record, with no 2012 seam
+    par = dict(con.execute("SELECT c, h3_cell_to_parent(c, 4) FROM (SELECT unnest(?::UBIGINT[]) c)", [cells]).fetchall())
+    g = (cmo.with_columns(pl.col("h3r6").replace_strict(par, return_dtype=pl.UInt64).alias("p"))
+         .group_by(["y", "m", "p"]).agg(pl.col("n_days").sum().alias("n")))
+    gcells = sorted(g["p"].unique().to_list())
+    gid = {c: i for i, c in enumerate(gcells)}
+    gstr = [s for (s,) in con.execute("SELECT h3_h3_to_string(c) FROM (SELECT unnest(?::UBIGINT[]) c)", [gcells]).fetchall()]
+    tot = {(yy, mm): float(nn) for yy, mm, nn in g.group_by(["y", "m"]).agg(pl.col("n").sum()).iter_rows()}
+    hm = {(rec["y"], rec["m"]): rec["H"] for rec in months}
+    gm: dict = {}
+    for r in g.iter_rows(named=True):
+        h, t = hm.get((r["y"], r["m"])), tot.get((r["y"], r["m"]), 0)
+        if h is None or t <= 0:
+            continue
+        v = r["n"] * h / t
+        v = round(v) if v >= 10 else round(v, 1)   # keeps the file small; one decimal only where it matters
+        if v > 0:
+            gm.setdefault(f"{r['y']:04d}-{r['m']:02d}", []).extend([gid[r["p"]], v])
+    globe = {"cells": gstr, "m": gm}
+
     # ---- High-detail hexes (QA #44): H3 res 7 (~5 km²), native VIIRS, 2012+, primary VIIRS stream per month ---------
     clean_p7 = sql_path(path("clean") / f"{region}_filtered.parquet")
     vkeep = pl.DataFrame([{"y": r["y"], "m": r["m"], "stream": viirs_stream(r["y"], r["m"])} for r in months if r["y"] >= 2012])
@@ -330,7 +352,7 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "detail": detail,
     }
     write_json(web / "regions" / f"{region}.json", doc, compact=True)
-    return {"id": region, "name": rc["name"], "bbox": bbox, "months": len(months), "method": method,
+    return {"id": region, "name": rc["name"], "bbox": bbox, "months": len(months), "method": method, "globe": globe,
             "harmonized": bool(harm), "first": f"{months[0]['y']}-{months[0]['m']:02d}", "last": latest_key,
             "latest": stats.get("latest"), "latest_complete": stats.get("latest_complete"), "doc": doc}
 
@@ -389,6 +411,8 @@ def main() -> None:
     data_end = max(region_end(r) for r in cfg["regions"])
     regs = [export_region(r, rc, region_end(r), web) for r, rc in cfg["regions"].items()]
     write_dataset(regs, web)
+    write_json(web / "globe.json", {"res": 4, "unit": "fire cell-days (MODIS-equivalent), res-4 parent sums",
+                                    "regions": {r["id"]: r.pop("globe") for r in regs}}, compact=True)
     write_json(web / "meta.json", {
         "version": cfg["version"], "data_end": str(data_end), "citation": CITATION,
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),

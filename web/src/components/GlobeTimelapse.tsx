@@ -8,6 +8,8 @@ import { agoText } from '../lib/live'
 import type { LiveData } from '../lib/live'
 import { MONTHS } from '../lib/series'
 import { tidyBasemap } from '../lib/mapStyle'
+import { fetchJson } from '../lib/api'
+import { cellToBoundary, cellToLatLng } from 'h3-js'
 import type { RegionDoc } from '../lib/types'
 
 setWorkerUrl(workerUrl)
@@ -28,7 +30,33 @@ function LivePanelLine({ docs, live }: { docs: RegionDoc[]; live: Record<string,
   )
 }
 
-/** 3D globe; hero regions glow with their monthly harmonized fire-days, played 2001 → 2026. */
+type GlobeRegion = { m: Record<string, number[]>; top: number; poly: [number, number][][]; ctr: [number, number][] }
+
+/** Lazy-load the res-4 globe layer once the map is up; precompute hexagon outlines and a robust per-region top value. */
+function useGlobe(ready: boolean): Record<string, GlobeRegion> | null {
+  const [g, setG] = useState<Record<string, GlobeRegion> | null>(null)
+  useEffect(() => {
+    if (!ready || g) return
+    let alive = true
+    fetchJson<{ regions: Record<string, { cells: string[]; m: Record<string, number[]> }> }>('globe.json').then((doc) => {
+      if (!alive) return
+      const out: Record<string, GlobeRegion> = {}
+      for (const [id, r] of Object.entries(doc.regions)) {
+        const vals = Object.values(r.m).flatMap((a) => a.filter((_, j) => j % 2 === 1)).sort((a, b) => a - b)
+        out[id] = { m: r.m, top: vals[Math.floor(0.98 * (vals.length - 1))] || 1,
+          poly: r.cells.map((c) => cellToBoundary(c, true) as [number, number][]),
+          ctr: r.cells.map((c) => { const [la, lo] = cellToLatLng(c); return [lo, la] as [number, number] }) }
+      }
+      setG(out)
+    }).catch(() => { /* the globe keeps its region markers */ })
+    return () => { alive = false }
+  }, [ready, g])
+  return g
+}
+
+const globeOn = true
+
+/** 3D globe; hero regions glow with real fire hexagons (monthly harmonized fire-days), played 2001 → 2026. */
 export default function GlobeTimelapse({ docs, live }: Props) {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<MlMap | null>(null)
@@ -40,6 +68,7 @@ export default function GlobeTimelapse({ docs, live }: Props) {
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const interacted = useRef(false)
 
+  const globe = useGlobe(ready)
   const maxH = useMemo(() => Object.fromEntries(docs.map((d) => [d.id, Math.max(...d.months.map((r) => r.H ?? 0)) || 1])), [docs])
 
   useEffect(() => {
@@ -54,12 +83,22 @@ export default function GlobeTimelapse({ docs, live }: Props) {
     })
     mp.on('load', () => {
       tidyBasemap(mp, { borderOpacity: 0.35 })
+      // QA #1: real fire hexagons (H3 res 4, MODIS-equivalent fire-days) that breathe with the seasons
+      mp.addSource('hex', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      mp.addLayer({ id: 'hex-glow', type: 'circle', source: 'hex', filter: ['==', ['geometry-type'], 'Point'], paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, ['*', 7, ['get', 't']], 5, ['*', 28, ['get', 't']]],
+        'circle-color': ['interpolate', ['linear'], ['get', 't'], 0, '#932667', 0.4, '#DD513A', 0.7, '#FCA50A', 1, '#FCFFA4'],
+        'circle-blur': 1, 'circle-opacity': ['*', 0.7, ['get', 't']] } })
+      mp.addLayer({ id: 'hex-fill', type: 'fill', source: 'hex', filter: ['==', ['geometry-type'], 'Polygon'], paint: {
+        'fill-color': ['interpolate', ['linear'], ['get', 't'], 0, '#5c1a6e', 0.25, '#932667', 0.5, '#DD513A', 0.75, '#FCA50A', 1, '#FCFFA4'],
+        'fill-opacity': ['interpolate', ['linear'], ['get', 't'], 0, 0.35, 1, 0.95] } })
       mp.addSource('fire', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       mp.addLayer({ id: 'fire-glow', type: 'circle', source: 'fire', paint: {
         'circle-radius': ['interpolate', ['linear'], ['get', 't'], 0, 4, 1, 46], 'circle-color': ['get', 'c'],
-        'circle-blur': 1, 'circle-opacity': ['interpolate', ['linear'], ['get', 't'], 0, 0.15, 1, 0.75] } })
+        'circle-blur': 1, 'circle-opacity': ['interpolate', ['linear'], ['get', 't'], 0, 0.05, 1, globeOn ? 0.2 : 0.75] } })
       mp.addLayer({ id: 'fire-core', type: 'circle', source: 'fire', paint: {
-        'circle-radius': ['interpolate', ['linear'], ['get', 't'], 0, 2, 1, 10], 'circle-color': ['get', 'c'], 'circle-opacity': 0.95,
+        // the hexagons carry the fire now; the marker just anchors the label
+        'circle-radius': 2.5, 'circle-color': '#E8EEF5', 'circle-opacity': 0.8,
         'circle-stroke-width': 1, 'circle-stroke-color': '#0A0E14' } })
       mp.addLayer({ id: 'fire-label', type: 'symbol', source: 'fire', layout: { 'text-field': ['get', 'name'], 'text-size': 11, 'text-offset': [0, 1.6], 'text-font': ['Noto Sans Regular'] },
         paint: { 'text-color': '#E8EEF5', 'text-halo-color': '#0A0E14', 'text-halo-width': 1.5 } })
@@ -97,7 +136,22 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       return { type: 'Feature' as const, properties: { t, c, name: d.name.split(' (')[0] }, geometry: { type: 'Point' as const, coordinates: at } }
     })
     ;(map.current.getSource('fire') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features })
-  }, [ready, i, frames, docs, maxH])
+    if (globe) {
+      const key = `${f.y}-${String(f.m).padStart(2, '0')}`
+      const hf: { type: 'Feature'; properties: { t: number }; geometry: { type: 'Polygon'; coordinates: [number, number][][] } | { type: 'Point'; coordinates: [number, number] } }[] = []
+      for (const d of docs) {
+        const g = globe[d.id]
+        const arr = g?.m[key]
+        if (!g || !arr) continue
+        for (let j = 0; j < arr.length; j += 2) {
+          const t = Math.min(1, Math.sqrt(arr[j + 1] / g.top))
+          hf.push({ type: 'Feature', properties: { t }, geometry: { type: 'Polygon', coordinates: [g.poly[arr[j]]] } })
+          hf.push({ type: 'Feature', properties: { t }, geometry: { type: 'Point', coordinates: g.ctr[arr[j]] } })
+        }
+      }
+      ;(map.current.getSource('hex') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features: hf })
+    }
+  }, [ready, i, frames, docs, maxH, globe])
 
   // playback
   useEffect(() => {

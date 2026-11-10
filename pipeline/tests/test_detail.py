@@ -54,3 +54,19 @@ def test_detail_block_shape(region):
         if a["H"] is not None:
             s = sum(months[(a["y"], m)] for m in range(1, 13) if (a["y"], m) in months)
             assert abs(a["H"] - s) <= 1.0 + 1e-4 * s
+
+
+def test_globe_layer_sums_match_harmonized():
+    """QA #1: res-4 globe glow = the same MODIS-equivalent fire-days as H (rounded per parent cell)."""
+    g = json.loads((WEB.parent / "globe.json").read_text(encoding="utf-8"))
+    for region in REGIONS:
+        d = doc(region)
+        gm = g["regions"][region]["m"]
+        for r in d["months"]:
+            if r["H"] is None or r["H"] < 50:
+                continue
+            arr = gm.get(f"{r['y']:04d}-{r['m']:02d}", [])
+            tot = sum(arr[1::2])
+            n = len(arr) // 2
+            # scaled to H per month; only the per-parent rounding differs
+            assert abs(tot - r["H"]) <= 0.5 * n + 0.2, (region, r["y"], r["m"], tot, r["H"])
