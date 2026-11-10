@@ -25,6 +25,8 @@ export default function AnswerCard({ a }: { a: Answer }) {
           </span>
         )}
       </p>
+      {a.mode === 'detail' && <p className="mt-2 text-xs text-accent-2" data-testid="answer-mode">High detail answer: native VIIRS fire-days (2012–now), not comparable with Long-term numbers.</p>}
+      {a.source === 'cache' && a.mode === 'longterm' && <p className="mt-2 text-xs text-muted" data-testid="answer-mode">Long-term answer (MODIS-equivalent fire-days).</p>}
       {switched && <p className="mt-2 text-xs text-accent-2">Switched to {switched} — your question names it.</p>}
       <p className="mt-3 text-[15px] leading-relaxed text-text">{a.answer}</p>
       {a.caveat && <p className="mt-2 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {a.caveat}</p>}

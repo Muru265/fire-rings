@@ -20,13 +20,13 @@ export interface Series {
 export interface Annotation { x: number; label: string; align?: 'left' | 'right' }
 
 /** Multi-series line chart on a shared x (years). Crosshair tooltip, legend, direct end labels, bands, annotations. */
-export default function LineChart({ series, height = 280, yFormat, xBand, annotations = [], yLabel, zeroLine, legendExtra }: {
+export default function LineChart({ series, height = 280, yFormat, xBand, annotations = [], yLabel, zeroLine, legendExtra, endLabels = true }: {
   series: Series[]; height?: number; yFormat: (v: number) => string; xBand?: [number, number, string]
-  annotations?: Annotation[]; yLabel?: string; zeroLine?: boolean; legendExtra?: ReactNode
+  annotations?: Annotation[]; yLabel?: string; zeroLine?: boolean; legendExtra?: ReactNode; endLabels?: boolean
 }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hx, setHx] = useState<number | null>(null)
-  const M = { t: 26, r: 118, b: 26, l: 52 }
+  const M = { t: 26, r: endLabels ? 118 : 14, b: 26, l: yLabel ? 52 : 40 }
   const xs = series.flatMap((s) => s.points.map((p) => p.x))
   const ys = series.flatMap((s) => s.points.map((p) => p.y).filter((v): v is number => v != null))
   const x = scaleLinear().domain([Math.min(...xs), Math.max(...xs)]).range([M.l, w - M.r])
@@ -34,7 +34,9 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
   const y = scaleLinear().domain([lo, Math.max(...ys) * 1.06]).nice(4).range([height - M.b, M.t])
   const gen = d3line<{ x: number; y: number | null }>().defined((p) => p.y != null).x((p) => x(p.x)).y((p) => y(p.y!))
   const years = [...new Set(xs)].sort((a, b) => a - b)
-  const tick = years.length > 14 ? 5 : 2
+  // label every Nth year so labels stay ≥ 34 px apart at any width
+  const plotW = Math.max(1, w - M.r - M.l)
+  const tick = [1, 2, 5, 10].find((k) => (plotW / Math.max(1, years.length - 1)) * k >= 34) ?? 10
 
   return (
     <div ref={ref} className="relative">
@@ -68,22 +70,28 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
           </g>
         ))}
         {yLabel && <text x={12} y={height / 2} transform={`rotate(-90 12 ${height / 2})`} textAnchor="middle" className="fill-[var(--text-faint)] text-[10px]">{yLabel}</text>}
-        {years.filter((yr) => yr % tick === 0 || yr === years[0] || yr === years[years.length - 1]).map((yr) => (
+        {years.filter((yr, i) => (yr % tick === 0 && Math.abs(yr - years[0]) * (plotW / Math.max(1, years.length - 1)) >= 30 && Math.abs(years[years.length - 1] - yr) * (plotW / Math.max(1, years.length - 1)) >= 30) || i === 0 || i === years.length - 1).map((yr) => (
           <text key={yr} x={x(yr)} y={height - 8} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[10px]">{yr}</text>
         ))}
-        {annotations.map((a) => (
-          <g key={a.label}>
+        {annotations.map((a0) => {
+          // flip to the left when the label would run past the right edge (≈5.6 px per character at 10 px)
+          const a = { ...a0, align: a0.align ?? (x(a0.x) + 4 + a0.label.length * 5.6 > w ? 'left' : 'right') as 'left' | 'right' }
+          const room = a.align === 'left' ? x(a.x) - 4 : w - x(a.x) - 4
+          const label = a.label.length * 5.6 > room ? `${a.label.slice(0, Math.max(6, Math.floor(room / 5.6) - 1))}…` : a.label
+          return (
+          <g key={a.label}><title>{a.label}</title>
             <line x1={x(a.x)} x2={x(a.x)} y1={M.t} y2={height - M.b} stroke="var(--text-muted)" strokeDasharray="3 3" />
             <text x={x(a.x) + (a.align === 'left' ? -4 : 4)} y={M.t + 10} textAnchor={a.align === 'left' ? 'end' : 'start'}
-              className="fill-[var(--text)] text-[10px]" style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 3 }}>{a.label}</text>
+              className="fill-[var(--text)] text-[10px]" style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 3 }}>{label}</text>
           </g>
-        ))}
+          )
+        })}
         {series.map((s) => (
           <path key={s.id} d={gen(s.points) ?? ''} fill="none" stroke={s.color} strokeWidth={s.width ?? 2} strokeDasharray={s.dash ?? (s.dashed ? '5 4' : undefined)} strokeLinejoin="round" strokeLinecap={s.dash ? 'round' : undefined} />
         ))}
         {(() => {
           // direct end labels, nudged apart so they never overprint
-          const labs = series.filter((s) => s.legend !== false).map((s) => {
+          const labs = (endLabels ? series : []).filter((s) => s.legend !== false).map((s) => {
             const last = [...s.points].reverse().find((p) => p.y != null)
             return last ? { id: s.id, text: s.label.split(' (')[0], x: x(last.x) + 6, y: y(last.y!) } : null
           }).filter((l): l is { id: string; text: string; x: number; y: number } => l != null).sort((a, b) => a.y - b.y)

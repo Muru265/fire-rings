@@ -90,6 +90,19 @@ try {
   check('box outside region is clipped with a warning', await page.getByText('box clipped to').isVisible())
   await page.screenshot({ path: resolve(out, 'e2e_box.png'), fullPage: false })
 
+  // QA #44: mode toggle switches everything, goes into the URL and is remembered
+  await page.goto(`http://localhost:${PORT}/r/madagascar`, { waitUntil: 'load' })
+  await page.getByTestId('mode-detail').click()
+  await page.waitForTimeout(600)
+  check('High detail toggle → URL + chip', page.url().includes('mode=detail') && (await page.getByTestId('mode-chip').innerText()).includes('High detail'))
+  check('High detail: rings start 2012', ((await page.locator('svg[role="grid"] [role="gridcell"]').first().getAttribute('aria-label')) ?? '').includes('2012'))
+  await page.goto(`http://localhost:${PORT}/r/punjab`, { waitUntil: 'load' })
+  await page.waitForTimeout(400)
+  check('mode remembered across pages', (await page.getByTestId('mode-chip').innerText()).includes('High detail'))
+  await page.getByTestId('mode-longterm').click()
+  await page.waitForTimeout(400)
+  check('back to Long-term', !page.url().includes('mode=detail') && (await page.getByTestId('mode-chip').innerText()).includes('Long-term'))
+
   // QA #38: Proof before/after — raw line drawn from 2001 with a 2012 bridge; "Show the fix" morphs it onto harmonized
   await page.goto(`http://localhost:${PORT}/proof`, { waitUntil: 'load' })
   const fix = page.getByTestId('ba-show-fix')

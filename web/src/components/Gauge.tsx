@@ -56,7 +56,7 @@ export default function Gauge({ j }: { j: Judgement }) {
         <div className="mt-1 text-xs text-muted">{has ? 'of the typical month' : ''}</div>
         <div className="num mt-2 text-sm text-text">{label}</div>
         {has && (j.beyond || j.rp) && (j.ratio ?? 0) > 1 && (
-          <div className="mt-1 text-xs text-muted">{j.beyond ? 'beyond the 2003–2022 record' : `about 1-in-${Math.round(j.rp!)} years`}</div>
+          <div className="mt-1 text-xs text-muted">{j.beyond ? `beyond the ${j.baseline?.[0] ?? 2003}–${j.baseline?.[1] ?? 2022} record` : `about 1-in-${Math.round(j.rp!)} years`}</div>
         )}
         {has && (
           <div className="mt-2 text-[11px] text-faint">Needle = where this month ranks against the same month in past years · white band = our uncertainty for that rank</div>

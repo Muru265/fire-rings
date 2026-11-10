@@ -5,12 +5,14 @@ import { useJson } from '../lib/api'
 import { pctRange } from '../lib/describe'
 import { fmtCompact, fmtInt, fmtRatio } from '../lib/format'
 import { factorOf, loadCells, monthCells } from '../lib/hexes'
+import type { HexRes } from '../lib/hexes'
 import { headline, judgeMonth } from '../lib/headline'
 import { MONTHS } from '../lib/series'
 import { COUNT_COLORS } from '../lib/scales'
 import type { MonthRec, RegionDoc } from '../lib/types'
 import { downloadText } from '../lib/exporters'
 import { DataTable } from './ChartCard'
+import { unitOf } from '../lib/mode'
 
 type Daily = Record<string, { modis?: number[]; viirs?: number[]; off?: number[] }>
 
@@ -107,12 +109,12 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
             {series && series.off.length > 0 && (
               <p className="mt-1 text-[11px] text-warn">Hatched days ({series.off.join(', ')}): the satellite sent no data for this region — not zero fire.</p>
             )}
-            <p className="mt-1 text-[11px] text-faint">Bars: this month (MODIS-equivalent, daily cell-days × calibration). Band: P10–P90 of the same day in {doc.baseline[0]}–{doc.baseline[1]}; line: median.</p>
+            <p className="mt-1 text-[11px] text-faint">Bars: this month ({doc.mode === 'detail' ? 'VIIRS native daily cell-days' : 'MODIS-equivalent, daily cell-days × calibration'}). Band: P10–P90 of the same day in {doc.baseline[0]}–{doc.baseline[1]}; line: median.</p>
           </section>
 
           <section aria-labelledby="dots-h">
             <h3 id="dots-h" className="mb-2 font-display text-sm font-semibold">Every {MONTHS[rec.m - 1]} in the baseline</h3>
-            <DotPlot vals={baseVals} rec={rec} median={doc.climatology?.median[rec.m - 1] ?? null} />
+            <DotPlot vals={baseVals} rec={rec} median={doc.climatology?.median[rec.m - 1] ?? null} unit={unitOf(doc)} />
           </section>
 
           <section aria-labelledby="mini-h">
@@ -132,7 +134,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
             )}
             {series && (
               <button onClick={() => downloadText(`fire-rings_${doc.id}_${key}_daily.csv`,
-                `# Fire Rings v1 · ${doc.name} · ${key} · daily fire-days (MODIS-equivalent)\nday,fire_days,baseline_p10,baseline_median,baseline_p90\n` +
+                `# Fire Rings v1 · ${doc.name} · ${key} · daily ${unitOf(doc)}\nday,fire_days,baseline_p10,baseline_median,baseline_p90\n` +
                 series.band.map((b, i) => [i + 1, series.cur[i]?.toFixed(1) ?? '', b?.p10.toFixed(1) ?? '', b?.p50.toFixed(1) ?? '', b?.p90.toFixed(1) ?? ''].join(',')).join('\n'))}
                 className="rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text hover:bg-surface-2">Download daily CSV</button>
             )}
@@ -178,7 +180,7 @@ function DailyChart({ cur, band, n, off = [] }: { cur: number[]; band: ({ p10: n
   )
 }
 
-function DotPlot({ vals, rec, median }: { vals: MonthRec[]; rec: MonthRec; median: number | null }) {
+function DotPlot({ vals, rec, median, unit }: { vals: MonthRec[]; rec: MonthRec; median: number | null; unit: string }) {
   const [hov, setHov] = useState<MonthRec | null>(null)
   const W = 470
   const H = 74
@@ -204,7 +206,7 @@ function DotPlot({ vals, rec, median }: { vals: MonthRec[]; rec: MonthRec; media
         {rec.H != null && <text x={x(rec.H)} y={Y + 24} textAnchor={anchor(x(rec.H))} className="fill-[var(--accent)] text-[10px]">
           {mon} {rec.y} ({fmtInt(rec.H)}{rec.lo != null ? `, 90% ${fmtInt(rec.lo)}–${fmtInt(rec.hi)}` : ''})</text>}
         <text x={14} y={H - 2} className="fill-[var(--text-faint)] font-mono text-[9px]">0</text>
-        <text x={W / 2} y={H - 2} textAnchor="middle" className="fill-[var(--text-faint)] text-[9px]">fire-days (MODIS-equivalent)</text>
+        <text x={W / 2} y={H - 2} textAnchor="middle" className="fill-[var(--text-faint)] text-[9px]">{unit}</text>
         <text x={W - 14} y={H - 2} textAnchor="end" className="fill-[var(--text-faint)] font-mono text-[9px]">{fmtCompact(x.domain()[1])}</text>
       </svg>
       <p className="mt-1 min-h-[1rem] text-[11px] text-muted" aria-live="polite">
@@ -217,6 +219,7 @@ function DotPlot({ vals, rec, median }: { vals: MonthRec[]; rec: MonthRec; media
 function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
   const [pts, setPts] = useState<{ x: number; y: number; v: number }[] | null>(null)
   const [foot, setFoot] = useState<{ x: number; y: number }[]>([])
+  const res: HexRes = doc.mode === 'detail' && y >= 2012 ? 7 : 6
   const [err, setErr] = useState<string | null>(null)
   const [w, s, e, n] = doc.bbox
   const W = 470
@@ -224,7 +227,7 @@ function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
   const H = Math.min(360, Math.max(160, (W * (n - s)) / ((e - w) * kx)))
   useEffect(() => {
     let alive = true
-    Promise.all([loadCells(doc.id), monthCells(doc.id, y, m)]).then(([{ ids, ll }, cells]) => {
+    Promise.all([loadCells(doc.id, res), monthCells(doc.id, y, m, res)]).then(([{ ids, ll }, cells]) => {
       if (!alive) return
       const idx = new Map(ids.map((id, i) => [id, i]))
       // every hexagon that ever had fire, drawn faintly: gives the region's shape without a basemap
@@ -232,7 +235,7 @@ function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
       setPts(cells.map((c) => { const [lat, lng] = ll[idx.get(c.id)!]; return { x: ((lng - w) / (e - w)) * W, y: ((n - lat) / (n - s)) * H, v: c.v } }))
     }).catch((er: Error) => alive && setErr(er.message))
     return () => { alive = false }
-  }, [doc.id, y, m, w, s, e, n, H])
+  }, [doc.id, y, m, w, s, e, n, H, res])
   if (err) return <p className="text-xs text-danger">{err}</p>
   if (!pts) return <div className="h-[200px] animate-pulse rounded-sm bg-surface-2" />
   if (!pts.length) return <p className="rounded-sm bg-surface-2 p-4 text-xs text-muted">No vegetation-fire hotspots detected in this month.</p>
@@ -259,7 +262,7 @@ function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
         <span className="flex items-center gap-1">fewer
           <span className="inline-flex">{COUNT_COLORS.map((c) => <span key={c} className="h-2.5 w-3" style={{ background: c }} />)}</span>
-          more days with fire in each ~36 km² hexagon ({fmtInt(vals[0])}–{fmtInt(vals[vals.length - 1])} days, raw satellite count)</span>
+          more days with fire in each {res === 7 ? '~5 km²' : '~36 km²'} hexagon ({fmtInt(vals[0])}–{fmtInt(vals[vals.length - 1])} days, raw satellite count)</span>
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-surface-3" />ever had fire (2001–now)</span>
         <span className="flex items-center gap-1"><span className="h-2.5 w-3 border border-dashed border-text-faint" />region box</span>
       </div>

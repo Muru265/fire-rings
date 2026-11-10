@@ -4,6 +4,7 @@ import { fmtCompact, fmtInt } from '../lib/format'
 import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import ChartCard from './ChartCard'
+import { unitOf } from '../lib/mode'
 
 const H = 240
 const M = { t: 22, r: 8, b: 26, l: 44 }
@@ -48,7 +49,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
     }
   }
   const table = {
-    caption: 'Annual fire-days (MODIS-equivalent) with 90% interval',
+    caption: `Annual ${unitOf(doc)} with 90% range`,
     columns: ['Year', 'Fire-days', '90% low', '90% high', 'Complete', 'Ranked'],
     rows: data.map((d) => [d.y, fmtInt(d.H), fmtInt(d.lo), fmtInt(d.hi), d.complete ? 'yes' : 'partial',
       d.rankable === false ? (d.terra_only_months ? 'no (Terra only)' : 'no') : 'yes']),
@@ -57,7 +58,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
     <ChartCard id="annual" title="Annual totals" table={table}
       subtitle={<span data-testid="annual-takeaway">{takeaway(doc)}</span>}>
       <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted" aria-label="Legend">
-        <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] bg-[#E55C30]" />MODIS-equivalent fire-days per year</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] bg-[#E55C30]" />{unitOf(doc)} per year</li>
         <li className="flex items-center gap-1.5"><span className="h-3 w-px bg-text" />whisker = 90% range</li>
         <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] border border-[#E55C30]" />incomplete year</li>
         <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px]" style={{ background: 'repeating-linear-gradient(45deg,#E55C30 0 1.5px,transparent 1.5px 4px)' }} />Terra-only months (not ranked)</li>
@@ -77,7 +78,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
           ))}
           {(() => {
             const after = data.find((d) => d.y >= 2012)
-            if (!after) return null
+            if (!after || data[0].y >= 2012) return null   // High detail starts in 2012: no switch to show
             const sx = x(after.y)! - (x.step() - x.bandwidth()) / 2
             return (
               <g>
@@ -109,7 +110,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
         </svg>
       </div>
       <p className="mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
-        {hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> MODIS-equivalent fire-days
+        {hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> {unitOf(doc)}
           {hv.lo != null && <> · 90% range {fmtInt(hv.lo)}–{fmtInt(hv.hi)}</>}{hv.rankable === false && hv.terra_only_months ? ' · Terra only, not ranked' : ''}</> : 'Hover a year for its values.'}
       </p>
     </ChartCard>

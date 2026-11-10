@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchJson } from '../lib/api'
 import { fmtCompact, fmtInt } from '../lib/format'
-import { monthCells } from '../lib/hexes'
-import type { Box } from '../lib/hexes'
+import { factorOf, monthCells } from '../lib/hexes'
+import type { Box, HexRes } from '../lib/hexes'
 import type { LiveData } from '../lib/live'
 import { REGIONS } from '../lib/regions'
 import { COUNT_COLORS } from '../lib/scales'
@@ -72,7 +72,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const [ready, setReady] = useState(false)
   const [drawing, setDrawing] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const [stats, setStats] = useState<{ cells: number; max: number } | null>(null)
+  const [stats, setStats] = useState<{ cells: number; min: number; max: number } | null>(null)
   const [pts, setPts] = useState<{ n: number; available: boolean } | null>(null)
   const [zoom, setZoom] = useState(0)
   const [showLive, setShowLive] = useState(true)
@@ -148,12 +148,18 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc.id])
 
-  // month hexes
+  // month hexes — High detail mode uses finer res-7 hexagons (~5 km², native VIIRS) so the 375 m detail shows (QA #44)
+  const res: HexRes = doc.mode === 'detail' && y >= 2012 ? 7 : 6
   useEffect(() => {
     if (!ready || !map.current) return
     let alive = true
-    monthCells(doc.id, y, m).then((cells) => {
+    // QA #19: same unit as the rest of the page — Long-term multiplies raw cell-days by the month's ratio (k, q or k·k′)
+    // → MODIS-equivalent; High detail is native VIIRS (factor 1, or k′ for NOAA-20 months)
+    const rec = doc.months.find((r) => r.y === y && r.m === m)
+    const f = (rec && factorOf(doc, rec)) ?? 1
+    monthCells(doc.id, y, m, res).then((raw) => {
       if (!alive || !map.current) return
+      const cells = raw.map((c) => ({ id: c.id, v: c.v * f }))
       const vals = cells.map((c) => c.v).sort((a, b) => a - b)
       const q = (p: number) => vals[Math.min(vals.length - 1, Math.floor(p * vals.length))] ?? 0
       const breaks = [1, 2, 3, 4, 5, 6].map((i) => q(i / 7))
@@ -163,10 +169,10 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         geometry: { type: 'Polygon' as const, coordinates: [cellToBoundary(c.id, true)] },
       }))
       ;(map.current.getSource('hex') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features })
-      setStats({ cells: cells.length, max: vals[vals.length - 1] ?? 0 })
+      setStats({ cells: cells.length, min: vals[0] ?? 0, max: vals[vals.length - 1] ?? 0 })
     }).catch((e: Error) => alive && setErr(e.message))
     return () => { alive = false }
-  }, [ready, doc.id, y, m])
+  }, [ready, doc, y, m, res])
 
   // detection points (small regions: always; large regions: latest months, drawn from zoom 9)
   useEffect(() => {
@@ -233,7 +239,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         <div>
           <h2 id="map-h" className="font-display text-lg font-semibold">Map · {MONTHS[m - 1]} {y}</h2>
           <p className="mt-0.5 text-xs text-muted">
-            Each hexagon (~36 km²) is coloured by how many days it had fire this month ({y < 2012 ? 'MODIS' : 'VIIRS'}, raw count)
+            Each hexagon ({res === 7 ? '~5 km², High detail' : '~36 km²'}) is coloured by its fire-days this month ({doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'})
             {stats ? <> · <strong className="text-text">{fmtInt(stats.cells)}</strong> hexagons had fire</> : ''}
           </p>
         </div>
@@ -252,9 +258,9 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         <div className="absolute bottom-3 left-3 max-w-[260px] space-y-1.5 rounded-sm bg-surface/90 px-2.5 py-2 text-[10px] backdrop-blur">
           {stats && stats.cells > 0 && (
             <div>
-              <div className="mb-1 text-muted">days with fire per hexagon</div>
+              <div className="mb-1 text-muted">{doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'} fire-days per hexagon, {MONTHS[m - 1]} {y}</div>
               <div className="flex items-center gap-1">{COUNT_COLORS.map((c) => <span key={c} className="h-2.5 w-4 rounded-[2px]" style={{ background: c }} />)}</div>
-              <div className="num mt-0.5 flex justify-between text-faint"><span>1</span><span>{fmtCompact(stats.max)}</span></div>
+              <div className="num mt-0.5 flex justify-between text-faint"><span>{stats.min < 10 ? stats.min.toFixed(1) : fmtCompact(stats.min)}</span><span>{stats.max < 10 ? stats.max.toFixed(1) : fmtCompact(stats.max)}</span></div>
             </div>
           )}
           {pointsVisible && (

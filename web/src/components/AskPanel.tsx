@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { askFireRings, CHIPS, regionInQuestion } from '../lib/ask'
+import type { DataMode } from '../lib/types'
 import type { Answer, Voice } from '../lib/ask'
 import { REGIONS } from '../lib/regions'
 import AnswerCard from './AnswerCard'
@@ -8,7 +9,7 @@ import AnswerCard from './AnswerCard'
 interface Turn { id: number; question: string; region: string; voice: Voice; status: 'loading' | 'done' | 'error'; answer?: Answer; error?: string }
 
 /** Chat with the grounded analyst. Used in the region drawer and on /ask. */
-export default function AskPanel({ initialRegion, initialQuestion, compact }: { initialRegion?: string; initialQuestion?: string; compact?: boolean }) {
+export default function AskPanel({ initialRegion, initialQuestion, compact, mode = 'longterm' }: { initialRegion?: string; initialQuestion?: string; compact?: boolean; mode?: DataMode }) {
   const [region, setRegion] = useState(initialRegion ?? 'punjab')
   const [voice, setVoice] = useState<Voice>('responder')
   const [q, setQ] = useState('')
@@ -29,7 +30,7 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
     setTurns((ts) => [{ id, question: text, region: useRegion, voice, status: 'loading' }, ...ts])
     setQ('')
     try {
-      const a = await askFireRings(text, useRegion, voice)
+      const a = await askFireRings(text, useRegion, voice, mode)
       const withNote = named && named !== region ? { ...a, switched_region: named } : a
       setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'done', answer: withNote } : t)))
     } catch (e) {

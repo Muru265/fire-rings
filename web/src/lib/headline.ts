@@ -24,6 +24,8 @@ export interface Judgement {
   terraOnly: boolean
   /** Punjab Oct–Nov 2022+: detection-time caveat text (docs/punjab_timing.md) */
   timingCaveat: string | null
+  /** baseline years of the view (Long-term 2003–2022, High detail 2013–2022) */
+  baseline?: [number, number]
 }
 
 /** Judgement for a month record (uses the per-month stats exported by 07_stats). */
@@ -40,6 +42,7 @@ export function judgeMonth(doc: RegionDoc, r: MonthRec): Judgement {
     provisional: r.flags.includes('provisional'), uncertain: r.flags.includes('uncertain'),
     terraOnly: r.flags.includes('terra_only'),
     timingCaveat: r.flags.includes('overpass_timing') ? doc.caveats?.overpass_timing ?? null : null,
+    baseline: doc.baseline,
   }
 }
 
@@ -57,7 +60,7 @@ export function headline(j: Judgement): { lead: string; rest: string } {
   if (j.rank != null && j.rankOf != null && j.rank === 1) parts.push(`the highest ${full} on record`)
   else if (j.rank != null && j.rankOf != null && j.rank === j.rankOf) parts.push(`the lowest ${full} on record`)
   else if (j.pct) parts.push(j.pct[0] === j.pct[1] ? `${ordinal(j.pct[0])} percentile` : `${ordinal(j.pct[0])}–${ordinal(j.pct[1])} percentile`)
-  if (j.beyond) parts.push('beyond anything in the 2003–2022 baseline')
+  if (j.beyond) parts.push(`beyond anything in the ${j.baseline?.[0] ?? 2003}–${j.baseline?.[1] ?? 2022} baseline`)
   else if (j.rp != null && r != null && r > 1) parts.push(`about a 1-in-${Math.round(j.rp)}-year ${full}`)
   const tail = [j.provisional ? 'Provisional.' : '', j.uncertain ? 'Uncertain.' : '',
     j.terraOnly ? 'Terra only — wider uncertainty; not ranked.' : '', j.timingCaveat ?? ''].filter(Boolean).join(' ')

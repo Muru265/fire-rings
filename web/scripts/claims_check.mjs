@@ -91,6 +91,34 @@ try {
     // validation badge
     const hdr = await page.locator('main header').first().innerText()
     if (d.validation) check(P, 'validation badge', hdr, d.validation.low_activity ? 'low-activity region' : `${d.validation.loyo_err_pct}% out-of-sample error`)
+    if (d.detail) check(P, 'adds card ratio (native ÷ MODIS-eq)', await page.getByTestId('adds-card').innerText(), `${d.detail.adds.ratio.toFixed(1)}×`)
+  }
+
+  // ---- High detail mode (QA #44): the same checks against the native VIIRS fields --------------------------------
+  for (const { id } of meta.regions) {
+    const d = J(`regions/${id}.json`)
+    if (!d.detail) continue
+    const P = `/r/${id}?mode=detail`
+    await page.goto(base + P, { waitUntil: 'load' })
+    await page.waitForSelector('svg[role="grid"] [role="gridcell"]')
+    await page.waitForTimeout(900)
+    const det = d.detail
+    const lc = det.latest_complete
+    const lcRec = d.months.find((r) => r.y === lc.y && r.m === lc.m)
+    const head = await page.locator('main p.font-display').first().innerText()
+    check(P, 'detail: mode chip', await page.getByTestId('mode-chip').innerText(), 'High detail')
+    check(P, 'detail: headline month', head, `${FULL[lc.m - 1]} ${lc.y}`)
+    if (lcRec.V_guard) check(P, 'detail: headline guard', head, 'too little fire to judge')
+    else check(P, 'detail: headline ratio', head, `${fmtRatio(lcRec.V_ratio)} a typical ${FULL[lc.m - 1]}`)
+    const card = (label) => page.locator('.card').filter({ has: page.locator('span.eyebrow', { hasText: label }) }).first().innerText()
+    const lt = det.latest
+    const tm = await card('This month')
+    check(P, 'detail: KPI this month value', tm, fmtInt(lt.value))
+    const peak = det.climatology.median.indexOf(Math.max(...det.climatology.median))
+    check(P, 'detail: KPI peak median', await card('Peak month'), `typical median ${fmtInt(det.climatology.median[peak])}`)
+    check(P, 'detail: baseline label', await page.getByTestId('detail-note').innerText(), `${det.baseline[0]}–${det.baseline[1]}`)
+    const firstRing = await page.locator('svg[role="grid"] [role="gridcell"]').first().getAttribute('aria-label')
+    check(P, 'detail: record starts 2012', firstRing ?? '', '2012')
   }
 
   // ---- landing: globe panel + region cards ---------------------------------------------------------------------

@@ -40,10 +40,13 @@ export default function Proof() {
           <a href={`${REPO}/blob/main/pipeline/06_validate.py`} target="_blank" rel="noreferrer" className="num text-xs">pipeline/06_validate.py ↗</a> and is tested out of sample.
           Full results: <a href={`${REPO}/blob/main/docs/validation_report.md`} target="_blank" rel="noreferrer">docs/validation_report.md ↗</a>.
         </p>
-        <p className="mt-3 rounded-sm border border-border bg-surface-2 px-3 py-2 text-sm text-muted">
-          <strong className="text-text">What we keep vs what we convert.</strong> Converting the new satellite into old-satellite units is only for the
-          25-year comparison (Long-term mode). The new satellite’s full 375 m detail is kept, not thrown away — it is shown as-is in High detail mode.
-        </p>
+        <div id="two-views" className="mt-3 rounded-sm border border-border bg-surface-2 px-3 py-2 text-sm text-muted">
+          <p><strong className="text-text">Two views of the same data — what we keep vs what we convert.</strong> Think of an old blurry photo next to a sharp new one:
+            to compare them fairly you blur the new one to match (<strong className="text-text">Long-term</strong>, 2001–now). To see today in full detail you look at the
+            new photo as it is (<strong className="text-text">High detail</strong>, 2012–now, native VIIRS 375 m).</p>
+          <p className="mt-1">Use Long-term for trends and “is this normal over 25 years?”; use High detail for where fires are now and small fires the old camera missed.
+            We scale VIIRS <em>down</em> for trends and never invent detail for old years. <a href={`${REPO}/blob/main/METHODS.md#8d-two-views-of-the-same-data-long-term-vs-high-detail-07b_detailpy-qa-44`} target="_blank" rel="noreferrer">How High detail is computed ↗</a></p>
+        </div>
       </header>
 
       <div role="tablist" aria-label="Region" className="flex flex-wrap gap-1.5">

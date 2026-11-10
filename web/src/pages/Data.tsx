@@ -16,6 +16,7 @@ const DICT: [string, string, string][] = [
   ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius'],
   ['year, month', '—', 'Calendar month (local solar day = UTC + longitude/15 h)'],
   ['H', 'fire cell-days (MODIS-equivalent)', 'Harmonized monthly value. One fire cell-day = one H3 resolution-6 hexagon (~36 km²) with ≥1 kept detection on one solar day'],
+  ['V_native, V_lo, V_hi', 'fire cell-days (VIIRS native)', 'High detail (2012+): VIIRS 375 m fire cell-days as seen, S-NPP-equivalent (NOAA-20 × k′ after S-NPP ended), not converted to MODIS units. V_lo/V_hi = 5th/95th percentile of Poisson counting noise. H = k × V on these months'],
   ['H_lo, H_hi', 'fire cell-days', '5th and 95th percentiles of 500 year-block bootstrap draws (+ Poisson noise)'],
   ['raw_modis_celldays', 'fire cell-days', 'MODIS Terra ∪ Aqua cell-days, coverage-adjusted, no calibration'],
   ['raw_viirs_celldays', 'fire cell-days', 'VIIRS cell-days (S-NPP to Oct 2026, NOAA-20 from Nov 2026), coverage-adjusted, no calibration'],

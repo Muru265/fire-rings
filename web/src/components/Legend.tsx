@@ -4,7 +4,7 @@ import type { CalMode } from '../lib/types'
 
 const NODATA_BG = 'repeating-linear-gradient(45deg, var(--border-strong) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, var(--border-strong) 0 1px, transparent 1px 4px)'
 
-export default function Legend({ scale, unit, mode = 'counts', vertical }: { scale: ClassScale; unit: string; mode?: CalMode; vertical?: boolean }) {
+export default function Legend({ scale, unit, mode = 'counts', vertical, baseline = [2003, 2022] }: { scale: ClassScale; unit: string; mode?: CalMode; vertical?: boolean; baseline?: [number, number] }) {
   const items = mode === 'anomaly'
     ? ANOM_COLORS.map((c, i) => ({ c, label: ANOM_LABELS[i] }))
     : scale.colors.map((c, i) => ({ c, label: scale.labels[i] }))
@@ -54,7 +54,7 @@ export default function Legend({ scale, unit, mode = 'counts', vertical }: { sca
           {scale.colors.length} quantile classes of this region's non-zero months{scale.colors.length < 7 ? ' (tied values merged)' : ''}.
         </p>
       ) : (
-        <p className="mt-3 text-faint">▲ ≥ 2× typical · ▼ ≤ ½ typical. Typical = baseline median 2003–2022.</p>
+        <p className="mt-3 text-faint">▲ ≥ 2× typical · ▼ ≤ ½ typical. Typical = baseline median {baseline[0]}–{baseline[1]}.</p>
       )}
     </figure>
   )

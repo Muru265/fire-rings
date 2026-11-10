@@ -25,8 +25,9 @@ export const CAVEATS = {
   no_forecast: 'Fire Rings describes fires already detected by satellites; it does not forecast future fire activity.',
 } as const
 
-const pctText = (p: [number, number]) => p[1] === 0 ? 'below every year in the 2003–2022 baseline'
-  : p[0] >= 95 ? 'above every year in the 2003–2022 baseline'
+// top possible Weibull percentile with n baseline years = 100·n/(n+1): 95 for 2003–2022, 91 for 2013–2022
+const pctText = (p: [number, number], b: [number, number] = [2003, 2022]) => p[1] === 0 ? `below every year in the ${b[0]}–${b[1]} baseline`
+  : p[0] >= Math.round((100 * (b[1] - b[0] + 1)) / (b[1] - b[0] + 2)) ? `above every year in the ${b[0]}–${b[1]} baseline`
   : p[0] === p[1] ? `${ord(p[0])} percentile` : `${ord(p[0])}–${ord(p[1])} percentile`
 
 export const REGION_ALIASES: Record<string, string[]> = {
@@ -90,6 +91,8 @@ function modeView(doc: any, mode: Mode) {
     ratio: (r: any) => (detail ? r.V_ratio : r.ratio), pct: (r: any) => (detail ? r.V_pct : r.pct), guard: (r: any) => (detail ? r.V_guard : r.guard),
     clim: detail ? doc.detail.climatology : doc.climatology, annual: detail ? doc.detail.annual : doc.annual,
     baseline: detail ? doc.detail.baseline : doc.baseline,
+    latest: detail ? doc.detail.latest : doc.latest,
+    rp: (r: any) => (detail ? r.V_rp : r.rp), beyond: (r: any) => (detail ? r.V_beyond : r.beyond), rank: (r: any) => (detail ? r.V_rank : r.rank),
     unit: detail ? 'VIIRS fire-days (native 375 m, S-NPP-equivalent)' : 'MODIS-equivalent fire-days',
     note: mode === 'detail' && !doc.detail ? 'High-detail data is not published for this region; Long-term values are shown.' : undefined,
   }
@@ -112,8 +115,8 @@ function caveatsFor(doc: any, rec: any | null, mv: ReturnType<typeof modeView>, 
 }
 
 function monthView(doc: any, rec: any, mv: ReturnType<typeof modeView>) {
-  const lt = doc.latest
-  const mtd = rec.flags.includes('mtd') && lt && lt.y === rec.y && lt.m === rec.m && !mv.detail
+  const lt = mv.latest
+  const mtd = rec.flags.includes('mtd') && lt && lt.y === rec.y && lt.m === rec.m
   const median = mtd ? lt.median : mv.clim?.median?.[rec.m - 1]
   const guard = !!mv.guard(rec)
   const pct = mv.pct(rec)
@@ -123,10 +126,10 @@ function monthView(doc: any, rec: any, mv: ReturnType<typeof modeView>) {
     fire_days: r0(mv.val(rec)), range_90: mv.lo(rec) != null ? [r0(mv.lo(rec)), r0(mv.hi(rec))] : null,
     typical_fire_days: r0(median), baseline: `${mv.baseline[0]}–${mv.baseline[1]}`,
     ratio_to_typical: guard ? null : r1(mv.ratio(rec)),
-    percentile: guard || !pct ? null : pctText(pct),
-    return_period_years: guard || rec.rp == null || mv.detail ? null : r0(rec.rp),
-    beyond_baseline_record: !!rec.beyond && !mv.detail,
-    rank_among_years_for_this_month: mv.detail ? null : rec.rank ?? null,
+    percentile: guard || !pct ? null : pctText(pct, mv.baseline),
+    return_period_years: guard || mv.rp(rec) == null ? null : r0(mv.rp(rec)),
+    beyond_baseline_record: !!mv.beyond(rec),
+    rank_among_years_for_this_month: mv.rank(rec) ?? null,
     too_little_fire_to_judge: guard,
     raw_hotspots: { modis: rec.hot_modis, viirs: rec.y >= 2012 ? rec.hot_viirs : null },
     ...caveatsFor(doc, rec, mv),

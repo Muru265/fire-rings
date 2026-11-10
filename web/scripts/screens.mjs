@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const out = resolve(here, '../../docs/screens')
 mkdirSync(out, { recursive: true })
 const PORT = 4179
-const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/r/punjab', '/r/madagascar', '/r/se_australia', '/r/mauritius', '/proof', '/data', '/ask', '/story/madagascar', '/does-not-exist']
+const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/r/punjab', '/r/madagascar', '/r/se_australia', '/r/mauritius', '/r/punjab?mode=detail', '/r/madagascar?mode=detail', '/proof', '/data', '/ask', '/story/madagascar', '/does-not-exist']
 const widths = [{ w: 1440, h: 900, tag: 'desktop' }, { w: 390, h: 844, tag: 'mobile' }]
 
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
@@ -33,7 +33,7 @@ try {
       await page.goto(base + p, { waitUntil: 'load' })
       if (p.startsWith('/r/')) await page.waitForSelector('svg[role="grid"]', { timeout: 15000 }).catch(() => {})
       await page.waitForTimeout(p.startsWith('/r/') || p === '/' ? 3500 : 800)
-      const name = (p === '/' ? 'landing' : p.slice(1).replace(/\//g, '_')) + `_${tag}.png`
+      const name = (p === '/' ? 'landing' : p.slice(1).replace(/\//g, '_').replace('?mode=', '_')) + `_${tag}.png`
       await page.screenshot({ path: resolve(out, name), fullPage: true })
       console.log('saved', name)
       if (p.startsWith('/r/') && tag === 'desktop') {

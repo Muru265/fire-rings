@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import AskPanel from './AskPanel'
+import type { DataMode } from '../lib/types'
 
-export default function AskDrawer({ region, question, onClose }: { region: string; question?: string; onClose: () => void }) {
+export default function AskDrawer({ region, question, onClose, mode }: { region: string; question?: string; onClose: () => void; mode?: DataMode }) {
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     closeRef.current?.focus()
@@ -20,7 +21,7 @@ export default function AskDrawer({ region, question, onClose }: { region: strin
           </div>
           <button ref={closeRef} onClick={onClose} className="rounded-sm border border-border-strong px-2.5 py-1 text-sm text-muted hover:text-text" aria-label="Close (Esc)">✕</button>
         </div>
-        <AskPanel initialRegion={region} initialQuestion={question} compact />
+        <AskPanel initialRegion={region} initialQuestion={question} compact mode={mode} />
       </aside>
     </div>
   )

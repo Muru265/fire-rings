@@ -190,6 +190,31 @@ island of Mauritius rather than the ocean between it and Rodrigues). Country-fil
 of their detections; detections more than one view-width away form an inset (Rodrigues). Regions whose view is under
 10,000 km² (Mauritius) publish every detection as map points; larger regions show points for the latest months from zoom 9.
 
+## 8d. Two views of the same data: Long-term vs High detail (`07b_detail.py`, QA #44)
+
+To compare 25 years fairly you must match the old camera's sharpness; to see today in full detail you use the new
+camera as it is. The app therefore has two modes (URL `?mode=detail`, remembered per browser):
+
+- **Long-term (2001–now, default)** — the harmonized record `H` above: VIIRS scaled *down* to MODIS-equivalent with
+  ratios fitted on Jul 2012 – Dec 2019 only; baseline 2003–2022. We never invent detail for old years.
+- **High detail (2012–now)** — `V`, native VIIRS 375 m fire cell-days, **not** converted:
+  `V = C*(S-NPP)` for 2012-01 … 2026-10 and `V = k′ · C*(NOAA-20)` from 2026-11 (the existing VIIRS↔VIIRS bridge, so the
+  end of S-NPP makes no new seam). `C*` is the same coverage-adjusted cell-day count the harmonized record uses, so
+  `H = k · V` on every VIIRS month (asserted in `07b_detail.py`, tested in `tests/test_detail.py`). No ratio is fitted,
+  nothing touches 2020+ calibration. Interval = 5th–95th percentile of Poisson counting noise (no calibration
+  uncertainty exists in this view). Baseline for "typical"/percentiles = **2013–2022** (10 full VIIRS years; Jan 2012
+  lacks coverage) — shorter, so percentiles are coarser (max 91st with 10 years) and uncertainty is wider; the UI says so.
+  Return periods, ranks, the low-activity guard and month-to-date (same days 1..D of 2013–2022, S-NPP daily cell-days)
+  use the same code as §8.
+- **Map**: Long-term = H3 res 6 (~36 km²); High detail = H3 res 7 (~5 km²) native VIIRS cell-days, primary VIIRS stream
+  per month (`web/public/data/v1/hexes7/`). Res 8 was not exported (≈7× larger files).
+- **"What the new satellite adds"** = Σ V ÷ Σ H over 2013–2022 months with both values (Punjab 2.9×, Madagascar 3.8×,
+  SE Australia 2.4×, Mauritius 4.6× in this run) — computed in the pipeline, never typed.
+- Native ≥ MODIS-equivalent holds wherever k ≤ 1. Where a monthly k > 1 (Punjab August, 1.20 — flagged low-reliability,
+  §5) the native value is below the MODIS-equivalent one; that is the small-sample k, not a data error.
+- CSV exports always carry both columns (`fire_days_modis_eq`, `fire_days_viirs_native`); the open dataset adds
+  `V_native, V_lo, V_hi`. Never mix the two in one comparison.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

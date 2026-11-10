@@ -198,6 +198,21 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         months[-1].update({"ratio": lt.get("ratio"), "pct": lt.get("pct"), "rp": lt.get("return_period"), "rp_range": lt.get("rp_range"),
                            "beyond": lt.get("beyond_record") or None, "rank": lt.get("rank"), "guard": lt.get("guard")})
 
+    # ---- High detail (QA #44): native VIIRS values next to each 2012+ month (07b_detail) --------------------------
+    det = opt_json(out / f"detail_{region}.json")
+    detail = None
+    if det:
+        dm = {(r["y"], r["m"]): r for r in det["months"]}
+        for rec in months:
+            d = dm.get((rec["y"], rec["m"]))
+            if d:
+                rec.update({"V": r1(d["V"]), "V_lo": r1(d["V_lo"]), "V_hi": r1(d["V_hi"]), "V_ratio": d["ratio"], "V_pct": d["pct"],
+                            "V_rp": d["rp"], "V_rp_range": d["rp_range"], "V_beyond": d["beyond"] or None,
+                            "V_rank": d["rank"], "V_guard": d["guard"]})
+        detail = {k: det[k] for k in ("baseline", "unit", "climatology", "latest", "latest_complete", "annual",
+                                      "similar_years", "similar_detail", "adds")}
+        detail["first"] = f"{det['months'][0]['y']}-{det['months'][0]['m']:02d}"
+
     bbox = rc.get("bbox")
     if bbox is None:
         clean = pl.read_parquet(path("clean") / f"{region}_filtered.parquet", columns=["lat", "lon"])
@@ -243,6 +258,25 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         for r in part.iter_rows(named=True):
             mm[r["m"] - 1] += [cid[r["h3r6"]], int(r["n_days"])]
         write_json(web / "hexes" / region / f"{y}.json", {"y": y, "m": mm}, compact=True)
+
+    # ---- High-detail hexes (QA #44): H3 res 7 (~5 km²), native VIIRS, 2012+, primary VIIRS stream per month ---------
+    clean_p7 = sql_path(path("clean") / f"{region}_filtered.parquet")
+    vkeep = pl.DataFrame([{"y": r["y"], "m": r["m"], "stream": viirs_stream(r["y"], r["m"])} for r in months if r["y"] >= 2012])
+    con.register("vkeep", vkeep.to_arrow())
+    c7 = pl.DataFrame(con.execute(f"""
+        SELECT h3_latlng_to_cell(lat, lon, 7) AS c, year(solar_date) AS y, month(solar_date) AS m, count(DISTINCT solar_date) AS n
+        FROM '{clean_p7}' f JOIN vkeep k ON year(f.solar_date) = k.y AND month(f.solar_date) = k.m AND f.stream = k.stream
+        GROUP BY 1, 2, 3""").fetchall(), schema=["c", "y", "m", "n"], orient="row")
+    cells7 = sorted(c7["c"].unique().to_list())
+    cid7 = {c: i for i, c in enumerate(cells7)}
+    strs7 = [s for (s,) in con.execute("SELECT h3_h3_to_string(c) FROM (SELECT unnest(?::UBIGINT[]) c)", [cells7]).fetchall()]
+    write_json(web / "hexes7" / region / "cells.json", strs7, compact=True)
+    for y, part in c7.group_by("y"):
+        y = y[0]
+        mm = [[] for _ in range(12)]
+        for r in part.iter_rows(named=True):
+            mm[r["m"] - 1] += [cid7[r["c"]], int(r["n"])]
+        write_json(web / "hexes7" / region / f"{y}.json", {"y": y, "m": mm}, compact=True)
 
     # ---- hotspot CSVs for the latest months ----------------------------------------------------------------
     clean_p = sql_path(path("clean") / f"{region}_filtered.parquet")
@@ -293,6 +327,7 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "hotspot_months": [f"{r['y']:04d}-{r['m']:02d}" for r in months[-HOTSPOT_MONTHS:]],
         "hex_years": sorted({r["y"] for r in months}),
         "harmonized": bool(harm),
+        "detail": detail,
     }
     write_json(web / "regions" / f"{region}.json", doc, compact=True)
     return {"id": region, "name": rc["name"], "bbox": bbox, "months": len(months), "method": method,
@@ -313,12 +348,13 @@ def write_dataset(regs: list[dict], web: Path) -> None:
                          "coverage_modis": mrec["cov_modis"], "coverage_viirs": mrec["cov_viirs"], "source": mrec["src"],
                          "flags": "|".join(mrec["flags"]), "ratio_to_median": mrec["ratio"],
                          "pct_lo": mrec["pct"][0] if mrec["pct"] else None, "pct_hi": mrec["pct"][1] if mrec["pct"] else None,
+                         "V_native": mrec.get("V"), "V_lo": mrec.get("V_lo"), "V_hi": mrec.get("V_hi"),
                          "method": d["method"], "calib_version": d["calib_version"]})
     df = pl.DataFrame(rows, infer_schema_length=None)
     df.write_parquet(ds / "harmonized_monthly_regions_v1.parquet")
     csv = ds / "harmonized_monthly_regions_v1.csv"
     with csv.open("w", encoding="utf-8", newline="") as fh:
-        fh.write(f"# {CITATION} Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day). "
+        fh.write(f"# {CITATION} Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day); V_native = High detail, native VIIRS 375 m fire cell-days (S-NPP-equivalent, 2012+, not converted). "
                  f"Regions: {', '.join(r['id'] for r in regs)}. Data through {regs[0]['doc']['data_end']}. "
                  "Dictionary: /data page.\n")
         fh.write(df.write_csv())

@@ -17,13 +17,19 @@ export function downloadText(name: string, text: string, type = 'text/csv;charse
 const cell = (v: number | null | undefined) => (v == null ? '' : String(v))
 
 /** Calendar CSV with a header comment line (region, dates, version, citation) — opens cleanly in Excel. */
-export function calendarCsv(name: string, months: MonthRec[], note: string): string {
+export function calendarCsv(name: string, months: MonthRec[], note: string, base?: MonthRec[]): string {
   const first = months[0]
   const last = months[months.length - 1]
   const head = `# Fire Rings v1 · ${name} · ${first.y}-${String(first.m).padStart(2, '0')} to ${last.y}-${String(last.m).padStart(2, '0')} · ${note} · ${CITATION}`
-  const cols = 'year,month,fire_days_H,H_lo90,H_hi90,raw_modis_celldays,raw_viirs_celldays,hotspots_modis,hotspots_viirs,source,flags,ratio_to_median,pct_lo,pct_hi'
-  const rows = months.map((r) => [r.y, r.m, cell(r.H), cell(r.lo), cell(r.hi), cell(r.raw_modis), cell(r.raw_viirs), cell(r.hot_modis),
-    cell(r.hot_viirs), r.src, r.flags.join('|'), cell(r.ratio), cell(r.pct?.[0]), cell(r.pct?.[1])].join(','))
+  // QA #44: always both units — Long-term (MODIS-equivalent) and High detail (native VIIRS, 2012+) — whatever the view.
+  // "months" may be a High-detail view (H = native); the base values travel in V and in the region doc, so take them from "base" when given.
+  const cols = 'year,month,fire_days_modis_eq,modis_eq_lo90,modis_eq_hi90,fire_days_viirs_native,viirs_native_lo90,viirs_native_hi90,raw_modis_celldays,raw_viirs_celldays,hotspots_modis,hotspots_viirs,source,flags,ratio_to_median,pct_lo,pct_hi'
+  const baseOf = new Map((base ?? months).map((r) => [`${r.y}-${r.m}`, r]))
+  const rows = months.map((r) => {
+    const b = baseOf.get(`${r.y}-${r.m}`) ?? r
+    return [r.y, r.m, cell(b.H), cell(b.lo), cell(b.hi), cell(b.V), cell(b.V_lo), cell(b.V_hi), cell(r.raw_modis), cell(r.raw_viirs), cell(r.hot_modis),
+      cell(r.hot_viirs), r.src, r.flags.join('|'), cell(r.ratio), cell(r.pct?.[0]), cell(r.pct?.[1])].join(',')
+  })
   return [head, cols, ...rows].join('\n') + '\n'
 }
 

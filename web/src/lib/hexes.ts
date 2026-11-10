@@ -8,17 +8,22 @@ interface YearFile { y: number; m: number[][] }
 
 const centroidCache = new Map<string, [number, number][]>()
 
-export async function loadCells(region: string): Promise<{ ids: string[]; ll: [number, number][] }> {
-  const ids = await fetchJson<string[]>(`hexes/${region}/cells.json`)
-  if (!centroidCache.has(region)) centroidCache.set(region, ids.map((c) => cellToLatLng(c)))
-  return { ids, ll: centroidCache.get(region)! }
+/** res 6 (~36 km², all years) or res 7 (~5 km², native VIIRS 2012+, High detail mode — QA #44) */
+export type HexRes = 6 | 7
+const dir = (res: HexRes) => (res === 7 ? 'hexes7' : 'hexes')
+
+export async function loadCells(region: string, res: HexRes = 6): Promise<{ ids: string[]; ll: [number, number][] }> {
+  const ids = await fetchJson<string[]>(`${dir(res)}/${region}/cells.json`)
+  const key = `${region}@${res}`
+  if (!centroidCache.has(key)) centroidCache.set(key, ids.map((c) => cellToLatLng(c)))
+  return { ids, ll: centroidCache.get(key)! }
 }
 
-export const loadYear = (region: string, y: number) => fetchJson<YearFile>(`hexes/${region}/${y}.json`)
+export const loadYear = (region: string, y: number, res: HexRes = 6) => fetchJson<YearFile>(`${dir(res)}/${region}/${y}.json`)
 
 /** Cells with fire-days in one month (raw cell-days of the primary stream). */
-export async function monthCells(region: string, y: number, m: number): Promise<{ id: string; v: number }[]> {
-  const [{ ids }, yf] = await Promise.all([loadCells(region), loadYear(region, y)])
+export async function monthCells(region: string, y: number, m: number, res: HexRes = 6): Promise<{ id: string; v: number }[]> {
+  const [{ ids }, yf] = await Promise.all([loadCells(region, res), loadYear(region, y, res)])
   const arr = yf.m[m - 1] ?? []
   const out: { id: string; v: number }[] = []
   for (let i = 0; i < arr.length; i += 2) out.push({ id: ids[arr[i]], v: arr[i + 1] })

@@ -17,12 +17,16 @@ import { makeColorer } from '../lib/colors'
 import { calibrationSummary } from '../lib/calibration'
 import { boxDerived } from '../lib/boxDerived'
 import { calendarCsv, downloadPng, downloadText } from '../lib/exporters'
-import { fmtInt } from '../lib/format'
+import { fmtCompact, fmtInt } from '../lib/format'
 import type { Box } from '../lib/hexes'
 import { headline, judgeMonth } from '../lib/headline'
 import { REGIONS, findRegion } from '../lib/regions'
 import { MONTHS, toGrid } from '../lib/series'
-import type { CalMode, RegionDoc } from '../lib/types'
+import type { CalMode, DataMode, RegionDoc } from '../lib/types'
+import { hasDetail, toDetail } from '../lib/detail'
+import { useMode } from '../lib/mode'
+import LineChart from '../components/LineChart'
+import type { Series } from '../components/LineChart'
 import type { Cell } from '../lib/useCellNav'
 
 const MapView = lazy(() => import('../components/MapView'))
@@ -55,7 +59,11 @@ export default function Region() {
   return <RegionView key={region.id} doc={doc.data} />
 }
 
-function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
+function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
+  // QA #44: Long-term (harmonized) vs High detail (native VIIRS) — one view doc, every panel switches together
+  const [dataMode, setDataMode] = useMode()
+  const detail = dataMode === 'detail' && hasDetail(baseDoc)
+  const regionDoc = useMemo(() => (detail ? toDetail(baseDoc) : baseDoc), [detail, baseDoc])
   const [box, setBox] = useState<Box | null>(null)
   const [boxState, setBoxState] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; months?: RegionDoc['months']; cells?: number; error?: string }>({ status: 'idle' })
   const [t, setT] = useState(regionDoc.harmonized ? 1 : 0)
@@ -90,11 +98,13 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
     ? { ...regionDoc, months: boxState.months!, ...boxDerived(regionDoc, boxState.months!) }
     : regionDoc), [boxed, regionDoc, boxState.months])
   const effMode: CalMode = boxed ? 'counts' : mode
-  const colorer = useMemo(() => makeColorer(doc, effMode, t), [doc, effMode, t])
+  // High detail has no raw↔fixed seam (nothing is converted): always show the record values
+  const tt = detail ? 1 : t
+  const colorer = useMemo(() => makeColorer(doc, effMode, tt), [doc, effMode, tt])
   const grid = useMemo(() => toGrid(doc.months), [doc])
-  const viewMode = t >= 0.5 ? 'harmonized' : 'raw'
-  const scale = t >= 0.5 ? colorer.harmScale : colorer.rawScale
-  const unit = viewMode === 'raw' ? 'Fire-days (raw cell-days)' : 'Fire-days (MODIS-equivalent)'
+  const viewMode = tt >= 0.5 ? 'harmonized' : 'raw'
+  const scale = tt >= 0.5 ? colorer.harmScale : colorer.rawScale
+  const unit = detail ? 'VIIRS fire-days (native 375 m)' : viewMode === 'raw' ? 'Fire-days (raw cell-days)' : 'Fire-days (MODIS-equivalent)'
   const label = `${doc.name}${boxed ? ' (box)' : ''}, ${viewMode} monthly fire-days`
 
   // insight month: selected/focused month, else the last complete month
@@ -123,10 +133,13 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
           </p>
           <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">{regionDoc.name}</h1>
           <RegionSwitcher current={regionDoc.id} />
+          {hasDetail(baseDoc) && <ModeToggle mode={detail ? 'detail' : 'longterm'} onChange={(m) => { setDataMode(m); setFocusMonth(null); setSelected(null); setCompareYear(null); applyBox(null) }} />}
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <LiveBadge live={live} />
-          {regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok">Harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}
+          {detail
+            ? <span className="rounded-full border border-accent-2/50 bg-accent-2/10 px-3 py-1 text-accent-2" data-testid="mode-chip">High detail · native VIIRS 375 m · 2012–now</span>
+            : regionDoc.harmonized && <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-ok" data-testid="mode-chip">Long-term · harmonized · method: {regionDoc.method === 'pooled' ? 'single ratio' : 'monthly ratios'}</span>}
           {v && <Link to="/proof" className="rounded-full border border-border-strong px-3 py-1 text-muted no-underline hover:text-text">
             Validated: {v.low_activity ? 'low-activity region' : `${v.loyo_err_pct}% out-of-sample error`}
           </Link>}
@@ -150,6 +163,13 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
           )}
         </div>
       )}
+      {detail && (
+        <p className="max-w-4xl rounded-sm border border-accent-2/40 bg-accent-2/10 px-3 py-2 text-sm text-text" data-testid="detail-note">
+          <strong>High detail:</strong> the new satellites’ full 375 m view, not converted to old-satellite units — more small fires, finer map.
+          “Typical” uses {regionDoc.baseline[0]}–{regionDoc.baseline[1]} (10 years): a <strong>shorter baseline, so wider uncertainty</strong>.
+          Not comparable with years before 2012 — switch to Long-term for the 25-year comparison.
+        </p>
+      )}
       {regionDoc.harmonized && <KpiCards doc={regionDoc} />}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -161,7 +181,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
               <button onClick={() => applyBox(null)} className="rounded-sm border border-border-strong px-3 py-1 text-xs text-text hover:bg-surface-2">Back to whole region</button>
             </div>
           )}
-          {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing 2001–2026 for the box…</p>}
+          {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing {first.y}–{last.y} for the box…</p>}
           {box && boxState.status === 'error' && <p className="rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn" role="status">{boxState.error}</p>}
 
           <section aria-labelledby="rings-h" className="card">
@@ -176,26 +196,33 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
                     </button>
                   ))}
                 </div>
-                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), doc.months, 'fire-days (MODIS-equivalent) + raw cell-days'))}
+                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}${detail ? '_detail' : ''}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), doc.months,
+                  `view: ${detail ? 'High detail' : 'Long-term'} · fire_days_modis_eq (MODIS-equivalent) and fire_days_viirs_native (VIIRS 375 m, S-NPP-equivalent, 2012+) + raw cell-days · ratio/pct columns follow the view`, boxed ? undefined : baseDoc.months))}
                   onPng={() => ringsRef.current && downloadPng(ringsRef.current, `fire-rings_${doc.id}.png`)} />
               </div>
             </div>
             <div ref={ringsRef} className="grid items-center gap-6 bg-surface lg:grid-cols-[minmax(0,1fr)_220px]">
               <FireRings grid={grid} colorOf={colorer.colorOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} drawIn
                 emphasis={compareYear ? (y) => y === compareYear || y === last.y : undefined}
-                centerLabel={effMode === 'anomaly' ? 'vs typical' : t <= 0 ? 'Raw' : t >= 1 ? 'Harmonized' : 'Morphing'} />
+                centerLabel={detail ? 'High detail' : effMode === 'anomaly' ? 'vs typical' : t <= 0 ? 'Raw' : t >= 1 ? 'Harmonized' : 'Morphing'} />
               <div className="space-y-5">
-                <Legend scale={scale} unit={unit} mode={effMode} vertical />
-                <p className="text-[10px] text-faint">Fire Rings · {doc.name}{boxed ? ' (box)' : ''} · {MONTHS[first.m - 1]} {first.y}–{MONTHS[last.m - 1]} {last.y} · {effMode === 'anomaly' ? 'ratio to 2003–2022 median' : unit} · NASA FIRMS MODIS + VIIRS · fire-rings.vercel.app</p>
+                <Legend scale={scale} unit={unit} mode={effMode} vertical baseline={regionDoc.baseline} />
+                <p className="text-[10px] text-faint">Fire Rings · {doc.name}{boxed ? ' (box)' : ''} · {detail ? 'High detail' : 'Long-term'} · {MONTHS[first.m - 1]} {first.y}–{MONTHS[last.m - 1]} {last.y} · {effMode === 'anomaly' ? `ratio to ${regionDoc.baseline[0]}–${regionDoc.baseline[1]} median` : unit} · NASA FIRMS {detail ? 'VIIRS' : 'MODIS + VIIRS'} · fire-rings.vercel.app</p>
               </div>
             </div>
             <div className="mt-5 border-t border-border pt-4">
-              <SeamSlider value={t} onChange={setT} disabled={effMode === 'anomaly' || !regionDoc.harmonized} />
-              <p className="mt-2 text-xs text-muted">
-                {t < 0.5
-                  ? 'Raw: MODIS cell-days to 2011, VIIRS after. The jump at the dashed ring is the satellite changing, not the fire.'
-                  : 'Harmonized: VIIRS converted to MODIS-equivalent fire-days with ratios fitted on Jul 2012 – Dec 2019 only.'}
-              </p>
+              {detail ? (
+                <p className="text-xs text-muted">High detail: VIIRS 375 m fire-days as seen (S-NPP, then NOAA-20 put on S-NPP’s footing with the existing VIIRS-to-VIIRS rate). Rings start in 2012, when VIIRS began; nothing is converted, so there is no raw↔fixed slider here.</p>
+              ) : (
+                <>
+                  <SeamSlider value={t} onChange={setT} disabled={effMode === 'anomaly' || !regionDoc.harmonized} />
+                  <p className="mt-2 text-xs text-muted">
+                    {t < 0.5
+                      ? 'Raw: MODIS cell-days to 2011, VIIRS after. The jump at the dashed ring is the satellite changing, not the fire.'
+                      : 'Harmonized: VIIRS converted to MODIS-equivalent fire-days with ratios fitted on Jul 2012 – Dec 2019 only.'}
+                  </p>
+                </>
+              )}
             </div>
           </section>
 
@@ -274,6 +301,8 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
             </section>
           )}
 
+          {baseDoc.detail && <AddsCard doc={baseDoc} />}
+
           <section className="card" aria-labelledby="ask-h">
             <h2 id="ask-h" className="eyebrow">Ask Fire Rings</h2>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -290,10 +319,12 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
               <dt className="text-faint">Data</dt><dd>NASA FIRMS MODIS C6.1 (Terra, Aqua), VIIRS 375 m (S-NPP, NOAA-20, NOAA-21)</dd>
               <dt className="text-faint">Through</dt><dd><span className="num">{new Date(regionDoc.data_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> · Aug–Nov 2026 are NRT = quick-look data, replaced by NASA’s final data about 5 months later</dd>
-              <dt className="text-faint">Unit</dt><dd>fire-day = one ~36 km² hexagon with at least one fire on one day (MODIS-equivalent)</dd>
-              <dt className="text-faint">Calibration</dt><dd>fitted Jul 2012 – Dec 2019 only · <CalibrationText doc={regionDoc} /></dd>
-              <dt className="text-faint">Baseline</dt><dd>“typical” = median of {regionDoc.baseline[0]}–{regionDoc.baseline[1]}</dd>
-              <dt className="text-faint">Mode</dt><dd>Long-term (2001–now, MODIS-equivalent)</dd>
+              <dt className="text-faint">Unit</dt><dd>fire-day = one ~36 km² hexagon with at least one fire on one day ({detail ? 'VIIRS native 375 m, S-NPP-equivalent' : 'MODIS-equivalent'})</dd>
+              <dt className="text-faint">Calibration</dt><dd>{detail
+                ? 'none — High detail shows VIIRS as seen; only NOAA-20 months (after S-NPP ended) use the VIIRS-to-VIIRS rate k′'
+                : <>fitted Jul 2012 – Dec 2019 only · <CalibrationText doc={baseDoc} /></>}</dd>
+              <dt className="text-faint">Baseline</dt><dd>“typical” = median of {regionDoc.baseline[0]}–{regionDoc.baseline[1]}{detail ? ' (10 VIIRS years: shorter, so wider uncertainty)' : ''}</dd>
+              <dt className="text-faint">Mode</dt><dd>{detail ? 'High detail (2012–now, native VIIRS 375 m)' : 'Long-term (2001–now, MODIS-equivalent)'}</dd>
               <dt className="text-faint">Updated</dt><dd>{new Date(regionDoc.updated.replace('Z', ':00Z')).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Indian/Mauritius' })} Mauritius time</dd>
             </dl>
             <Link to="/proof" className="mt-3 inline-block">How we know it works →</Link>
@@ -309,10 +340,50 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
       )}
       {ask && (
         <Suspense fallback={null}>
-          <AskDrawer region={regionDoc.id} question={ask.q} onClose={() => setAsk(null)} />
+          <AskDrawer region={regionDoc.id} question={ask.q} onClose={() => setAsk(null)} mode={detail ? 'detail' : 'longterm'} />
         </Suspense>
       )}
     </div>
+  )
+}
+
+function ModeToggle({ mode, onChange }: { mode: DataMode; onChange: (m: DataMode) => void }) {
+  const opts: [DataMode, string, string][] = [
+    ['longterm', 'Long-term (2001–now)', 'Fair 25-year comparison: new satellite converted to old-satellite units (MODIS-equivalent).'],
+    ['detail', 'High detail (2012–now)', 'The new satellites’ full 375 m view as seen — more small fires, finer map. Not comparable with years before 2012.'],
+  ]
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Data mode">
+      {opts.map(([m, label, tip]) => (
+        <button key={m} onClick={() => onChange(m)} aria-pressed={mode === m} title={tip} data-testid={`mode-${m}`}
+          className={`rounded-full border px-3 py-1 text-xs ${mode === m ? (m === 'detail' ? 'border-accent-2 bg-accent-2/15 text-text' : 'border-accent bg-accent/15 text-text') : 'border-border-strong text-muted hover:text-text'}`}>
+          {label}
+        </button>
+      ))}
+      <Link to="/proof#two-views" className="text-[11px] text-faint no-underline hover:text-text" title="Two views of the same data">ⓘ which one?</Link>
+    </div>
+  )
+}
+
+/** "What the new satellite adds" (QA #44): native VIIRS vs the old-camera equivalent, both from the pipeline. */
+function AddsCard({ doc }: { doc: RegionDoc }) {
+  const a = doc.detail!.adds
+  const ys = doc.detail!.annual.filter((x) => x.complete && x.H != null).map((x) => x.y)
+  const lt = new Map(doc.annual.map((x) => [x.y, x.H]))
+  const series: Series[] = [
+    { id: 'v', label: 'VIIRS native', color: '#5AC8FA', width: 2, points: ys.map((y) => ({ x: y, y: doc.detail!.annual.find((x) => x.y === y)!.H })) },
+    { id: 'h', label: 'MODIS-equivalent', color: '#E55C30', width: 2, points: ys.map((y) => ({ x: y, y: lt.get(y) ?? null })) },
+  ]
+  return (
+    <section className="card" aria-labelledby="adds-h" data-testid="adds-card">
+      <h2 id="adds-h" className="eyebrow">What the new satellite adds</h2>
+      <p className="mt-2 text-sm text-text">
+        In {doc.name.split(' (')[0]}, VIIRS sees about <strong className="num">{a.ratio != null ? `${a.ratio.toFixed(1)}×` : '—'}</strong> more fire-days than the
+        old-camera equivalent ({a.years[0]}–{a.years[1]}) — mostly small fires MODIS misses.
+      </p>
+      {ys.length > 2 && <div className="mt-2"><LineChart series={series} yFormat={fmtCompact} height={160} endLabels={false} /></div>}
+      <p className="mt-1 text-[11px] text-faint">Fire-days per year, complete years. Long-term mode keeps the 25-year record fair by using the lower line; High detail shows the upper one.</p>
+    </section>
   )
 }
 

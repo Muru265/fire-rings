@@ -1,7 +1,7 @@
 """Run the whole Fire Rings pipeline from raw CSVs to web/public/data/v1/.
 
 Usage: python pipeline/run_all.py [--from STEP] [--skip-tests]
-Steps: 02_unify 03_mask report 04_cube 05_calibrate 06_validate 07_stats 08_export
+Steps: 02_unify 03_mask report 04_cube 05_calibrate 06_validate 07_stats 07b_detail 08_export
 """
 from __future__ import annotations
 
@@ -22,6 +22,7 @@ STEPS = [
     ("snpp_check", [PIPE / "tools" / "snpp_endcheck.py"]),
     ("timing_check", [PIPE / "tools" / "punjab_timing.py"]),
     ("07_stats", [PIPE / "07_stats.py"]),
+    ("07b_detail", [PIPE / "07b_detail.py"]),
     ("08_export", [PIPE / "08_export.py"]),
 ]
 

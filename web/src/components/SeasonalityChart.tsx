@@ -5,6 +5,7 @@ import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import ChartCard from './ChartCard'
+import { unitOf } from '../lib/mode'
 
 const H = 240
 const M = { t: 12, r: 12, b: 26, l: 44 }
@@ -94,7 +95,7 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
             <span className="font-semibold text-text">{MONTHS[hover]}</span> · typical <span className="num text-text">{fmtInt(c.median[hover])}</span>
             {' '}(normal range {fmtInt(c.p10[hover])}–{fmtInt(c.p90[hover])})
             {yr[hover]?.H != null && <> · {year}: <span className="num text-text">{fmtInt(yr[hover]!.H)}</span></>}
-            {cy?.[hover]?.H != null && <> · {compareYear}: <span className="num text-text">{fmtInt(cy[hover]!.H)}</span></>} MODIS-equivalent fire-days
+            {cy?.[hover]?.H != null && <> · {compareYear}: <span className="num text-text">{fmtInt(cy[hover]!.H)}</span></>} {unitOf(doc)}
           </>
         ) : 'Hover a month for its values.'}
       </p>

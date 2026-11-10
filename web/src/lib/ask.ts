@@ -47,7 +47,8 @@ export async function askFireRings(question: string, region: string | undefined,
     return { ...j, question, source: 'live' }
   } catch (e) {
     const cached = await fromCache(question, region, voice)
-    if (cached) return cached
+    // saved answers are Long-term; in High detail they are still shown, clearly labelled with their mode
+    if (cached) return { ...cached, mode: 'longterm' }
     throw new Error((e as Error).name === 'AbortError' ? 'The live AI did not answer within a minute' : (e as Error).message || 'The live AI is busy right now')
   } finally {
     clearTimeout(timer)
