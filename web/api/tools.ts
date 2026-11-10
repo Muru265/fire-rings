@@ -22,6 +22,7 @@ export const CAVEATS = {
   uncertain: 'This value is uncertain: its 90% range is wider than half the value.',
   insufficient: 'There was not enough satellite coverage this month to give a value.',
   incomplete_year: 'This year is not complete, so its total is not comparable with full years.',
+  no_forecast: 'Fire Rings describes fires already detected by satellites; it does not forecast future fire activity.',
 } as const
 
 const pctText = (p: [number, number]) => p[1] === 0 ? 'below every year in the 2003–2022 baseline'
@@ -136,8 +137,13 @@ function yearRec(mv: ReturnType<typeof modeView>, y: number) {
   return (mv.annual ?? []).find((a: any) => a.y === y)
 }
 
-export async function runTool(load: Loader, name: string, args: any): Promise<any> {
-  const mode: Mode = args?.mode === 'detail' ? 'detail' : 'longterm'
+export async function runTool(load: Loader, name: string, rawArgs: any): Promise<any> {
+  // models sometimes send numbers as strings ("2015"): coerce once so every lookup compares numbers
+  const args: any = { ...(rawArgs ?? {}) }
+  for (const k of ['year', 'year1', 'year2', 'month']) {
+    if (args[k] != null && args[k] !== '') { const n = Number(args[k]); args[k] = Number.isFinite(n) ? Math.trunc(n) : undefined }
+  }
+  const mode: Mode = args.mode === 'detail' ? 'detail' : 'longterm'
   switch (name) {
     case 'list_regions': {
       const meta = await load('meta.json')
@@ -163,7 +169,11 @@ export async function runTool(load: Loader, name: string, args: any): Promise<an
       if (doc.error) return doc
       const mv = modeView(doc, mode)
       const a = yearRec(mv, args.year)
-      if (!a || a.H == null) return { region: doc.name, year: args.year, error: a ? CAVEATS.insufficient : `no data for ${args.year}`, ...caveatsFor(doc, null, mv) }
+      if (!a || a.H == null) {
+        const miss = a?.missing_months?.length ? ` (${a.missing_months.map((m: number) => MONTHS[m - 1]).join(', ')} had too little satellite coverage)` : ''
+        return { region: doc.name, year: args.year, error: a ? `No annual total for ${args.year}: the year is incomplete${miss}. Ask for single months instead.` : `no data for ${args.year}`,
+          record: `${doc.months[0].y} to ${doc.months.at(-1).y}`, ...caveatsFor(doc, null, mv) }
+      }
       const ranked = (mv.annual ?? []).filter((x: any) => x.complete && x.rankable !== false && x.H != null).sort((p: any, q: any) => q.H - p.H)
       const rank = ranked.findIndex((x: any) => x.y === a.y)
       const extra: string[] = []

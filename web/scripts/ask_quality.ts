@@ -12,7 +12,7 @@ import { apiKey, load, sleep } from './ask_local.js'
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const models = [...new Set(['gemini-3.5-flash-lite', 'gemini-3-flash-preview', ...FALLBACK_MODELS].filter(Boolean) as string[])]
 const r0 = (v: number) => Math.round(v)
-interface Case { q: string; region: string; selected: string; expect: number[]; expectAny?: boolean; noNumbers?: boolean }
+interface Case { q: string; region: string; selected: string; expect: number[]; expectAny?: boolean; noNumbers?: boolean; expectMissing?: boolean }
 
 const meta = await load('meta.json')
 const regions: string[] = process.argv[2] ? [process.argv[2]] : meta.regions.map((r: { id: string }) => r.id)
@@ -41,7 +41,9 @@ for (const id of regions) {
   push(`How many fire-days in September 2019?`, [r0(mo(2019, 9).H)])
   push('Which years look most like this year?', d.similar_years, { expectAny: true })
   push('How many fire-days will there be next month?', [], { noNumbers: true })
-  push(`How many fire-days were there in 2001?`, [r0(yr(2001).H ?? 0)], { expectAny: true })
+  // 2001 has no annual total where a month lacked coverage: then the answer must say so instead of a number
+  if (yr(2001)?.H == null) push('How many fire-days were there in 2001?', [], { expectMissing: true })
+  else push('How many fire-days were there in 2001?', [r0(yr(2001).H)], { expectAny: true })
 }
 
 const fmtVariants = (n: number) => [String(n), n.toLocaleString('en-US'), n.toLocaleString('en-GB')]
@@ -59,7 +61,9 @@ for (const [i, c] of cases.entries()) {
   else {
     const text = out.answer
     const hits = c.expect.filter((n) => fmtVariants(n).some((v) => text.includes(v)))
-    const numOk = c.noNumbers ? !/\d{2,}/.test(text) : c.expectAny ? hits.length > 0 || c.expect.length === 0 : hits.length === c.expect.length
+    // forecast questions: no numbers at all, or an explicit refusal (quoting the typical month is fine, predicting is not)
+    const refuses = /can.?not (forecast|predict)|can.?t (forecast|predict)|do(es)? not (forecast|predict)|no forecast|not a (forecast|prediction)/i.test(text)
+    const numOk = c.expectMissing ? /incomplete|not enough|missing|no annual|too little|coverage/i.test(text) : c.noNumbers ? refuses || !/\d{2,}/.test(text) : c.expectAny ? hits.length > 0 || c.expect.length === 0 : hits.length === c.expect.length
     const cavOk = out.caveat.split(' ').length >= 6
     const regionOk = out.region === c.region
     ok = out.verified && numOk && cavOk && regionOk

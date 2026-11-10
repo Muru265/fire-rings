@@ -1,7 +1,9 @@
 // Ask Fire Rings — agent loop (Gemini function calling) + number verification. Shared by api/ask.ts and scripts.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenAI } from '@google/genai'
-import { TOOL_DECLARATIONS, regionInQuestion, runTool } from '../tools.js'
+import { CAVEATS, TOOL_DECLARATIONS, regionInQuestion, runTool } from '../tools.js'
+
+const NO_TOOL_CAVEAT = CAVEATS.no_forecast
 import type { Loader, Mode } from '../tools.js'
 
 export type Voice = 'responder' | 'scientist'
@@ -46,6 +48,8 @@ Rules — follow all of them:
 4. Never forecast. Similar years are analogues, not predictions.
 5. If too_little_fire_to_judge is true, say there is too little fire to judge against normal instead of quoting a ratio.
 6. If data is missing, say so plainly.
+7. Always state the key fire-day count(s) the tool returned for the question (e.g. this month's fire-days and the typical value,
+   the peak month's typical fire-days, the validation error %). A ratio or a month name alone is not enough.
 Output format, exactly two lines:
 ANSWER: <your answer>
 CAVEAT: <copy ONE sentence verbatim from the "caveats" list in the tool results — the most important one>`
@@ -185,7 +189,8 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
       }
       // QA #56: the caveat line is always one full sentence from the tools' fixed caveat list
       const cav = toolCaveats(trace)
-      const caveat = cav.find((c) => out.caveat && (c === out.caveat || out.caveat.includes(c) || c.includes(out.caveat))) ?? cav[0] ?? ''
+      // no tool called (e.g. a refused forecast): still end with one full sentence from the fixed list
+  const caveat = cav.find((c) => out.caveat && (c === out.caveat || out.caveat.includes(c) || c.includes(out.caveat))) ?? cav[0] ?? NO_TOOL_CAVEAT
       const base = { voice: opts.voice, region, mode, ...(switched ? { switched_region: switched } : {}), timings }
       log({ ev: 'done', model, total_ms: Date.now() - t0, verified: !bad.length })
       if (bad.length) {

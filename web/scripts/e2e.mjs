@@ -89,6 +89,19 @@ try {
   await page.waitForTimeout(400)
   check('box outside region is clipped with a warning', await page.getByText('box clipped to').isVisible())
   await page.screenshot({ path: resolve(out, 'e2e_box.png'), fullPage: false })
+
+  // QA #38: Proof before/after — raw line drawn from 2001 with a 2012 bridge; "Show the fix" morphs it onto harmonized
+  await page.goto(`http://localhost:${PORT}/proof`, { waitUntil: 'load' })
+  const fix = page.getByTestId('ba-show-fix')
+  await fix.waitFor({ timeout: 10000 })
+  const pathLen = async () => page.locator('section:has([data-testid="ba-show-fix"]) svg path[stroke="#B45A93"]').evaluateAll((els) => els.map((e) => e.getAttribute('d') ?? ''))
+  const d0 = await pathLen()
+  check('before/after raw line + 2012 bridge drawn', d0.length === 2 && d0.every((d) => d.length > 5))
+  await fix.click()
+  await page.waitForTimeout(2600)
+  const d1 = await pathLen()
+  check('Show the fix morphs the raw line', (await fix.getAttribute('aria-pressed')) === 'true' && d1[0] !== d0[0])
+  await page.locator('section:has([data-testid="ba-show-fix"])').first().screenshot({ path: resolve(out, 'e2e_showfix.png') })
 } catch (e) {
   console.log('FAIL  exception', e.message)
   failed = true

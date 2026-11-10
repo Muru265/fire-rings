@@ -1,5 +1,5 @@
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ChartCard from '../components/ChartCard'
 import EmptyState from '../components/EmptyState'
@@ -209,15 +209,51 @@ function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
       { id: 'harm', label: 'Harmonized', color: C_HARM, width: 2.5, points: agg((r) => r.H) },
     ]
   }, [doc, v3])
+  const [raw, modis, harm] = series
   const table = {
     caption: 'Annual fire-days: raw concatenation, MODIS only, harmonized',
     columns: ['Year', 'Raw', 'MODIS only', 'Harmonized'],
-    rows: series[0].points.map((p, i) => [p.x, p.y == null ? null : fmtInt(p.y), series[1].points[i].y == null ? null : fmtInt(series[1].points[i].y!), series[2].points[i].y == null ? null : fmtInt(series[2].points[i].y!)]),
+    rows: raw.points.map((p, i) => [p.x, p.y == null ? (p.x === 2012 ? 'partial year' : null) : fmtInt(p.y), modis.points[i].y == null ? null : fmtInt(modis.points[i].y!), harm.points[i].y == null ? null : fmtInt(harm.points[i].y!)]),
   }
+  // QA #38 "Show the fix": the raw line morphs onto the harmonized line (t: 0 = raw, 1 = fixed)
+  const [t, setT] = useState(0)
+  const anim = useRef<number | null>(null)
+  useEffect(() => () => { if (anim.current) cancelAnimationFrame(anim.current) }, [])
+  const play = () => {
+    const to = t < 0.5 ? 1 : 0
+    if (anim.current) cancelAnimationFrame(anim.current)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setT(to); return }
+    const from = t
+    const t0 = performance.now()
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / 2200)
+      const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2
+      setT(from + (to - from) * e)
+      if (k < 1) anim.current = requestAnimationFrame(step)
+    }
+    anim.current = requestAnimationFrame(step)
+  }
+  const morph = raw.points.map((p, i) => {
+    const h = harm.points[i]?.y
+    return { x: p.x, y: p.y == null ? null : h == null ? p.y : p.y + t * (h - p.y) }
+  })
+  // 2012 is skipped (S-NPP started 20 Jan, so January has too little VIIRS coverage): a dotted bridge shows the cliff anyway
+  const before = [...morph].reverse().find((p) => p.x < 2012 && p.y != null)
+  const after = morph.find((p) => p.x > 2012 && p.y != null)
+  const drawn: Series[] = [
+    modis, harm,
+    { ...raw, label: t > 0.02 ? (t > 0.98 ? 'Raw, after the fix' : 'Raw → fixed') : raw.label, width: 2, points: morph },
+    ...(before && after ? [{ id: 'bridge', label: '', color: C_RAW, legend: false, dash: '1 4', width: 2, points: [before, after] } as Series] : []),
+  ]
   return (
     <ChartCard id="ba" title="Before / after: the 2012 step disappears" table={table}
-      subtitle={<>Annual fire-days (complete years). Raw jumps <strong className="text-text">{v3.step_raw_pct > 0 ? '+' : ''}{fmtInt(v3.step_raw_pct)}%</strong> when VIIRS arrives; harmonized changes {v3.step_harm_pct > 0 ? '+' : ''}{v3.step_harm_pct}% (90% CI {v3.step_harm_ci[0]} to {v3.step_harm_ci[1]}), in line with MODIS alone ({v3.step_modis_pct > 0 ? '+' : ''}{v3.step_modis_pct}%). Step = mean 2012–19 vs 2003–11.</>}>
-      <LineChart series={series} yFormat={fmtCompact} annotations={[{ x: 2012, label: `VIIRS arrives · raw +${fmtInt(v3.step_raw_pct)}%` }]} yLabel="fire-days per year" />
+      subtitle={<>Annual fire-days (complete years). Raw jumps <strong className="text-text">{v3.step_raw_pct > 0 ? '+' : ''}{fmtInt(v3.step_raw_pct)}%</strong> when VIIRS arrives; harmonized changes {v3.step_harm_pct > 0 ? '+' : ''}{v3.step_harm_pct}% (90% range {v3.step_harm_ci[0]} to {v3.step_harm_ci[1]}), in line with MODIS alone ({v3.step_modis_pct > 0 ? '+' : ''}{v3.step_modis_pct}%). Step = mean 2012–19 vs 2003–11.</>}>
+      <div className="mb-2 flex flex-wrap items-center gap-3">
+        <button onClick={play} data-testid="ba-show-fix" aria-pressed={t > 0.5}
+          className="rounded-sm bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:brightness-110">{t > 0.5 ? '↺ Show raw again' : '▶ Show the fix'}</button>
+        <span className="text-xs text-muted">{t > 0.5 ? 'The pink raw line now sits on the harmonized line: the 2012 cliff is gone.' : 'Before 2012 the pink raw line is the old satellite (same as the blue line). Watch it come down onto the harmonized line.'}</span>
+      </div>
+      <LineChart series={drawn} yFormat={fmtCompact} annotations={[{ x: 2012, label: raw.points.find((p) => p.x === 2012)?.y == null ? `2012 skipped (partial VIIRS year, S-NPP from 20 Jan) · raw +${fmtInt(v3.step_raw_pct)}%` : `VIIRS arrives · raw +${fmtInt(v3.step_raw_pct)}%` }]} yLabel="fire-days per year" />
       <p className="mt-2 text-sm text-text" data-testid="ba-takeaway">{baTakeaway(v3, series)}</p>
       <p className="mt-1 text-xs text-muted">Where the orange line is hidden behind the blue one (2012–2019) the two agree — that overlap is the point. In the table you can see both values.</p>
     </ChartCard>

@@ -10,6 +10,10 @@ export interface Series {
   color: string
   dashed?: boolean
   width?: number
+  /** false = drawn but left out of the legend, end labels and readout (e.g. a connector) */
+  legend?: boolean
+  /** dash pattern override, e.g. '1 4' for a dotted connector */
+  dash?: string
   points: { x: number; y: number | null }[]
 }
 
@@ -35,7 +39,7 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
   return (
     <div ref={ref} className="relative">
       <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted" aria-label="Legend">
-        {series.map((s) => (
+        {series.filter((s) => s.legend !== false).map((s) => (
           <li key={s.id} className="flex items-center gap-1.5">
             <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke={s.color} strokeWidth={s.width ?? 2} strokeDasharray={s.dashed ? '4 3' : undefined} /></svg>
             {s.label}
@@ -75,11 +79,11 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
           </g>
         ))}
         {series.map((s) => (
-          <path key={s.id} d={gen(s.points) ?? ''} fill="none" stroke={s.color} strokeWidth={s.width ?? 2} strokeDasharray={s.dashed ? '5 4' : undefined} strokeLinejoin="round" />
+          <path key={s.id} d={gen(s.points) ?? ''} fill="none" stroke={s.color} strokeWidth={s.width ?? 2} strokeDasharray={s.dash ?? (s.dashed ? '5 4' : undefined)} strokeLinejoin="round" strokeLinecap={s.dash ? 'round' : undefined} />
         ))}
         {(() => {
           // direct end labels, nudged apart so they never overprint
-          const labs = series.map((s) => {
+          const labs = series.filter((s) => s.legend !== false).map((s) => {
             const last = [...s.points].reverse().find((p) => p.y != null)
             return last ? { id: s.id, text: s.label.split(' (')[0], x: x(last.x) + 6, y: y(last.y!) } : null
           }).filter((l): l is { id: string; text: string; x: number; y: number } => l != null).sort((a, b) => a.y - b.y)
@@ -89,7 +93,7 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
         {hx != null && (
           <g pointerEvents="none">
             <line x1={x(hx)} x2={x(hx)} y1={M.t} y2={height - M.b} stroke="var(--text-faint)" />
-            {series.map((s) => {
+            {series.filter((s) => s.legend !== false).map((s) => {
               const p = s.points.find((q) => q.x === hx)
               return p?.y != null ? <circle key={s.id} cx={x(hx)} cy={y(p.y)} r={4} fill={s.color} stroke="var(--surface)" strokeWidth={2} /> : null
             })}
@@ -101,7 +105,7 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
         {hx != null ? (
           <>
             <span className="font-semibold text-text">{hx}</span>
-            {series.map((s) => {
+            {series.filter((s) => s.legend !== false).map((s) => {
               const p = s.points.find((q) => q.x === hx)
               return <span key={s.id} className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-3" style={{ background: s.color }} />{s.label}: <span className="num text-text">{p?.y != null ? yFormat(p.y) : '—'}</span></span>
             })}
