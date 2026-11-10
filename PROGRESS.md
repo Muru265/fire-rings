@@ -49,6 +49,13 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 - Briefings that sound like a forecast (“will…”, “expect…”, “coming weeks”) are rejected and regenerated. This came up once (“Fire services can expect…”).
 - Scientist-style Ask answers no longer echo the prompt text “Point to the Proof page…”. They end with “Method: see the Proof page.” The 60-question Ask quality set was not re-run after this small prompt change.
 
+**Checked on production after deploy (10 Nov):**
+- `/api/watch?stream=1&brief=1` streamed 51 steps in 17 s.
+  - Live 72 h counts were used (Punjab 1,625 vs ~9,072 expected → normal).
+  - Punjab got a **live** Gemini briefing, 6 numbers verified.
+  - Madagascar’s live attempts ran out of time, so it showed the **saved** briefing, labelled as such.
+- `/api/ask` streaming: “How many fire-days did Mauritius have in 2015?” with Punjab selected → switched to Mauritius, 23 fire-days, 3 numbers verified.
+
 **What to check first**
 1. `/watch` → press **▶ Run the agent now**. Steps should stream, two regions should be Unusually low, and the briefings should appear.
 2. `/watch` → scroll to “Why harmonization matters”: 99 / 53 / 46, with striped vs solid bars per year.
