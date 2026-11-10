@@ -30,6 +30,11 @@ the same ruler. It then answers one question for responders and land managers: *
 - **Two views of the same data**: **Long-term** (2001–now, MODIS-equivalent, the fair 25-year comparison) and **High detail**
   (2012–now, native VIIRS 375 m, finer ~5 km² map hexagons). Everything on the page switches together (`?mode=detail`); CSV
   exports always carry both units. A "What the new satellite adds" card shows how many more fire-days VIIRS sees.
+- **Fire Watch** (`/watch`): agentic monitoring. **Rules decide, AI explains**:
+  - Fixed, published rules give every region a status (Normal / Watch / Alert / Unusually low) from the month to date, the last full month and the live 72 h feed, with the low-activity guard applied first.
+  - A Gemini briefing agent explains flagged regions using only verified numbers, with forecast wording rejected.
+  - “▶ Run the agent now” streams every step.
+  - **Why harmonization matters:** the same rules on raw data would have raised 99 alerts since 2012, 53 of them only because of the satellite switch, against 46 on harmonized data (`pipeline/09_watch.py`).
 - **Guide** (`/guide`): every chart and number explained in plain words, with worked examples computed from the data,
   annotated real charts, a glossary and typo-tolerant search. Every chart title on the site has an ⓘ linking to its entry.
 - **Globe time-lapse** with real fire hexagons, **stories** for all four regions (`/story`) and a **60-day NRT pull** of NOAA-20/21 for Punjab.

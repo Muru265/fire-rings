@@ -119,6 +119,19 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 900 })
 
+  // Fire Watch: run the agent → steps appear → every region gets a status (local preview has no /api → offline replay)
+  await page.goto(`http://localhost:${PORT}/watch`, { waitUntil: 'load' })
+  await page.getByTestId('run-agent').click()
+  await page.getByTestId('watch-trace').getByText('Done.').waitFor({ timeout: 20000 }).catch(() => {})
+  const traceTxt = await page.getByTestId('watch-trace').innerText()
+  const nStatus = (traceTxt.match(/Status: /g) ?? []).length
+  check(`Fire Watch: agent steps appear (${nStatus} region statuses in the trace)`, nStatus === 4 && /Checking Punjab/.test(traceTxt))
+  const statuses = await page.getByTestId('watch-card').evaluateAll((els) => els.map((e) => e.getAttribute('data-status')))
+  check('Fire Watch: every region card has a status', statuses.length === 4 && statuses.every((s) => ['Normal', 'Watch', 'Alert', 'Unusually low'].includes(s)))
+  const flaggedNoBrief = await page.locator('[data-testid="watch-card"]:not([data-status="Normal"])').evaluateAll((els) => els.filter((e) => !e.querySelector('[data-testid="watch-briefing"]')).length)
+  check('Fire Watch: every flagged region shows a briefing', flaggedNoBrief === 0)
+  check('Fire Watch: raw-vs-harmonized proof shown', await page.getByTestId('watch-proof-headline').isVisible())
+
   // QA #69: on phones the globe is not hidden behind the hero text
   for (const w of [360, 430]) {
     const ph = await browser.newPage({ viewport: { width: w, height: 900 } })

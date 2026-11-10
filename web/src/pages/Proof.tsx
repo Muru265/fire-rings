@@ -13,6 +13,7 @@ import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import { calibrationSummary } from '../lib/calibration'
 import Help from '../components/Help'
+import WatchProof from '../components/WatchProof'
 
 const C_HARM = '#D97706'
 const C_MODIS = '#3B8FCC'
@@ -62,6 +63,8 @@ export default function Proof() {
       {val.status === 'ready' && <ProofBody val={val.data} rid={rid} doc={doc.status === 'ready' ? doc.data : null} />}
 
       <DetectionTiming />
+
+      <WatchProof />
 
       <section aria-labelledby="lim-h">
         <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them<Help id="limitations" /></h2>

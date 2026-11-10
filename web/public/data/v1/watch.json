@@ -1,0 +1,802 @@
+{
+ "version": "v1",
+ "data_end": "2026-11-09",
+ "rules": {
+  "alert_pct": 95,
+  "far_above_pct": 90,
+  "far_below_pct": 10,
+  "live_spike_ratio": 3,
+  "live_min_expected": 20,
+  "live_satellites": 2
+ },
+ "rule_text": {
+  "above_every_baseline_year": "above every year in the 2003–2022 baseline (percentile ≥ 95)",
+  "far_above_normal": "far above normal: above the 90th percentile (P90) even at the low end of our uncertainty",
+  "far_below_normal": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty",
+  "low_activity_guard": "too little fire to judge (typical value under 5 and this value under 10) — no alarm",
+  "live_spike": "live spike: last-72 h detections at least 3× the expected count"
+ },
+ "backtest": {
+  "period": [
+   "2012-01",
+   "2025-12"
+  ],
+  "baseline": [
+   2003,
+   2022
+  ],
+  "totals": {
+   "raw_alerts": 99,
+   "harmonized_alerts": 46,
+   "raw_only_alerts": 53,
+   "both": 46,
+   "harmonized_only_alerts": 0,
+   "raw_lows": 5,
+   "harmonized_lows": 33,
+   "lows_missed_by_raw": 28
+  },
+  "per_year": {
+   "2012": {
+    "raw": 3,
+    "harmonized": 2,
+    "raw_only": 1
+   },
+   "2013": {
+    "raw": 8,
+    "harmonized": 1,
+    "raw_only": 7
+   },
+   "2014": {
+    "raw": 4,
+    "harmonized": 1,
+    "raw_only": 3
+   },
+   "2015": {
+    "raw": 2,
+    "harmonized": 1,
+    "raw_only": 1
+   },
+   "2016": {
+    "raw": 11,
+    "harmonized": 5,
+    "raw_only": 6
+   },
+   "2017": {
+    "raw": 11,
+    "harmonized": 5,
+    "raw_only": 6
+   },
+   "2018": {
+    "raw": 9,
+    "harmonized": 2,
+    "raw_only": 7
+   },
+   "2019": {
+    "raw": 10,
+    "harmonized": 8,
+    "raw_only": 2
+   },
+   "2020": {
+    "raw": 13,
+    "harmonized": 5,
+    "raw_only": 8
+   },
+   "2021": {
+    "raw": 8,
+    "harmonized": 5,
+    "raw_only": 3
+   },
+   "2022": {
+    "raw": 6,
+    "harmonized": 2,
+    "raw_only": 4
+   },
+   "2023": {
+    "raw": 3,
+    "harmonized": 2,
+    "raw_only": 1
+   },
+   "2024": {
+    "raw": 8,
+    "harmonized": 6,
+    "raw_only": 2
+   },
+   "2025": {
+    "raw": 3,
+    "harmonized": 1,
+    "raw_only": 2
+   }
+  },
+  "method": "Same percentile rules on raw (MODIS to 2011, unconverted VIIRS after) and harmonized monthly fire-days, each vs its own 2003–2022 same-month baseline; point percentile; low-activity guard on both."
+ },
+ "regions": {
+  "punjab": {
+   "name": "Punjab–Haryana",
+   "status": "Unusually low",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 9,
+     "value": 614.9,
+     "lo": 577.3,
+     "hi": 654.4,
+     "median": 2539.1,
+     "ratio": 0.24,
+     "pct": [
+      0,
+      0
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional",
+      "overpass_timing"
+     ],
+     "status": "Unusually low",
+     "rule": "far_below_normal",
+     "rule_text": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty"
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 392.3,
+     "lo": 370.5,
+     "hi": 416.9,
+     "median": 4903.7,
+     "ratio": 0.08,
+     "pct": [
+      0,
+      0
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional",
+      "overpass_timing"
+     ],
+     "status": "Unusually low",
+     "rule": "far_below_normal",
+     "rule_text": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty"
+    }
+   ],
+   "flags": [
+    "mtd",
+    "overpass_timing",
+    "provisional"
+   ],
+   "relevant_for": "air-quality and health agencies (Oct–Nov crop-residue smoke), researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 45359,
+    "expected_72h": 9071.8,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 28,
+    "harmonized_alerts": 17,
+    "raw_only_alerts": 11,
+    "both": 17,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 5,
+    "harmonized_lows": 13,
+    "lows_missed_by_raw": 8,
+    "per_year": {
+     "2012": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2013": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2014": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2015": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2016": {
+      "raw": 6,
+      "harmonized": 2,
+      "raw_only": 4
+     },
+     "2017": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2019": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2020": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2021": {
+      "raw": 4,
+      "harmonized": 4,
+      "raw_only": 0
+     },
+     "2022": {
+      "raw": 3,
+      "harmonized": 2,
+      "raw_only": 1
+     },
+     "2023": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2024": {
+      "raw": 3,
+      "harmonized": 3,
+      "raw_only": 0
+     },
+     "2025": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     }
+    },
+    "raw_only_months": [
+     "2014-09",
+     "2016-01",
+     "2016-02",
+     "2016-04",
+     "2016-10",
+     "2017-10",
+     "2018-03",
+     "2018-05",
+     "2020-09",
+     "2020-12",
+     "2022-06"
+    ]
+   }
+  },
+  "madagascar": {
+   "name": "Madagascar",
+   "status": "Unusually low",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 1723.0,
+     "lo": 1624.9,
+     "hi": 1807.0,
+     "median": 1800.0,
+     "ratio": 0.96,
+     "pct": [
+      38,
+      48
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 5612.0,
+     "lo": 5463.9,
+     "hi": 5739.1,
+     "median": 7759.9,
+     "ratio": 0.72,
+     "pct": [
+      5,
+      5
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Unusually low",
+     "rule": "far_below_normal",
+     "rule_text": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty"
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services, land managers and conservation teams, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 47277,
+    "expected_72h": 9455.4,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 30,
+    "harmonized_alerts": 15,
+    "raw_only_alerts": 15,
+    "both": 15,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 0,
+    "harmonized_lows": 11,
+    "lows_missed_by_raw": 11,
+    "per_year": {
+     "2012": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2013": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2014": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2015": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2016": {
+      "raw": 4,
+      "harmonized": 3,
+      "raw_only": 1
+     },
+     "2017": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 4,
+      "harmonized": 0,
+      "raw_only": 4
+     },
+     "2019": {
+      "raw": 2,
+      "harmonized": 2,
+      "raw_only": 0
+     },
+     "2020": {
+      "raw": 6,
+      "harmonized": 3,
+      "raw_only": 3
+     },
+     "2021": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2022": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2023": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2024": {
+      "raw": 3,
+      "harmonized": 3,
+      "raw_only": 0
+     },
+     "2025": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     }
+    },
+    "raw_only_months": [
+     "2012-10",
+     "2013-04",
+     "2013-09",
+     "2015-11",
+     "2016-12",
+     "2017-02",
+     "2018-03",
+     "2018-06",
+     "2018-08",
+     "2018-09",
+     "2020-02",
+     "2020-03",
+     "2020-11",
+     "2021-12",
+     "2025-06"
+    ]
+   }
+  },
+  "se_australia": {
+   "name": "SE Australia (NSW + VIC)",
+   "status": "Normal",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 110.5,
+     "lo": 96.2,
+     "hi": 124.4,
+     "median": 79.5,
+     "ratio": 1.39,
+     "pct": [
+      57,
+      76
+     ],
+     "return_period": 3.0,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 283.9,
+     "lo": 256.0,
+     "hi": 312.5,
+     "median": 502.0,
+     "ratio": 0.57,
+     "pct": [
+      10,
+      14
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services and land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 2877,
+    "expected_72h": 575.4,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 23,
+    "harmonized_alerts": 13,
+    "raw_only_alerts": 10,
+    "both": 13,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 0,
+    "harmonized_lows": 8,
+    "lows_missed_by_raw": 8,
+    "per_year": {
+     "2012": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2013": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2014": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2015": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2016": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2017": {
+      "raw": 5,
+      "harmonized": 3,
+      "raw_only": 2
+     },
+     "2018": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2019": {
+      "raw": 5,
+      "harmonized": 5,
+      "raw_only": 0
+     },
+     "2020": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2021": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2022": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2023": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2024": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2025": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     }
+    },
+    "raw_only_months": [
+     "2013-09",
+     "2013-11",
+     "2017-05",
+     "2017-06",
+     "2018-05",
+     "2020-02",
+     "2021-04",
+     "2022-03",
+     "2023-04",
+     "2025-09"
+    ]
+   }
+  },
+  "mauritius": {
+   "name": "Mauritius (incl. Rodrigues)",
+   "status": "Normal",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 0.5,
+     "lo": 0.1,
+     "hi": 1.0,
+     "median": 1.0,
+     "ratio": 0.46,
+     "pct": [
+      14,
+      43
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": true,
+     "flags": [
+      "mtd",
+      "provisional",
+      "uncertain"
+     ],
+     "status": "Normal",
+     "rule": "low_activity_guard",
+     "rule_text": "too little fire to judge (typical value under 5 and this value under 10) — no alarm"
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 4.0,
+     "lo": 2.3,
+     "hi": 5.8,
+     "median": 6.7,
+     "ratio": 0.59,
+     "pct": [
+      10,
+      43
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional",
+      "uncertain"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    }
+   ],
+   "flags": [
+    "low_activity",
+    "mtd",
+    "provisional",
+    "uncertain"
+   ],
+   "relevant_for": "land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 28,
+    "expected_72h": 5.7,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 18,
+    "harmonized_alerts": 1,
+    "raw_only_alerts": 17,
+    "both": 1,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 0,
+    "harmonized_lows": 1,
+    "lows_missed_by_raw": 1,
+    "per_year": {
+     "2012": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2013": {
+      "raw": 3,
+      "harmonized": 0,
+      "raw_only": 3
+     },
+     "2014": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2015": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2016": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2017": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2018": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2020": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2021": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2022": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2023": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2024": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2025": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     }
+    },
+    "raw_only_months": [
+     "2013-07",
+     "2013-08",
+     "2013-10",
+     "2014-06",
+     "2014-07",
+     "2016-11",
+     "2017-01",
+     "2017-12",
+     "2019-06",
+     "2019-11",
+     "2020-08",
+     "2020-10",
+     "2021-12",
+     "2022-09",
+     "2022-11",
+     "2024-09",
+     "2024-11"
+    ]
+   }
+  }
+ }
+}

@@ -215,6 +215,39 @@ camera as it is. The app therefore has two modes (URL `?mode=detail`, remembered
 - CSV exports always carry both columns (`fire_days_modis_eq`, `fire_days_viirs_native`); the open dataset adds
   `V_native, V_lo, V_hi`. Never mix the two in one comparison.
 
+## 8e. Fire Watch: alert rules and the raw-vs-harmonized backtest (`09_watch.py`, `web/api/watch.ts`)
+
+**Rules decide, AI explains.** Thresholds live in one place, `pipeline/config.yaml → watch`, and are published in
+`/data/v1/watch.json`. The month rules use the published percentile *range* (bootstrap P5–P95 of the Weibull percentile vs
+2003–2022, §8), so an alarm needs the whole range past the threshold:
+
+| Status | Rule |
+|---|---|
+| Alert | the month is above every baseline year: percentile low end ≥ 95 (the top possible with 20 years) or beyond record |
+| Watch | far above normal: percentile low end ≥ 90 (above P90); or live 72 h detections ≥ 3 × expected (live never raises an Alert) |
+| Unusually low | far below normal: percentile high end ≤ 10 (below P10) |
+| Normal | otherwise — and **always** when the low-activity guard applies (baseline median < 5 and value < 10) |
+
+Checked: the month to date (vs the same days of baseline years) and the last full month; region status = the most severe check.
+Live rule (`/api/watch`): expected 72 h detections = median S-NPP monthly detections for the calendar month over 2013–2022
+× 3 / days in month × 2 (the live feed has two VIIRS satellites, NOAA-20 + NOAA-21). This is an approximation, so the live
+rule can only raise Watch, and it is skipped when fewer than 20 detections are expected.
+
+**Briefing agent.** For each flagged region, `/api/watch` asks Gemini with the Ask tools (function calling on the published
+JSON) for a Responder briefing. The same server-side check as Ask applies: any number not in the tool results is rejected and
+the briefing regenerated once; forecast wording ("will…", "expect…", "coming weeks") is rejected too. Otherwise the saved
+briefing (`watch_cache.json`, made with `scripts/watch_cache.ts`, verified the same way) is shown as "⚡ saved briefing".
+Each card adds a fixed "Relevant for:" line from config (Punjab Oct–Nov → air-quality and health agencies, etc.).
+
+**Backtest ("why harmonization matters").** The same rules for every month 2012-01 … 2025-12, all regions, on (a) the raw
+record (MODIS cell-days to 2011, unconverted VIIRS after) and (b) the harmonized record, each against its own 2003–2022
+same-month baseline, using the point percentile (identical method for both, so the comparison is fair). Result in this run:
+raw → 99 "far above normal" alerts, 53 of them only because of the satellite switch (raw-only months); harmonized → 46.
+Raw data also hides real drops: 5 "far below normal" months vs 33 on the harmonized record. Recounted independently in
+`pipeline/tests/test_watch.py`.
+
+Fire Watch is situational awareness for planning, not an emergency alert service, and never a forecast.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

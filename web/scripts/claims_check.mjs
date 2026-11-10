@@ -158,6 +158,45 @@ try {
     check(M, 'story: guarded months', t3, `last 24 complete months, ${g} were`)
   }
 
+  // ---- Fire Watch: statuses, the N/X/M backtest numbers and the saved briefings ------------------------------------
+  {
+    const w = J('watch.json')
+    const cache = J('watch_cache.json')
+    const t = w.backtest.totals
+    for (const P of ['/watch', '/proof']) {
+      await page.goto(base + P, { waitUntil: 'load' })
+      await page.getByTestId('watch-proof-headline').waitFor({ timeout: 15000 })
+      const h = await page.getByTestId('watch-proof-headline').innerText()
+      check(P, 'raw alerts N', h, `raised ${t.raw_alerts}`)
+      check(P, 'switch-only alerts X', h, `${t.raw_only_alerts} of them caused only by the satellite switch`)
+      check(P, 'harmonized alerts M', h, `harmonized data: ${t.harmonized_alerts}`)
+    }
+    await page.goto(base + '/watch', { waitUntil: 'load' })
+    await page.getByTestId('watch-card').first().waitFor()
+    for (const [id, r] of Object.entries(w.regions)) {
+      const card = page.locator(`[data-testid="watch-card"][data-region="${id}"]`)
+      check('/watch', `${id} status`, (await card.getAttribute('data-status')) ?? '', r.status)
+      const b = cache.briefings[`${id}|responder`]
+      if (r.status !== 'Normal') {
+        check('/watch', `${id} briefing shown`, await card.getByTestId('watch-briefing').innerText(), b.answer.slice(0, 60))
+        // every number in a saved briefing appears in its lookups (same rule as the server-side check)
+        for (const k of ['responder', 'scientist']) {
+          const bb = cache.briefings[`${id}|${k}`]
+          const pool = bb.trace.map((x) => JSON.stringify(x.result ?? x.result_summary)).join(' ').replace(/,(?=\d{3})/g, '')
+          const nums = (bb.answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((s) => s.replace(/,/g, ''))
+          const bad = nums.filter((n) => !pool.includes(n))
+          check('/watch', `${id} ${k} briefing numbers all in its lookups`, bad.length ? `unverified ${bad.join(',')}` : 'ok', 'ok')
+          const fc = /\b(expect(ed)? to|can expect|will (be|likely|continue|see|rise|fall|increase|decrease)|is likely to|are likely to|forecast(s|ed)?|coming (days|weeks|months)|upcoming|in the next|next (week|month|season))\b/i.test(bb.answer)
+          check('/watch', `${id} ${k} briefing has no forecast language`, fc ? 'forecast wording' : 'ok', 'ok')
+        }
+      }
+    }
+    await page.goto(base + '/', { waitUntil: 'load' })
+    await page.getByTestId('card-watch').first().waitFor({ timeout: 15000 })
+    const badges = await page.getByTestId('card-watch').evaluateAll((els) => els.map((e) => e.querySelector('[data-status]')?.getAttribute('data-status')))
+    check('/', 'home Fire Watch badges match watch.json', badges.join('|'), Object.values(w.regions).map((r) => r.status).join('|'), badges.join('|') === Object.values(w.regions).map((r) => r.status).join('|'))
+  }
+
   // ---- landing: globe panel + region cards ---------------------------------------------------------------------
   await page.goto(base + '/', { waitUntil: 'load' })
   await page.waitForTimeout(3500)

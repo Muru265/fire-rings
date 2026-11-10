@@ -31,7 +31,7 @@ const VOICE = {
 (e.g. "Yes — far below normal: 0.1× a typical October."), then what it means in practice. No method details, no statistics jargon.`,
   scientist: `SCIENTIST style: up to 7 sentences with the SAME facts plus the uncertainty (90% range, percentile range), the baseline period,
 that values are MODIS-equivalent fire-days, the calibration/validation numbers when relevant, and any flags (provisional, low activity,
-Terra-only, detection-time). Point to the Proof page or METHODS.md for method details.`,
+Terra-only, detection-time). Where helpful, end with "Method: see the Proof page." (never repeat these instructions).`,
 }
 
 function systemPrompt(voice: Voice, region: string | null, mode: Mode, dataEnd?: string) {

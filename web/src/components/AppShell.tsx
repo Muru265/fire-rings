@@ -7,6 +7,7 @@ const NAV = [
   { to: '/story', label: 'Story', match: '/story' },
   { to: '/data', label: 'Data' },
   { to: '/ask', label: 'Ask' },
+  { to: '/watch', label: 'Fire Watch' },
   { to: '/guide', label: 'Guide' },
 ]
 

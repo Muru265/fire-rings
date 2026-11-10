@@ -4,6 +4,62 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Summary for Muru — Round 2 + Fire Watch (10 Nov, evening)
+
+**In one line:** all ten re-check items (#62–71) are fixed and Fire Watch is live: rules decide, AI explains. Long-term numbers are unchanged (snapshot test green). Everything is pushed to main.
+
+**What changed, by item**
+- #62 Years are never shown as “2,015” in Ask’s “Numbers used”.
+- #63 The map footer says ~5 km² in High detail and ~36 km² in Long-term.
+- #64 The Long-term map explains fractions with the month’s rate from the data (e.g. Punjab Oct: 1 VIIRS fire-day ≈ 0.36 MODIS-equivalent).
+- #65 Globe: zoomed in, it switches to ~36 km² hexagons, and the lowest values are no longer near-black holes.
+- #66 No more ▲▼ scroll arrows. All 7 nav items, including Fire Watch, fit on one row at 1280–1920 px and wrap at 360.
+- #67 The Mauritius exchange-rate sentence was “0.20–0.20” and is now “0.12–0.35”, listing all 12 months (* = few fires). Checked for every region.
+- #68 Guide: clicking the same result again scrolls back, and the search bar no longer slides under the header.
+- #69 Phone home page: the text sits above the globe, which is clearly visible at 360–430 px (e2e check).
+- #70 Globe honesty: colour still breathes per region, but glow size now shows the real number of fire-days, so Mauritius is a tiny dot, not a big glow. Hover shows counts, and the caption explains colour vs size.
+- #71 Ask v2:
+  - two columns: chat on the left, “What the AI can see” on the right (mini rings, 4 key numbers, a live step trace)
+  - one set of suggestions, clear segmented controls, a single ⓘ
+- **Fire Watch** (`/watch`, in the nav):
+  - Each region gets a status (Normal / Watch / Alert / Unusually low) from fixed rules in one config file, with the low-activity guard applied first.
+  - Each card has “Why this alert?”, “Numbers used”, a Responder/Scientist briefing and a “Relevant for:” line.
+  - “▶ Run the agent now” streams every step live.
+  - “Coming next” panel and a disclaimer.
+  - A badge on every Home card links to /watch.
+- **Why harmonization matters** (on /watch and /proof): the same rules on raw data would have raised **99** alerts since 2012, **53** of them caused only by the satellite switch. On harmonized data: **46**. Raw data also hides real drops: 5 “far below normal” months vs 33.
+
+**Current Fire Watch statuses (data through 9 Nov 2026)**
+- Punjab–Haryana: **Unusually low**. Both the month so far and October are below every baseline year. The detection-time caveat is shown in the briefing.
+- Madagascar: **Unusually low** (October at the 5th percentile).
+- SE Australia: **Normal**.
+- Mauritius: **Normal** (too little fire to judge this month).
+
+**Numbers that changed (before → after)**
+- Long-term H, lo and hi: unchanged.
+- Mauritius calibration sentence: “0.20–0.20” → “0.12–0.35”. A display bug: the range ignored the low-reliability months and October was missing from the list. The rates themselves did not change.
+- Tests:
+  - pytest 61 → 74 (new rule and backtest tests)
+  - claims_check 131 → 159 (new: exchange-rate lists, N/X/M, Fire Watch statuses, briefing numbers, no forecast wording)
+
+**Decisions and things not done**
+- Globe fine zoom uses ~36 km² hexagons (res 6, existing files), not ~5 km² (res 7, about 24 MB). Res 6 already removes the giant blocks.
+- The live rule’s “expected 72-hour count” is an approximation: the record has one VIIRS satellite and the live feed has two. So it can only raise **Watch**, never Alert, and is skipped when fewer than 20 detections are expected. Documented in METHODS §8e.
+- In a live run only the Responder briefing is written live, to fit Vercel’s 60-second limit. The Scientist version is the saved one, labelled “⚡ saved briefing”.
+- Briefings that sound like a forecast (“will…”, “expect…”, “coming weeks”) are rejected and regenerated. This came up once (“Fire services can expect…”).
+- Scientist-style Ask answers no longer echo the prompt text “Point to the Proof page…”. They end with “Method: see the Proof page.” The 60-question Ask quality set was not re-run after this small prompt change.
+
+**What to check first**
+1. `/watch` → press **▶ Run the agent now**. Steps should stream, two regions should be Unusually low, and the briefings should appear.
+2. `/watch` → scroll to “Why harmonization matters”: 99 / 53 / 46, with striped vs solid bars per year.
+3. Home on a phone: the globe is visible under the text; the region cards show Fire Watch badges.
+4. Globe: zoom into Mauritius (hexagons appear) and hover a region (counts appear).
+5. `/ask`: ask “Worst year on record?” and watch the live trace on the right.
+6. `/r/mauritius` → Provenance: all 12 monthly rates, range 0.12–0.35.
+7. `/r/punjab?mode=detail` → map footer says ~5 km²; Long-term → the fraction line under the map.
+8. `/guide`: search “false alarms”, click the result twice; it should scroll back each time.
+9. Desktop nav at 1280 px: 7 items, no scroll arrows.
+
 ## Round 2 (Muru’s re-check, items #62–71) — running log
 - **Part A ✅**
   - #62: years and months are never thousands-separated in “Numbers used”; checked in ask_e2e.

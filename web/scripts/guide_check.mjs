@@ -17,7 +17,7 @@ const REQUIRED = ['globe', 'region-cards', 'live-line', 'satellite-timeline', 'm
   'fire-rings', 'calendar', 'seasonality', 'annual-totals', 'gauge', 'similar-years', 'ask-chips', 'provenance', 'map', 'month-drawer',
   'daily-fire-days', 'baseline-strip', 'where-map', 'export', 'v1-error', 'v3-step', 'seasonal-shape', 'v9-peaks', 'before-after', 'orbit-drift',
   'calibration-ratio-by-month', 'outages', 'static-sources', 'detection-time', 'limitations', 'method-steps', 'story', 'data-page', 'ask-page',
-  'fire-day', 'percentile', 'return-period', 'exchange-rate', 'problem', 'fix', 'two-views', 'live-vs-record', 'punjab-caveat', 'five-satellites', 'glossary']
+  'fire-watch', 'raw-vs-harmonized', 'fire-day', 'percentile', 'return-period', 'exchange-rate', 'problem', 'fix', 'two-views', 'live-vs-record', 'punjab-caveat', 'five-satellites', 'glossary']
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
@@ -33,7 +33,7 @@ try {
   check(`worked example readings from data (${examples})`, examples >= 15)
 
   // every ⓘ on the site points at an existing guide anchor; every chart card title has one
-  const pages = ['/', '/r/punjab', '/r/punjab?mode=detail', '/proof', '/data', '/ask', '/story', '/story/punjab']
+  const pages = ['/', '/r/punjab', '/r/punjab?mode=detail', '/proof', '/data', '/ask', '/story', '/story/punjab', '/watch']
   const helpIds = new Set()
   for (const p of pages) {
     await page.goto(B + p, { waitUntil: 'load' })
@@ -63,7 +63,7 @@ try {
   // search: synonyms, typo tolerance, enter → hash, no-results
   await page.goto(`${B}/guide`, { waitUntil: 'load' })
   const s = page.getByTestId('guide-search')
-  for (const [q, want] of [['exchange rate', 'Calibration ratio by month'], ['pie chart', 'Fire Rings'], ['speedometer', '“Is this normal?” gauge'], ['calibraton ratio by month', 'Calibration ratio by month'], ['fire-day', 'Fire-day']]) {
+  for (const [q, want] of [['exchange rate', 'Calibration ratio by month'], ['pie chart', 'Fire Rings'], ['speedometer', '“Is this normal?” gauge'], ['calibraton ratio by month', 'Calibration ratio by month'], ['fire-day', 'Fire-day'], ['false alarms', 'Why harmonization matters'], ['agent', 'Fire Watch'], ['alerts', 'Fire Watch']]) {
     await s.fill(q)
     await page.waitForTimeout(150)
     const first = await page.locator('#guide-results [role="option"]').first().innerText().catch(() => '')

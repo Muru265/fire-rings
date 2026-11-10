@@ -247,6 +247,21 @@ export const ENTRIES: Entry[] = [
     watch: [],
     where: PR },
 
+  // ---- Fire Watch -------------------------------------------------------------------------------------------------
+  { id: 'fire-watch', title: 'Fire Watch (monitoring agent + briefings)', group: 'Ask', aliases: ['fire watch', 'watch', 'agent', 'alerts', 'alert', 'monitoring', 'briefing', 'status', 'unusually low', 'run the agent'],
+    short: 'An agent checks each region against fixed rules (status: Normal / Watch / Alert / Unusually low); an AI briefing explains flagged regions with verified numbers.',
+    what: 'Rules decide, AI explains: a deterministic check of every region, then a short plain-words briefing for regions where a rule fired.',
+    steps: ['Each card shows the status as colour, icon and words, plus “Why this alert?” — the rule that fired.', '“Numbers used” lists the month so far, the last full month and the live 72-hour count against what is typical.',
+      '▶ Run the agent now shows every step live; briefings are written by Gemini using the Ask tools, and any number not found in those lookups is rejected.', '“Relevant for:” names who typically uses this kind of signal.'],
+    watch: ['Situational awareness for planning — not an emergency alert service, and never a forecast.', 'Low-activity regions are never flagged (too little fire to judge).', '“⚡ saved briefing” = precomputed from the same data when the live AI is busy.'],
+    where: { to: '/watch', label: 'Open Fire Watch →' } },
+  { id: 'raw-vs-harmonized', title: 'Why harmonization matters (raw vs harmonized alerts)', group: 'Proof', aliases: ['false alarms', 'raw vs harmonized', 'backtest', 'why harmonization matters', 'alerts since 2012', 'satellite switch alerts'],
+    short: 'The same alert rules run on raw and on harmonized data, every month since 2012: raw data raises many false alarms caused only by the satellite switch.',
+    what: 'A backtest of the Fire Watch rules on the unconverted record versus the harmonized record, 2012–2025, all regions.',
+    steps: ['Striped bars = alerts per year on raw data; solid bars = alerts on harmonized data.', '“Caused only by the satellite switch” = months raw data flags that the harmonized record does not.', 'Raw data also misses real drops: compare the “far below normal” counts.'],
+    watch: ['Both use the same thresholds and the same 2003–2022 baseline; only the conversion differs.'],
+    where: { to: '/watch', label: 'Open Fire Watch →' } },
+
   // ---- Story / Data / Ask --------------------------------------------------------------------------------------
   { id: 'story', title: 'Story mode', group: 'Story', aliases: ['story', 'madagascar story', 'scroll'],
     short: 'A guided scroll through Madagascar’s fire calendar.',

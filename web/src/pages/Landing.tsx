@@ -7,6 +7,8 @@ import { fetchJson, useMeta } from '../lib/api'
 import { headline, judgeMonth } from '../lib/headline'
 import { plainLevel, TONE_CLASS } from '../lib/plain'
 import { REGIONS } from '../lib/regions'
+import StatusBadge from '../components/StatusBadge'
+import type { WatchDoc } from '../../api/_lib/watch'
 import type { RegionDoc } from '../lib/types'
 import { fetchLive } from '../lib/live'
 import type { LiveData } from '../lib/live'
@@ -17,6 +19,8 @@ export default function Landing() {
   const meta = useMeta()
   const [docs, setDocs] = useState<RegionDoc[] | null>(null)
   const [live, setLive] = useState<Record<string, LiveData | null>>({})
+  const [watch, setWatch] = useState<WatchDoc | null>(null)
+  useEffect(() => { fetchJson<WatchDoc>('watch.json').then(setWatch).catch(() => {}) }, [])
   useEffect(() => {
     Promise.all(REGIONS.map((r) => fetchJson<RegionDoc>(`regions/${r.id}.json`))).then(setDocs).catch(() => setDocs([]))
     REGIONS.forEach((r) => fetchLive(r.id).then((l) => setLive((x) => ({ ...x, [r.id]: l }))))
@@ -54,8 +58,13 @@ export default function Landing() {
               const h = j ? headline({ ...j, timingCaveat: null }) : null
               const flagged = !!j?.timingCaveat
               return (
-                <li key={r.id}>
-                  <Link to={`/r/${r.id}`} className="card flex h-full items-start gap-4 no-underline transition-colors duration-[var(--dur-fast)] hover:border-border-strong hover:bg-surface-2">
+                <li key={r.id} className="relative">
+                  {watch?.regions[r.id] && (
+                    <Link to="/watch" className="absolute right-4 bottom-3 z-10 flex items-center gap-1.5 text-[11px] text-muted no-underline hover:text-text" data-testid="card-watch" title="Fire Watch status — see why">
+                      <span>Fire Watch</span><StatusBadge status={watch.regions[r.id].status} small />
+                    </Link>
+                  )}
+                  <Link to={`/r/${r.id}`} className="card flex h-full items-start gap-4 pb-12 no-underline transition-colors duration-[var(--dur-fast)] hover:border-border-strong hover:bg-surface-2">
                     <div className="shrink-0">{d ? <MiniRings months={d.months} label={`${r.name} mini Fire Rings`} /> : <div className="h-[72px] w-[72px] animate-pulse rounded-full bg-surface-3" />}</div>
                     <div className="min-w-0">
                       <span className="font-display text-lg font-semibold text-text">{d?.name ?? r.name}</span>

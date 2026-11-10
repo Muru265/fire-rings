@@ -73,6 +73,24 @@ stats:
   guard_value_lt: 10
   similar_years_top: 3
 
+# Fire Watch (agentic monitoring). Rules decide, AI explains. The ONE place these thresholds live: 07c_watch.py applies
+# them to the record and the raw-vs-harmonized backtest, /api/watch adds the live rule, METHODS.md §8e documents them.
+watch:
+  alert_pct: 95           # Alert: the month is above every baseline year (percentile range low end ≥ 95 = top of 20 years) or beyond record
+  far_above_pct: 90       # Watch ("far above normal"): percentile range low end ≥ 90 (above P90 even at the low end of our uncertainty)
+  far_below_pct: 10       # Unusually low ("far below normal"): percentile range high end ≤ 10 (below P10 even at the high end)
+  live_spike_ratio: 3     # Live spike → Watch (never Alert): live 72 h detections ≥ 3 × expected 72 h detections
+  live_min_expected: 20   # no live rule when fewer than 20 detections are expected in 72 h (low-activity guard for the live feed)
+  live_satellites: 2      # the live feed is NOAA-20 + NOAA-21; the expected count is built from one satellite (S-NPP) in the record
+  live_baseline: [2013, 2022]
+  backtest: ["2012-01", "2025-12"]
+  relevant_for:           # fixed mapping, one line per alert (no forecasts)
+    punjab_octnov: "air-quality and health agencies (Oct–Nov crop-residue smoke), researchers and journalists"
+    punjab: "agriculture and air-quality agencies, researchers and journalists"
+    madagascar: "fire services, land managers and conservation teams, researchers and journalists"
+    se_australia: "fire services and land managers, researchers and journalists"
+    mauritius: "land managers, researchers and journalists"
+
 record:
   start: "2001-01"
   data_end: "2026-11-08"

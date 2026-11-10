@@ -16,11 +16,14 @@ import { plainLevel } from '../lib/plain'
 import { REGIONS } from '../lib/regions'
 import { MONTHS, toGrid } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
+import type { WatchDoc } from '../../api/_lib/watch'
 
 const FULL = (m: number) => new Date(Date.UTC(2000, m - 1, 1)).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' })
 
 /** Worked example sentences, computed from the published JSON (never typed). */
-function exampleFor(id: string, docs: Record<string, RegionDoc>): string | null {
+function exampleFor(id: string, docs: Record<string, RegionDoc>, watch?: WatchDoc | null): string | null {
+  if (id === 'raw-vs-harmonized' && watch) { const t = watch.backtest.totals; return `On raw data the agent would have raised ${t.raw_alerts} alerts since 2012 — ${t.raw_only_alerts} of them only because of the satellite switch; on harmonized data ${t.harmonized_alerts}.` }
+  if (id === 'fire-watch' && watch) return Object.values(watch.regions).map((r) => `${r.name.split(' (')[0]}: ${r.status}`).join(' · ') + ` (data through ${watch.data_end}).`
   const p = docs.punjab
   if (!p) return null
   const name = p.name
@@ -117,8 +120,8 @@ function Example({ id, doc }: { id: string; doc: RegionDoc }) {
 }
 const HAS_EXAMPLE = new Set(['fire-rings', 'calendar', 'seasonality', 'annual-totals', 'gauge'])
 
-function EntryCard({ e, docs, flash }: { e: Entry; docs: Record<string, RegionDoc>; flash: boolean }) {
-  const ex = exampleFor(e.id, docs)
+function EntryCard({ e, docs, flash, watch }: { e: Entry; docs: Record<string, RegionDoc>; flash: boolean; watch: WatchDoc | null }) {
+  const ex = exampleFor(e.id, docs, watch)
   return (
     <article id={e.id} className={`card scroll-mt-[calc(var(--header-h,56px)+4.5rem)] transition-shadow duration-500 ${flash ? 'ring-2 ring-accent-2' : ''}`} data-guide-entry={e.id}>
       <h3 className="font-display text-lg font-semibold"><a href={`#${e.id}`} className="text-text no-underline hover:underline">{e.title}</a></h3>
@@ -182,6 +185,8 @@ function TwoCameras() {
 
 export default function Guide() {
   const [docs, setDocs] = useState<Record<string, RegionDoc>>({})
+  const [watch, setWatch] = useState<WatchDoc | null>(null)
+  useEffect(() => { fetchJson<WatchDoc>('watch.json').then(setWatch).catch(() => {}) }, [])
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
   const [sel, setSel] = useState(0)
@@ -304,7 +309,7 @@ export default function Guide() {
           {groups.map((g) => (
             <div key={g} className="space-y-4">
               <h2 className="eyebrow pt-2">{g}</h2>
-              {byGroup(g).map((e) => <EntryCard key={e.id} e={e} docs={docs} flash={flash === e.id} />)}
+              {byGroup(g).map((e) => <EntryCard key={e.id} e={e} docs={docs} flash={flash === e.id} watch={watch} />)}
             </div>
           ))}
 
