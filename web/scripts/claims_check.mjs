@@ -92,6 +92,14 @@ try {
     const hdr = await page.locator('main header').first().innerText()
     if (d.validation) check(P, 'validation badge', hdr, d.validation.low_activity ? 'low-activity region' : `${d.validation.loyo_err_pct}% out-of-sample error`)
     if (d.detail) check(P, 'adds card ratio (native ÷ MODIS-eq)', await page.getByTestId('adds-card').innerText(), `${d.detail.adds.ratio.toFixed(1)}×`)
+    // QA #67: the exchange-rate sentence covers every month and its range is the true min–max
+    const prov = await page.locator('section[aria-labelledby="prov-h"]').innerText()
+    if (d.method === 'pooled') check(P, 'calibration: single rate', prov, d.k.pool.toFixed(2))
+    else {
+      check(P, 'calibration: range min–max of all months', prov, `${Math.min(...d.k.month).toFixed(2)}–${Math.max(...d.k.month).toFixed(2)}`)
+      const miss = MONTHS.filter((mn, i) => !contains(prov, `${mn} ${d.k.month[i].toFixed(2)}`))
+      check(P, 'calibration: all 12 months listed', miss.length ? `missing ${miss.join(',')}` : 'ok', 'ok')
+    }
   }
 
   // ---- High detail mode (QA #44): the same checks against the native VIIRS fields --------------------------------

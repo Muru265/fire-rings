@@ -10,13 +10,13 @@ export default function Ask() {
   const m = sp.get('m')
   const q = sp.get('q') ?? (y && m ? `How unusual was ${new Date(Date.UTC(Number(y), Number(m) - 1, 1)).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' })} ${y}?` : undefined)
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <header>
+    <div className="space-y-6">
+      <header className="max-w-3xl">
         <p className="eyebrow">AI analyst</p>
-        <h1 className="mt-2 text-[28px] font-bold sm:text-[40px]">Ask Fire Rings<Help id="ask-page" /></h1>
-        <p className="mt-3 text-muted">Plain-English answers grounded only in the harmonized record. Every number is looked up, and you can see which.</p>
+        <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">Ask Fire Rings<Help id="ask-page" /></h1>
+        <p className="mt-2 text-base text-muted">Plain-English answers grounded only in the harmonized record. Every number is looked up, verified, and shown with its source.</p>
       </header>
-      <div className="card"><AskPanel initialRegion={region} initialQuestion={q} /></div>
+      <AskPanel initialRegion={region} initialQuestion={q} />
     </div>
   )
 }

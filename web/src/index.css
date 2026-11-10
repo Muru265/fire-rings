@@ -86,3 +86,7 @@ input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; ba
     color: var(--text-muted);
   }
 }
+
+/* globe hover popup (QA #70) */
+.globe-pop .maplibregl-popup-content { background: var(--surface-3); color: var(--text); font: 11px/1.4 var(--font-sans, Inter, sans-serif); padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 6px; box-shadow: none; }
+.globe-pop .maplibregl-popup-tip { border-top-color: var(--surface-3) !important; border-bottom-color: var(--surface-3) !important; }

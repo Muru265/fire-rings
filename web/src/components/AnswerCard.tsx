@@ -15,12 +15,14 @@ const TOOL_LABEL: Record<string, string> = {
 }
 const SKIP = new Set(['region', 'unit', 'caveats', 'flags', 'note', 'raw_hotspots', 'typical_by_month', 'last_complete_month'])
 const label = (k: string) => k.replace(/_/g, ' ').replace(/\b90\b/, '90%')
-const val = (v: unknown): string | null => {
+// QA #62: years and months are never thousands-separated ("2015", not "2,015")
+const isYearKey = (k: string) => /(^|_)(year|years|month|months|y|m|year1|year2)($|_)/.test(k)
+const val =(v: unknown, key = ''): string | null => {
   if (v == null || v === false) return v === false ? 'no' : null
-  if (typeof v === 'number') return Math.abs(v) >= 100 ? fmtInt(v) : String(v)
+  if (typeof v === 'number') return isYearKey(key) ? String(v) : Math.abs(v) >= 100 ? fmtInt(v) : String(v)
   if (typeof v === 'string') return v
   if (v === true) return 'yes'
-  if (Array.isArray(v) && v.length === 2 && v.every((x) => typeof x === 'number')) return `${val(v[0])}–${val(v[1])}`
+  if (Array.isArray(v) && v.length === 2 && v.every((x) => typeof x === 'number')) return `${val(v[0], key)}–${val(v[1], key)}`
   return null
 }
 
@@ -38,7 +40,7 @@ function rowsOf(tool: string, region: string, r: Record<string, unknown>): [stri
       }
       continue
     }
-    const s = val(v)
+    const s = val(v, k)
     if (s != null && s.length < 90) out.push([label(k), s, src])
   }
   return out.slice(0, 14)

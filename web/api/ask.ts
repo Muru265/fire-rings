@@ -23,7 +23,7 @@ export async function POST(req: Request): Promise<Response> {
   if (limited(ip)) return Response.json({ error: 'rate_limited', message: 'Too many questions — please wait a minute.' }, { status: 429 })
   const key = process.env.GEMINI_API_KEY
   if (!key) return Response.json({ error: 'not_configured' }, { status: 503 })
-  let body: { question?: string; region?: string; voice?: Voice; mode?: string }
+  let body: { question?: string; region?: string; voice?: Voice; mode?: string; stream?: boolean }
   try { body = await req.json() } catch { return Response.json({ error: 'bad_json' }, { status: 400 }) }
   const question = String(body.question ?? '').trim().slice(0, 500)
   if (!question) return Response.json({ error: 'empty_question' }, { status: 400 })
@@ -42,6 +42,29 @@ export async function POST(req: Request): Promise<Response> {
   }
   const models = [...new Set([process.env.GEMINI_MODEL, ...FALLBACK_MODELS].filter(Boolean) as string[])]
   const log = (e: Record<string, unknown>) => console.log(JSON.stringify({ fn: 'ask', ...e }))
+  // QA #71: { stream: true } → NDJSON lines {type:'step',…} while the analyst works, then {type:'answer'|'error',…}
+  if (body.stream) {
+    const enc = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(ctrl) {
+        const send = (o: Record<string, unknown>) => ctrl.enqueue(enc.encode(JSON.stringify(o) + '\n'))
+        try {
+          const out = await Promise.race([
+            ask({ apiKey: key, models, load, question, voice, region, mode, log, onStep: (s) => send({ type: 'step', ...s }) }),
+            new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout: request budget exceeded')), 57_000)),
+          ])
+          send({ type: 'answer', ...out })
+        } catch (e) {
+          const cls = classify(String((e as Error).message))
+          log({ ev: 'failed', error_class: cls })
+          send({ type: 'error', error: 'model_error', error_class: cls, message: 'The AI service is unavailable right now.' })
+        } finally {
+          ctrl.close()
+        }
+      },
+    })
+    return new Response(stream, { headers: { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-store', 'x-accel-buffering': 'no' } })
+  }
   try {
     const out = await Promise.race([
       ask({ apiKey: key, models, load, question, voice, region, mode, log }),

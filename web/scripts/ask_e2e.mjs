@@ -19,7 +19,7 @@ try {
     for (const voice of ['responder', 'scientist']) {
       const page = await browser.newPage()
       await page.goto(`http://localhost:${PORT}/ask?region=${region}`, { waitUntil: 'load' })
-      await page.getByRole('button', { name: voice, exact: true }).click()
+      await page.getByRole('button', { name: voice[0].toUpperCase() + voice.slice(1), exact: true }).click()
       for (const chip of CHIPS) {
         n++
         await page.getByRole('button', { name: chip, exact: true }).click()
@@ -30,7 +30,13 @@ try {
           await card.locator('[data-testid="numbers-table"]').waitFor({ timeout: 8000 }) // QA #57: numbers used shown as a table
           const v = await card.getAttribute('data-voice')
           const q = await card.innerText()
-          const ok = v === voice && q.includes(chip)
+          // QA #62: year/month values are never thousands-separated
+          const badYear = await card.locator('[data-testid="numbers-table"] tr').evaluateAll((trs) => trs.some((tr) => {
+            const td = tr.querySelectorAll('td'); return td.length > 1 && /^(year|month|y|m)$/i.test(td[0].textContent.trim()) && td[1].textContent.includes(',')
+          }))
+          // QA #71: the side panel shows the step trace (live, or replayed lookups for a saved answer)
+          const traceN = await page.getByTestId('ask-trace').locator('li').count()
+          const ok = v === voice && q.includes(chip) && !badYear && traceN >= 3
           if (!ok) { fail++; console.log(`FAIL  ${region} ${voice} ${chip}: badge=${v}`) }
           else console.log(`PASS  ${region} ${voice} ${chip}`)
         } catch {

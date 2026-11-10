@@ -1,7 +1,8 @@
 // Ask Fire Rings — agent loop (Gemini function calling) + number verification. Shared by api/ask.ts and scripts.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenAI } from '@google/genai'
-import { CAVEATS, TOOL_DECLARATIONS, regionInQuestion, runTool } from '../tools.js'
+import { CAVEATS, TOOL_DECLARATIONS, describeCall, describeResult, regionInQuestion, runTool } from '../tools.js'
+import type { StepEvent } from '../tools.js'
 
 const NO_TOOL_CAVEAT = CAVEATS.no_forecast
 import type { Loader, Mode } from '../tools.js'
@@ -107,7 +108,10 @@ function parse(text: string): { answer: string; caveat: string } {
 }
 
 export async function ask(opts: { apiKey: string; models: string[]; load: Loader; question: string; voice: Voice; region?: string; mode?: Mode
-  maxSteps?: number; perModelMs?: number; budgetMs?: number; log?: (e: Record<string, unknown>) => void }): Promise<AskResult> {
+  maxSteps?: number; perModelMs?: number; budgetMs?: number; log?: (e: Record<string, unknown>) => void
+  /** live trace for the UI (QA #71, Fire Watch): plain-words steps, never key material */
+  onStep?: (s: StepEvent) => void }): Promise<AskResult> {
+  const step$ = opts.onStep ?? (() => {})
   // Time budget (QA #59): each model attempt ≤ 22 s (all its steps), whole request ≤ 55 s (Vercel maxDuration 60). No SDK retries.
   const PER = opts.perModelMs ?? 22_000
   const TOTAL = opts.budgetMs ?? 55_000
@@ -157,6 +161,7 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
       contents.length = 1
       let text = ''
       for (let step = 0; step < (opts.maxSteps ?? 5); step++) {
+        step$({ kind: 'model', text: step === 0 ? 'Reading the question and choosing lookups…' : 'Reading the lookup results…', model })
         const res = await gen(model, contents, config, `step${step}`)
         const calls = res.functionCalls ?? []
         if (!calls.length) { text = res.text ?? ''; break }
@@ -167,9 +172,11 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
           const args = { ...(c.args ?? {}) } as Record<string, unknown>
           if (region && 'region' in args && named) args.region = region    // never answer one region with another's data
           if (TOOL_DECLARATIONS.find((d) => d.name === c.name)?.parameters?.properties && 'mode' in ((TOOL_DECLARATIONS.find((d) => d.name === c.name)!.parameters as any).properties)) args.mode = mode
+          step$({ kind: 'tool_start', tool: c.name ?? '', args, text: `Looking up ${describeCall(c.name ?? '', args)}…` })
           const result = await runTool(opts.load, c.name ?? '', args)
           timings.push({ step: `tool:${c.name}`, ms: Date.now() - s0 })
           log({ ev: 'tool', tool: c.name, ms: Date.now() - s0 })
+          step$({ kind: 'tool_done', tool: c.name ?? '', args, text: describeResult(c.name ?? '', result) })
           trace.push({ tool: c.name ?? '', args, result_summary: summarize(result), result })
           parts.push({ functionResponse: { name: c.name, response: { result } } })
         }
@@ -193,6 +200,8 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
   const caveat = cav.find((c) => out.caveat && (c === out.caveat || out.caveat.includes(c) || c.includes(out.caveat))) ?? cav[0] ?? NO_TOOL_CAVEAT
       const base = { voice: opts.voice, region, mode, ...(switched ? { switched_region: switched } : {}), timings }
       log({ ev: 'done', model, total_ms: Date.now() - t0, verified: !bad.length })
+      const nNums = (out.answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).length
+      step$({ kind: 'verify', ok: !bad.length, count: nNums, text: bad.length ? `Rejected: ${bad.length} number(s) not in the lookups` : `Verified ${nNums} number${nNums === 1 ? '' : 's'} against the lookups ✓` })
       if (bad.length) {
         return { answer: 'I could not produce an answer that uses only verified numbers. Please see the "Numbers used" panel for the data I retrieved.',
           caveat: 'Answer withheld because it contained unverified numbers.', trace, model, verified: false, unverified_numbers: bad, ...base }

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 
 const NAV = [
@@ -16,6 +17,17 @@ function lastRegion(): string {
 
 export default function AppShell() {
   const { pathname } = useLocation()
+  // publish the header height as --header-h so sticky bars (Guide search) sit below it at any width (QA #68)
+  const headerRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    const set = () => document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`)
+    set()
+    const ro = new ResizeObserver(set)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -24,14 +36,15 @@ export default function AppShell() {
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur">
+      <header ref={headerRef} className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
           <Link to="/" className="group flex items-center gap-2.5 no-underline" aria-label="Fire Rings home">
             <img src="/favicon.svg" alt="" width={28} height={28} />
             <span className="font-display text-lg font-bold tracking-[0.14em] text-text">FIRE RINGS</span>
           </Link>
-          <nav aria-label="Main" className="-mr-2 max-w-full overflow-x-auto sm:mr-0">
-            <ul className="flex items-center gap-0 text-[13px] sm:gap-1 sm:text-sm">
+          {/* QA #66: never a scroll container (it showed ▲▼ arrows on desktop); on narrow phones the items wrap instead */}
+          <nav aria-label="Main" className="-mx-[7px] max-w-full sm:mx-0">
+            <ul className="flex flex-wrap items-center gap-x-0 gap-y-1 text-[13px] sm:gap-x-1 sm:text-sm">
               {NAV.map((n) => (
                 <li key={n.to}>
                   <NavLink

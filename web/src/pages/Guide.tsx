@@ -120,7 +120,7 @@ const HAS_EXAMPLE = new Set(['fire-rings', 'calendar', 'seasonality', 'annual-to
 function EntryCard({ e, docs, flash }: { e: Entry; docs: Record<string, RegionDoc>; flash: boolean }) {
   const ex = exampleFor(e.id, docs)
   return (
-    <article id={e.id} className={`card scroll-mt-28 transition-shadow duration-500 ${flash ? 'ring-2 ring-accent-2' : ''}`} data-guide-entry={e.id}>
+    <article id={e.id} className={`card scroll-mt-[calc(var(--header-h,56px)+4.5rem)] transition-shadow duration-500 ${flash ? 'ring-2 ring-accent-2' : ''}`} data-guide-entry={e.id}>
       <h3 className="font-display text-lg font-semibold"><a href={`#${e.id}`} className="text-text no-underline hover:underline">{e.title}</a></h3>
       <p className="mt-1 text-sm text-text"><span className="eyebrow mr-1 !text-[10px]">What it shows</span>{e.what}</p>
       {HAS_EXAMPLE.has(e.id) && docs.punjab && (
@@ -146,7 +146,7 @@ function EntryCard({ e, docs, flash }: { e: Entry; docs: Record<string, RegionDo
 
 function Section({ id, title, children, flash }: { id: string; title: string; children: ReactNode; flash: boolean }) {
   return (
-    <section id={id} className={`card scroll-mt-28 transition-shadow duration-500 ${flash ? 'ring-2 ring-accent-2' : ''}`}>
+    <section id={id} className={`card scroll-mt-[calc(var(--header-h,56px)+4.5rem)] transition-shadow duration-500 ${flash ? 'ring-2 ring-accent-2' : ''}`}>
       <h2 className="font-display text-xl font-semibold"><a href={`#${id}`} className="text-text no-underline hover:underline">{title}</a></h2>
       <div className="mt-2 space-y-2 text-sm text-muted">{children}</div>
     </section>
@@ -196,21 +196,24 @@ export default function Guide() {
       .then((xs) => setDocs(Object.fromEntries(xs.filter((x): x is [string, RegionDoc] => x != null))))
   }, [])
 
+  const reveal = (id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
+    setFlash(id)
+    setTimeout(() => setFlash((f) => (f === id ? null : f)), 2000)
+  }
   const go = (id: string) => {
     setOpen(false)
-    navigate(`/guide#${id}`, { replace: false })
+    // QA #68: scroll + highlight every time, even when the URL hash is already this id
+    if (decodeURIComponent(loc.hash.slice(1)) === id) reveal(id)
+    else navigate(`/guide#${id}`, { replace: false })
   }
   // scroll + highlight on hash (deep links from ⓘ and from search)
   useEffect(() => {
     const id = decodeURIComponent(loc.hash.slice(1))
     if (!id) return
-    const t = setTimeout(() => {
-      const el = document.getElementById(id)
-      if (!el) return
-      el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
-      setFlash(id)
-      setTimeout(() => setFlash((f) => (f === id ? null : f)), 2000)
-    }, docs.punjab ? 50 : 400)
+    const t = setTimeout(() => reveal(id), docs.punjab ? 50 : 400)
     return () => clearTimeout(t)
   }, [loc.hash, docs.punjab])
   // "/" focuses search
@@ -236,7 +239,8 @@ export default function Guide() {
       </header>
 
       {/* sticky search */}
-      <div className="sticky top-14 z-20 -mx-4 bg-bg/90 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0">
+      {/* QA #68: sits just below the site header at any width (header height published by AppShell) */}
+      <div className="sticky top-[var(--header-h,56px)] z-20 -mx-4 bg-bg/90 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0">
         <div className="relative max-w-2xl">
           <input ref={input} value={q} onChange={(e) => { setQ(e.target.value); setOpen(true); setSel(0) }} onFocus={() => setOpen(true)}
             onKeyDown={(e) => {
@@ -267,7 +271,7 @@ export default function Guide() {
 
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
         {/* table of contents */}
-        <nav aria-label="Guide contents" className="lg:sticky lg:top-32 lg:max-h-[calc(100vh-9rem)] lg:self-start lg:overflow-auto">
+        <nav aria-label="Guide contents" className="lg:sticky lg:top-[calc(var(--header-h,56px)+4.5rem)] lg:max-h-[calc(100vh-9rem)] lg:self-start lg:overflow-auto">
           <button onClick={() => setToc((v) => !v)} aria-expanded={toc} className="mb-2 rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text lg:hidden">{toc ? 'Hide contents' : 'Show contents'}</button>
           <div className={`${toc ? 'block' : 'hidden'} space-y-3 text-xs lg:block`}>
             <div><p className="eyebrow !text-[10px]">Basics</p><ul className="mt-1 space-y-0.5">{SECTIONS.map((s) => <li key={s.id}><a href={`#${s.id}`} className="text-muted no-underline hover:text-text">{s.title}</a></li>)}</ul></div>
@@ -325,13 +329,13 @@ export default function Guide() {
             </ul>
           </Section>
 
-          <section id="glossary" className="card scroll-mt-28">
+          <section id="glossary" className="card scroll-mt-[calc(var(--header-h,56px)+4.5rem)]">
             <h2 className="font-display text-xl font-semibold">Glossary</h2>
             <dl className="mt-3 grid gap-x-6 gap-y-3 md:grid-cols-2">
               {TERMS.map((t) => {
                 const ex = exampleFor(t.id, docs)
                 return (
-                  <div key={t.id} id={t.id} className={`scroll-mt-28 rounded-sm p-2 transition-shadow duration-500 ${flash === t.id ? 'ring-2 ring-accent-2' : ''}`} data-guide-entry={t.id}>
+                  <div key={t.id} id={t.id} className={`scroll-mt-[calc(var(--header-h,56px)+4.5rem)] rounded-sm p-2 transition-shadow duration-500 ${flash === t.id ? 'ring-2 ring-accent-2' : ''}`} data-guide-entry={t.id}>
                     <dt className="font-semibold text-text"><a href={`#${t.id}`} className="text-text no-underline hover:underline">{t.term}</a></dt>
                     <dd className="mt-0.5 text-sm text-muted">{t.short}{t.more ? ` ${t.more}` : ''}{ex ? <span className="mt-1 block text-text">{ex}</span> : null}</dd>
                   </div>

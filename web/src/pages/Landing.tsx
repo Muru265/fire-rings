@@ -24,20 +24,21 @@ export default function Landing() {
 
   return (
     <div className="-mx-4 -mt-8 sm:-mx-6">
-      <section className="starfield relative h-[78vh] min-h-[520px] overflow-hidden border-b border-border">
-        <div className="absolute inset-0 lg:left-[28%]">
-          <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
-        </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-full bg-gradient-to-r from-bg via-bg/50 to-transparent lg:w-[55%]" />
-        <div className="pointer-events-auto absolute top-6 right-3 left-3 max-w-[520px] rounded-card bg-bg/80 p-4 backdrop-blur-sm sm:right-auto sm:top-14 sm:left-10 sm:p-0 lg:bg-transparent lg:backdrop-blur-none">
+      {/* QA #69: phones/tablets stack the text above the globe so the globe is clearly visible; large screens overlay it */}
+      <section className="starfield relative overflow-hidden border-b border-border lg:h-[78vh] lg:min-h-[520px]">
+        <div className="relative z-10 max-w-[560px] px-4 pt-6 pb-3 sm:px-10 sm:pt-10 lg:pointer-events-auto lg:absolute lg:top-14 lg:left-10 lg:p-0">
           <p className="eyebrow">MODIS + VIIRS · NASA FIRMS · 2001–2026</p>
-          <h1 className="mt-3 text-[40px] leading-[1.02] font-bold sm:text-[64px]">25 years of fire.<br /><span className="text-muted">One honest record.</span></h1>
-          <p className="mt-5 max-w-md text-base text-muted">Two generations of satellites see fire differently. Fire Rings converts the new one into the old one's units, so every month since 2001 uses the same ruler — and tells you whether this month is normal.</p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <h1 className="mt-3 text-[36px] leading-[1.02] font-bold sm:text-[56px] lg:text-[64px]">25 years of fire.<br /><span className="text-muted">One honest record.</span></h1>
+          <p className="mt-4 max-w-md text-base text-muted lg:mt-5">Two generations of satellites see fire differently. Fire Rings converts the new one into the old one's units, so every month since 2001 uses the same ruler — and tells you whether this month is normal.</p>
+          <div className="mt-5 flex flex-wrap gap-3 lg:mt-7">
             <Link to="/r/punjab" className="rounded-sm bg-accent px-5 py-2.5 text-sm font-semibold text-bg no-underline hover:brightness-110">Explore a region</Link>
-            <Link to="/story/madagascar" className="rounded-sm border border-border-strong bg-bg/60 px-5 py-2.5 text-sm font-semibold text-text no-underline hover:bg-surface-2">Watch the story</Link>
+            <Link to="/story" className="rounded-sm border border-border-strong bg-bg/60 px-5 py-2.5 text-sm font-semibold text-text no-underline hover:bg-surface-2">Watch the stories</Link>
           </div>
         </div>
+        <div className="relative h-[560px] sm:h-[600px] lg:absolute lg:inset-0 lg:left-[28%] lg:h-auto" data-testid="hero-globe">
+          <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-bg via-bg/50 to-transparent lg:block" />
       </section>
 
       <div className="mx-auto max-w-[1440px] space-y-12 px-4 py-10 sm:px-6">

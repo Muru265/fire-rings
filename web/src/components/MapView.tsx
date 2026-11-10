@@ -157,6 +157,12 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
 
   // month hexes — High detail mode uses finer res-7 hexagons (~5 km², native VIIRS) so the 375 m detail shows (QA #44)
   const res: HexRes = doc.mode === 'detail' && y >= 2012 ? 7 : 6
+  // QA #64: why Long-term hexagons can show fractions — the month's exchange rate from the data
+  const monthRec = doc.months.find((r) => r.y === y && r.m === m)
+  const fac = monthRec ? factorOf(doc, monthRec) : null
+  const fracNote = doc.mode !== 'detail' && fac != null && Math.abs(fac - 1) > 1e-9
+    ? `Converted values can be fractions: here 1 ${monthRec!.src === 'T' ? 'Terra' : 'VIIRS'} fire-day ≈ ${fac.toFixed(2)} MODIS-equivalent fire-days (the ${MONTHS[m - 1]} exchange rate).`
+    : null
   useEffect(() => {
     if (!ready || !map.current) return
     let alive = true
@@ -313,7 +319,11 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         )}
       </div>
       {note && <p className="mt-2 rounded-sm border border-warn/40 bg-warn/10 px-3 py-1.5 text-xs text-warn" role="status">{note}</p>}
-      <p className="mt-2 text-xs text-muted">Hexagons are ~36 km² on purpose: counting presence per hexagon lets old and new satellites be compared fairly. Zoom in to see individual detections.</p>
+      {/* QA #63: the footer follows the mode */}
+      <p className="mt-2 text-xs text-muted" data-testid="map-footer">{res === 7
+        ? 'High detail: hexagons are ~5 km², so the new satellite’s 375 m view shows field-scale fires. Values are native VIIRS fire-days, not comparable with years before 2012. Zoom in to see individual detections.'
+        : 'Hexagons are ~36 km² on purpose: counting presence per hexagon lets old and new satellites be compared fairly. Zoom in to see individual detections.'}</p>
+      {fracNote && <p className="mt-1 text-xs text-muted" data-testid="map-fraction-note">{fracNote}</p>}
       <p className="mt-1 text-xs text-faint">
         {small ? 'Detections are shown for every month in this small region.' : pts?.available ? `Individual detections appear from zoom ${POINT_ZOOM}.` : `Individual detections are published for the latest months (${doc.hotspot_months.join(', ')}); older months show hexagons only.`}
         {' '}A box recomputes the calendar from hexagons inside it, using this region's calibration. Basemap © OpenFreeMap, © OpenStreetMap contributors.

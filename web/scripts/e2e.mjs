@@ -103,6 +103,35 @@ try {
   await page.waitForTimeout(400)
   check('back to Long-term', !page.url().includes('mode=detail') && (await page.getByTestId('mode-chip').innerText()).includes('Long-term'))
 
+  // QA #63/#64: map text follows the mode; Long-term explains fractional values with the month's exchange rate
+  await page.goto(`http://localhost:${PORT}/r/punjab?mode=detail`, { waitUntil: 'load' })
+  await page.getByTestId('map-footer').waitFor({ timeout: 15000 })
+  check('High detail map footer says ~5 km²', (await page.getByTestId('map-footer').innerText()).includes('~5 km²'))
+  await page.goto(`http://localhost:${PORT}/r/punjab?mode=longterm`, { waitUntil: 'load' })
+  await page.getByTestId('map-footer').waitFor({ timeout: 15000 })
+  check('Long-term map footer says ~36 km²', (await page.getByTestId('map-footer').innerText()).includes('~36 km²'))
+  check('Long-term map explains fractions with k', /1 VIIRS fire-day ≈ \d\.\d\d MODIS-equivalent/.test(await page.getByTestId('map-fraction-note').innerText()))
+  // QA #66: the nav is never a scroll container and fits on one row at desktop widths
+  for (const w of [1280, 1440, 1920]) {
+    await page.setViewportSize({ width: w, height: 900 })
+    const [sw, cw, rows] = await page.evaluate(() => { const n = document.querySelector('nav[aria-label="Main"]'); const lis = [...n.querySelectorAll('li')].map((l) => l.getBoundingClientRect().top); return [n.scrollWidth, n.clientWidth, new Set(lis.map(Math.round)).size] })
+    check(`${w}px: nav fits on one row, no scrollbar`, sw <= cw && rows === 1)
+  }
+  await page.setViewportSize({ width: 1440, height: 900 })
+
+  // QA #69: on phones the globe is not hidden behind the hero text
+  for (const w of [360, 430]) {
+    const ph = await browser.newPage({ viewport: { width: w, height: 900 } })
+    await ph.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
+    await ph.waitForSelector('[data-testid="hero-globe"] canvas', { timeout: 15000 })
+    await ph.waitForTimeout(1500)
+    const [txtBottom, globeTop, canvasH] = await ph.evaluate(() => [document.querySelector('main h1').parentElement.getBoundingClientRect().bottom,
+      document.querySelector('[data-testid="hero-globe"]').getBoundingClientRect().top, document.querySelector('[data-testid="hero-globe"] canvas').getBoundingClientRect().height])
+    check(`${w}px: globe below the hero text and ≥300 px tall`, globeTop >= txtBottom - 1 && canvasH >= 300)
+    await ph.screenshot({ path: resolve(out, `e2e_home_globe_${w}.png`) })
+    await ph.close()
+  }
+
   // QA #38: Proof before/after — raw line drawn from 2001 with a 2012 bridge; "Show the fix" morphs it onto harmonized
   await page.goto(`http://localhost:${PORT}/proof`, { waitUntil: 'load' })
   const fix = page.getByTestId('ba-show-fix')

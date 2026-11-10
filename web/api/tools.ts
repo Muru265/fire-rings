@@ -307,3 +307,41 @@ export async function runTool(load: Loader, name: string, rawArgs: any): Promise
 export function GET() {
   return Response.json({ tools: TOOL_DECLARATIONS })
 }
+
+
+// ---- plain-words steps for the live traces (Ask “What the AI can see”, Fire Watch) -------------------------------
+export interface StepEvent { kind: 'model' | 'tool_start' | 'tool_done' | 'verify' | 'rule' | 'status' | 'info'; text: string; tool?: string; args?: Record<string, unknown>; model?: string; ok?: boolean; count?: number; region?: string }
+
+const nf = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('en-US') : String(v ?? '—'))
+const mon = (m: unknown) => (typeof m === 'number' && m >= 1 && m <= 12 ? MONTHS[m - 1] : '')
+
+export function describeCall(tool: string, a: Record<string, unknown>): string {
+  const y = a.year != null ? String(a.year) : ''
+  switch (tool) {
+    case 'get_month': return y && a.month ? `${mon(Number(a.month))} ${y}` : 'the latest month'
+    case 'get_year_total': return `the ${y} total`
+    case 'get_typical': return `a typical ${mon(Number(a.month))}`
+    case 'compare_years': return `${a.year1} vs ${a.year2}${a.month ? ` (${mon(Number(a.month))})` : ''}`
+    case 'get_rankings': return a.by === 'month' ? `the ranking of every ${mon(Number(a.month))}` : 'the ranking of years'
+    case 'get_season': return 'the seasonal cycle'
+    case 'get_similar_years': return 'similar years'
+    case 'get_quality': return 'the reliability checks'
+    case 'list_regions': return 'the list of regions'
+    default: return tool
+  }
+}
+
+export function describeResult(tool: string, r: any): string {
+  if (!r || r.error) return `No value: ${r?.error ?? 'nothing found'} ✓`
+  switch (tool) {
+    case 'get_month': return `${r.month}: ${nf(r.fire_days)} fire-days${r.ratio_to_typical != null ? `, ${r.ratio_to_typical}× typical` : r.too_little_fire_to_judge ? ', too little fire to judge' : ''} ✓`
+    case 'get_year_total': return `${r.year}: ${nf(r.fire_days)} fire-days ✓`
+    case 'get_typical': return `typical ${r.month}: ${nf(r.typical_fire_days_median)} fire-days ✓`
+    case 'compare_years': return `${r.times_larger ?? 'compared'} ✓`
+    case 'get_rankings': return r.highest?.[0] ? `highest ${r.highest[0].year}: ${nf(r.highest[0].fire_days)} fire-days ✓` : 'ranking found ✓'
+    case 'get_season': return `peak ${r.peak_month} (typical ${nf(r.peak_median)}) ✓`
+    case 'get_similar_years': return `${(r.similar_years ?? []).map((s: any) => s.year).join(', ')} ✓`
+    case 'get_quality': return r.low_activity_region ? 'low-activity region: not judged ✓' : `out-of-sample error ${r.out_of_sample_annual_error_pct}% ✓`
+    default: return 'done ✓'
+  }
+}

@@ -4,6 +4,29 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 2 (Muru’s re-check, items #62–71) — running log
+- **Part A ✅**
+  - #62: years and months are never thousands-separated in “Numbers used”; checked in ask_e2e.
+  - #63: the map footer follows the mode (~5 km² in High detail, ~36 km² in Long-term).
+  - #64: the Long-term map explains fractions with the month’s rate from the data, e.g. Punjab Oct: “1 VIIRS fire-day ≈ 0.36 MODIS-equivalent fire-days”.
+  - #65/#70, globe:
+    - Colour stays relative to each region’s own record, so seasons still breathe.
+    - Glow size now uses one global scale (absolute fire-days), so tiny places stay tiny.
+    - Mauritius is a small soft dot at world zoom.
+    - From zoom 3.6, ~36 km² res-6 hexagons load lazily, scaled to H per month like the res-4 layer.
+    - The ramp starts brighter, so no near-black “holes”.
+    - Hover shows absolute counts, and the caption explains colour vs size.
+  - #66: the nav is no longer a scroll container (no ▲▼); it fits on one row at 1280/1440/1920 (e2e) and wraps at 360.
+  - #67: the exchange-rate sentence’s range now covers all 12 months, every month is listed and low-reliability months are starred. Example: Mauritius went from “0.20–0.20” to “0.12–0.35 … Oct 0.20”. claims_check covers all regions.
+  - #68: the same Guide result a second time scrolls back. The sticky search sits below the header at any width (`--header-h`), plus an e2e check.
+  - #69: on phones the hero text is stacked above the globe, the globe opens zoomed out and the control panel sits under it; e2e checks at 360 and 430.
+  - #71: Ask v2:
+    - two columns: the chat thread with a large chat bar, and a “What the AI can see” panel (mini rings, 4 key numbers for the region and mode, a live trace)
+    - `/api/ask` streams NDJSON steps (“Looking up the ranking of years… highest 2016: 15,346 fire-days… Verified 2 numbers ✓”)
+    - saved answers replay their lookups on the published data, clearly labelled
+    - one set of suggestions, segmented controls, a single ⓘ
+  - Tests: 61 pytest · claims 138/138 · e2e incl. nav/globe/map/guide checks · ask_e2e 32/32 (now also checks the trace and year formatting).
+
 ## Summary for Muru — QA run, 10 Nov (docs/QA_ISSUES.md, items 1–61)
 
 **In one line:** all 61 QA items are done or done with a stated limit. Long-term (harmonized) numbers are unchanged. Every test is green: 61 pytest, 195 Playwright checks, 131/131 on-screen numbers match the JSON, 32/32 Ask chips, Ask quality 60/60. All of it is pushed to main, and the production checks below pass.
