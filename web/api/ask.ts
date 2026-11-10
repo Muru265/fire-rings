@@ -1,8 +1,10 @@
-// POST /api/ask  { question, region?, voice?: 'responder' | 'scientist' }  →  { answer, caveat, trace, model, verified }
+// POST /api/ask  { question, region?, voice?: 'responder'|'scientist', mode?: 'longterm'|'detail' }
+//   → { answer, caveat, trace, model, verified, voice, region, mode, switched_region? }
 // Gemini function calling over the published region JSON. Key only from Vercel env (GEMINI_API_KEY, GEMINI_MODEL).
+// Logs: one JSON line per model call / tool / result with timings and an error class — never key material (QA #59).
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { FALLBACK_MODELS, ask } from './_lib/core.js'
+import { FALLBACK_MODELS, ask, classify } from './_lib/core.js'
 import type { Voice } from './_lib/core.js'
 
 // simple per-IP rate limit (per warm instance): 8 requests / minute, 60 / hour
@@ -21,11 +23,12 @@ export async function POST(req: Request): Promise<Response> {
   if (limited(ip)) return Response.json({ error: 'rate_limited', message: 'Too many questions — please wait a minute.' }, { status: 429 })
   const key = process.env.GEMINI_API_KEY
   if (!key) return Response.json({ error: 'not_configured' }, { status: 503 })
-  let body: { question?: string; region?: string; voice?: Voice }
+  let body: { question?: string; region?: string; voice?: Voice; mode?: string }
   try { body = await req.json() } catch { return Response.json({ error: 'bad_json' }, { status: 400 }) }
   const question = String(body.question ?? '').trim().slice(0, 500)
   if (!question) return Response.json({ error: 'empty_question' }, { status: 400 })
   const voice: Voice = body.voice === 'scientist' ? 'scientist' : 'responder'
+  const mode = body.mode === 'detail' ? 'detail' : 'longterm'
   const region = body.region && /^[a-z_]{2,32}$/.test(body.region) ? body.region : undefined
   const origin = new URL(req.url).origin
   const load = async (p: string) => {
@@ -38,15 +41,16 @@ export async function POST(req: Request): Promise<Response> {
     return r.json()
   }
   const models = [...new Set([process.env.GEMINI_MODEL, ...FALLBACK_MODELS].filter(Boolean) as string[])]
+  const log = (e: Record<string, unknown>) => console.log(JSON.stringify({ fn: 'ask', ...e }))
   try {
-    // hard ceiling below maxDuration (30 s) no matter what the SDK does
     const out = await Promise.race([
-      ask({ apiKey: key, models, load, question, voice, region }),
-      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('request budget exceeded')), 26_000)),
+      ask({ apiKey: key, models, load, question, voice, region, mode, log }),
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout: request budget exceeded')), 57_000)),
     ])
     return Response.json(out, { headers: { 'cache-control': 'no-store' } })
   } catch (e) {
-    console.error('ask failed', (e as Error).message)
-    return Response.json({ error: 'model_error', message: 'The AI service is unavailable right now.' }, { status: 502 })
+    const cls = classify(String((e as Error).message))
+    log({ ev: 'failed', error_class: cls })
+    return Response.json({ error: 'model_error', error_class: cls, message: 'The AI service is unavailable right now.' }, { status: 502 })
   }
 }

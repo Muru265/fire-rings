@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { askFireRings, CHIPS } from '../lib/ask'
+import { askFireRings, CHIPS, regionInQuestion } from '../lib/ask'
 import type { Answer, Voice } from '../lib/ask'
 import { REGIONS } from '../lib/regions'
 import AnswerCard from './AnswerCard'
@@ -13,6 +13,7 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
   const [voice, setVoice] = useState<Voice>('responder')
   const [q, setQ] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
+  const [styleHelp, setStyleHelp] = useState(false)
   const asked = useRef(false)
   const nextId = useRef(1)
   const busy = turns.some((t) => t.status === 'loading')
@@ -21,11 +22,16 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
     const text = question.trim()
     if (!text || busy) return
     const id = nextId.current++
-    setTurns((ts) => [{ id, question: text, region, voice, status: 'loading' }, ...ts])
+    // QA #61: a region named in the question switches the selector (never answer Mauritius with Punjab data)
+    const named = regionInQuestion(text)
+    const useRegion = named ?? region
+    if (named && named !== region) setRegion(named)
+    setTurns((ts) => [{ id, question: text, region: useRegion, voice, status: 'loading' }, ...ts])
     setQ('')
     try {
-      const a = await askFireRings(text, region, voice)
-      setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'done', answer: a } : t)))
+      const a = await askFireRings(text, useRegion, voice)
+      const withNote = named && named !== region ? { ...a, switched_region: named } : a
+      setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'done', answer: withNote } : t)))
     } catch (e) {
       setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'error', error: (e as Error).message } : t)))
     }
@@ -50,7 +56,15 @@ export default function AskPanel({ initialRegion, initialQuestion, compact }: { 
               className={`rounded-[6px] px-2.5 py-1 capitalize ${voice === v ? 'bg-surface-3 text-text' : 'text-muted hover:text-text'}`}>{v}</button>
           ))}
         </div>
+        <button onClick={() => setStyleHelp((s) => !s)} aria-expanded={styleHelp} className="text-xs text-accent-2" aria-label="What do the styles mean?">ⓘ styles</button>
       </div>
+      {styleHelp && (
+        <p className="rounded-sm border border-border bg-surface-2 p-3 text-xs text-muted">
+          <strong className="text-text">Responder:</strong> 2–3 plain sentences, bottom line first — is it unusual, how much, what it means.{' '}
+          <strong className="text-text">Scientist:</strong> the same numbers plus uncertainty (90% range, percentile range), baseline, units and method notes.
+          Both use only verified numbers from the record.
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         {CHIPS.map((c) => (
           <button key={c} disabled={busy} onClick={() => send(c)}

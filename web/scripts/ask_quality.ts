@@ -1,0 +1,85 @@
+// Answer-quality test set (QA #60): ~15 questions per region. Expected numbers are read from the published JSON at run
+// time (never typed by hand); an answer passes when it is verified, contains the expected number (any formatting), carries
+// a full-sentence caveat, and does not answer with another region's data. Writes ../docs/ask_quality.md.
+// Usage: npx tsx --env-file=../.env scripts/ask_quality.ts [region]
+import { writeFile } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { FALLBACK_MODELS, ask } from '../api/_lib/core.js'
+import type { AskResult } from '../api/_lib/core.js'
+import { apiKey, load, sleep } from './ask_local.js'
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const models = [...new Set(['gemini-3.5-flash-lite', 'gemini-3-flash-preview', ...FALLBACK_MODELS].filter(Boolean) as string[])]
+const r0 = (v: number) => Math.round(v)
+interface Case { q: string; region: string; selected: string; expect: number[]; expectAny?: boolean; noNumbers?: boolean }
+
+const meta = await load('meta.json')
+const regions: string[] = process.argv[2] ? [process.argv[2]] : meta.regions.map((r: { id: string }) => r.id)
+const cases: Case[] = []
+for (const id of regions) {
+  const d = await load(`regions/${id}.json`)
+  const name = d.name.split(' (')[0]
+  const other = meta.regions.find((r: { id: string }) => r.id !== id).id
+  const yr = (y: number) => d.annual.find((a: any) => a.y === y)
+  const mo = (y: number, m: number) => d.months.find((x: any) => x.y === y && x.m === m)
+  const ranked = d.annual.filter((a: any) => a.complete && a.rankable !== false && a.H != null).sort((a: any, b: any) => b.H - a.H)
+  const peak = d.climatology.median.indexOf(Math.max(...d.climatology.median))
+  const lc = d.latest_complete
+  const push = (q: string, expect: number[], extra: Partial<Case> = {}) => cases.push({ q, region: id, selected: id, expect, ...extra })
+  push(`How many fire-days did ${name} have in 2015?`, [r0(yr(2015).H)])
+  push(`What was the total for ${name} in 2019?`, [r0(yr(2019).H)])
+  push(`How many fire-days did ${name} have in 2015?`, [r0(yr(2015).H)], { selected: other })   // QA #61: other region selected
+  push('Is this month unusual?', [r0(d.latest.value)])
+  push(`How did ${MONTHS[lc.m - 1]} ${lc.y} compare with normal?`, [r0(mo(lc.y, lc.m).H)])
+  push('Worst year on record?', [r0(ranked[0].H), ranked[0].y])
+  push('Which complete year had the fewest fire-days?', [r0(ranked[ranked.length - 1].H), ranked[ranked.length - 1].y], { expectAny: true })
+  push(`What is a typical ${MONTHS[peak]}?`, [r0(d.climatology.median[peak])])
+  push('When does the season peak?', [r0(d.climatology.median[peak])], { expectAny: true })
+  push('Compare 2019 with 2015.', [r0(yr(2019).H), r0(yr(2015).H)])
+  push('How reliable is this?', [d.validation.loyo_err_pct])
+  push(`How many fire-days in September 2019?`, [r0(mo(2019, 9).H)])
+  push('Which years look most like this year?', d.similar_years, { expectAny: true })
+  push('How many fire-days will there be next month?', [], { noNumbers: true })
+  push(`How many fire-days were there in 2001?`, [r0(yr(2001).H ?? 0)], { expectAny: true })
+}
+
+const fmtVariants = (n: number) => [String(n), n.toLocaleString('en-US'), n.toLocaleString('en-GB')]
+const rows: string[] = []
+let pass = 0
+for (const [i, c] of cases.entries()) {
+  let out: AskResult | null = null
+  let err = ''
+  for (let a = 0; a < 3 && !out; a++) {
+    try { out = await ask({ apiKey: apiKey(), models, load, question: c.q, voice: 'responder', region: c.selected, perModelMs: 20_000 }) } catch (e) { err = (e as Error).message.slice(0, 100); await sleep(5000) }
+  }
+  let ok = false
+  let why = ''
+  if (!out) why = `error: ${err}`
+  else {
+    const text = out.answer
+    const hits = c.expect.filter((n) => fmtVariants(n).some((v) => text.includes(v)))
+    const numOk = c.noNumbers ? !/\d{2,}/.test(text) : c.expectAny ? hits.length > 0 || c.expect.length === 0 : hits.length === c.expect.length
+    const cavOk = out.caveat.split(' ').length >= 6
+    const regionOk = out.region === c.region
+    ok = out.verified && numOk && cavOk && regionOk
+    why = [!out.verified && 'unverified', !numOk && `expected ${c.expect.join(', ')}`, !cavOk && 'caveat not a sentence', !regionOk && `answered for ${out.region}`].filter(Boolean).join('; ')
+  }
+  if (ok) pass++
+  rows.push(`| ${i + 1} | ${c.region} | ${c.selected !== c.region ? `${c.selected} → ${c.region}` : c.region} | ${c.q} | ${ok ? '✅' : `❌ ${why}`} | ${(out?.answer ?? '').replace(/\|/g, '/').replace(/\n/g, ' ')} | ${out?.caveat ?? ''} |`)
+  console.log(i + 1, ok ? 'PASS' : `FAIL ${why}`, c.region, c.q)
+  await sleep(1500)
+}
+const here = dirname(fileURLToPath(import.meta.url))
+await writeFile(resolve(here, '../../docs/ask_quality.md'), `# Ask Fire Rings — answer-quality test set (QA #60)
+
+Generated by \`npx tsx --env-file=../.env scripts/ask_quality.ts\` on ${new Date().toISOString().slice(0, 16)}Z. Expected numbers come from the
+published JSON at run time. Pass = verified + expected number(s) present + full-sentence caveat + answered for the right region.
+
+**Result: ${pass}/${cases.length} pass.**
+
+| # | Region | Selected → used | Question | Result | Answer | Caveat |
+|---:|---|---|---|---|---|---|
+${rows.join('\n')}
+`, 'utf-8')
+console.log(`\n${pass}/${cases.length} pass`)
