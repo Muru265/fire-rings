@@ -11,7 +11,8 @@ import { factorOf, monthCells } from '../lib/hexes'
 import type { Box, HexRes } from '../lib/hexes'
 import type { LiveData } from '../lib/live'
 import { REGIONS } from '../lib/regions'
-import { COUNT_COLORS } from '../lib/scales'
+import { MAP_COLORS } from '../lib/scales'
+import { tidyBasemap } from '../lib/mapStyle'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 
@@ -75,10 +76,12 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const [stats, setStats] = useState<{ cells: number; min: number; max: number } | null>(null)
   const [pts, setPts] = useState<{ n: number; available: boolean } | null>(null)
   const [zoom, setZoom] = useState(0)
-  const [showLive, setShowLive] = useState(true)
+  // QA #17: live layer off by default on the map (the badge still shows the count); hexagons stay the main visual
+  const [showLive, setShowLive] = useState(false)
   const [inInset, setInInset] = useState(false)
   const view = (doc.geo?.view_bbox ?? doc.bbox) as [number, number, number, number]
   const small = !!doc.geo?.small
+  const clipped = doc.area_km2 != null
   const [inputs, setInputs] = useState<string[]>(() => (box ?? view).map((v) => v.toFixed(2)))
   const navigate = useNavigate()
   const drawRef = useRef(false)
@@ -99,14 +102,16 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
     })
     mp.on('zoomend', () => setZoom(mp.getZoom()))
     mp.on('load', () => {
+      tidyBasemap(mp)
       setZoom(mp.getZoom())
       mp.addImage('tri-viirs', triangleIcon(C_VIIRS))
-      mp.addSource('region', { type: 'geojson', data: boxFeature(doc.bbox) })
-      mp.addLayer({ id: 'region', type: 'line', source: 'region', paint: { 'line-color': '#93A1B3', 'line-width': 1, 'line-dasharray': [3, 2] } })
+      // QA #20: outline only where the data really is a rectangle (a clip box); whole-country files follow the coastline
+      mp.addSource('region', { type: 'geojson', data: clipped ? boxFeature(doc.bbox) : EMPTY })
+      mp.addLayer({ id: 'region', type: 'line', source: 'region', paint: { 'line-color': '#93A1B3', 'line-width': 1, 'line-dasharray': [3, 2], 'line-opacity': 0.7 } })
       mp.addSource('hex', { type: 'geojson', data: EMPTY })
       // softer hexagons so place names stay readable
-      mp.addLayer({ id: 'hex', type: 'fill', source: 'hex', paint: { 'fill-color': ['get', 'c'], 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.55, 9, 0.35, 12, 0.2] } })
-      mp.addLayer({ id: 'hex-line', type: 'line', source: 'hex', paint: { 'line-color': ['get', 'c'], 'line-width': 0.6, 'line-opacity': 0.7 } })
+      mp.addLayer({ id: 'hex', type: 'fill', source: 'hex', paint: { 'fill-color': ['get', 'c'], 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.8, 9, 0.5, 12, 0.3] } })
+      mp.addLayer({ id: 'hex-line', type: 'line', source: 'hex', paint: { 'line-color': ['get', 'c'], 'line-width': 0.9, 'line-opacity': 0.9 } })
       mp.addSource('pts', { type: 'geojson', data: EMPTY })
       const pz = small ? 0 : POINT_ZOOM
       mp.addLayer({ id: 'pts-modis', type: 'circle', source: 'pts', minzoom: pz, filter: ['==', ['get', 's'], 0],
@@ -114,9 +119,10 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       mp.addLayer({ id: 'pts-viirs', type: 'symbol', source: 'pts', minzoom: pz, filter: ['==', ['get', 's'], 1],
         layout: { 'icon-image': 'tri-viirs', 'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 13, 0.9], 'icon-allow-overlap': true } })
       mp.addSource('live', { type: 'geojson', data: EMPTY })
+      // small, faint, filled dots drawn beneath the hexagons (QA #17)
       mp.addLayer({ id: 'live', type: 'circle', source: 'live', paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2.5, 12, 7], 'circle-color': 'rgba(0,0,0,0)',
-        'circle-stroke-color': C_LIVE, 'circle-stroke-width': 1.6 } })
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 1.2, 8, 2, 12, 4], 'circle-color': C_LIVE, 'circle-opacity': 0.55,
+        'circle-stroke-width': 0 } }, 'hex')
       mp.addSource('box', { type: 'geojson', data: EMPTY })
       mp.addLayer({ id: 'box-fill', type: 'fill', source: 'box', paint: { 'fill-color': '#5AC8FA', 'fill-opacity': 0.06 } })
       mp.addLayer({ id: 'box-line', type: 'line', source: 'box', paint: { 'line-color': '#5AC8FA', 'line-width': 2 } })
@@ -165,7 +171,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       const breaks = [1, 2, 3, 4, 5, 6].map((i) => q(i / 7))
       const cls = (v: number) => { let c = 0; while (c < breaks.length && v > breaks[c]) c++; return c }
       const features = cells.map((c) => ({
-        type: 'Feature' as const, properties: { v: c.v, c: COUNT_COLORS[cls(c.v)] },
+        type: 'Feature' as const, properties: { v: c.v, c: MAP_COLORS[cls(c.v)] },
         geometry: { type: 'Polygon' as const, coordinates: [cellToBoundary(c.id, true)] },
       }))
       ;(map.current.getSource('hex') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features })
@@ -255,35 +261,33 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       <div className="relative overflow-hidden rounded-sm border border-border">
         <div ref={el} className="h-[380px] w-full bg-bg sm:h-[440px]" role="region" aria-label={`Map of ${doc.name} fire hexagons for ${MONTHS[m - 1]} ${y}`} />
         {err && <div className="absolute inset-x-3 top-3 rounded-sm border border-danger/40 bg-surface-2 px-3 py-2 text-xs text-danger">{err}</div>}
-        <div className="absolute bottom-3 left-3 max-w-[260px] space-y-1.5 rounded-sm bg-surface/90 px-2.5 py-2 text-[10px] backdrop-blur">
-          {stats && stats.cells > 0 && (
-            <div>
-              <div className="mb-1 text-muted">{doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'} fire-days per hexagon, {MONTHS[m - 1]} {y}</div>
-              <div className="flex items-center gap-1">{COUNT_COLORS.map((c) => <span key={c} className="h-2.5 w-4 rounded-[2px]" style={{ background: c }} />)}</div>
-              <div className="num mt-0.5 flex justify-between text-faint"><span>{stats.min < 10 ? stats.min.toFixed(1) : fmtCompact(stats.min)}</span><span>{stats.max < 10 ? stats.max.toFixed(1) : fmtCompact(stats.max)}</span></div>
-            </div>
-          )}
-          {pointsVisible && (
-            <div className="flex flex-wrap gap-x-3 text-muted">
-              <span><span style={{ color: C_MODIS }}>●</span> MODIS</span>
-              <span><span style={{ color: C_VIIRS }}>▲</span> VIIRS</span>
-              <span className="text-faint">{fmtInt(pts?.n ?? 0)} detections</span>
-            </div>
-          )}
-          {live?.ok && showLive && (
-            <div className="text-muted"><span style={{ color: C_LIVE }}>◯</span> live 72 h — near-real-time, provisional</div>
-          )}
-          <div className="flex flex-col gap-0.5 text-muted">
-            <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t border-dashed border-[#93A1B3]" />data area (region edge)</span>
-            {box && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t-2 border-[#5AC8FA]" />your box</span>}
-          </div>
-        </div>
         {inset && (
           <button onClick={toggleInset} className="absolute top-3 left-3 rounded-sm border border-border-strong bg-surface/90 px-2.5 py-1 text-xs text-text backdrop-blur hover:bg-surface-2">
             {inInset ? `← ${doc.name.split(' (')[0]}` : `${inset.name} →`}
           </button>
         )}
         {drawing && <div className="absolute top-12 left-3 rounded-sm bg-accent px-2.5 py-1 text-xs font-semibold text-bg">Drag on the map to draw a box</div>}
+      </div>
+      {/* QA #21: legend below the map, never over the fires */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-muted" data-testid="map-legend">
+        {stats && stats.cells > 0 && (
+          <span className="flex items-center gap-1.5">
+            <span>{doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'} fire-days per {res === 7 ? '~5 km²' : '~36 km²'} hexagon, {MONTHS[m - 1]} {y}:</span>
+            <span className="num text-faint">{stats.min < 10 ? stats.min.toFixed(1) : fmtCompact(stats.min)}</span>
+            <span className="inline-flex">{MAP_COLORS.map((c) => <span key={c} className="h-2.5 w-4" style={{ background: c }} />)}</span>
+            <span className="num text-faint">{stats.max < 10 ? stats.max.toFixed(1) : fmtCompact(stats.max)}</span>
+          </span>
+        )}
+        {pointsVisible && (
+          <span className="flex items-center gap-2">
+            <span><span style={{ color: C_MODIS }}>●</span> MODIS detection</span>
+            <span><span style={{ color: C_VIIRS }}>▲</span> VIIRS detection</span>
+            <span className="text-faint">({fmtInt(pts?.n ?? 0)})</span>
+          </span>
+        )}
+        {live?.ok && showLive && <span><span style={{ color: C_LIVE }}>●</span> live 72 h — raw, provisional, not in the record</span>}
+        {clipped && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t border-dashed border-[#93A1B3]" />data area (clip box)</span>}
+        {box && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t-2 border-[#5AC8FA]" />your box</span>}
       </div>
       <div className="mt-3 flex flex-wrap items-end gap-2 text-xs">
         <button onClick={() => setDrawing((d) => !d)} aria-pressed={drawing}

@@ -7,6 +7,7 @@ import { fmtInt } from '../lib/format'
 import { agoText } from '../lib/live'
 import type { LiveData } from '../lib/live'
 import { MONTHS } from '../lib/series'
+import { tidyBasemap } from '../lib/mapStyle'
 import type { RegionDoc } from '../lib/types'
 
 setWorkerUrl(workerUrl)
@@ -52,6 +53,7 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       mp.setProjection({ type: 'globe' })
     })
     mp.on('load', () => {
+      tidyBasemap(mp, { borderOpacity: 0.35 })
       mp.addSource('fire', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       mp.addLayer({ id: 'fire-glow', type: 'circle', source: 'fire', paint: {
         'circle-radius': ['interpolate', ['linear'], ['get', 't'], 0, 4, 1, 46], 'circle-color': ['get', 'c'],

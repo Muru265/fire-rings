@@ -3,6 +3,9 @@ import { quantile } from 'd3-array'
 
 /** Counts ramp: inferno sampled t ∈ [0.18, 0.98] (bottom of inferno vanishes on the dark background). */
 export const N_CLASSES = 7
+/** Map ramp (QA #18): the same Inferno ramp started brighter (0.34 → 0.98) so the lowest class stays visible on the dark basemap. */
+export const MAP_COLORS = Array.from({ length: N_CLASSES }, (_, i) => interpolateInferno(0.34 + (0.64 * i) / (N_CLASSES - 1)))
+
 export const COUNT_COLORS = Array.from({ length: N_CLASSES }, (_, i) =>
   interpolateInferno(0.18 + (0.8 * i) / (N_CLASSES - 1)),
 )
