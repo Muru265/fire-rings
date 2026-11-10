@@ -1,4 +1,4 @@
-// Screenshot key pages at 1440px and 390px into ../docs/screens/.
+// Screenshot key pages at 1440px and 360px into ../docs/screens/.
 // Usage: npm run build && node scripts/screens.mjs [path ...]   (starts `vite preview` itself)
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
@@ -11,7 +11,7 @@ const out = resolve(here, '../../docs/screens')
 mkdirSync(out, { recursive: true })
 const PORT = 4179
 const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/r/punjab', '/r/madagascar', '/r/se_australia', '/r/mauritius', '/r/punjab?mode=detail', '/r/madagascar?mode=detail', '/proof', '/data', '/ask', '/story', '/story/madagascar', '/story/punjab', '/story/se_australia', '/story/mauritius', '/guide', '/does-not-exist']
-const widths = [{ w: 1440, h: 900, tag: 'desktop' }, { w: 390, h: 844, tag: 'mobile' }]
+const widths = [{ w: 1440, h: 900, tag: 'desktop' }, { w: 360, h: 800, tag: 'mobile' }]
 
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: resolve(here, '..'), stdio: 'ignore', shell: process.platform === 'win32',

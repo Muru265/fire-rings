@@ -4,6 +4,72 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Summary for Muru — QA run, 10 Nov (docs/QA_ISSUES.md, items 1–61)
+
+**In one line:** all 61 QA items are done or done with a stated limit. Long-term (harmonized) numbers are unchanged. Every test is green: 61 pytest, 195 Playwright checks, 131/131 on-screen numbers match the JSON, 32/32 Ask chips, Ask quality 60/60. All of it is pushed to main, and the production checks below pass.
+
+**Done, by item (details in the running log below)**
+- Numbers (Phase 0): #23 return period fixed · #29 hotspot counts per satellite · #30 outage days hatched · #35 one calibration sentence everywhere · #37 status on every Proof card · #43 Mauritius “too little fire to validate” · #45 Punjab August explained · #48 real sources.
+- Bugs (Phase 1): #12 chart width · #15 charts in box view · #16 box clipping · #52 cache style label · #58 errors stay with their own question.
+- Ask (Phase 2): #59 longer time budget, logging, model fallback · #60 direct lookups + 60-question quality set · #61 named region switches · #54 `/api/health` · #56 flags in answers · #53 two styles · #33 cache 32/32 · #55 calm “Instant answer” chip.
+- Plain language (Phase 3): #3 #4 #5 #6 #7 #8 #10 #11 #13 #14 #22 #24 #25 #26 #27 #28 #31 #32 #34 #36 #39 #40 #41 #42 #46 #47 #49 #50.
+- #38 before/after shows the 2012 cliff, plus “▶ Show the fix”.
+- ★#44 Long-term vs High detail mode, and #19 map in the page’s unit.
+- Map: #17 #18 #20 #21.
+- Home: #1 globe hexagons · #2 maritime rings removed.
+- ★#9 Guide with search, worked examples, glossary and ⓘ everywhere.
+- #51 stories for all 4 regions.
+- #57 Ask page redesign.
+
+**Skipped or partial, and why**
+- **Phase 11 (new regions), skipped.** Adding the whole India and Australia presets means re-running 02–08 on about 4 GB, reviewing new calibration and validation by hand (CLAUDE.md rule 7), and 16 more Gemini cache answers. Too risky this close to submission. The pipeline is config-driven, so it’s a post-event job.
+- **#44:**
+  - Res-8 hexagons (~0.7 km²) not exported: about 7× the 24 MB of res-7 files. Res 7 (~5 km²) is used.
+  - High detail percentiles are coarser, because the baseline is only 10 years (top possible percentile is 91). The UI says so.
+- **#20:** no real country or region polygons exist in our data. Instead the clip-box outline is drawn only where the data really is a box (Punjab, SE Australia); Madagascar and Mauritius follow the coastline.
+- **#2:** maritime rings are hidden, but small-island land shapes come from the OpenFreeMap basemap itself, so they stay.
+- **#32:** the drawer mini map shows a silhouette of every hexagon that ever burned, not a basemap. That keeps it light and offline-safe.
+- **#9:** five entries render the real chart with numbered markers (Fire Rings, Calendar, Seasonality, Annual totals, gauge). The other entries are text plus a data example. The marker positions are fixed percentages: check them by eye.
+- **Punjab August:** native VIIRS is below MODIS-equivalent there, because the small-sample k is 1.20 > 1. This is documented, not changed.
+
+**Numbers: before → after**
+- **Long-term H / lo / hi:** unchanged. The snapshot test covers 311 months × 4 regions.
+- **Return periods (#23):** 60 months now agree with their percentile. Example: SE Australia Jul 2025 (66–71st percentile) went from “1-in-4” to “about 1-in-3”.
+- **V9:** scored only where there is a sourced event (SE Australia Black Summer = #1). The other regions show “info” with a reason.
+- **New published numbers, all from the pipeline:**
+  - High detail values V for 2012+.
+  - “What the new satellite adds”: Punjab 2.9×, Madagascar 3.8×, SE Australia 2.4×, Mauritius 4.6×.
+  - `globe.json` (res-4 hexagons, scaled to H).
+  - `quality.rows_read` and `quality.cell_days` (e.g. Punjab: 18,029,309 detections read → 2,408,576 kept).
+- **Tests:**
+  - pytest 48 → 61
+  - claims_check 93 → 131
+  - Ask answer-quality 43/60 → 60/60 (fixed: the model sent years as text, incomplete-year wording, a missing caveat on refusals)
+
+**Muru to do**
+1. **Gemini billing or quota decision.** Production works now (`/api/health`: gemini-3.5-flash-lite ok). The free tier hit 429s on other models earlier, and `gemini-flash-latest` kept timing out. Keep `GEMINI_MODEL=gemini-3.5-flash-lite` in Vercel. Paid quota is safer for the live demo; the saved answers cover every chip either way.
+2. Re-check by eye:
+   - the Guide markers ①–④ on the Fire Rings and gauge examples
+   - the 360 px layout on a real phone
+   - the High detail map at Punjab field scale
+3. After the next data refresh: re-run `npx tsx --env-file=../.env scripts/ask_cache.ts` (the cache is dated 10 Nov), then `npm run test:e2e`.
+4. Decide on Phase 11 (India and Australia whole-country presets) after the event.
+5. Optional: have a fire scientist read the High detail wording (“S-NPP-equivalent native VIIRS fire-days”) and the SE Australia story (its typical peak months are Apr, May and Sep).
+
+**What to check first on the live site (10)**
+1. `/r/punjab`: click **High detail (2012–now)**. Check the chip, the note, rings starting in 2012, the ~5 km² map hexagons, then switch back.
+2. `/proof`: press **▶ Show the fix** on the before/after chart.
+3. `/guide`: search “pie chart” and “exchange rate”; then click any ⓘ on Explore and use “Learn more”.
+4. Home: press ▶ on the globe. Madagascar should breathe Sep–Oct, and SE Australia should flare in Dec 2019.
+5. `/ask`:
+   - “Worst year on record?”: a mini bar chart and the Numbers-used table should appear.
+   - With Punjab selected, ask “How many fire-days did Mauritius have in 2015?”: it should switch to Mauritius and answer 23.
+6. `/story`: open the picker, then the Punjab and SE Australia stories.
+7. SE Australia: click Jul 2025. The gauge should say “about 1-in-3 years” next to the 66–71st percentile.
+8. Map: the legend sits under the map and the live layer is off by default. On Mauritius there should be no ocean rings and the Rodrigues button should work.
+9. Click a month to open the drawer. Check the dot-strip labels, the “Where” silhouette, the legend and the scale bar.
+10. Phone width: the six nav items fit, Guide “Show contents” works, and the KPI cards wrap cleanly.
+
 ## QA run — 10 Nov (docs/QA_ISSUES.md items) — running log
 - **Phase 0 (numbers) ✅** #23 return period now = 100/(100−p) from the shown percentile range (60 months disagreed before; e.g. SE Australia Jul 2025 66th–71st pct: "1-in-4" → "about 1-in-3"); unit + output tests. Long-term snapshot test added — harmonized values unchanged. #29 drawer shows "VIIRS n · MODIS n". #30 satellite gap days hatched in the daily chart; SE Aus 26–27 Jul 2025 checked = real low (S-NPP operating, normal counts elsewhere in Australia). #35 one plain calibration sentence per region shared by Provenance/Proof/METHODS. #37 every Proof card has a status; V9 scored only against a sourced event (Black Summer → Royal Commission tabling release), other regions "info" with a reason. #43 Mauritius shows "too little fire to validate reliably". #45 Punjab August k=1.20 = small-sample noise (126 vs 92 fire-days in 8 years, 0.13% of fire-days), labelled "few fires — low reliability" (months < 200 fire-days); documented in METHODS + validation_report. #48 timing reports now real checked links (NASA Earth Observatory; ISRO via ThePrint; iFOREST via The Tribune).
 - **Phase 1 (bugs) ✅** #12 charts stay mounted when the table shows (no shrink) + e2e; #15 Seasonality/Annual totals recomputed for a box (no vanishing) + e2e; #16 box clipped to the region with a warning, outside/empty boxes refused + e2e; #58 Ask keeps each question with its own answer/error; #52 cached answers are labelled with the style they were written in (both styles regenerated in Phase 2).
@@ -18,8 +84,11 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 - **Phase 9 ✅ #51 stories.** “Story” nav opens `/story` with a picker (cards with mini rings). One stepper for all regions with a region switcher at the top and “Explore this region →” at the end. New stories: **Punjab–Haryana** (two harvests: Apr–May + Oct–Nov hold 95% of a typical year; the fake +199% 2012 jump and the fix; the decline 13,844 (2021) → 5,708 (2025); the detection-time caveat), **SE Australia** (Dec 2019 = 3,551 fire-days, 15.2× a typical December, #1 December; Jul 2019–Jun 2020 season #1 of 23), **Mauritius** (3 steps: very little fire; 20 of the last 24 complete months “too little fire to judge” — the guard working). Madagascar keeps its 6 steps. All numbers computed from the JSON at run time; 6 new claims_check lines (131/131). Note: SE Australia’s typical peak months are Apr, May and Sep (not midsummer), so that story says so instead of assuming a summer peak.
 - **Phase 10 ✅ #57 Ask design.** Chat thread, newest at the bottom (question bubble → answer card), kept for the session, auto-scroll. Answer text larger and first, then caveat, then one inline visual built from the published data the answer used (annual bars with the year highlighted for rankings/year totals/compare; a 12-month typical strip with the month highlighted for season/typical/month). “Numbers used” open by default as a table (metric · value · source) — the lookups are re-run in the browser with the same `api/tools.ts` on the published JSON, so live and saved answers both get full tables. 2–3 follow-up questions under each answer. One control row: region · Responder/Scientist · Long-term/High detail · ⓘ styles · ⓘ who answers (the model line moved there). Ask button brand orange with a clear disabled state; Enter sends. Typing indicator + skeleton; empty state with example questions for the selected region; errors offer the chips. Disclaimer kept: planning tool, no forecasts, not an emergency service. ask_e2e now also requires the numbers table (32/32).
 
-## ⚠ BLOCKER: live layer needs FIRMS_MAP_KEY in Vercel Production
-Production `/api/live?region=punjab` currently returns `{"ok":false,"error":"not_configured"}`. The deployed function can't see `FIRMS_MAP_KEY` (deploy `cfe4170`, built after the push). The code works: locally with the same key it returns Punjab 1,921 and Madagascar 9,236 detections. The UI shows "LIVE · feed temporarily unavailable" as designed.
+## ✅ RESOLVED (checked 10 Nov 12:29 UTC): live layer on production
+`/api/live?region=punjab` → ok, 1,625 detections; `/api/health` → gemini ok (gemini-3.5-flash-lite, 572 ms), firms ok. Old note kept below for reference.
+
+### (old) BLOCKER: live layer needed FIRMS_MAP_KEY in Vercel Production
+Production `/api/live?region=punjab` returned `{"ok":false,"error":"not_configured"}`. The deployed function can't see `FIRMS_MAP_KEY` (deploy `cfe4170`, built after the push). The code works: locally with the same key it returns Punjab 1,921 and Madagascar 9,236 detections. The UI shows "LIVE · feed temporarily unavailable" as designed.
 **To fix (2 min):**
 1. Vercel → project **fire-rings** → **Settings → Environment Variables**.
 2. Check that a variable named exactly `FIRMS_MAP_KEY` (no spaces) exists, with **Production** ticked. Add it if missing, using the value from your local `.env`.

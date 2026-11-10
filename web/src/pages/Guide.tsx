@@ -174,8 +174,8 @@ function TwoCameras() {
   }
   return (
     <svg viewBox="0 0 230 130" className="mx-auto w-full max-w-md" role="img" aria-label="The same seven fires seen by a camera with big pixels (few cells lit) and one with small pixels (many cells lit)">
-      {grid(50, 0, 'Old camera (MODIS, 1 km)')}
-      {grid(12.5, 130, 'New camera (VIIRS, 375 m)')}
+      {grid(50, 0, 'MODIS · 1 km pixels')}
+      {grid(12.5, 130, 'VIIRS · 375 m pixels')}
     </svg>
   )
 }
