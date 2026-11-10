@@ -14,6 +14,7 @@ import { useRegion } from '../lib/api'
 import { useLive } from '../lib/live'
 import LiveBadge from '../components/LiveBadge'
 import { makeColorer } from '../lib/colors'
+import { calibrationSummary } from '../lib/calibration'
 import { calendarCsv, downloadPng, downloadText } from '../lib/exporters'
 import { fmtInt } from '../lib/format'
 import type { Box } from '../lib/hexes'
@@ -265,7 +266,7 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
               <dt className="text-faint">Data</dt><dd>NASA FIRMS MODIS C6.1 (Terra, Aqua), VIIRS 375 m (S-NPP, NOAA-20, NOAA-21)</dd>
               <dt className="text-faint">Through</dt><dd className="num">{regionDoc.data_end} (Aug–Nov 2026 provisional NRT)</dd>
               <dt className="text-faint">Unit</dt><dd>fire-day = one H3 res-6 hexagon (~36 km²) with ≥1 detection on one solar day</dd>
-              <dt className="text-faint">Calibration</dt><dd>Jul 2012 – Dec 2019 · {regionDoc.method === 'pooled' ? `single ratio ${regionDoc.k.pool}` : `monthly ratios ${Math.min(...regionDoc.k.month).toFixed(2)}–${Math.max(...regionDoc.k.month).toFixed(2)}`}</dd>
+              <dt className="text-faint">Calibration</dt><dd>Jul 2012 – Dec 2019 · <CalibrationText doc={regionDoc} /></dd>
               <dt className="text-faint">Baseline</dt><dd>{regionDoc.baseline[0]}–{regionDoc.baseline[1]}</dd>
               <dt className="text-faint">Updated</dt><dd className="num">{regionDoc.updated}</dd>
             </dl>
@@ -287,6 +288,10 @@ function RegionView({ doc: regionDoc }: { doc: RegionDoc }) {
       )}
     </div>
   )
+}
+
+function CalibrationText({ doc }: { doc: RegionDoc }) {
+  return <>{calibrationSummary(doc)}</>
 }
 
 function ExportMenu({ onCsv, onPng }: { onCsv: () => void; onPng: () => void }) {

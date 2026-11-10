@@ -93,6 +93,8 @@
       "2021–22",
       "2017–18"
      ],
+     "status": "info",
+     "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check.",
      "octnov_top3_harmonized": [
       2016,
       2005,
@@ -402,6 +404,8 @@
        "2021–22",
        "2017–18"
       ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check.",
       "octnov_top3_harmonized": [
        2016,
        2005,
@@ -710,6 +714,8 @@
        "2021–22",
        "2017–18"
       ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check.",
       "octnov_top3_harmonized": [
        2005,
        2016,
@@ -836,7 +842,9 @@
       "2016–17",
       "2015–16",
       "2019–20"
-     ]
+     ],
+     "status": "info",
+     "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
     }
    },
    "results": {
@@ -1114,7 +1122,9 @@
        "2016–17",
        "2015–16",
        "2019–20"
-      ]
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
      }
     },
     "pooled": {
@@ -1391,7 +1401,9 @@
        "2016–17",
        "2015–16",
        "2019–20"
-      ]
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
      }
     }
    }
@@ -1488,6 +1500,15 @@
       "2017–18",
       "2016–17"
      ],
+     "known_event": {
+      "event": "Black Summer bushfires, 2019–20 season",
+      "season_start": 2019,
+      "source": {
+       "name": "Australian Government — tabling of the Royal Commission into National Natural Disaster Arrangements report (30 Oct 2020)",
+       "url": "https://minister.homeaffairs.gov.au/davidlittleproud/Pages/tabling-the-report-of-the-royal-commission-into-national-natural-disaster-arrangements.aspx"
+      }
+     },
+     "status": "pass",
      "black_summer_rank_harmonized": 1,
      "black_summer_rank_raw": 1,
      "pass": true
@@ -1769,6 +1790,15 @@
        "2017–18",
        "2016–17"
       ],
+      "known_event": {
+       "event": "Black Summer bushfires, 2019–20 season",
+       "season_start": 2019,
+       "source": {
+        "name": "Australian Government — tabling of the Royal Commission into National Natural Disaster Arrangements report (30 Oct 2020)",
+        "url": "https://minister.homeaffairs.gov.au/davidlittleproud/Pages/tabling-the-report-of-the-royal-commission-into-national-natural-disaster-arrangements.aspx"
+       }
+      },
+      "status": "pass",
       "black_summer_rank_harmonized": 1,
       "black_summer_rank_raw": 1,
       "pass": true
@@ -2049,6 +2079,15 @@
        "2017–18",
        "2016–17"
       ],
+      "known_event": {
+       "event": "Black Summer bushfires, 2019–20 season",
+       "season_start": 2019,
+       "source": {
+        "name": "Australian Government — tabling of the Royal Commission into National Natural Disaster Arrangements report (30 Oct 2020)",
+        "url": "https://minister.homeaffairs.gov.au/davidlittleproud/Pages/tabling-the-report-of-the-royal-commission-into-national-natural-disaster-arrangements.aspx"
+       }
+      },
+      "status": "pass",
       "black_summer_rank_harmonized": 1,
       "black_summer_rank_raw": 1,
       "pass": true
@@ -2147,7 +2186,9 @@
       "2013–14",
       "2014–15",
       "2016–17"
-     ]
+     ],
+     "status": "info",
+     "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
     }
    },
    "results": {
@@ -2425,7 +2466,9 @@
        "2013–14",
        "2014–15",
        "2016–17"
-      ]
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
      }
     },
     "pooled": {
@@ -2702,7 +2745,9 @@
        "2013–14",
        "2014–15",
        "2016–17"
-      ]
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
      }
     }
    }

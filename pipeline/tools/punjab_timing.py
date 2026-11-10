@@ -22,6 +22,16 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from lib.common import ROOT, connect, path, sql_path, write_json  # noqa: E402
 
+# Independent reports of the shift (QA #48). Only sources whose pages were checked on 2026-11-10 are listed.
+SOURCES = [
+    {"name": "NASA Earth Observatory — “New Timing for Stubble Burning in India” (H. Jethva, NASA Goddard)",
+     "url": "https://science.nasa.gov/earth/earth-observatory/new-timing-for-stubble-burning-in-india/"},
+    {"name": "ISRO Space Applications Centre study, Current Science (Nov 2025) — as reported by ThePrint",
+     "url": "https://theprint.in/environment/are-farm-fires-going-uncounted-isro-study-suggests-farmers-have-figured-out-a-way-to-evade-satellites/2797583"},
+    {"name": "iFOREST Stubble Burning Status Report 2025 (Dec 2025) — as reported by The Tribune",
+     "url": "https://www.tribuneindia.com/news/delhi/satellites-miss-majority-of-stubble-fires-delhi-air-pollution-underestimated-report"},
+]
+
 SEASONS = {
     ("punjab", "Oct–Nov (rice residue)"): [10, 11],
     ("punjab", "Apr–May (wheat residue)"): [4, 5],
@@ -71,9 +81,12 @@ def main() -> None:
                                     "night_rel_2022_2026": mean_rel("night_share", 2022, 2026),
                                     "aqua_n20_rel_2022_2026": mean_rel("aqua_n20", 2022, 2026),
                                     "aqua_rel_2022_2025": mean_rel("aqua_snpp", 2022, 2025)}
+    res["_sources"] = SOURCES
     write_json(path("out") / "punjab_timing.json", res)
     write_md(res)
     for k, v in res.items():
+        if k.startswith("_"):
+            continue
         print(f"{k:<40} Aqua/S-NPP 2022–26 vs 2013–19: ×{v['aqua_rel_2022_2026']}  Terra: ×{v['terra_rel_2022_2026']}  night share: ×{v['night_rel_2022_2026']}")
 
 
@@ -85,10 +98,10 @@ def write_md(res: dict) -> None:
          "## Summary: mean of 2022–2026 relative to 2013–2019", "",
          "| region · season | Aqua ÷ S-NPP (day) | same, 2022–2025 only | Aqua ÷ NOAA-20 (day, vs 2018–19) | Terra ÷ S-NPP (day) | S-NPP night share |",
          "|---|---:|---:|---:|---:|---:|"]
-    for v in res.values():
+    for v in [x for k, x in res.items() if not k.startswith("_")]:
         L.append(f"| {v['region']} · {v['season']} | ×{v['aqua_rel_2022_2026']} | ×{v['aqua_rel_2022_2025']} | ×{v['aqua_n20_rel_2022_2026']} | "
                  f"×{v['terra_rel_2022_2026']} | ×{v['night_rel_2022_2026']} |")
-    for v in res.values():
+    for v in [x for k, x in res.items() if not k.startswith("_")]:
         L += ["", f"## {v['region']} · {v['season']}", "",
               "| year | S-NPP day cell-days | Aqua÷S-NPP | rel | Aqua÷NOAA-20 | rel | Terra÷S-NPP | rel | night share | rel |",
               "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -116,8 +129,8 @@ def write_md(res: dict) -> None:
           "so we do not correct the numbers.", "",
           "**What Fire Rings does.** Harmonized values are unchanged (documented limitation, not a correction). Punjab Oct–Nov months from 2022 "
           "carry the caveat: *“Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be "
-          "undercounted.”* This shows on headlines, the month drawer, the Proof page and in the AI tools. Independent reports of the shift: "
-          "ISRO (2025), iFOREST (Dec 2025), NASA scientist H. Jethva.", ""]
+          "undercounted.”* This shows on headlines, the month drawer, the Proof page and in the AI tools.", "",
+          "## Independent reports of the shift (sources checked 2026-11-10)", ""] + [f"- [{s['name']}]({s['url']})" for s in SOURCES] + [""]
     (ROOT / "docs" / "punjab_timing.md").write_text("\n".join(L), encoding="utf-8")
 
 

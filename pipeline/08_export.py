@@ -30,6 +30,7 @@ CITATION = ("Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2
             "Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.")
 HOTSPOT_MONTHS = 2
 TIMING_CAVEAT_REGIONS = {"punjab"}
+LOW_N_FIREDAYS = 200
 TIMING_CAVEAT = ("Detected at satellite overpass times; burning has reportedly shifted to late afternoon, "
                  "so recent seasons may be undercounted.")
 
@@ -185,14 +186,14 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
                 "hot_modis": int(md["hot"]), "hot_viirs": int(vs["hot"]) if y >= 2012 else None,
                 "cov_modis": md["cov"], "cov_viirs": vs["cov"] if y >= 2012 else None,
                 "src": seg, "flags": flags,
-                "ratio": s.get("ratio"), "pct": s.get("pct"), "rp": s.get("return_period"),
+                "ratio": s.get("ratio"), "pct": s.get("pct"), "rp": s.get("return_period"), "rp_range": s.get("rp_range"),
                 "beyond": s.get("beyond_record") or None, "rank": s.get("rank"), "guard": s.get("guard"),
             })
 
     # the partial (month-to-date) month is judged against the same days of baseline years, as in `latest`
     lt = stats.get("latest") or {}
     if lt.get("mtd") and months and (months[-1]["y"], months[-1]["m"]) == (lt.get("y"), lt.get("m")):
-        months[-1].update({"ratio": lt.get("ratio"), "pct": lt.get("pct"), "rp": lt.get("return_period"),
+        months[-1].update({"ratio": lt.get("ratio"), "pct": lt.get("pct"), "rp": lt.get("return_period"), "rp_range": lt.get("rp_range"),
                            "beyond": lt.get("beyond_record") or None, "rank": lt.get("rank"), "guard": lt.get("guard")})
 
     bbox = rc.get("bbox")
@@ -207,6 +208,7 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
     # ---- daily sidecar -------------------------------------------------------------------------------------
     daily_all = pl.read_parquet(cube / f"{region}_daily.parquet")
     by_day = {(r["date"], r["stream"]): int(r["cells"]) for r in daily_all.iter_rows(named=True)}
+    off = {s: set(v) for s, v in ((opt_json(out / f"cube_{region}.json") or {}).get("off_days") or {}).items()}
     side: dict = {}
     for rec in months:
         y, m = rec["y"], rec["m"]
@@ -214,6 +216,12 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         series = {"modis": [by_day.get((dt.date(y, m, d), "MODIS"), 0) for d in range(1, nd + 1)]}
         if y >= 2012:
             series["viirs"] = [by_day.get((dt.date(y, m, d), viirs_stream(y, m)), 0) for d in range(1, nd + 1)]
+        # days the primary stream was not operating (outage / regional gap) → hatched in the drawer, not a zero
+        ps = {"T": "TERRA", "M": "AQUA", "V": "SNPP", "V2": "N20"}[segment(y, m)]
+        streams = ["TERRA", "AQUA"] if ps == "AQUA" else [ps]   # MODIS: a day is "off" only if both are off
+        gaps = [d for d in range(1, nd + 1) if all(str(dt.date(y, m, d)) in off.get(s, set()) for s in streams)]
+        if gaps:
+            series["off"] = gaps
         side[f"{y:04d}-{m:02d}"] = series
     latest_key = f"{months[-1]['y']:04d}-{months[-1]['m']:02d}"
     write_json(web / "daily" / f"{region}.json", side, compact=True)
@@ -262,8 +270,10 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "method": method,
         "method_reason": (valid.get("summary") or {}).get("method_reason"),
         "months": months,
-        "k": {k: cm["k"][k] for k in ("month", "lo", "hi", "B", "A", "raw_month", "pool", "tau")} if cm else
-             {"month": [], "lo": [], "hi": [], "B": []},
+        "k": ({**{k: cm["k"][k] for k in ("month", "lo", "hi", "B", "A", "raw_month", "pool", "tau")},
+               # months whose rate rests on < 200 S-NPP fire-days in the window: shown as "few fires — low reliability" (QA #45)
+               "low_n": [b < LOW_N_FIREDAYS for b in cm["k"]["B"]], "low_n_threshold": LOW_N_FIREDAYS} if cm else
+              {"month": [], "lo": [], "hi": [], "B": []}),
         "q": {k: cm["q"][k] for k in ("month", "lo", "hi", "pool")} if cm else None,
         "kprime": {k: cm["kprime"][k] for k in ("month", "lo", "hi", "pool")} if cm else None,
         "validation": valid.get("summary"),
@@ -331,7 +341,8 @@ def write_dataset(regs: list[dict], web: Path) -> None:
     write_json(ds / "validation_v1.json", {"version": "v1", "regions": val})
     timing = opt_json(path("out") / "punjab_timing.json")
     if timing:
-        write_json(ds / "punjab_timing_v1.json", {"caveat": TIMING_CAVEAT, "checks": timing}, compact=True)
+        sources = timing.pop("_sources", [])
+        write_json(ds / "punjab_timing_v1.json", {"caveat": TIMING_CAVEAT, "checks": timing, "sources": sources}, compact=True)
 
 
 def main() -> None:

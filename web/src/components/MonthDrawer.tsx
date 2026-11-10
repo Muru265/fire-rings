@@ -12,7 +12,7 @@ import type { MonthRec, RegionDoc } from '../lib/types'
 import { downloadText } from '../lib/exporters'
 import { DataTable } from './ChartCard'
 
-type Daily = Record<string, { modis?: number[]; viirs?: number[] }>
+type Daily = Record<string, { modis?: number[]; viirs?: number[]; off?: number[] }>
 
 function dailyH(doc: RegionDoc, d: Daily, r: MonthRec): number[] | null {
   const key = `${r.y}-${String(r.m).padStart(2, '0')}`
@@ -56,7 +56,8 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
       return col.length ? { p10: q(col, 0.1), p50: q(col, 0.5), p90: q(col, 0.9) } : null
     })
     const lastDay = rec.flags.includes('mtd') ? Number(doc.data_end.slice(8, 10)) : n
-    return { cur: cur.slice(0, lastDay), band, n }
+    const off = daily.data[`${rec.y}-${String(rec.m).padStart(2, '0')}`]?.off ?? []
+    return { cur: cur.slice(0, lastDay), band, n, off }
   }, [daily, doc, rec])
 
   const baseVals = doc.months.filter((x) => x.m === rec.m && x.y >= doc.baseline[0] && x.y <= doc.baseline[1] && x.H != null)
@@ -79,9 +80,18 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
               <dd className="text-faint">90% {fmtInt(rec.lo)}–{fmtInt(rec.hi)}</dd></div>
             <div className="rounded-sm bg-surface-2 p-3"><dt className="text-faint">vs typical</dt><dd className="num mt-1 text-lg text-text">{j.guard ? '~' : fmtRatio(j.ratio)}</dd>
               <dd className="text-faint">{j.guard ? 'too little fire' : pctRange(j.pct) ?? ''}</dd></div>
-            <div className="rounded-sm bg-surface-2 p-3"><dt className="text-faint">Raw hotspots</dt><dd className="num mt-1 text-lg text-text">{fmtCompact((rec.y >= 2012 ? rec.hot_viirs : rec.hot_modis) ?? null)}</dd>
-              <dd className="text-faint">{rec.y >= 2012 ? 'VIIRS' : 'MODIS'} · MODIS {fmtCompact(rec.hot_modis)}</dd></div>
+            <div className="rounded-sm bg-surface-2 p-3"><dt className="text-faint">Raw hotspots</dt>
+              {rec.y >= 2012 ? (
+                <>
+                  <dd className="num mt-1 text-lg text-text">VIIRS {fmtInt(rec.hot_viirs)}</dd>
+                  <dd className="num text-faint">MODIS {fmtInt(rec.hot_modis)}</dd>
+                </>
+              ) : (
+                <dd className="num mt-1 text-lg text-text">MODIS {fmtInt(rec.hot_modis)}</dd>
+              )}
+            </div>
           </dl>
+          <p className="-mt-3 text-[11px] text-faint">Hotspots are individual satellite pixels flagged as hot; many hotspots can fall in one fire-day.</p>
 
           <section aria-labelledby="daily-h">
             <div className="mb-2 flex items-center justify-between">
@@ -93,7 +103,10 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
             {series && (table
               ? <DataTable spec={{ caption: 'Daily fire-days vs baseline', columns: ['Day', 'Fire-days', 'Baseline P10', 'Median', 'P90'],
                   rows: series.band.map((b, i) => [i + 1, series.cur[i] != null ? fmtInt(series.cur[i]) : null, b ? fmtInt(b.p10) : null, b ? fmtInt(b.p50) : null, b ? fmtInt(b.p90) : null]) }} />
-              : <DailyChart cur={series.cur} band={series.band} n={series.n} />)}
+              : <DailyChart cur={series.cur} band={series.band} n={series.n} off={series.off} />)}
+            {series && series.off.length > 0 && (
+              <p className="mt-1 text-[11px] text-warn">Hatched days ({series.off.join(', ')}): the satellite sent no data for this region — not zero fire.</p>
+            )}
             <p className="mt-1 text-[11px] text-faint">Bars: this month (MODIS-equivalent, daily cell-days × calibration). Band: P10–P90 of the same day in {doc.baseline[0]}–{doc.baseline[1]}; line: median.</p>
           </section>
 
@@ -135,7 +148,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
   )
 }
 
-function DailyChart({ cur, band, n }: { cur: number[]; band: ({ p10: number; p50: number; p90: number } | null)[]; n: number }) {
+function DailyChart({ cur, band, n, off = [] }: { cur: number[]; band: ({ p10: number; p50: number; p90: number } | null)[]; n: number; off?: number[] }) {
   const W = 470
   const H = 170
   const M = { t: 8, r: 6, b: 20, l: 36 }
@@ -151,8 +164,14 @@ function DailyChart({ cur, band, n }: { cur: number[]; band: ({ p10: number; p50
         <g key={t}><line x1={M.l} x2={W - M.r} y1={y(t)} y2={y(t)} stroke="var(--border)" />
           <text x={M.l - 5} y={y(t)} dy="0.32em" textAnchor="end" className="fill-[var(--text-faint)] font-mono text-[9px]">{fmtCompact(t)}</text></g>
       ))}
+      <defs>
+        <pattern id="day-off" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="4" stroke="var(--warn)" strokeWidth="1.2" />
+        </pattern>
+      </defs>
       <polygon points={`${area} ${areaB}`} fill="var(--surface-3)" />
-      {cur.map((v, i) => <rect key={i} x={x(i)} y={y(v)} width={x.bandwidth()} height={Math.max(0, y(0) - y(v))} rx={1.5} fill="var(--accent)" />)}
+      {off.map((d) => <rect key={`off${d}`} x={x(d - 1)} y={M.t} width={x.bandwidth()} height={H - M.b - M.t} fill="url(#day-off)" opacity={0.7}><title>{`Day ${d}: no satellite data`}</title></rect>)}
+      {cur.map((v, i) => off.includes(i + 1) ? null : <rect key={i} x={x(i)} y={y(v)} width={x.bandwidth()} height={Math.max(0, y(0) - y(v))} rx={1.5} fill="var(--accent)" />)}
       <polyline points={med} fill="none" stroke="var(--text)" strokeWidth={1.2} />
       {[1, 10, 20, n].map((d) => <text key={d} x={x(d - 1)! + x.bandwidth() / 2} y={H - 5} textAnchor="middle" className="fill-[var(--text-faint)] font-mono text-[9px]">{d}</text>)}
     </svg>

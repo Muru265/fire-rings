@@ -101,4 +101,10 @@ A change in fire *size* would push the ratio the other way (coarser MODIS misses
 
 **Caveats.** The 2025 and 2026 ratios rest on few fires (S-NPP day cell-days 4,257 and 1,138); 2026 is near-real-time and compared only up to S-NPP's last day (1 Nov). We cannot measure how much burning happens between overpasses, so we do not correct the numbers.
 
-**What Fire Rings does.** Harmonized values are unchanged (documented limitation, not a correction). Punjab Oct–Nov months from 2022 carry the caveat: *“Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.”* This shows on headlines, the month drawer, the Proof page and in the AI tools. Independent reports of the shift: ISRO (2025), iFOREST (Dec 2025), NASA scientist H. Jethva.
+**What Fire Rings does.** Harmonized values are unchanged (documented limitation, not a correction). Punjab Oct–Nov months from 2022 carry the caveat: *“Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.”* This shows on headlines, the month drawer, the Proof page and in the AI tools.
+
+## Independent reports of the shift (sources checked 2026-11-10)
+
+- [NASA Earth Observatory — “New Timing for Stubble Burning in India” (H. Jethva, NASA Goddard)](https://science.nasa.gov/earth/earth-observatory/new-timing-for-stubble-burning-in-india/)
+- [ISRO Space Applications Centre study, Current Science (Nov 2025) — as reported by ThePrint](https://theprint.in/environment/are-farm-fires-going-uncounted-isro-study-suggests-farmers-have-figured-out-a-way-to-evade-satellites/2797583)
+- [iFOREST Stubble Burning Status Report 2025 (Dec 2025) — as reported by The Tribune](https://www.tribuneindia.com/news/delhi/satellites-miss-majority-of-stubble-fires-delhi-air-pollution-underestimated-report)

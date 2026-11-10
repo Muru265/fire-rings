@@ -104,6 +104,22 @@ Harmonized record H (MODIS-equivalent fire-days):
 
 VIIRS is scaled **down** to MODIS-equivalent; MODIS is never scaled up (detail that MODIS could not see in 2003 cannot be invented).
 
+**Method per region (v1; same text in the app's Provenance and on Proof):**
+
+| Region | Method | Rates |
+|---|---|---|
+| Punjab–Haryana | monthly rates with shrinkage (τ = 10) | 0.14–0.40 most months; region-wide 0.347; August 1.20 rests on few fires (low reliability) |
+| Madagascar | monthly rates with shrinkage (τ = 300) | 0.12–0.29; region-wide 0.262 |
+| SE Australia | one region-wide rate (fallback 1) | 0.41 for every month — monthly rates failed the 2012 step test narrowly, the single rate passed both tests |
+| Mauritius | monthly rates with shrinkage (τ = 30) | all months rest on few fires (low-activity region) |
+
+**Low-reliability months.** A monthly rate based on fewer than 200 S-NPP fire-days in the window is labelled
+"few fires — low reliability". Punjab's August rate is above 1 (MODIS saw more than VIIRS), which is physically unusual.
+Checked: only 4–23 fire-days a year per sensor in the monsoon month (126 MODIS vs 92 S-NPP cell-days over 2012–2019), the
+MODIS detections are scattered single cells with no repeat location (not a missed static source), and 47 of 107 S-NPP
+detections are at night. This is small-sample noise; August holds 0.13 % of Punjab's harmonized fire-days, so it changes
+no season, ranking or validation result. The method is unchanged.
+
 ## 6. Uncertainty
 
 Year-block bootstrap ×500: calibration years are resampled with replacement and all ratios refitted; each month's base
@@ -125,7 +141,11 @@ count gets a Poisson draw. The interval is the 5th–95th percentile of the draw
 
 Baseline 2003–2022, same calendar month:
 - ratio to the baseline median; Weibull percentile 100·#{baseline ≤ x}/(n+1), reported as a range over the bootstrap draws;
-- return period (n+1)/#{baseline ≥ x} for above-median months, never extrapolated beyond the record;
+- return period = 100 / (100 − p), taken from the **same** percentile range that is shown next to it (middle of the
+  range → headline value, ends → range), for above-median months; never extrapolated — a month above every baseline year
+  is labelled "beyond the 2003–2022 record" with no number. (Fixed 10 Nov 2026: the old formula (n+1)/#{baseline ≥ x}
+  used the point value and a different rank, and could show "1-in-4" next to a 66th–71st percentile; it now reads
+  "about 1-in-3". Only return periods changed; no harmonized value changed.)
 - rank among all years; **low-activity guard**: baseline median < 5 and value < 10 → "too little fire to judge";
 - the current partial month is compared with the **same days** of baseline years (month to date);
 - similar years = top-3 Pearson correlation of the year-to-date monthly curve (analogues, not forecasts).
@@ -135,8 +155,11 @@ Baseline 2003–2022, same calendar month:
 
 ## 8b. Detection-time check: Punjab's late-afternoon burning (`tools/punjab_timing.py`, `docs/punjab_timing.md`)
 
-Polar orbiters only see fires burning at overpass time (~13:30 for VIIRS and, originally, Aqua). Reports (ISRO 2025, iFOREST
-Dec 2025, NASA's H. Jethva) say Punjab/Haryana stubble burning shifted to after ~15:00 from 2022. Aqua's overpass has drifted
+Polar orbiters only see fires burning at overpass time (~13:30 for VIIRS and, originally, Aqua). Independent reports say
+Punjab/Haryana stubble burning moved to the late afternoon in recent years:
+[NASA Earth Observatory, "New Timing for Stubble Burning in India" (H. Jethva)](https://science.nasa.gov/earth/earth-observatory/new-timing-for-stubble-burning-in-india/);
+[ISRO Space Applications Centre, Current Science, Nov 2025 (ThePrint report)](https://theprint.in/environment/are-farm-fires-going-uncounted-isro-study-suggests-farmers-have-figured-out-a-way-to-evade-satellites/2797583);
+[iFOREST Stubble Burning Status Report 2025 (The Tribune report)](https://www.tribuneindia.com/news/delhi/satellites-miss-majority-of-stubble-fires-delhi-air-pollution-underestimated-report). Aqua's overpass has drifted
 later since Dec 2021, so if fires are lit later, Aqua should now see relatively more of them than VIIRS. We computed daytime
 Aqua ÷ S-NPP cell-day ratios per season (same days only, up to S-NPP's last day), relative to 2013–2019:
 

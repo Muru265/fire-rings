@@ -45,6 +45,8 @@ export interface Ratios {
   A?: number[]
   raw_month?: number[]
   tau?: number
+  low_n?: boolean[]
+  low_n_threshold?: number
 }
 
 export interface LatestStats {

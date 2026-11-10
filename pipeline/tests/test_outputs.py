@@ -52,8 +52,16 @@ def test_geo_anchor_on_land_inside_view_and_live_file(region):
         assert 57.3 < lon < 57.9   # main island, not the ocean between it and Rodrigues
 
 
+@pytest.mark.parametrize("region", REGIONS)
+def test_published_return_periods_agree_with_percentiles(region):
+    for m in doc(region)["months"]:
+        if m.get("rp") and m.get("pct"):
+            p0, p1 = m["pct"]
+            assert 100 / (100 - p0) - 0.05 <= m["rp"] <= 100 / (100 - min(p1, 95.3)) + 0.05, (region, m["y"], m["m"], m["pct"], m["rp"])
+
+
 def test_timing_check_signal_is_punjab_specific():
     t = json.loads((OUT / "punjab_timing.json").read_text(encoding="utf-8"))
     p = t["punjab|Oct–Nov (rice residue)"]["aqua_rel_2022_2026"]
-    others = [t[k]["aqua_rel_2022_2026"] for k in t if not k.startswith("punjab|Oct")]
+    others = [t[k]["aqua_rel_2022_2026"] for k in t if not k.startswith(("punjab|Oct", "_"))]
     assert p > max(others)

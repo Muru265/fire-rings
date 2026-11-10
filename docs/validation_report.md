@@ -23,9 +23,32 @@ Method choice:
 ## V9 famous seasons
 
 - punjab: top-3 Jul–Jun seasons harmonized ['2016–17', '2007–08', '2021–22'], raw ['2016–17', '2021–22', '2017–18'] · Oct–Nov crop-burning top 3 (harmonized): [2016, 2005, 2021]
-- madagascar: top-3 Jul–Jun seasons harmonized ['2016–17', '2019–20', '2007–08'], raw ['2016–17', '2015–16', '2019–20']
+- madagascar: top-3 Jul–Jun seasons harmonized ['2016–17', '2019–20', '2007–08'], raw ['2016–17', '2015–16', '2019–20'] · status: **info**
 - se_australia: top-3 Jul–Jun seasons harmonized ['2019–20', '2002–03', '2003–04'], raw ['2019–20', '2017–18', '2016–17'] · **Black Summer 2019–20 rank: 1 harmonized (raw: 1)** ✅
-- mauritius: top-3 Jul–Jun seasons harmonized ['2013–14', '2006–07', '2010–11'], raw ['2013–14', '2014–15', '2016–17']
+- mauritius: top-3 Jul–Jun seasons harmonized ['2013–14', '2006–07', '2010–11'], raw ['2013–14', '2014–15', '2016–17'] · status: **info**
+
+V9 is only scored against events documented with a source:
+
+- se_australia: Black Summer bushfires, 2019–20 season — [Australian Government — tabling of the Royal Commission into National Natural Disaster Arrangements report (30 Oct 2020)](https://minister.homeaffairs.gov.au/davidlittleproud/Pages/tabling-the-report-of-the-royal-commission-into-national-natural-disaster-arrangements.aspx)
+- Other regions: no sourced event list → V9 shown as information, not pass/fail.
+
+## Low-reliability calibration months (QA #45)
+
+Months whose monthly rate rests on fewer than 200 S-NPP fire-days in Jul 2012 – Dec 2019 are labelled
+"few fires — low reliability" in the app. They use the same shrinkage as every month (τ chosen by
+leave-one-year-out); because they hold almost no fire, they barely affect any total.
+
+- punjab: Aug k=1.20 (unshrunk 1.37; MODIS 126 vs S-NPP 92 fire-days)
+- madagascar: none
+- se_australia: none
+- mauritius: Jan k=0.18 (unshrunk 0.14; MODIS 2 vs S-NPP 17 fire-days); Feb k=0.21 (unshrunk 0.20; MODIS 1 vs S-NPP 7 fire-days); Mar k=0.13 (unshrunk 0.04; MODIS 0 vs S-NPP 12 fire-days); Apr k=0.19 (unshrunk 0.15; MODIS 2 vs S-NPP 16 fire-days); May k=0.16 (unshrunk 0.09; MODIS 1 vs S-NPP 16 fire-days); Jun k=0.18 (unshrunk 0.17; MODIS 11 vs S-NPP 68 fire-days); Jul k=0.18 (unshrunk 0.18; MODIS 19 vs S-NPP 109 fire-days); Aug k=0.22 (unshrunk 0.22; MODIS 30 vs S-NPP 137 fire-days); Sep k=0.35 (unshrunk 0.38; MODIS 69 vs S-NPP 183 fire-days); Nov k=0.18 (unshrunk 0.18; MODIS 20 vs S-NPP 116 fire-days); Dec k=0.12 (unshrunk 0.09; MODIS 4 vs S-NPP 52 fire-days)
+
+Punjab August (k ≈ 1.2, above 1 = MODIS saw more than VIIRS): only 4–23 fire-days a year per sensor in the
+monsoon month (126 MODIS vs 92 S-NPP cell-days over 2012–2019); the MODIS detections are scattered single
+cells with no repeat location (not a static source) and 47 of 107 S-NPP detections are at night. This is
+small-sample noise, not a sensor effect. August holds 0.13 % of Punjab's harmonized fire-days, so it does
+not change any season, rank or validation result.
+
 
 ## Both methods side by side
 

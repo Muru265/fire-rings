@@ -128,7 +128,17 @@ def build(con, region: str, op: pl.DataFrame, data_end: dt.date, min_ratio: floa
     out.write_parquet(cube / f"{region}_monthly.parquet")
     flags = out.filter(pl.col("flag").is_not_null() & (pl.col("O") > 0))
     global_gaps = global_outages(op, data_end)
-    return {"months": len(months),
+    # days each stream was NOT operating for this region (global outage or regional gap), within its lifetime —
+    # the month drawer hatches these days instead of showing a misleading zero (QA #30)
+    off_days = {}
+    for s, first in FIRST_DAY.items():
+        d, days = first, []
+        while d <= data_end:
+            if d not in opsets[s]:
+                days.append(str(d))
+            d += dt.timedelta(1)
+        off_days[s] = days
+    return {"months": len(months), "off_days": off_days,
             "regional_gaps": {s: [[str(a), str(b), (b - a).days + 1] for a, b in r] for s, r in gaps.items()},
             "global_outages": global_gaps,
             "cell_days_total": {s: int(out.filter(pl.col("stream") == s)["C"].sum()) for s in STREAMS},

@@ -7,8 +7,8 @@ Output data/out/stats_{region}.json
 Per month (y, m), against the same calendar month in baseline years 2003–2022:
   ratio          H / baseline median
   pct            Weibull percentile 100·#{baseline ≤ x}/(n+1), as a P5–P95 range over the bootstrap draws of x
-  return_period  (n+1) / #{baseline ≥ x} for above-median months; null + beyond_record when x exceeds every baseline
-                 value (no extrapolation)
+  return_period  100 / (100 − p) from the displayed percentile range (middle → value, ends → rp_range), for
+                 above-median months; null + beyond_record when x exceeds every baseline value (no extrapolation)
   rank           rank of H among all years of that calendar month (1 = highest)
   guard          true when baseline median < 5 and H < 10 ("too little fire to judge")
 Month-to-date: the latest partial month is compared with the same days (1..D) of baseline years.
@@ -33,25 +33,33 @@ def weibull_pct(x: float, base: np.ndarray) -> float:
     return 100.0 * np.sum(base <= x) / (len(base) + 1)
 
 
-def return_period(x: float, base: np.ndarray) -> tuple[float | None, bool]:
-    n_ge = int(np.sum(base >= x))
-    if n_ge == 0:
-        return None, True
-    return (len(base) + 1) / n_ge, False
+def return_period_from_pct(p_lo: float, p_hi: float, n: int) -> tuple[float | None, list[float] | None, bool]:
+    """Return period consistent with the percentile shown next to it (QA #23).
+
+    A Weibull percentile p means a share (100 − p)% of years are expected to be higher, so the return period is
+    100 / (100 − p). We use the middle of the displayed percentile range for the headline value and the two ends
+    for the range. With n baseline years the highest possible Weibull percentile is 100·n/(n+1); if the whole range
+    sits there the month is above every baseline year → beyond_record (no extrapolation, no number)."""
+    top = 100.0 * n / (n + 1)
+    if p_lo >= round(top):          # percentiles are published as integers (95 = above all 20 baseline years)
+        return None, None, True
+    mid = (p_lo + p_hi) / 2
+    rng = [round(100 / (100 - p_lo), 1), round(100 / (100 - min(p_hi, top)), 1)]
+    return round(100 / (100 - mid), 1), rng, False
 
 
 def month_stats(x: float | None, draws: np.ndarray, base: np.ndarray, guard_med: float, guard_x: float) -> dict:
     if x is None or len(base) == 0:
-        return {"ratio": None, "pct": None, "return_period": None, "beyond_record": False, "guard": None}
+        return {"ratio": None, "pct": None, "return_period": None, "rp_range": None, "beyond_record": False, "guard": None}
     med = float(np.median(base))
     d = draws[~np.isnan(draws)]
     pcts = np.array([weibull_pct(v, base) for v in d]) if len(d) else np.array([weibull_pct(x, base)])
-    lo, hi = np.percentile(pcts, [5, 95])
-    rp, beyond = (None, False)
+    lo, hi = (round(float(v)) for v in np.percentile(pcts, [5, 95]))
+    rp, rng, beyond = (None, None, False)
     if x > med:
-        rp, beyond = return_period(x, base)
+        rp, rng, beyond = return_period_from_pct(lo, hi, len(base))
     return {"ratio": round(x / med, 2) if med > 0 else None, "median": round(med, 1),
-            "pct": [round(float(lo)), round(float(hi))], "return_period": None if rp is None else round(rp, 1),
+            "pct": [lo, hi], "return_period": rp, "rp_range": rng,
             "beyond_record": beyond, "guard": bool(med < guard_med and x < guard_x)}
 
 

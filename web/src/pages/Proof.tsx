@@ -90,13 +90,23 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
   return (
     <div className="space-y-6">
       {/* validation cards */}
+      {low && (
+        <div className="rounded-sm border border-warn/40 bg-warn/10 px-4 py-3 text-sm text-warn" role="note">
+          <strong>Too little fire to validate reliably.</strong> This region has only a handful of fire-days most months, so one or two fires can swing
+          the test errors a lot. We show the numbers for transparency, but don't mark them pass or fail; on Explore the app says
+          “too little fire to judge” instead of quoting ratios.
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Out-of-sample annual error (V1)" value={`${res.V1.mape_pct}%`} pass={low ? null : res.V1.pass}
-          sub={`mean absolute error, leave-one-year-out 2012–2019 · bias ${res.V1.bias_pct}% · target < 20% / ±10%`} />
-        <Stat label="Step at 2012 (V3)" value={`${s.step_raw_pct > 0 ? '+' : ''}${fmtInt(s.step_raw_pct)}% → ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%`} pass={low ? null : res.V3.pass}
-          sub={`raw → harmonized (MODIS-only: ${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%) · Pettitt p ${res.V3.pettitt_p_raw} → ${res.V3.pettitt_p_harm}`} />
-        <Stat label="Seasonal shape (r)" value={s.shape_r.toFixed(2)} pass={null}
-          sub="correlation of out-of-sample monthly predictions with MODIS, 2012–2019" />
+        <Stat label="Out-of-sample annual error (V1)" value={`${res.V1.mape_pct}%`} status={low ? 'low' : res.V1.pass ? 'pass' : 'fail'}
+          plain={low ? 'Too few fires for this test to mean much here.' : `We hid one year at a time (2012–2019), predicted it from the other years and compared with what the old satellite saw: off by ${res.V1.mape_pct}% on average.`}
+          sub={`goal: error under 20% and bias within ±10% · bias ${res.V1.bias_pct}% (not always too high or too low)`} />
+        <Stat label="Step at 2012 (V3)" value={`${s.step_raw_pct > 0 ? '+' : ''}${fmtInt(s.step_raw_pct)}% → ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%`} status={low ? 'low' : res.V3.pass ? 'pass' : 'fail'}
+          plain={low ? 'Too few fires for a reliable jump test.' : `Raw data says fire jumped ${fmtInt(s.step_raw_pct)}% when VIIRS arrived in 2012. After the fix: ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%, close to the old satellite alone (${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%) — the fake jump is gone.`}
+          sub={`jump test: before the fix p ${res.V3.pettitt_p_raw} (jump found); after p ${res.V3.pettitt_p_harm} (${res.V3.pettitt_p_harm > 0.05 ? 'no jump' : 'jump remains'})`} />
+        <Stat label="Seasonal shape (r)" value={s.shape_r.toFixed(2)} status="info"
+          plain={`Our predicted months follow the real seasonal pattern${s.shape_r >= 0.95 ? ' almost perfectly' : s.shape_r >= 0.85 ? ' closely' : ' only loosely'} (1.00 = perfect).`}
+          sub="correlation of out-of-sample monthly predictions with MODIS, 2012–2019 · information, no fixed target" />
         <V9Card v9={res.V9} rid={rid} />
       </div>
       <p className="text-xs text-muted">
@@ -112,32 +122,51 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
   )
 }
 
-function Stat({ label, value, sub, pass }: { label: string; value: string; sub: string; pass: boolean | null }) {
+type Status = 'pass' | 'fail' | 'info' | 'low'
+const STATUS: Record<Status, [string, string]> = {
+  pass: ['✓ pass', 'bg-ok/15 text-ok'],
+  fail: ['✗ fail', 'bg-danger/15 text-danger'],
+  info: ['ⓘ info', 'bg-accent-2/15 text-accent-2'],
+  low: ['~ too little fire', 'bg-warn/15 text-warn'],
+}
+
+function Stat({ label, value, sub, plain, status, children }: { label: string; value: string; sub: string; plain?: string; status: Status; children?: React.ReactNode }) {
+  const [txt, cls] = STATUS[status]
   return (
-    <div className="card flex flex-col gap-1">
+    <div className="card flex flex-col gap-1" data-status={status}>
       <div className="flex items-start justify-between gap-2">
         <span className="eyebrow !text-[11px]">{label}</span>
-        {pass != null && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${pass ? 'bg-ok/15 text-ok' : 'bg-danger/15 text-danger'}`}>{pass ? '✓ pass' : '✗ fail'}</span>}
-        {pass == null && label.includes('V') && <span className="rounded-full bg-surface-3 px-2 py-0.5 text-[10px] text-muted">n/a</span>}
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${cls}`}>{txt}</span>
       </div>
       <span className="font-display text-[28px] font-semibold text-text">{value}</span>
+      {plain && <span className="text-sm text-text">{plain}</span>}
       <span className="text-xs text-muted">{sub}</span>
+      {children}
     </div>
   )
 }
 
 function V9Card({ v9, rid }: { v9: Record<string, unknown>; rid: string }) {
   const top = (v9.top3_harmonized as string[]) ?? []
-  if (rid === 'se_australia') {
+  const status = (v9.status as Status) ?? 'info'
+  const ev = v9.known_event as { event: string; source: { name: string; url: string } } | undefined
+  const reason = v9.status_reason as string | undefined
+  if (rid === 'se_australia' && ev) {
     const r = v9.black_summer_rank_harmonized as number
-    return <Stat label="Famous season (V9)" value={`#${r}`} pass={r <= 3}
-      sub={`Black Summer 2019–20 among ${v9.n_seasons} Jul–Jun seasons (raw rank #${v9.black_summer_rank_raw})`} />
+    return (
+      <Stat label="Famous season (V9)" value={`#${r}`} status={status}
+        plain={`The ${ev.event} ranks #${r} of ${v9.n_seasons} Jul–Jun seasons in our record — it matches the documented event.`}
+        sub={`raw rank #${v9.black_summer_rank_raw} · seasons before Jul 2002 (Terra only) not ranked`}>
+        <a href={ev.source.url} className="text-[11px]" target="_blank" rel="noreferrer">Source: {ev.source.name} ↗</a>
+      </Stat>
+    )
   }
   if (rid === 'punjab') {
-    return <Stat label="Crop-burning peaks (V9)" value={((v9.octnov_top3_harmonized as number[]) ?? []).join(' · ')} pass={null}
-      sub="top-3 Oct–Nov seasons, harmonized" />
+    return <Stat label="Crop-burning peaks (V9)" value={((v9.octnov_top3_harmonized as number[]) ?? []).join(' · ')} status={status}
+      plain="The three biggest October–November burning seasons in the harmonized record." sub={reason ?? ''} />
   }
-  return <Stat label="Biggest seasons (V9)" value={top.slice(0, 2).join(' · ')} pass={null} sub={`top Jul–Jun seasons, harmonized (3rd: ${top[2] ?? '—'})`} />
+  return <Stat label="Biggest seasons (V9)" value={top.slice(0, 2).join(' · ')} status={status}
+    plain={`Biggest Jul–Jun seasons in the record (3rd: ${top[2] ?? '—'}).`} sub={reason ?? ''} />
 }
 
 function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
@@ -227,14 +256,28 @@ function KChart({ doc }: { doc: RegionDoc }) {
               <g key={mn}>
                 <line x1={cx} x2={cx} y1={y(k.lo[i])} y2={y(k.hi[i])} stroke={C_HARM} strokeWidth={3} strokeLinecap="round" opacity={0.6} />
                 {k.raw_month && <circle cx={cx} cy={y(k.raw_month[i])} r={3} fill="none" stroke="var(--text-faint)" />}
-                <circle cx={cx} cy={y(k.month[i])} r={5} fill={C_HARM} stroke="var(--surface)" strokeWidth={2} />
+                <circle cx={cx} cy={y(k.month[i])} r={5} fill={k.low_n?.[i] ? 'var(--surface)' : C_HARM} stroke={k.low_n?.[i] ? C_HARM : 'var(--surface)'} strokeWidth={2}>
+                  <title>{`${mn}: rate ${k.month[i].toFixed(2)} (90% ${k.lo[i].toFixed(2)}–${k.hi[i].toFixed(2)}), based on ${fmtInt(k.B?.[i] ?? null)} S-NPP fire-days${k.low_n?.[i] ? ' — few fires, low reliability' : ''}`}</title>
+                </circle>
+                {k.low_n?.[i] && <text x={cx} y={y(k.hi[i]) - 6} textAnchor="middle" className="fill-[var(--warn)] text-[9px]">few fires</text>}
                 <text x={cx} y={H - 24} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[10px]">{mn[0]}</text>
                 <text x={cx} y={H - 10} textAnchor="middle" className="fill-[var(--text-faint)] font-mono text-[9px]">{fmtCompact(k.B?.[i] ?? null)}</text>
               </g>
             )
           })}
         </svg>
-        <p className="text-xs text-faint">● ratio used · ○ unshrunk monthly ratio · bar: 90% interval</p>
+        <p className="text-xs text-muted">
+          <strong className="text-text">How to read it:</strong> filled dot = the rate we use · small hollow ring = the raw monthly rate before shrinking ·
+          bar = 90% range · dashed line = region-wide rate · grey numbers = how many S-NPP fire-days the rate rests on (more = more reliable) ·
+          hollow orange dot + “few fires” = fewer than {k.low_n_threshold ?? 200} fire-days, low reliability.
+          {doc.method !== 'pooled' && ` Shrinkage τ = ${k.tau} means months with few fires are pulled toward the region-wide rate.`}
+        </p>
+        {k.low_n?.some(Boolean) && doc.method !== 'pooled' && (
+          <p className="mt-1 text-xs text-warn">
+            {k.low_n.map((l, i) => (l ? `${MONTHS[i]} (${k.month[i].toFixed(2)})` : null)).filter(Boolean).join(', ')}: very few fires that month, so the rate is noisy.
+            These months hold almost no fire, so they barely change any total (details: docs/validation_report.md).
+          </p>
+        )}
       </div>
     </ChartCard>
   )
@@ -271,7 +314,7 @@ function Outages({ doc }: { doc: RegionDoc }) {
 }
 
 interface TimingSeries { y: number; snpp_day: number; aqua_snpp: number | null; aqua_snpp_rel: number | null; aqua_n20_rel: number | null; terra_snpp_rel: number | null; night_share_rel: number | null }
-interface TimingDoc { caveat: string; checks: Record<string, { region: string; season: string; series: TimingSeries[]; aqua_rel_2022_2026: number; terra_rel_2022_2026: number; night_rel_2022_2026: number; aqua_n20_rel_2022_2026: number }> }
+interface TimingDoc { caveat: string; sources: { name: string; url: string }[]; checks: Record<string, { region: string; season: string; series: TimingSeries[]; aqua_rel_2022_2026: number; terra_rel_2022_2026: number; night_rel_2022_2026: number; aqua_n20_rel_2022_2026: number }> }
 
 function DetectionTiming() {
   const t = useJson<TimingDoc>('dataset/punjab_timing_v1.json')
@@ -300,13 +343,21 @@ function DetectionTiming() {
     <ChartCard id="timing" title="Detection-time caveat: Punjab's late-afternoon burning" table={table}
       subtitle={<>Polar-orbiting satellites only see fires burning at their overpass (~13:30 for VIIRS). Since Dec 2021 Aqua passes later in the afternoon. In Punjab's Oct–Nov season, Aqua now sees
         <strong className="text-text"> ×{p.aqua_rel_2022_2026.toFixed(1)}</strong> as much relative to VIIRS as in 2013–2019 (×{p.aqua_n20_rel_2022_2026.toFixed(1)} vs NOAA-20), rising to ×{last[last.length - 1].aqua_snpp_rel?.toFixed(1)} in {last[last.length - 1].y};
-        other seasons stay flat. VIIRS night detections rose ×{p.night_rel_2022_2026.toFixed(1)}. Together this supports reports (ISRO 2025, iFOREST 2025, NASA's H. Jethva) that burning moved after ~3 pm.</>}>
+        other seasons stay flat. Fires seen at the ~1:30 am VIIRS pass rose ×{p.night_rel_2022_2026.toFixed(1)}. Together this supports independent reports (below) that burning moved after ~3 pm.</>}>
       <LineChart series={series} yFormat={(v) => `×${v.toFixed(1)}`} height={280} xBand={[2012.5, 2019.5, '2013–19 = ×1.0']}
         annotations={[{ x: 2021.95, label: 'Aqua drifts later' }]} yLabel="Aqua ÷ S-NPP vs 2013–19" />
       <p className="mt-3 rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn">
         Shown on Punjab Oct–Nov from 2022: “{t.data.caveat}” Harmonized numbers are <strong>not</strong> adjusted — we can't measure burning between overpasses.
         Recent years rest on few fires (S-NPP day cell-days: {p.series.filter((s) => s.y >= 2024).map((s) => `${s.y} ${fmtInt(s.snpp_day)}`).join(', ')}). Details: docs/punjab_timing.md.
       </p>
+      {t.data.sources?.length > 0 && (
+        <div className="mt-3 text-xs text-muted">
+          <p className="font-semibold text-text">Independent reports of the later burning:</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+            {t.data.sources.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.name} ↗</a></li>)}
+          </ul>
+        </div>
+      )}
     </ChartCard>
   )
 }

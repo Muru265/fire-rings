@@ -82,6 +82,12 @@ try {
       check(P, 'gauge percentile', g, pl)
     }
     check(P, 'gauge baseline median', g, `median ${fmtInt(d.climatology.median[lc.m - 1])} fire-days`)
+    if (lcRec.rp && lcRec.ratio > 1 && !lcRec.guard) {
+      // QA #23: the return period shown must agree with the percentile next to it
+      check(P, 'gauge return period', g, `1-in-${Math.round(lcRec.rp)} years`)
+      const [p0, p1] = lcRec.pct
+      check(P, 'rp consistent with pct', String(100 / (100 - p0) - 0.05 <= lcRec.rp && lcRec.rp <= 100 / (100 - Math.min(p1, 95.3)) + 0.05), 'true')
+    }
     // validation badge
     const hdr = await page.locator('main header').first().innerText()
     if (d.validation) check(P, 'validation badge', hdr, d.validation.low_activity ? 'low-activity region' : `${d.validation.loyo_err_pct}% out-of-sample error`)
@@ -122,7 +128,8 @@ try {
     check('/proof', `${id} V1 MAPE`, cards, `${res.V1.mape_pct}%`)
     check('/proof', `${id} V1 bias`, cards, `bias ${res.V1.bias_pct}%`)
     check('/proof', `${id} V3 step`, cards, `${s.step_raw_pct > 0 ? '+' : ''}${fmtInt(s.step_raw_pct)}% → ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%`)
-    check('/proof', `${id} MODIS-only step`, cards, `MODIS-only: ${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%`)
+    if (!s.low_activity) check('/proof', `${id} MODIS-only step`, cards, `old satellite alone (${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%)`)
+    else check('/proof', `${id} low-activity state`, cards, 'Too few fires')
     check('/proof', `${id} shape r`, cards, s.shape_r.toFixed(2))
     if (id === 'se_australia') check('/proof', 'Black Summer rank', cards, `#${res.V9.black_summer_rank_harmonized}`)
     if (id === 'punjab') check('/proof', 'Punjab Oct–Nov top 3', cards, res.V9.octnov_top3_harmonized.join(' · '))

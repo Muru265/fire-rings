@@ -31,6 +31,16 @@ cal = imp("05_calibrate") if False else None  # (kept simple: reuse helpers belo
 
 MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
+# V9 checks only against events documented with a source (QA #37). Regions without one get an "info" status.
+KNOWN_EVENTS = {
+    "se_australia": {
+        "event": "Black Summer bushfires, 2019–20 season",
+        "season_start": 2019,
+        "source": {"name": "Australian Government — tabling of the Royal Commission into National Natural Disaster Arrangements report (30 Oct 2020)",
+                   "url": "https://minister.homeaffairs.gov.au/davidlittleproud/Pages/tabling-the-report-of-the-royal-commission-into-national-natural-disaster-arrangements.aspx"},
+    },
+}
+
 
 def ym(s):
     return int(s[:4]), int(s[5:7])
@@ -176,6 +186,14 @@ def validate(region: str, method: str, cube: dict, calib: dict, cfg: dict) -> di
     rank_raw = {s["start"]: i + 1 for i, s in enumerate(by_raw)}
     v9 = {"season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)", "n_seasons": len(seasons),
           "top3_harmonized": [s["season"] for s in by_h[:3]], "top3_raw": [s["season"] for s in by_raw[:3]]}
+    ev = KNOWN_EVENTS.get(region)
+    if ev:
+        v9["known_event"] = ev
+        v9["status"] = "pass" if rank_h.get(ev["season_start"], 99) <= 3 else "fail"
+    else:
+        v9["status"] = "info"
+        v9["status_reason"] = ("Shown for information: we have no independently sourced list of this region's big fire years "
+                               "to test against, so this is not a pass/fail check.")
     if region == "se_australia":
         v9["black_summer_rank_harmonized"] = rank_h.get(2019)
         v9["black_summer_rank_raw"] = rank_raw.get(2019)
@@ -271,13 +289,31 @@ def write_report(allres: dict) -> None:
     L += ["", "## V9 famous seasons", ""]
     for region, d in allres.items():
         v = d["summary"]["v9"]
-        extra = ""
+        extra = f" · status: **{v.get('status')}**"
         if "black_summer_rank_harmonized" in v:
             extra = (f" · **Black Summer 2019–20 rank: {v['black_summer_rank_harmonized']} harmonized "
                      f"(raw: {v['black_summer_rank_raw']})** {'✅' if v.get('pass') else '❌'}")
         if "octnov_top3_harmonized" in v:
             extra = f" · Oct–Nov crop-burning top 3 (harmonized): {v['octnov_top3_harmonized']}"
         L.append(f"- {region}: top-3 Jul–Jun seasons harmonized {v['top3_harmonized']}, raw {v['top3_raw']}{extra}")
+    L += ["", "V9 is only scored against events documented with a source:", ""]
+    for region, ev in KNOWN_EVENTS.items():
+        L.append(f"- {region}: {ev['event']} — [{ev['source']['name']}]({ev['source']['url']})")
+    L.append("- Other regions: no sourced event list → V9 shown as information, not pass/fail.")
+    L += ["", "## Low-reliability calibration months (QA #45)", "",
+          "Months whose monthly rate rests on fewer than 200 S-NPP fire-days in Jul 2012 – Dec 2019 are labelled",
+          "\"few fires — low reliability\" in the app. They use the same shrinkage as every month (τ chosen by",
+          "leave-one-year-out); because they hold almost no fire, they barely affect any total.", ""]
+    for region in allres:
+        c = read_json(path("out") / f"calib_{region}.json")["methods"][allres[region]["summary"]["method"]]["k"]
+        low = [f"{MON[i]} k={c['month'][i]:.2f} (unshrunk {c['raw_month'][i]:.2f}; MODIS {c['A'][i]:.0f} vs S-NPP {c['B'][i]:.0f} fire-days)"
+               for i in range(12) if c["B"][i] < 200]
+        L.append(f"- {region}: " + ("; ".join(low) if low else "none"))
+    L += ["", "Punjab August (k ≈ 1.2, above 1 = MODIS saw more than VIIRS): only 4–23 fire-days a year per sensor in the",
+          "monsoon month (126 MODIS vs 92 S-NPP cell-days over 2012–2019); the MODIS detections are scattered single",
+          "cells with no repeat location (not a static source) and 47 of 107 S-NPP detections are at night. This is",
+          "small-sample noise, not a sensor effect. August holds 0.13 % of Punjab's harmonized fire-days, so it does",
+          "not change any season, rank or validation result.", ""]
     L += ["", "## Both methods side by side", "",
           "| region | method | τ | V1 bias | V1 MAPE | V1 max |err| | harmonized step | Pettitt p | V3 | shape r |",
           "|---|---|---:|---:|---:|---:|---:|---:|---|---:|"]
