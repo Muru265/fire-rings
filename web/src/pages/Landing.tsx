@@ -4,6 +4,7 @@ import MiniRings from '../components/MiniRings'
 import SensorTimeline from '../components/SensorTimeline'
 import { fetchJson, useMeta } from '../lib/api'
 import { headline, judgeMonth } from '../lib/headline'
+import { plainLevel, TONE_CLASS } from '../lib/plain'
 import { REGIONS } from '../lib/regions'
 import type { RegionDoc } from '../lib/types'
 import { fetchLive } from '../lib/live'
@@ -56,6 +57,10 @@ export default function Landing() {
                     <div className="shrink-0">{d ? <MiniRings months={d.months} label={`${r.name} mini Fire Rings`} /> : <div className="h-[72px] w-[72px] animate-pulse rounded-full bg-surface-3" />}</div>
                     <div className="min-w-0">
                       <span className="font-display text-lg font-semibold text-text">{d?.name ?? r.name}</span>
+                      {j && j.value != null && (() => {
+                        const pl = plainLevel(j.ratio, j.guard)
+                        return <span className={`mt-1.5 block w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASS[pl.tone]}`} data-testid="card-level">{pl.text}</span>
+                      })()}
                       <span className="mt-1 block text-xs text-muted">{h ? `${h.lead} ${h.rest}` : r.country}</span>
                       {flagged && <span className="mt-1.5 block text-[11px] text-warn">⚑ Detection-time caveat: may be undercounted</span>}
                     </div>

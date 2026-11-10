@@ -233,8 +233,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         <div>
           <h2 id="map-h" className="font-display text-lg font-semibold">Map · {MONTHS[m - 1]} {y}</h2>
           <p className="mt-0.5 text-xs text-muted">
-            Fire-days per ~36 km² hexagon ({y < 2012 ? 'MODIS' : 'VIIRS'} detections, raw cell-days)
-            {stats ? ` · ${fmtInt(stats.cells)} hexagons with fire` : ''}
+            Each hexagon (~36 km²) is coloured by how many days it had fire this month ({y < 2012 ? 'MODIS' : 'VIIRS'}, raw count)
+            {stats ? <> · <strong className="text-text">{fmtInt(stats.cells)}</strong> hexagons had fire</> : ''}
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Region presets">
@@ -252,7 +252,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         <div className="absolute bottom-3 left-3 max-w-[260px] space-y-1.5 rounded-sm bg-surface/90 px-2.5 py-2 text-[10px] backdrop-blur">
           {stats && stats.cells > 0 && (
             <div>
-              <div className="mb-1 text-muted">fire-days per hexagon</div>
+              <div className="mb-1 text-muted">days with fire per hexagon</div>
               <div className="flex items-center gap-1">{COUNT_COLORS.map((c) => <span key={c} className="h-2.5 w-4 rounded-[2px]" style={{ background: c }} />)}</div>
               <div className="num mt-0.5 flex justify-between text-faint"><span>1</span><span>{fmtCompact(stats.max)}</span></div>
             </div>
@@ -267,6 +267,10 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           {live?.ok && showLive && (
             <div className="text-muted"><span style={{ color: C_LIVE }}>◯</span> live 72 h — near-real-time, provisional</div>
           )}
+          <div className="flex flex-col gap-0.5 text-muted">
+            <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t border-dashed border-[#93A1B3]" />data area (region edge)</span>
+            {box && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t-2 border-[#5AC8FA]" />your box</span>}
+          </div>
         </div>
         {inset && (
           <button onClick={toggleInset} className="absolute top-3 left-3 rounded-sm border border-border-strong bg-surface/90 px-2.5 py-1 text-xs text-text backdrop-blur hover:bg-surface-2">
@@ -280,11 +284,11 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           className={`rounded-sm border px-3 py-1.5 ${drawing ? 'border-accent text-accent' : 'border-border-strong text-text hover:bg-surface-2'}`}>
           ▭ Draw box
         </button>
-        {['W', 'S', 'E', 'N'].map((lab, i) => (
+        {['West', 'South', 'East', 'North'].map((lab, i) => (
           <label key={lab} className="flex flex-col gap-0.5">
-            <span className="text-faint">{lab}</span>
+            <span className="text-faint">{lab} (°)</span>
             <input value={inputs[i]} inputMode="decimal" onChange={(e) => setInputs((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
-              className="num w-[72px] rounded-sm border border-border bg-surface-2 px-2 py-1 text-text" aria-label={`${lab} bound (decimal degrees)`} />
+              className="num w-[72px] rounded-sm border border-border bg-surface-2 px-2 py-1 text-text" aria-label={`${lab} edge (decimal degrees)`} />
           </label>
         ))}
         <button onClick={apply} className="rounded-sm bg-accent px-3 py-1.5 font-semibold text-bg hover:brightness-110">Apply box</button>

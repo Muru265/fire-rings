@@ -11,6 +11,7 @@ import { REGIONS } from '../lib/regions'
 import { MONTHS, VIIRS_START } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
+import { calibrationSummary } from '../lib/calibration'
 
 const C_HARM = '#D97706'
 const C_MODIS = '#3B8FCC'
@@ -35,7 +36,13 @@ export default function Proof() {
         <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">How we know it works</h1>
         <p className="mt-4 text-muted">
           VIIRS is converted into MODIS-equivalent fire-days using ratios fitted only on <strong className="text-text">July 2012 – December 2019</strong>,
-          when both satellite families flew stable orbits. Every number below comes from <code className="num text-xs">pipeline/06_validate.py</code> and is tested out of sample.
+          when both satellite families flew stable orbits. Every number below comes from{' '}
+          <a href={`${REPO}/blob/main/pipeline/06_validate.py`} target="_blank" rel="noreferrer" className="num text-xs">pipeline/06_validate.py ↗</a> and is tested out of sample.
+          Full results: <a href={`${REPO}/blob/main/docs/validation_report.md`} target="_blank" rel="noreferrer">docs/validation_report.md ↗</a>.
+        </p>
+        <p className="mt-3 rounded-sm border border-border bg-surface-2 px-3 py-2 text-sm text-muted">
+          <strong className="text-text">What we keep vs what we convert.</strong> Converting the new satellite into old-satellite units is only for the
+          25-year comparison (Long-term mode). The new satellite’s full 375 m detail is kept, not thrown away — it is shown as-is in High detail mode.
         </p>
       </header>
 
@@ -56,27 +63,16 @@ export default function Proof() {
         <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {LIMITS.map((l) => (
-            <article key={l.t} className="card">
-              <h3 className="font-display text-base font-semibold text-text">{l.t}</h3>
-              <p className="mt-2 text-sm text-muted">{l.p}</p>
-              <p className="mt-3 text-sm"><span className="eyebrow mr-1 !text-ok">Mitigation</span> <span className="text-muted">{l.m}</span></p>
+            <article key={l.t} className="card flex flex-col gap-3">
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold text-text"><span aria-hidden="true" className="text-xl">{l.i}</span>{l.t}</h3>
+              <div><p className="eyebrow !text-[10px] !text-warn">The problem</p><p className="mt-1 text-sm text-muted">{l.p}</p></div>
+              <div><p className="eyebrow !text-[10px] !text-ok">What we do about it</p><p className="mt-1 text-sm text-muted">{l.m}</p></div>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="card max-w-4xl" aria-labelledby="method-h">
-        <h2 id="method-h" className="font-display text-xl font-semibold">Method in six steps</h2>
-        <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-muted marker:text-faint">
-          <li><span className="text-text">Unify</span> 5 satellite streams from NASA FIRMS (Terra, Aqua, S-NPP, NOAA-20, NOAA-21): standard archive plus near-real-time, one schema, local solar day.</li>
-          <li><span className="text-text">Filter identically</span>: drop low confidence; drop FIRMS volcano/static/offshore flags; mask H3 cells ever flagged static (incl. for NRT rows) and persistent non-seasonal cells.</li>
-          <li><span className="text-text">Count fire cell-days</span>: one H3 res-6 hexagon (~36 km²) with ≥1 detection on one day. Robust to VIIRS splitting a big fire into many pixels.</li>
-          <li><span className="text-text">Adjust coverage</span> for satellite outages (detected from the data, incl. regional gaps).</li>
-          <li><span className="text-text">Calibrate</span> MODIS/VIIRS ratio of sums per calendar month on Jul 2012 – Dec 2019, shrunk to the region-wide ratio (τ by leave-one-year-out); Terra→Terra+Aqua before July 2002; NOAA-20→S-NPP after S-NPP ended.</li>
-          <li><span className="text-text">Quantify uncertainty</span> with a year-block bootstrap ×500 plus Poisson noise; judge "normal" against 2003–2022.</li>
-        </ol>
-        <a href={`${REPO}/blob/main/METHODS.md`} className="mt-4 inline-block text-sm">Full method (METHODS.md) →</a>
-      </section>
+      <MethodFlow doc={doc.status === 'ready' ? doc.data : null} />
     </div>
   )
 }
@@ -109,6 +105,10 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
           sub="correlation of out-of-sample monthly predictions with MODIS, 2012–2019 · information, no fixed target" />
         <V9Card v9={res.V9} rid={rid} />
       </div>
+      <p className="text-sm text-muted">
+        <strong className="text-text">{doc?.name ?? ''} exchange rate:</strong> {doc ? calibrationSummary(doc) : ''}{' '}
+        Different landscapes have different fire sizes, so each region gets its own rate.
+      </p>
       <p className="text-xs text-muted">
         Method used: <strong className="text-text">{s.method === 'pooled' ? 'single region-wide ratio (fallback 1)' : 'monthly ratios with shrinkage'}</strong> — {s.method_reason}.
         {low && ' Low-activity region: targets are reported but not judged; the app applies the "too little fire to judge" guard.'}
@@ -169,6 +169,24 @@ function V9Card({ v9, rid }: { v9: Record<string, unknown>; rid: string }) {
     plain={`Biggest Jul–Jun seasons in the record (3rd: ${top[2] ?? '—'}).`} sub={reason ?? ''} />
 }
 
+/** Plain takeaway for the before/after chart (QA #39), computed from the plotted series. */
+function baTakeaway(v3: V3, series: Series[]): string {
+  const mult = 1 + v3.step_raw_pct / 100
+  const s: string[] = []
+  if (mult >= 1.4) s.push(`Raw: fires seem to jump ${mult >= 1.95 ? `about ×${mult.toFixed(1)}` : `by ${fmtInt(v3.step_raw_pct)}%`} in 2012 — they didn't, the camera changed.`)
+  else s.push(`Raw: the 2012 camera change adds a ${fmtInt(v3.step_raw_pct)}% step.`)
+  s.push(`Fixed: the orange line changes ${v3.step_harm_pct > 0 ? '+' : ''}${v3.step_harm_pct}%, close to the old satellite alone (${v3.step_modis_pct > 0 ? '+' : ''}${v3.step_modis_pct}%).`)
+  // is there a drop after 2021 in all three lines? (complete years only)
+  const fell = series.every((sr) => {
+    const a = sr.points.filter((p) => p.y != null && p.x >= 2017 && p.x <= 2021).map((p) => p.y!)
+    const b = sr.points.filter((p) => p.y != null && p.x >= 2022).map((p) => p.y!)
+    if (!a.length || !b.length) return false
+    return b.reduce((x, y) => x + y, 0) / b.length < 0.8 * (a.reduce((x, y) => x + y, 0) / a.length)
+  })
+  if (fell) s.push('All three lines fall after 2021, so that drop is in the data from both satellite families, not an artefact of the fix.')
+  return s.join(' ')
+}
+
 function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
   // full record from the region file (complete years only); falls back to the V3 series
   const series: Series[] = useMemo(() => {
@@ -200,7 +218,47 @@ function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
     <ChartCard id="ba" title="Before / after: the 2012 step disappears" table={table}
       subtitle={<>Annual fire-days (complete years). Raw jumps <strong className="text-text">{v3.step_raw_pct > 0 ? '+' : ''}{fmtInt(v3.step_raw_pct)}%</strong> when VIIRS arrives; harmonized changes {v3.step_harm_pct > 0 ? '+' : ''}{v3.step_harm_pct}% (90% CI {v3.step_harm_ci[0]} to {v3.step_harm_ci[1]}), in line with MODIS alone ({v3.step_modis_pct > 0 ? '+' : ''}{v3.step_modis_pct}%). Step = mean 2012–19 vs 2003–11.</>}>
       <LineChart series={series} yFormat={fmtCompact} annotations={[{ x: 2012, label: `VIIRS arrives · raw +${fmtInt(v3.step_raw_pct)}%` }]} yLabel="fire-days per year" />
+      <p className="mt-2 text-sm text-text" data-testid="ba-takeaway">{baTakeaway(v3, series)}</p>
+      <p className="mt-1 text-xs text-muted">Where the orange line is hidden behind the blue one (2012–2019) the two agree — that overlap is the point. In the table you can see both values.</p>
     </ChartCard>
+  )
+}
+
+const fmtDay = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+const fmtRange = (a: string, b: string) => {
+  const A = new Date(`${a}T00:00:00Z`), B = new Date(`${b}T00:00:00Z`)
+  const same = A.getUTCFullYear() === B.getUTCFullYear()
+  return `${A.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(same ? {} : { year: 'numeric' }), timeZone: 'UTC' })} – ${fmtDay(b)}`
+}
+
+function MethodFlow({ doc }: { doc: RegionDoc | null }) {
+  const q = doc?.quality
+  const totalH = doc ? doc.months.reduce((s, r) => s + (r.H ?? 0), 0) : null
+  const steps = [
+    { i: '🛰️', t: 'Read', n: q?.rows_read, u: 'satellite detections (5 satellites, NASA FIRMS)' },
+    { i: '✂️', t: 'Region', n: q?.rows_unified, u: 'inside the region' },
+    { i: '🧹', t: 'Filter', n: q?.rows_kept, u: 'after dropping low-confidence and static sources' },
+    { i: '⬡', t: 'Count', n: q?.cell_days ? (q.cell_days.MODIS ?? 0) + (q.cell_days.SNPP ?? 0) : null, u: 'fire-days (MODIS + S-NPP, ~36 km² tiles)' },
+    { i: '⚖️', t: 'Calibrate', n: null, u: doc ? `exchange rate fitted on Jul 2012 – Dec 2019 (${doc.method === 'pooled' ? doc.k.pool.toFixed(2) : `${Math.min(...doc.k.month).toFixed(2)}–${Math.max(...doc.k.month).toFixed(2)}`})` : '' },
+    { i: '📈', t: 'Record', n: totalH, u: 'MODIS-equivalent fire-days 2001–now, with 90% ranges from 500 re-runs' },
+  ]
+  return (
+    <section className="card" aria-labelledby="method-h">
+      <h2 id="method-h" className="font-display text-xl font-semibold">Method in six steps{doc ? ` — ${doc.name}` : ''}</h2>
+      <p className="mt-1 text-xs text-muted">The data funnel with the real counts from the pipeline for the selected region.</p>
+      <ol className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        {steps.map((s, i) => (
+          <li key={s.t} className="relative rounded-sm border border-border bg-surface-2 p-3">
+            <div className="flex items-center gap-2"><span aria-hidden="true" className="text-lg">{s.i}</span><span className="num text-[10px] text-faint">{i + 1}</span>
+              <span className="font-display text-sm font-semibold text-text">{s.t}</span></div>
+            {s.n != null && <div className="num mt-2 text-lg text-text">{fmtInt(s.n)}</div>}
+            <div className="mt-1 text-[11px] text-muted">{s.u}</div>
+            {i < steps.length - 1 && <span aria-hidden="true" className="absolute top-1/2 -right-2.5 hidden text-faint xl:block">→</span>}
+          </li>
+        ))}
+      </ol>
+      <a href={`${REPO}/blob/main/METHODS.md`} className="mt-4 inline-block text-sm">Full method (METHODS.md) →</a>
+    </section>
   )
 }
 
@@ -218,10 +276,12 @@ function Drift({ v4 }: { v4: V4 }) {
   }
   return (
     <ChartCard id="drift" title="Why calibration stops at 2019: orbit drift" table={table}
-      subtitle={<>Yearly ratio of MODIS to VIIRS S-NPP fire-days. Terra's orbit began drifting in 2020 and Aqua's in December 2021, changing the time of day they see fire.
-        Mean change after 2020 vs the calibration window: <strong className="text-text">{v4.post2020_mean_rel_pct}%</strong>.</>}>
-      <LineChart series={series} yFormat={(v) => v.toFixed(2)} xBand={[2012.5, 2019.5, 'calibration window']} height={300}
-        annotations={[{ x: 2020, label: 'Terra drift' }, { x: 2021.95, label: 'Aqua drift' }, { x: 2023, label: 'MODIS 6.03 → 61.03' }]} yLabel="ratio" />
+      subtitle={<>The ratio says: for every 100 fire-days the new satellite (S-NPP) sees, the old ones see about {Math.round(v4.window_mean_ratio * 100)} (2013–2019 average).
+        Terra’s orbit began drifting in 2020 and Aqua’s in December 2021, so they now pass at a different time of day.{' '}
+        <strong className="text-text">After the drift the ratio changed by only {v4.post2020_mean_rel_pct}% on average — small, but we still freeze the exchange rate before it, to be safe.</strong></>}>
+      <LineChart series={series} yFormat={(v) => v.toFixed(2)} xBand={[2012.5, 2019.5, 'calibration window (Jul 2012–Dec 2019)']} height={300}
+        annotations={[{ x: 2020, label: 'Terra drift' }, { x: 2021.95, label: 'Aqua drift' }, { x: 2023, label: 'MODIS 6.03 → 61.03' }]} yLabel="old ÷ new satellite" />
+      <p className="mt-2 text-xs text-muted">Dashed lines: Terra starts drifting (2020) · Aqua starts drifting (Dec 2021) · “MODIS 6.03 → 61.03” = NASA changed the MODIS processing version on 1 Jan 2023 (same product, new label).</p>
     </ChartCard>
   )
 }
@@ -294,22 +354,56 @@ function Outages({ doc }: { doc: RegionDoc }) {
   return (
     <section className="card" aria-labelledby="out-h">
       <h2 id="out-h" className="font-display text-lg font-semibold">Known outages detected and handled</h2>
-      <p className="mt-1 text-xs text-muted">Found in the data (runs of ≥5 days for whole-system outages; ≥7 days for regional gaps). Months with ≥60% coverage are scaled up by days covered ÷ days operating; below 60% they are shown as "insufficient coverage", never guessed.</p>
+      <p className="mt-1 text-sm text-text">Sometimes a satellite stops sending data for a few days. We find those gaps in the data itself. If a month still has at least 60% of its days, we scale it up fairly; if not, we show “not enough data” instead of guessing.</p>
+      <p className="mt-1 text-xs text-muted">Whole-system outages = no detections anywhere for ≥5 days; regional gaps = no detections over this region for ≥7 days while the sister satellite saw fire.</p>
+      <OutageTimeline rows={rows} />
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">
-          <thead><tr className="text-left text-muted"><th className="py-1.5 pr-3 font-medium">Satellite</th><th className="pr-3 font-medium">From</th><th className="pr-3 font-medium">To</th><th className="pr-3 text-right font-medium">Days</th><th className="font-medium">Kind</th></tr></thead>
+          <thead><tr className="text-left text-muted"><th className="py-1.5 pr-3 font-medium">Satellite</th><th className="pr-3 font-medium">Dates</th><th className="pr-3 text-right font-medium">Days</th><th className="font-medium">Kind</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.join()} className="border-t border-border">
-                <td className="py-1.5 pr-3 text-text">{r[0]}</td><td className="num pr-3">{r[1]}</td><td className="num pr-3">{r[2]}</td><td className="num pr-3 text-right">{r[3]}</td><td className="text-muted">{r[4]}</td>
+                <td className="py-1.5 pr-3 text-text">{r[0]}</td><td className="pr-3 whitespace-nowrap">{fmtRange(r[1], r[2])}</td><td className="num pr-3 text-right">{r[3]}</td><td className="text-muted">{r[4]}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-xs text-muted">Static sources removed in {doc.name}: <span className="num text-text">{fmtInt(q.masked_static_total)}</span> detections in {fmtInt(q.known_static_cells)} flagged hexagons
-        (incl. <span className="num text-text">{fmtInt(q.nrt_removed_known_static)}</span> near-real-time rows that carry no FIRMS static flag). <Link to="/data">Pipeline row counts →</Link></p>
+      <p className="mt-3 text-sm text-muted">
+        <strong className="text-text">Static sources.</strong> In {doc.name} we removed <span className="num text-text">{fmtInt(q.masked_static_total)}</span> detections at{' '}
+        <span className="num text-text">{fmtInt(q.known_static_cells)}</span> places that are hot all the time (factories, brick kilns, gas flares), so they aren’t counted as fires.{' '}
+        <span className="num text-text">{fmtInt(q.nrt_removed_known_static)}</span> recent quick-look detections had no NASA flag, so we caught them with our own list. <Link to="/data">Pipeline row counts →</Link>
+      </p>
     </section>
+  )
+}
+
+function OutageTimeline({ rows }: { rows: [string, string, string, number, string][] }) {
+  const sats = ['Terra (MODIS)', 'Aqua (MODIS)', 'Suomi-NPP (VIIRS)', 'NOAA-20 (VIIRS)', 'NOAA-21 (VIIRS)']
+  const t0 = Date.UTC(2000, 10, 1), t1 = Date.UTC(2026, 11, 31)
+  const X = (iso: string) => ((Date.parse(`${iso}T00:00:00Z`) - t0) / (t1 - t0)) * 100
+  return (
+    <div className="mt-3 space-y-1" aria-label="Outage timeline 2001–2026" role="img">
+      {sats.map((s) => (
+        <div key={s} className="flex items-center gap-2 text-[10px]">
+          <span className="w-28 shrink-0 text-muted">{s}</span>
+          <div className="relative h-2.5 flex-1 rounded-full bg-surface-3">
+            {rows.filter((r) => r[0] === s).map((r) => (
+              <span key={r[1]} title={`${fmtRange(r[1], r[2])} (${r[3]} days)`} className="absolute top-0 h-2.5 rounded-sm bg-danger"
+                style={{ left: `${X(r[1])}%`, width: `max(3px, ${X(r[2]) - X(r[1])}%)` }} />
+            ))}
+          </div>
+        </div>
+      ))}
+      <div className="flex gap-2 font-mono text-[9px] text-faint">
+        <span className="w-28 shrink-0" />
+        <div className="relative h-3 flex-1">
+          {['2001', '2005', '2010', '2015', '2020', '2025'].map((yv) => (
+            <span key={yv} className="absolute -translate-x-1/2" style={{ left: `${X(`${yv}-01-01`)}%` }}>{yv}</span>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -363,18 +457,18 @@ function DetectionTiming() {
 }
 
 const LIMITS = [
-  { t: 'Fires lit after the overpass are missed', p: 'Polar orbiters see a place about twice a day. In Punjab, burning has shifted to late afternoon since 2022, after the ~13:30 VIIRS overpass, so recent Oct–Nov seasons are likely undercounted.',
+  { i: '🕓', t: 'Fires lit after the overpass are missed', p: 'Polar orbiters see a place about twice a day. In Punjab, burning has shifted to late afternoon since 2022, after the ~13:30 VIIRS overpass, so recent Oct–Nov seasons are likely undercounted.',
     m: 'Measured from the data (Aqua÷VIIRS rise after Aqua drifted later), shown as a caveat on every affected month and in AI answers; numbers are not adjusted.' },
-  { t: 'MODIS is ending and drifting', p: 'Terra (from 2020) and Aqua (from Dec 2021) drift to different overpass times, so MODIS counts after 2020 are not comparable with earlier years.',
+  { i: '🛰️', t: 'MODIS is ending and drifting', p: 'Terra (from 2020) and Aqua (from Dec 2021) drift to different overpass times, so MODIS counts after 2020 are not comparable with earlier years.',
     m: 'Calibration uses Jul 2012 – Dec 2019 only. After 2012 the record is VIIRS-based, so MODIS drift never enters it; the drift chart shows the evidence.' },
-  { t: "You can't add detail to old data", p: 'VIIRS sees fires MODIS never could. Harmonized values are in MODIS-equivalent units, so small fires seen only by VIIRS are scaled away.',
-    m: 'The unit is stated everywhere ("fire-days, MODIS-equivalent"); raw VIIRS detail stays available for 2012+ (seam slider, hotspot downloads).' },
-  { t: 'Ratios vary with fire type', p: 'The MODIS/VIIRS ratio depends on fire size and season (e.g. small crop fires vs large forest fires), so one number per region can be biased in some months.',
+  { i: '🔍', t: "You can't add detail to old data", p: 'VIIRS sees fires MODIS never could. Long-term values are in MODIS-equivalent units, so small fires seen only by VIIRS are scaled away for the 25-year comparison.',
+    m: 'The unit is stated everywhere. The full 375 m VIIRS detail is kept: High detail mode shows 2012–now as-is (finer map hexagons too), plus hotspot downloads.' },
+  { i: '🔥', t: 'Ratios vary with fire type', p: 'The MODIS/VIIRS ratio depends on fire size and season (e.g. small crop fires vs large forest fires), so one number per region can be biased in some months.',
     m: 'Monthly ratios with shrinkage, chosen by out-of-sample tests; regions fall back to a single ratio only when it validates better (recorded per region).' },
-  { t: 'Before July 2002 there is only Terra', p: 'Aqua launched in mid-2002. Earlier months are Terra scaled by a Terra→Terra+Aqua ratio, so 2001–Jun 2002 rankings are less certain.',
+  { i: '1️⃣', t: 'Before July 2002 there is only Terra', p: 'Aqua launched in mid-2002. Earlier months are Terra scaled by a Terra→Terra+Aqua ratio, so 2001–Jun 2002 rankings are less certain.',
     m: 'The ratio is fitted on 2002–2019 and its uncertainty is in the bootstrap interval. These months are shown hatched and labelled "Terra only", and are excluded from rankings, return periods, season ranks and similar years.' },
-  { t: 'Recent months are provisional', p: 'Aug–Nov 2026 come from near-real-time files, which lack FIRMS static-source flags and may be revised.',
+  { i: '⏳', t: 'Recent months are provisional', p: 'Aug–Nov 2026 come from near-real-time files, which lack FIRMS static-source flags and may be revised.',
     m: 'Marked "provisional" everywhere; static locations learned from the archive are masked in NRT rows too.' },
-  { t: 'Little fire, big percentages', p: 'In low-fire places (e.g. Mauritius) a handful of detections can swing a ratio wildly.',
+  { i: '🏝️', t: 'Little fire, big percentages', p: 'In low-fire places (e.g. Mauritius) a handful of detections can swing a ratio wildly.',
     m: 'A low-activity guard (typical < 5 and value < 10 fire-days) replaces ratios with "too little fire to judge"; wide intervals are hatched.' },
 ]

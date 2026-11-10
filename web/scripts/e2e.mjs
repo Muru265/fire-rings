@@ -74,7 +74,7 @@ try {
   check(`table→chart keeps width on ${nCards} chart cards`, nCards >= 2 && shrunk === 0)
 
   // lat/lon box (Ludhiana–Sangrur area)
-  const inputs = page.locator('input[aria-label$="bound (decimal degrees)"]')
+  const inputs = page.locator('input[aria-label$="edge (decimal degrees)"]')
   await inputs.nth(0).fill('75.0'); await inputs.nth(1).fill('29.8'); await inputs.nth(2).fill('76.2'); await inputs.nth(3).fill('31.0')
   await page.getByRole('button', { name: 'Apply box' }).click()
   await page.waitForSelector('text=Box view:', { timeout: 20000 })

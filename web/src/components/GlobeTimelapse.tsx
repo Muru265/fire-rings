@@ -15,12 +15,12 @@ interface Props { docs: RegionDoc[]; live?: Record<string, LiveData | null> }
 
 function LivePanelLine({ docs, live }: { docs: RegionDoc[]; live: Record<string, LiveData | null> }) {
   const ok = docs.map((d) => live[d.id]).filter((l): l is LiveData => !!l?.ok)
-  if (!Object.values(live).some(Boolean)) return <div className="mt-1.5 text-[11px] text-faint">LIVE · checking NASA FIRMS…</div>
-  if (!ok.length) return <div className="mt-1.5 text-[11px] text-faint">LIVE · feed temporarily unavailable</div>
+  if (!Object.values(live).some(Boolean)) return <div className="mt-1.5 text-[11px] text-faint">LIVE (raw detections, last 72 h) · checking NASA FIRMS…</div>
+  if (!ok.length) return <div className="mt-1.5 text-[11px] text-faint">LIVE (raw detections, last 72 h) · feed temporarily unavailable</div>
   const last = ok.map((l) => l.last_acq_utc).filter(Boolean).sort().pop() ?? null
   return (
     <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-accent-2">
-      <span><strong>LIVE</strong> · last satellite pass {agoText(last)} · detections in 72 h:</span>
+      <span><strong>LIVE</strong> · raw detections, last 72 h (not fire-days) · last satellite pass {agoText(last)}:</span>
       {docs.map((d) => <span key={d.id}>{d.name.split(' (')[0]} <span className="num">{live[d.id]?.ok ? fmtInt(live[d.id]!.count) : '—'}</span></span>)}
       <span className="text-faint">near-real-time, provisional, not in the record</span>
     </div>

@@ -179,27 +179,44 @@ function DailyChart({ cur, band, n, off = [] }: { cur: number[]; band: ({ p10: n
 }
 
 function DotPlot({ vals, rec, median }: { vals: MonthRec[]; rec: MonthRec; median: number | null }) {
+  const [hov, setHov] = useState<MonthRec | null>(null)
   const W = 470
-  const H = 64
+  const H = 74
+  const Y = 34
   const all = [...vals.map((v) => v.H!), rec.H ?? 0, rec.hi ?? 0]
-  const x = scaleLinear().domain([0, Math.max(1, ...all) * 1.05]).range([12, W - 12])
+  const x = scaleLinear().domain([0, Math.max(1, ...all) * 1.05]).range([14, W - 14])
+  const mon = MONTHS[rec.m - 1]
+  // keep the two top labels apart: the median label goes above, this month's label below the axis
+  const anchor = (px: number) => (px < 80 ? 'start' : px > W - 80 ? 'end' : 'middle')
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
-      aria-label={`Dot plot: ${vals.length} baseline values for this month, median ${fmtInt(median)}, this month ${fmtInt(rec.H)}`}>
-      <line x1={12} x2={W - 12} y1={30} y2={30} stroke="var(--border)" />
-      {vals.map((v) => <circle key={v.y} cx={x(v.H!)} cy={30} r={4} fill="var(--text-faint)" opacity={0.8}><title>{`${v.y}: ${fmtInt(v.H)}`}</title></circle>)}
-      {median != null && <line x1={x(median)} x2={x(median)} y1={18} y2={42} stroke="var(--text)" strokeWidth={2} />}
-      {rec.lo != null && rec.hi != null && <line x1={x(rec.lo)} x2={x(rec.hi)} y1={30} y2={30} stroke="var(--accent)" strokeWidth={3} strokeLinecap="round" />}
-      {rec.H != null && <circle cx={x(rec.H)} cy={30} r={7} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2} />}
-      <text x={12} y={60} className="fill-[var(--text-faint)] font-mono text-[9px]">0</text>
-      <text x={W - 12} y={60} textAnchor="end" className="fill-[var(--text-faint)] font-mono text-[9px]">{fmtCompact(x.domain()[1])}</text>
-      {median != null && <text x={x(median)} y={12} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[9px]">median</text>}
-    </svg>
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" data-testid="dotplot"
+        aria-label={`Dot plot: ${vals.length} baseline values for this month, median ${fmtInt(median)}, this month ${fmtInt(rec.H)}`}>
+        <line x1={14} x2={W - 14} y1={Y} y2={Y} stroke="var(--border)" />
+        {vals.map((v) => (
+          <circle key={v.y} cx={x(v.H!)} cy={Y} r={hov?.y === v.y ? 6 : 4} fill={hov?.y === v.y ? 'var(--text)' : 'var(--text-faint)'} opacity={0.85}
+            onMouseEnter={() => setHov(v)} onMouseLeave={() => setHov(null)} className="cursor-default"><title>{`${mon} ${v.y}: ${fmtInt(v.H)} fire-days`}</title></circle>
+        ))}
+        {median != null && <line x1={x(median)} x2={x(median)} y1={Y - 12} y2={Y + 12} stroke="var(--text)" strokeWidth={2} />}
+        {rec.lo != null && rec.hi != null && <line x1={x(rec.lo)} x2={x(rec.hi)} y1={Y} y2={Y} stroke="var(--accent)" strokeWidth={3} strokeLinecap="round" />}
+        {rec.H != null && <circle cx={x(rec.H)} cy={Y} r={7} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2} />}
+        {median != null && <text x={x(median)} y={Y - 17} textAnchor={anchor(x(median))} className="fill-[var(--text)] text-[10px]">typical (median {fmtInt(median)})</text>}
+        {rec.H != null && <text x={x(rec.H)} y={Y + 24} textAnchor={anchor(x(rec.H))} className="fill-[var(--accent)] text-[10px]">
+          {mon} {rec.y} ({fmtInt(rec.H)}{rec.lo != null ? `, 90% ${fmtInt(rec.lo)}–${fmtInt(rec.hi)}` : ''})</text>}
+        <text x={14} y={H - 2} className="fill-[var(--text-faint)] font-mono text-[9px]">0</text>
+        <text x={W / 2} y={H - 2} textAnchor="middle" className="fill-[var(--text-faint)] text-[9px]">fire-days (MODIS-equivalent)</text>
+        <text x={W - 14} y={H - 2} textAnchor="end" className="fill-[var(--text-faint)] font-mono text-[9px]">{fmtCompact(x.domain()[1])}</text>
+      </svg>
+      <p className="mt-1 min-h-[1rem] text-[11px] text-muted" aria-live="polite">
+        {hov ? <><span className="text-text">{mon} {hov.y}</span>: <span className="num text-text">{fmtInt(hov.H)}</span> fire-days</> : `Grey dots = each ${mon} in ${vals.length ? `${vals[0].y}–${vals[vals.length - 1].y}` : 'the baseline'}. Hover a dot for its year.`}
+      </p>
+    </div>
   )
 }
 
 function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
   const [pts, setPts] = useState<{ x: number; y: number; v: number }[] | null>(null)
+  const [foot, setFoot] = useState<{ x: number; y: number }[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [w, s, e, n] = doc.bbox
   const W = 470
@@ -210,6 +227,8 @@ function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
     Promise.all([loadCells(doc.id), monthCells(doc.id, y, m)]).then(([{ ids, ll }, cells]) => {
       if (!alive) return
       const idx = new Map(ids.map((id, i) => [id, i]))
+      // every hexagon that ever had fire, drawn faintly: gives the region's shape without a basemap
+      setFoot(ll.map(([lat, lng]) => ({ x: ((lng - w) / (e - w)) * W, y: ((n - lat) / (n - s)) * H })))
       setPts(cells.map((c) => { const [lat, lng] = ll[idx.get(c.id)!]; return { x: ((lng - w) / (e - w)) * W, y: ((n - lat) / (n - s)) * H, v: c.v } }))
     }).catch((er: Error) => alive && setErr(er.message))
     return () => { alive = false }
@@ -221,9 +240,29 @@ function MiniHexMap({ doc, y, m }: { doc: RegionDoc; y: number; m: number }) {
   const brk = [1, 2, 3, 4, 5, 6].map((i) => vals[Math.floor((i / 7) * (vals.length - 1))])
   const cls = (v: number) => { let c = 0; while (c < brk.length && v > brk[c]) c++; return c }
   const r = Math.max(1.4, Math.min(4, 900 / Math.sqrt(pts.length + 1) / 40))
+  const rf = Math.max(1, Math.min(2.5, 700 / Math.sqrt(foot.length + 1) / 40))
+  // scale bar: a round number of km close to a quarter of the width
+  const kmW = (e - w) * 111.32 * kx
+  const km = [10, 20, 50, 100, 200, 500, 1000].reduce((a, b) => (Math.abs(b - kmW / 4) < Math.abs(a - kmW / 4) ? b : a))
+  const kmPx = (km / kmW) * W
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-sm bg-bg" role="img" aria-label={`Mini map: ${pts.length} hexagons with fire in this month`}>
-      {[...pts].sort((a, b) => a.v - b.v).map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={r} fill={COUNT_COLORS[cls(p.v)]} />)}
-    </svg>
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-sm bg-bg" role="img" aria-label={`Mini map: ${pts.length} hexagons with fire in this month`}>
+        {foot.map((p, i) => <circle key={`f${i}`} cx={p.x} cy={p.y} r={rf} fill="var(--surface-3)" />)}
+        <rect x={0.5} y={0.5} width={W - 1} height={H - 1} fill="none" stroke="var(--text-faint)" strokeDasharray="3 3" />
+        {[...pts].sort((a, b) => a.v - b.v).map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={r} fill={COUNT_COLORS[cls(p.v)]} />)}
+        <g transform={`translate(10 ${H - 12})`}>
+          <line x1={0} x2={kmPx} y1={0} y2={0} stroke="var(--text-muted)" strokeWidth={2} />
+          <text x={kmPx + 5} y={0} dy="0.32em" className="fill-[var(--text-muted)] font-mono text-[9px]">{km} km</text>
+        </g>
+      </svg>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
+        <span className="flex items-center gap-1">fewer
+          <span className="inline-flex">{COUNT_COLORS.map((c) => <span key={c} className="h-2.5 w-3" style={{ background: c }} />)}</span>
+          more days with fire in each ~36 km² hexagon ({fmtInt(vals[0])}–{fmtInt(vals[vals.length - 1])} days, raw satellite count)</span>
+        <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-surface-3" />ever had fire (2001–now)</span>
+        <span className="flex items-center gap-1"><span className="h-2.5 w-3 border border-dashed border-text-faint" />region box</span>
+      </div>
+    </div>
   )
 }

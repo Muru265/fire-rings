@@ -90,6 +90,8 @@ export interface Validation {
 }
 
 export interface Quality {
+  rows_read?: number
+  cell_days?: Record<string, number>
   rows_unified: number
   rows_kept: number
   dropped_low_conf: number

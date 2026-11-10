@@ -8,6 +8,11 @@ const NAV = [
   { to: '/ask', label: 'Ask' },
 ]
 
+/** "Explore" opens the last-viewed region (QA #5). */
+function lastRegion(): string {
+  try { return localStorage.getItem('fr.lastRegion') || 'punjab' } catch { return 'punjab' }
+}
+
 export default function AppShell() {
   const { pathname } = useLocation()
   return (
@@ -29,7 +34,7 @@ export default function AppShell() {
               {NAV.map((n) => (
                 <li key={n.to}>
                   <NavLink
-                    to={n.to}
+                    to={n.label === 'Explore' ? `/r/${lastRegion()}` : n.to}
                     className={({ isActive }) =>
                       [
                         'rounded-sm px-3 py-2 no-underline transition-colors duration-[var(--dur-fast)]',

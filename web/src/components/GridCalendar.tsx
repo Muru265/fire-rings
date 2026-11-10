@@ -124,9 +124,16 @@ export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onA
           y={((row + 1) / (years.length + 1)) * 100}
           transform={`translate(${active.m <= 3 ? '-12px' : active.m >= 10 ? 'calc(-100% + 12px)' : '-50%'}, ${row < 6 ? '14px' : 'calc(-100% - 14px)'})`} />
       )}
-      <p id={`${uid}-note`} className="mt-3 text-xs text-faint">
-        Line above {VIIRS_START}: MODIS → VIIRS. "~" = incomplete year (missing or partial months).
-      </p>
+      <ul id={`${uid}-note`} className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-muted" aria-label="What the special cells mean">
+        <li className="flex items-center gap-1.5"><span className="h-3 w-5 rounded-[3px]" style={{ background: 'repeating-linear-gradient(45deg, var(--border-strong) 0 1px, transparent 1px 4px), repeating-linear-gradient(-45deg, var(--border-strong) 0 1px, transparent 1px 4px)' }} />
+          Criss-cross = not enough satellite data that month (e.g. Jun 2001 Terra outage; Jan 2012, S-NPP started on 20 Jan)</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-5 rounded-[3px] bg-surface-3" style={{ background: 'repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 1.4px, var(--surface-3) 1.4px 5px)' }} />
+          Striped = uncertain (wide 90% range) or Terra-only (2001 – Jun 2002, not ranked)</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-5 rounded-[3px] bg-surface-3" style={{ outline: '1px dotted var(--text)', outlineOffset: '-1px' }} />
+          Dotted outline = provisional (quick-look data) or month to date</li>
+        <li><span className="num text-text">~</span> before a year total = incomplete year</li>
+        <li>Line above {VIIRS_START} = switch from MODIS to VIIRS</li>
+      </ul>
     </div>
   )
 }

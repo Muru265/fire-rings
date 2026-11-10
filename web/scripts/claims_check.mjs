@@ -84,7 +84,7 @@ try {
     check(P, 'gauge baseline median', g, `median ${fmtInt(d.climatology.median[lc.m - 1])} fire-days`)
     if (lcRec.rp && lcRec.ratio > 1 && !lcRec.guard) {
       // QA #23: the return period shown must agree with the percentile next to it
-      check(P, 'gauge return period', g, `1-in-${Math.round(lcRec.rp)} years`)
+      check(P, 'gauge return period', g, `about 1-in-${Math.round(lcRec.rp)} years`)
       const [p0, p1] = lcRec.pct
       check(P, 'rp consistent with pct', String(100 / (100 - p0) - 0.05 <= lcRec.rp && lcRec.rp <= 100 / (100 - Math.min(p1, 95.3)) + 0.05), 'true')
     }

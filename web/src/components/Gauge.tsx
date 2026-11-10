@@ -29,7 +29,7 @@ export default function Gauge({ j }: { j: Judgement }) {
     : `${p0 === p1 ? ordinal(p0) : `${ordinal(p0)}–${ordinal(p1)}`} percentile`
   return (
     <figure className="flex flex-col items-center" aria-label={`Gauge: ${label}${j.ratio != null && has ? `, ${fmtRatio(j.ratio)} the typical month` : ''}`}>
-      <svg viewBox={`0 0 ${W} 132`} className="w-full max-w-[260px]" role="img" aria-hidden="true">
+      <svg viewBox={`-34 -16 ${W + 68} 156`} className="w-full max-w-[300px]" role="img" aria-hidden="true">
         {[0, 25, 50, 75, 100].map((t) => {
           const [a, b] = polar(t, R + 10)
           const [c, d] = polar(t, R + 4)
@@ -45,8 +45,9 @@ export default function Gauge({ j }: { j: Judgement }) {
             <circle cx={CX} cy={CY} r={5} fill="var(--accent)" />
           </>
         )}
-        <text x={polar(0, R + 20)[0]} y={CY + 16} textAnchor="middle" className="fill-[var(--text-faint)] font-mono text-[10px]">low</text>
-        <text x={polar(100, R + 20)[0]} y={CY + 16} textAnchor="middle" className="fill-[var(--text-faint)] font-mono text-[10px]">high</text>
+        <text x={polar(0, R)[0]} y={CY + 22} textAnchor="middle" className="fill-[var(--text-muted)] text-[10px]">Much lower</text>
+        <text x={polar(100, R)[0]} y={CY + 22} textAnchor="middle" className="fill-[var(--text-muted)] text-[10px]">Much higher</text>
+        <text x={CX} y={CY - R - 14} textAnchor="middle" className="fill-[var(--text-muted)] text-[10px]">Usual</text>
       </svg>
       <figcaption className="-mt-1 text-center">
         <div className="font-display text-[32px] leading-none font-bold text-text">
@@ -55,7 +56,10 @@ export default function Gauge({ j }: { j: Judgement }) {
         <div className="mt-1 text-xs text-muted">{has ? 'of the typical month' : ''}</div>
         <div className="num mt-2 text-sm text-text">{label}</div>
         {has && (j.beyond || j.rp) && (j.ratio ?? 0) > 1 && (
-          <div className="mt-1 text-xs text-muted">{j.beyond ? 'beyond the 2003–2022 record' : `≈ 1-in-${Math.round(j.rp!)} years`}</div>
+          <div className="mt-1 text-xs text-muted">{j.beyond ? 'beyond the 2003–2022 record' : `about 1-in-${Math.round(j.rp!)} years`}</div>
+        )}
+        {has && (
+          <div className="mt-2 text-[11px] text-faint">Needle = where this month ranks against the same month in past years · white band = our uncertainty for that rank</div>
         )}
       </figcaption>
     </figure>

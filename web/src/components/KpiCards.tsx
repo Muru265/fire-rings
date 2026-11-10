@@ -3,8 +3,9 @@ import { fmtInt, fmtRatio } from '../lib/format'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import CountUp from './CountUp'
+import { ratioWords } from '../lib/plain'
 
-function Card({ label, value, sub, badge }: { label: string; value: ReactNode; sub: string; badge?: string }) {
+function Card({ label, value, sub, badge, plain }: { label: string; value: ReactNode; sub: string; badge?: string; plain?: string }) {
   return (
     <div className="card flex flex-col gap-1 !p-4">
       <div className="flex items-center justify-between gap-2">
@@ -12,6 +13,7 @@ function Card({ label, value, sub, badge }: { label: string; value: ReactNode; s
         {badge && <span className="rounded-full border border-border-strong px-1.5 py-px font-mono text-[10px] text-muted">{badge}</span>}
       </div>
       <span className="font-display text-2xl font-semibold text-text">{value}</span>
+      {plain && <span className="text-sm text-text">{plain}</span>}
       <span className="text-xs text-muted">{sub}</span>
     </div>
   )
@@ -40,14 +42,16 @@ export default function KpiCards({ doc }: { doc: RegionDoc }) {
   return (
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <Card
-        label="This month"
+        label={lt?.mtd ? 'This month so far' : 'This month'}
         value={lt?.value != null ? <CountUp value={lt.value} format={fmtInt} /> : '—'}
-        sub={lt ? `${MONTHS[lt.m - 1]} ${lt.y}${lt.mtd ? ` · days 1–${lt.days}` : ''} · 90% ${fmtInt(lt.lo)}–${fmtInt(lt.hi)} fire-days` : 'no data'}
+        plain={lt?.ratio != null && !lt.guard ? `${ratioWords(lt.ratio)}${lt.mtd ? ' for these days' : ''}` : lt?.guard ? 'too little fire to judge' : undefined}
+        sub={lt ? `${MONTHS[lt.m - 1]}${lt.mtd ? ` 1–${lt.days}` : ''} ${lt.y} · 90% ${fmtInt(lt.lo)}–${fmtInt(lt.hi)} fire-days` : 'no data'}
         badge={lt?.provisional ? 'provisional' : undefined}
       />
       <Card
         label="Year to date"
         value={ytdOk && ytdMed > 0 ? <CountUp value={ytd / ytdMed} format={fmtRatio} /> : '—'}
+        plain={ytdOk && ytdMed > 0 ? ratioWords(ytd / ytdMed) : undefined}
         sub={ytdOk ? `Jan–${MONTHS[lastFull - 1]} ${ly}: ${fmtInt(ytd)} vs typical ${fmtInt(ytdMed)} fire-days` : 'not enough complete months'}
       />
       <Card

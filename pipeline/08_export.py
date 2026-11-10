@@ -75,6 +75,8 @@ def quality(region: str) -> dict | None:
     nrt_in = sum(v["in"] for k, v in mk["steps"].items() if k.endswith("/NRT"))
     nrt_known = sum(v["type"] - v["known"] for k, v in mk["steps"].items() if k.endswith("/NRT"))
     return {
+        "rows_read": sum((un or {}).get("read", {}).values()) if un else None,   # all raw CSV rows for the source files
+        "cell_days": (cb or {}).get("cell_days_total"),                         # fire cell-days per stream (record)
         "rows_unified": tot["in"], "rows_kept": tot["persist"],
         "dropped_low_conf": tot["in"] - tot["conf"], "dropped_type": tot["conf"] - tot["type"],
         "dropped_known_static": tot["type"] - tot["known"], "dropped_persistent": tot["known"] - tot["persist"],

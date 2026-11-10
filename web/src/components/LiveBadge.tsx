@@ -17,7 +17,7 @@ export default function LiveBadge({ live, compact }: { live: LiveData | null; co
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-2 opacity-60 motion-reduce:hidden" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-2" />
       </span>
-      <span><strong>LIVE</strong>{compact ? '' : ' ·'} {compact ? '' : `Last satellite pass ${agoText(live.last_acq_utc)} · `}<span className="num">{fmtInt(live.count)}</span> detections in 72 h</span>
+      <span><strong>LIVE</strong>{compact ? '' : ' ·'} {compact ? '' : `Last satellite pass ${agoText(live.last_acq_utc)} · `}<span className="num">{fmtInt(live.count)}</span> raw detections in 72 h{compact ? '' : ' (not fire-days)'}</span>
     </span>
   )
 }

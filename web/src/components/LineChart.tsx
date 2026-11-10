@@ -96,18 +96,18 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
           </g>
         )}
       </svg>
-      {hx != null && (
-        <div className="pointer-events-none absolute rounded-sm border border-border-strong bg-surface-3/95 px-3 py-2 text-xs shadow-card"
-          style={{ top: 30, left: Math.min(Math.max(0, x(hx) + 12), w - 200) }}>
-          <div className="font-display font-semibold text-text">{hx}</div>
-          {series.map((s) => {
-            const p = s.points.find((q) => q.x === hx)
-            return <div key={s.id} className="flex items-center gap-2 text-muted">
-              <span className="inline-block h-0.5 w-3" style={{ background: s.color }} />{s.label}: <span className="num text-text">{p?.y != null ? yFormat(p.y) : '—'}</span>
-            </div>
-          })}
-        </div>
-      )}
+      {/* readout below the plot: never covers axes, band labels or annotations (QA #13) */}
+      <p className="mt-1 flex min-h-[1.25rem] flex-wrap gap-x-3 text-xs text-muted" aria-live="polite">
+        {hx != null ? (
+          <>
+            <span className="font-semibold text-text">{hx}</span>
+            {series.map((s) => {
+              const p = s.points.find((q) => q.x === hx)
+              return <span key={s.id} className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-3" style={{ background: s.color }} />{s.label}: <span className="num text-text">{p?.y != null ? yFormat(p.y) : '—'}</span></span>
+            })}
+          </>
+        ) : 'Hover the chart for values.'}
+      </p>
     </div>
   )
 }

@@ -6,7 +6,23 @@ import { useWidth } from '../lib/useWidth'
 import ChartCard from './ChartCard'
 
 const H = 240
-const M = { t: 12, r: 8, b: 26, l: 44 }
+const M = { t: 22, r: 8, b: 26, l: 44 }
+
+/** One plain sentence from the data (QA #14). */
+function takeaway(doc: RegionDoc): string {
+  const full = doc.annual.filter((a) => a.complete && a.rankable !== false && a.H != null)
+  if (full.length < 3) return 'Harmonized fire-days per year.'
+  const sorted = [...full].sort((a, b) => a.H! - b.H!)
+  const q = (p: number) => sorted[Math.round(p * (sorted.length - 1))].H!
+  const hi = sorted[sorted.length - 1]
+  const lo = sorted[0]
+  let s = `Most years have about ${fmtCompact(q(0.2))}–${fmtCompact(q(0.8))} fire-days (${full[0].y}–${full[full.length - 1].y}); highest ${hi.y} (${fmtInt(hi.H)}), lowest ${lo.y} (${fmtInt(lo.H)}).`
+  // a run of falling years at the end of the record
+  let k = full.length - 1
+  while (k > 0 && full[k].H! < full[k - 1].H! && full[k].y === full[k - 1].y + 1) k--
+  if (full.length - 1 - k >= 3) s += ` Detected fire has fallen every year since ${full[k].y}.`
+  return s
+}
 
 /** Annual harmonized totals with 90% bootstrap whiskers; incomplete years drawn hollow. */
 export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: RegionDoc; selectedYear?: number; onSelectYear?: (y: number) => void }) {
@@ -39,7 +55,13 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
   }
   return (
     <ChartCard id="annual" title="Annual totals" table={table}
-      subtitle="Harmonized fire-days per year · whiskers: 90% interval · hollow: incomplete year · hatched: Terra-only months (not ranked)">
+      subtitle={<span data-testid="annual-takeaway">{takeaway(doc)}</span>}>
+      <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted" aria-label="Legend">
+        <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] bg-[#E55C30]" />MODIS-equivalent fire-days per year</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-px bg-text" />whisker = 90% range</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] border border-[#E55C30]" />incomplete year</li>
+        <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px]" style={{ background: 'repeating-linear-gradient(45deg,#E55C30 0 1.5px,transparent 1.5px 4px)' }} />Terra-only months (not ranked)</li>
+      </ul>
       <div ref={ref} className="relative">
         <svg width={w} height={H} role="img" aria-label="Annual totals bar chart. Use View as table for values.">
           <defs>
@@ -57,7 +79,12 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
             const after = data.find((d) => d.y >= 2012)
             if (!after) return null
             const sx = x(after.y)! - (x.step() - x.bandwidth()) / 2
-            return <line x1={sx} x2={sx} y1={M.t} y2={H - M.b} stroke="var(--text-muted)" strokeDasharray="4 3" />
+            return (
+              <g>
+                <line x1={sx} x2={sx} y1={M.t} y2={H - M.b} stroke="var(--text-muted)" strokeDasharray="4 3" />
+                <text x={sx + 4} y={M.t - 8} className="fill-[var(--text-muted)] text-[10px]">2012 satellite switch — no jump = fix works</text>
+              </g>
+            )
           })()}
           {data.map((d) => {
             const bx = x(d.y)!
@@ -80,15 +107,11 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
             )
           })}
         </svg>
-        {hv && (
-          <div className="pointer-events-none absolute top-0 rounded-sm border border-border-strong bg-surface-3/95 px-3 py-2 text-xs shadow-card"
-            style={{ left: Math.min(Math.max(0, (x(hv.y) ?? 0) - 70), w - 180) }}>
-            <div className="font-display font-semibold text-text">{hv.y}{hv.complete ? '' : ' (partial)'}</div>
-            <div><span className="num text-text">{fmtInt(hv.H)}</span> <span className="text-muted">fire-days</span></div>
-            <div className="text-muted">90% {fmtInt(hv.lo)}–{fmtInt(hv.hi)}</div>
-          </div>
-        )}
       </div>
+      <p className="mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
+        {hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> MODIS-equivalent fire-days
+          {hv.lo != null && <> · 90% range {fmtInt(hv.lo)}–{fmtInt(hv.hi)}</>}{hv.rankable === false && hv.terra_only_months ? ' · Terra only, not ranked' : ''}</> : 'Hover a year for its values.'}
+      </p>
     </ChartCard>
   )
 }
