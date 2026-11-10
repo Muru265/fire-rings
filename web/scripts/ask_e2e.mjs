@@ -27,6 +27,7 @@ try {
         const card = page.locator('article[data-voice]').filter({ hasText: chip }).last()
         try {
           await card.waitFor({ timeout: 15000 })
+          await card.locator('[data-testid="numbers-table"]').waitFor({ timeout: 8000 }) // QA #57: numbers used shown as a table
           const v = await card.getAttribute('data-voice')
           const q = await card.innerText()
           const ok = v === voice && q.includes(chip)
