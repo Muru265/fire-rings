@@ -4,12 +4,107 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Summary for Muru — Round 4 (fixes, 11–12 Nov)
+
+**In one line:** all 12 fixes (#76, #78–#88) are done, tested and pushed in both repos, before the Thursday 12:00 freeze. No new features. The long-term (harmonized) numbers did not change: the pipeline was not re-run and the snapshot test is green.
+
+**Done, by item**
+- **#85 Ask units.** High detail answers now say "native VIIRS fire-days (High detail, 2012–now)" and never "MODIS-equivalent". Long-term answers keep "MODIS-equivalent".
+  - This is enforced in four places: the AI instructions, the caveat sentences, the tool results, and a final automatic check on every answer.
+  - Added 32 saved High detail answers, so the offline fallback never shows a Long-term answer in High detail (64 saved answers in total).
+- **#81 Paper.**
+  - S-NPP now reads "data delivery ceased 2 Nov 2026", with the NOAA NESDIS and NASA Earthdata notices cited. The same wording is used on Home, the Guide, Explore, Data, METHODS and README.
+  - Hotspot check shown as **0.15%** everywhere (one shared formatter).
+  - "-0%" can no longer appear (guard + unit test).
+  - The volcano line now says "a median first-detection lag of 0 days for both sensors".
+  - Figures show only the chart and its legend.
+  - "Months after July/August 2026" became **Aug–Nov 2026**, read from the data flags. Proof had this hand-typed; it now reads the flags too.
+  - The bare "Link" reference now has a proper title.
+  - Author line: "Murugun Sharma Roma Rishi (Muru) · NASA Space Apps 2026 · Port Louis".
+- **#82 Exchange rates.** The range now covers only reliable months (≥ 200 fire-days). Example for Punjab: "0.14–0.40 (Aug 1.20 rests on few fires, low reliability)". Changed on Proof, Method in six steps, Provenance and the Guide.
+- **#86 Fire Watch trace.**
+  - One block per region, every line names its region, and ×N only merges identical lines within the same region.
+  - Each block ends with "✓ Punjab–Haryana briefing ready — N numbers verified", or "checked — no briefing needed" when the region is Normal.
+  - Lines arriving after a block has ended are dropped.
+- **#87 Slides.** Exactly 7 slides, in the brief's order, every number read live from the data and speaker notes on each slide (press N).
+  - Text and figures shrink to fit, so nothing spills off a slide; no buttons or ⓘ appear on slides.
+  - The PDF script now checks two things: every figure stays inside its slide, and the PDF has exactly 7 pages (the blank 8th page was a margin bug, now fixed).
+  - Slide 2's insurance number (14 raw-only payouts, Punjab, 90th percentile) is recomputed from the open API exactly like companion app 3.
+- **#80 Date range.**
+  - From and To are each two small dropdowns: Month and Year.
+  - If From is after To they are swapped, and dates outside the record are clamped; a short note says so in both cases.
+  - New preset "Biggest season on record (…)", taken from the season ranking. SE Australia shows "(Black Summer, Jul 2019 – Jun 2020)"; the name is used because the app already cites a source for it.
+- **#78 Home globe.**
+  - Zoom stops at a country view, and a chip "Explore Mauritius →" (or the nearby region) appears at that limit.
+  - On large screens the globe box starts to the right of the hero text, so it can never cover it.
+  - A soft fade at the edges removes the grey rectangle.
+- **#76 Globe tiles.**
+  - The zoomed-out views of Day and Night lights now load from 170 NASA GIBS tiles stored in the app (2.6 MB, downloaded once, politely). NASA GIBS is called only when you zoom in further.
+  - No more grey squares while tiles load, and the NASA credit is still shown.
+- **#79 Stars.** A few % of stars at a time now brighten slightly, fade fully out and come back over 1.5–3 s. Same in the companion.
+- **#83 Missing years.**
+  - Jan 2012 lacks satellite data, so 2012 (and seasons that include it) now show an empty hatched slot labelled "not enough satellite data (Jan 2012)" instead of being skipped.
+  - Fixed in both repos: annual bars, the Ask mini chart, companion app 2 (Fact-check) and app 6 (Land & loan).
+- **#84 Home cards.** When a card says e.g. "Lower than usual" but Fire Watch says Normal, the card adds "Fire Watch: within normal range (rule not triggered)" with an ⓘ. The same explanation is in the Guide under "Cards vs Fire Watch".
+- **#88 Insurance eyebrow.** Now reads "For insurers and disaster funds · parametric index (pays on a measured index, not on loss)". No company name remains anywhere in either repo.
+
+**Skipped:** nothing. Decisions I made:
+- The "Biggest season" preset covers the whole Jul–Jun season, because that is how seasons are ranked in the data.
+- On large screens the globe box now starts at 620 px, so at 1440 px the globe is a little smaller than before.
+- Slide 6 uses a montage of the six refreshed control-room fallback screenshots rather than the full-page screenshot, which had been captured while the windows were still loading.
+
+**Numbers that changed**
+- **Long-term record:** none.
+- **Display only:**
+  - The paper showed the hotspot check as 0.2%; it now shows 0.15%, the value already used on the Data page.
+  - Punjab's exchange-rate range changed from 0.14–1.20 to "0.14–0.40" with the low-reliability August named separately.
+  - The paper's provisional months now read Aug–Nov 2026.
+- **Data file:** `ask_cache.json` grew from 32 to 64 answers.
+
+**Tests, before → after**
+
+| Test | Round 3 | Round 4 |
+|---|---|---|
+| pytest | 92 | 92 |
+| e2e | 53 | 69 (0 fail) |
+| claims_check | 184 | 203 |
+| guide_check | 0 failures | 0 failures (22 checks) |
+| ask_e2e | 32 | 64 (both data modes) |
+| lint | clean | clean |
+| hotspot tests | pass | pass |
+| format/twinkle unit tests | — | 5 |
+| companion | all pass | 61 checks, all pass |
+
+Also: `npm run pdf` passes its new checks, and no preview servers are left running.
+
+**Production:** checked after the push.
+- fire-rings.vercel.app serves the new build: the 7-page slides PDF, the 64 saved answers, and `/tiles/*` with `Cache-Control: immutable`.
+- fire-rings-apps.vercel.app serves the same build as local.
+
+**What to check first**
+1. https://fire-rings.vercel.app/slides: 7 slides; press N for notes. Also check https://fire-rings.vercel.app/fire-rings-slides.pdf (7 pages).
+2. https://fire-rings.vercel.app/ask: switch to **High detail**, pick Punjab, then Scientist, then "Is this month unusual?". The answer should say "native VIIRS".
+3. https://fire-rings.vercel.app/watch: press ▶ Run. You should see one block per region, each ending with "briefing ready — N numbers verified".
+4. https://fire-rings.vercel.app/r/se_australia: try the Month/Year pickers and the "Biggest season on record (Black Summer…)" preset.
+5. https://fire-rings.vercel.app/ at 1920 px: zoom hard into Mauritius. You should see no grey box and the "Explore Mauritius →" chip.
+6. Same page: Day, then Night lights. No grey squares should appear.
+7. https://fire-rings.vercel.app/paper: S-NPP row, 0.15%, "0 days for both sensors", Aug–Nov 2026, author line, Figure 2 is chart-only.
+8. https://fire-rings.vercel.app/proof: exchange-rate line and "Method in six steps" show "0.14–0.40 (Aug 1.20 rests on few fires…)".
+9. https://fire-rings.vercel.app/r/punjab: annual bars have a hatched "n/a" slot at 2012 (hover it). Also https://fire-rings-apps.vercel.app/factcheck and https://fire-rings-apps.vercel.app/land.
+10. https://fire-rings.vercel.app/: the SE Australia and Mauritius cards show "Fire Watch: within normal range (rule not triggered)" with an ⓘ. Also https://fire-rings-apps.vercel.app/insurance (new eyebrow).
+
 ## Round 4 (11–12 Nov, fixes #76, #78–88) — running log
 - started; work order: correctness (#85, #81, #82, #86, #87) then looks (#80, #78, #76, #79, #83, #84, #88).
 - #85 done: High detail answers say "native VIIRS fire-days (High detail, 2012–now)"; 32 saved High detail answers added (cache 64); deterministic unit guard; ask_e2e 32 → 64. Decision: get_quality/get_similar_years in High detail say the calibration belongs to the Long-term record (data_mode_note) instead of quoting MODIS units.
 - #81 done: S-NPP wording "data delivery ceased 2 Nov 2026" (paper, Guide, Landing, Region, Data, METHODS, README; NESDIS + Earthdata cited); parity 0.15% via one formatter (pctDiff2sig); never "-0" (noNegZero + scripts/format_test.ts); lag wording; figures chart + legend only (FigureCtx); provisional months from flags (also fixes Proof, which was hand-typed); reference title; author line.
 - #82 done: k range over months with ≥200 fire-days (k.low_n), e.g. Punjab "0.14–0.40 (Aug 1.20 rests on few fires, low reliability)".
 - #86 done: Watch trace per-region blocks + closing line; e2e with a mocked interleaved stream (Punjab 615 vs Madagascar 1,723).
+- #87 done: 7 slides + notes, FitBox, PDF checks (figures inside slides, pages = slides; the blank page came from Tailwind v4 space-y using margin-bottom).
+- #80 done: Month+Year selects, swap/clamp note, data-driven "Biggest season" preset.
+- #78 done: maxZoom 6 + "Explore {region} →" chip, globe box right of the hero text (lg:left-[620px]), canvas vignette.
+- #76 done: 170 local GIBS tiles z0–3 (2.6 MB), GIBS from z4–8, 300 ms fade, preload, immutable cache.
+- #79 done (both repos). #83 done (both repos). #84 done. #88 done (companion).
+- FINAL: all tests green, screenshots refreshed, docs updated, both repos pushed and verified on production.
 
 ## Summary for Muru — Round 3 (11 Nov): main app P1 + companion apps + control room
 
