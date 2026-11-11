@@ -199,7 +199,7 @@ function baTakeaway(v3: V3, series: Series[]): string {
   return s.join(' ')
 }
 
-function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
+export function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
   // full record from the region file (complete years only); falls back to the V3 series
   const series: Series[] = useMemo(() => {
     if (!doc) {
@@ -260,14 +260,14 @@ function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
   return (
     <ChartCard id="ba" help="before-after" title="Before / after: the 2012 step disappears" table={table}
       subtitle={<>Annual fire-days (complete years). Raw jumps <strong className="text-text">{v3.step_raw_pct > 0 ? '+' : ''}{fmtInt(v3.step_raw_pct)}%</strong> when VIIRS arrives; harmonized changes {v3.step_harm_pct > 0 ? '+' : ''}{v3.step_harm_pct}% (90% range {v3.step_harm_ci[0]} to {v3.step_harm_ci[1]}), in line with MODIS alone ({v3.step_modis_pct > 0 ? '+' : ''}{v3.step_modis_pct}%). Step = mean 2012–19 vs 2003–11.</>}>
-      <div className="mb-2 flex flex-wrap items-center gap-3">
+      <div className="fig-hide mb-2 flex flex-wrap items-center gap-3">
         <button onClick={play} data-testid="ba-show-fix" aria-pressed={t > 0.5}
           className="rounded-sm bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:brightness-110">{t > 0.5 ? '↺ Show raw again' : '▶ Show the fix'}</button>
         <span className="text-xs text-muted">{t > 0.5 ? 'The pink raw line now sits on the harmonized line: the 2012 cliff is gone.' : 'Before 2012 the pink raw line is the old satellite (same as the blue line). Watch it come down onto the harmonized line.'}</span>
       </div>
       <LineChart series={drawn} yFormat={fmtCompact} annotations={[{ x: 2012, label: raw.points.find((p) => p.x === 2012)?.y == null ? `2012 skipped (partial VIIRS year, S-NPP from 20 Jan) · raw +${fmtInt(v3.step_raw_pct)}%` : `VIIRS arrives · raw +${fmtInt(v3.step_raw_pct)}%` }]} yLabel="fire-days per year" />
-      <p className="mt-2 text-sm text-text" data-testid="ba-takeaway">{baTakeaway(v3, series)}</p>
-      <p className="mt-1 text-xs text-muted">Where the orange line is hidden behind the blue one (2012–2019) the two agree — that overlap is the point. In the table you can see both values.</p>
+      <p className="fig-hide mt-2 text-sm text-text" data-testid="ba-takeaway">{baTakeaway(v3, series)}</p>
+      <p className="fig-hide mt-1 text-xs text-muted">Where the orange line is hidden behind the blue one (2012–2019) the two agree — that overlap is the point. In the table you can see both values.</p>
     </ChartCard>
   )
 }
@@ -458,7 +458,7 @@ function OutageTimeline({ rows }: { rows: [string, string, string, number, strin
 interface TimingSeries { y: number; snpp_day: number; aqua_snpp: number | null; aqua_snpp_rel: number | null; aqua_n20_rel: number | null; terra_snpp_rel: number | null; night_share_rel: number | null }
 interface TimingDoc { caveat: string; sources: { name: string; url: string }[]; checks: Record<string, { region: string; season: string; series: TimingSeries[]; aqua_rel_2022_2026: number; terra_rel_2022_2026: number; night_rel_2022_2026: number; aqua_n20_rel_2022_2026: number }> }
 
-function DetectionTiming() {
+export function DetectionTiming() {
   const t = useJson<TimingDoc>('dataset/punjab_timing_v1.json')
   if (t.status !== 'ready') return t.status === 'loading' ? <div className="card h-[300px] animate-pulse" /> : null
   const c = t.data.checks
@@ -488,12 +488,12 @@ function DetectionTiming() {
         other seasons stay flat. Fires seen at the ~1:30 am VIIRS pass rose ×{p.night_rel_2022_2026.toFixed(1)}. Together this supports independent reports (below) that burning moved after ~3 pm.</>}>
       <LineChart series={series} yFormat={(v) => `×${v.toFixed(1)}`} height={280} xBand={[2012.5, 2019.5, '2013–19 = ×1.0']}
         annotations={[{ x: 2021.95, label: 'Aqua drifts later' }]} yLabel="Aqua ÷ S-NPP vs 2013–19" />
-      <p className="mt-3 rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn">
+      <p className="fig-hide mt-3 rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn">
         Shown on Punjab Oct–Nov from 2022: “{t.data.caveat}” Harmonized numbers are <strong>not</strong> adjusted — we can't measure burning between overpasses.
         Recent years rest on few fires (S-NPP day cell-days: {p.series.filter((s) => s.y >= 2024).map((s) => `${s.y} ${fmtInt(s.snpp_day)}`).join(', ')}). Details: docs/punjab_timing.md.
       </p>
       {t.data.sources?.length > 0 && (
-        <div className="mt-3 text-xs text-muted">
+        <div className="fig-hide mt-3 text-xs text-muted">
           <p className="font-semibold text-text">Independent reports of the later burning:</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             {t.data.sources.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.name} ↗</a></li>)}

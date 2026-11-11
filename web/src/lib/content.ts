@@ -8,7 +8,8 @@ import type { RegionDoc } from './types'
 import type { WatchDoc } from '../../api/_lib/watch'
 
 export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius'] as const
-export interface ContentData { values: Record<string, string>; docs: Record<string, RegionDoc>; watch: WatchDoc | null; reunion: boolean }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ContentData { values: Record<string, string>; docs: Record<string, RegionDoc>; watch: WatchDoc | null; reunion: boolean; val: Record<string, any> | null }
 
 const n1 = (v: number | null | undefined) => (v == null ? undefined : fmt1(v))
 const n0 = (v: number | null | undefined) => (v == null ? undefined : fmtInt(v))
@@ -60,6 +61,24 @@ export async function loadContent(): Promise<ContentData> {
   let wins = 0, cells = 0
   for (const p of projs) for (const m of p?.months ?? []) for (const c of m.checkpoints) { cells++; if (c.better === 'projection') wins++ }
   if (cells) { set('proj.wins', String(wins)); set('proj.cells', String(cells)) }
+  // #87 slide 3: Punjab detection-time evidence + the three independent reports cited on Proof
+  const timing = await fetchJson<{ checks: Record<string, { aqua_rel_2022_2026: number }>; sources: { name: string; url: string }[] }>('dataset/punjab_timing_v1.json').catch(() => null)
+  const pt = timing?.checks['punjab|Oct–Nov (rice residue)']
+  set('timing.aqua_rel', pt ? pt.aqua_rel_2022_2026.toFixed(1) : undefined)
+  set('timing.sources', timing?.sources?.length ? timing.sources.map((x) => x.name.split(' — ')[0]).join('; ') : undefined)
+  set('timing.n_sources', timing?.sources?.length ? String(timing.sources.length) : undefined)
+  // #87 slide 2: the companion insurance app's result, computed the same way from the open API (Punjab, 90th percentile)
+  const ser = await fetchJson<{ baseline: [number, number]; months: (number | string | null)[][] }>('api/series/punjab.json').catch(() => null)
+  if (ser) {
+    const P = 90, q = (vs: number[], p: number) => { const s = [...vs].sort((a, b) => a - b); const i = (s.length - 1) * p, lo = Math.floor(i); return s[lo] + (s[Math.min(lo + 1, s.length - 1)] - s[lo]) * (i - lo) }
+    const rows = ser.months as [number, number, number | null, number | null, number | null, number | null][]
+    const thr = (col: 2 | 5) => Array.from({ length: 12 }, (_, m) => q(rows.filter((x) => x[1] === m + 1 && x[0] >= ser.baseline[0] && x[0] <= ser.baseline[1] && x[col] != null).map((x) => x[col]!), P / 100))
+    const tH = thr(2), tR = thr(5)
+    const cells = rows.filter((x) => x[0] >= 2003 && x[0] <= 2025).map((x) => ({ y: x[0], harm: x[2] != null && x[2] > tH[x[1] - 1], raw: x[5] != null && x[5] > tR[x[1] - 1] }))
+    set('ins.p', String(P)); set('ins.harm', String(cells.filter((c) => c.harm).length)); set('ins.raw', String(cells.filter((c) => c.raw).length))
+    set('ins.raw_only', String(cells.filter((c) => c.raw && !c.harm && c.y >= 2012).length))
+  }
+  const val = await fetchJson<{ regions: Record<string, unknown> }>('dataset/validation_v1.json').then((x) => x.regions).catch(() => null)
   const reu = await fetchJson<ReunionFile>('api/reunion.json').catch(() => null)
   if (reu) {
     const s = reu.summary
@@ -75,7 +94,7 @@ export async function loadContent(): Promise<ContentData> {
     set('reunion.pre_viirs', `${s.viirs.pre30_eruptions_with_detections} of ${s.viirs.pre30_eruptions_tested}`)
     set('reunion.dd_modis', n0(s.both.detection_days_modis)); set('reunion.dd_viirs', n0(s.both.detection_days_viirs)); set('reunion.both', String(s.both.eruptions))
   }
-  return { values: v, docs: byId, watch, reunion: !!reu }
+  return { values: v, docs: byId, watch, reunion: !!reu, val }
 }
 
 export function useContent(): ContentData | null | 'error' {

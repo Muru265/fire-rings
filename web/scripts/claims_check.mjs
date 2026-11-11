@@ -288,8 +288,23 @@ try {
       check(path, 'no missing placeholder', txt.includes('⟨missing') ? 'missing' : 'ok', 'ok')
       for (const id of ['punjab', 'madagascar', 'se_australia']) check(path, `${id} V1 error`, txt, `${nf1.format(docs[id].validation.loyo_err_pct)}%`)
       check(path, 'Punjab raw step', txt, `${fmtInt(docs.punjab.validation.step_raw_pct)}%`)
-      check(path, 'raw alerts', txt, String(w.raw_alerts)); check(path, 'harmonized alerts', txt, String(w.harmonized_alerts))
+      check(path, 'raw alerts', txt, String(w.raw_alerts)); if (path === '/paper') check(path, 'harmonized alerts', txt, String(w.harmonized_alerts))
       const ru = J('api/reunion.json').summary
+      if (path.startsWith('/slides')) {
+        check(path, 'exactly 7 slides', String(await page.getByTestId('slide').count()), '7')
+        const tm = J('dataset/punjab_timing_v1.json').checks['punjab|Oct–Nov (rice residue)']
+        check(path, 'Aqua ÷ VIIRS ratio (slide 3)', txt, `×${tm.aqua_rel_2022_2026.toFixed(1)}`)
+        // insurance index recomputed independently from the open API file (Punjab, 90th percentile)
+        const ser = J('api/series/punjab.json'), P = 0.9
+        const q = (vs, p) => { const s2 = [...vs].sort((a, b) => a - b); const i = (s2.length - 1) * p, lo = Math.floor(i); return s2[lo] + (s2[Math.min(lo + 1, s2.length - 1)] - s2[lo]) * (i - lo) }
+        const thr = (c) => Array.from({ length: 12 }, (_, m) => q(ser.months.filter((x) => x[1] === m + 1 && x[0] >= ser.baseline[0] && x[0] <= ser.baseline[1] && x[c] != null).map((x) => x[c]), P))
+        const tH = thr(2), tR = thr(5)
+        const rawOnly = ser.months.filter((x) => x[0] >= 2012 && x[0] <= 2025 && x[5] != null && x[5] > tR[x[1] - 1] && !(x[2] != null && x[2] > tH[x[1] - 1])).length
+        check(path, 'insurance raw-only payouts after 2012 (slide 2)', txt, `${rawOnly} raw-only payouts`)
+        check(path, 'raw-only alerts (slide 2)', txt, `${w.raw_only_alerts} caused only by the satellite switch`)
+        check(path, 'projection wins (slide 6)', txt.includes(' of ') ? 'ok' : 'none', 'ok')
+        check(path, 'author line', txt, 'Murugun Sharma Roma Rishi (Muru)')
+      }
       if (path === '/paper') {
         const prov = docs.punjab.months.filter((r) => r.flags.includes('provisional'))
         const span = prov.length ? (prov[0].y === prov.at(-1).y ? `${MONTHS[prov[0].m - 1]}–${MONTHS[prov.at(-1).m - 1]} ${prov[0].y}` : `${MONTHS[prov[0].m - 1]} ${prov[0].y} – ${MONTHS[prov.at(-1).m - 1]} ${prov.at(-1).y}`) : 'none'

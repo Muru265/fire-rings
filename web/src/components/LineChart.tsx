@@ -109,7 +109,7 @@ export default function LineChart({ series, height = 280, yFormat, xBand, annota
         )}
       </svg>
       {/* readout below the plot: never covers axes, band labels or annotations (QA #13) */}
-      <p className="mt-1 flex min-h-[1.25rem] flex-wrap gap-x-3 text-xs text-muted" aria-live="polite">
+      <p className="fig-hide mt-1 flex min-h-[1.25rem] flex-wrap gap-x-3 text-xs text-muted" aria-live="polite">
         {hx != null ? (
           <>
             <span className="font-semibold text-text">{hx}</span>

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import deck from '../../content/slides.md?raw'
 import links from '../../content/links.json'
@@ -13,14 +14,41 @@ const parse = (src: string): Slide[] => src.replace(/\r\n/g, '\n').split(/\n---\
   return { body: body.trim(), notes: notes.trim() }
 })
 
+/** #87: scales its content down (never up) so it always fits the box — no figure or text overflows a slide. */
+function FitBox({ children, className = '', testid }: { children: ReactNode; className?: string; testid?: string }) {
+  const outer = useRef<HTMLDivElement>(null)
+  const inner = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState({ s: 1, dy: 0 })
+  const s = fit.s
+  useLayoutEffect(() => {
+    const o = outer.current, i = inner.current
+    if (!o || !i) return
+    const fit = () => {
+      const h = i.offsetHeight, w = i.scrollWidth
+      const k = Math.min(1, o.clientHeight / Math.max(1, h), o.clientWidth / Math.max(1, w))
+      const dy = Math.max(0, Math.round((o.clientHeight - h * k) / 2)) // vertically centred
+      setFit((prev) => (Math.abs(prev.s - k) > 0.005 || Math.abs(prev.dy - dy) > 1 ? { s: k, dy } : prev))
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(o); ro.observe(i)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div ref={outer} className={`relative h-full min-h-0 w-full min-w-0 overflow-hidden ${className}`} data-testid={testid} data-fit={s.toFixed(3)}>
+      <div ref={inner} style={{ transform: `translateY(${fit.dy}px)${s < 1 ? ` scale(${s})` : ''}`, transformOrigin: 'top center' }} className="absolute inset-x-0 top-0">{children}</div>
+    </div>
+  )
+}
+
 function SlideView({ s, c, n, total }: { s: Slide; c: ContentData; n: number; total: number }) {
   const figLine = /^::figure.*$/m.exec(s.body)?.[0]
   const text = s.body.replace(/^::figure.*$/m, '')
   return (
     <div className="slide relative flex aspect-video w-full flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-surface p-[4%]" data-testid="slide">
-      <div className="grid min-h-0 flex-1 items-center gap-[4%]" style={{ gridTemplateColumns: figLine ? 'minmax(0,1.15fr) minmax(0,1fr)' : '1fr' }}>
-        <Markdown src={text} flags={{ reunion: c.reunion }} className="slide-md min-w-0" />
-        {figLine && <div className="slide-fig min-w-0">{(() => { const m = /^::figure\s+(\S+)(?:\s+(\S+))?/.exec(figLine)!; return renderFigure(c, m[1], m[2], true) })()}</div>}
+      <div className="grid min-h-0 flex-1 gap-[4%]" style={{ gridTemplateColumns: figLine ? 'minmax(0,1.1fr) minmax(0,1fr)' : '1fr' }}>
+        <FitBox testid="slide-text"><Markdown src={text} flags={{ reunion: c.reunion }} className="slide-md min-w-0" /></FitBox>
+        {figLine && <FitBox className="slide-fig" testid="slide-fig">{(() => { const m = /^::figure\s+(\S+)(?:\s+(\S+))?/.exec(figLine)!; return renderFigure(c, m[1], m[2], true) })()}</FitBox>}
       </div>
       <div className="mt-2 flex items-center justify-between text-[11px] text-faint">
         <span className="font-mono tracking-[0.14em]">FIRE RINGS · NASA SPACE APPS 2026</span>

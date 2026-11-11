@@ -267,6 +267,22 @@ try {
   check('slides: notes hidden by default', (await page.getByTestId('slide-notes').count()) === 0)
   await page.keyboard.press('n')
   check('slides: N shows presenter notes', await page.getByTestId('slide-notes').isVisible())
+  check('#87 exactly 7 slides', (await page.getByTestId('slide-counter').innerText()).trim().endsWith('/ 7'))
+  { // #87: every slide has speaker notes; figures and text stay inside the slide; no UI chrome in slides
+    const issues = []
+    for (let i = 1; i <= 7; i++) {
+      await page.goto(`http://localhost:${PORT}/slides?s=${i}`, { waitUntil: 'load' })
+      await page.getByTestId('slide').waitFor({ timeout: 15000 }); await page.waitForTimeout(900)
+      await page.keyboard.press('n')
+      const notes = (await page.getByTestId('slide-notes').innerText().catch(() => '')).replace('Presenter notes', '').trim()
+      if (notes.split(/\s+/).length < 40) issues.push(`slide ${i}: notes too short`)
+      const out = await page.evaluate(() => { const r = document.querySelector('[data-testid="slide"]').getBoundingClientRect(); return [...document.querySelectorAll('[data-testid="slide-fig"] > div, [data-testid="slide-text"] > div')].some((el) => { const b = el.getBoundingClientRect(); return b.left < r.left - 1 || b.right > r.right + 1 || b.top < r.top - 1 || b.bottom > r.bottom + 1 }) })
+      if (out) issues.push(`slide ${i}: content outside the slide`)
+      const chrome = await page.getByTestId('slide').evaluate((el) => [...el.querySelectorAll('button, [data-help]')].filter((b) => b.offsetParent !== null).length + (/(View as table|Hover (a|the))/.test(el.innerText) ? 1 : 0))
+      if (chrome) issues.push(`slide ${i}: UI chrome visible`)
+    }
+    check(`#87 slides: notes ≥ 40 words, figures inside the slide, no UI chrome${issues.length ? ` — ${issues.join('; ')}` : ''}`, issues.length === 0)
+  }
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
   check('home: paper / slides / how it works links', (await page.getByTestId('hero-docs').locator('a').count()) === 3)
 
