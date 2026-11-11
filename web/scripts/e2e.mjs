@@ -133,7 +133,7 @@ try {
   check('#80 From after To → swapped, with a short note', page.url().includes('from=2020-03') && page.url().includes('to=2021-07') && /swapped/.test(await page.getByTestId('range-note').innerText().catch(() => '')))
   await page.getByTestId('preset-biggest').click(); await page.waitForTimeout(300)
   const big = await page.getByTestId('preset-biggest').innerText()
-  check(`#80 "Biggest season" preset from the data (${big})`, /Black Summer/.test(big) && page.url().includes('from=2019-07') && page.url().includes('to=2020-06') && (await page.getByTestId('range-summary').innerText()).includes('Jul 2019 – Jun 2020'))
+  check(`#80 "Biggest season" preset from the data (${big})`, /2019–20 season \(Black Summer\)/.test(big) && /Jul 2019 – Jun 2020/.test(big) && page.url().includes('from=2019-07') && page.url().includes('to=2020-06') && (await page.getByTestId('range-summary').innerText()).includes('Jul 2019 – Jun 2020'))
   await page.getByTestId('range-from-month').selectOption('1'); await page.waitForTimeout(200)
   await page.getByTestId('range-from-year').selectOption('2015'); await page.waitForTimeout(200)
   await page.getByTestId('range-to-month').selectOption('3'); await page.waitForTimeout(300)

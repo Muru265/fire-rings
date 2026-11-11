@@ -56,8 +56,9 @@ export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: R
   const v9 = doc.validation?.v9 as { top3_harmonized?: string[]; known_event?: { event: string; season_start: number } } | undefined
   const top = v9?.top3_harmonized?.[0] ? Number(v9.top3_harmonized[0].slice(0, 4)) : null
   if (top != null && ymKey({ y: top, m: 7 }) >= ymKey(first) && ymKey({ y: top + 1, m: 6 }) <= ymKey(last)) {
-    const named = v9?.known_event?.season_start === top ? `${v9.known_event.event.split(',')[0].replace(/ bushfires$/, '')}, ` : ''
-    presets.push([`Biggest season on record (${named}Jul ${top} – Jun ${top + 1})`, { from: { y: top, m: 7 }, to: { y: top + 1, m: 6 } }])
+    // #91: "2019–20 season (Black Summer)" + the Jul–Jun range in small text ('|' separates label and small text)
+    const named = v9?.known_event?.season_start === top ? ` (${v9.known_event.event.split(',')[0].replace(/ bushfires$/, '')})` : ''
+    presets.push([`Biggest season on record: ${top}–${String(top + 1).slice(2)} season${named}|Jul ${top} – Jun ${top + 1}`, { from: { y: top, m: 7 }, to: { y: top + 1, m: 6 } }])
   }
 
   const s = range ? summarizeRange(doc, range) : null
@@ -74,7 +75,8 @@ export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: R
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {presets.map(([l, r]) => (
-          <button key={l} onClick={() => { setNote(null); onChange(r) }} data-testid={l.startsWith('Biggest') ? 'preset-biggest' : undefined} className="rounded-full border border-border px-2.5 py-0.5 text-[11px] text-muted hover:text-text">{l}</button>
+          <button key={l} onClick={() => { setNote(null); onChange(r) }} data-testid={l.startsWith('Biggest') ? 'preset-biggest' : undefined} className="rounded-full border border-border px-2.5 py-0.5 text-[11px] text-muted hover:text-text">
+            {l.split('|')[0]}{l.includes('|') && <span className="ml-1 text-[10px] text-faint">{l.split('|')[1]}</span>}</button>
         ))}
       </div>
       {note && <p className="mt-2 text-[11px] text-accent-2" data-testid="range-note" role="status">{note}</p>}

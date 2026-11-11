@@ -4,6 +4,9 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 5A (12 Nov, looks: #89–#92) — running log
+- started; order: #91, #89 (main), #90 (companion redesign), #92 (control room + slides refresh).
+
 ## Summary for Muru — Round 4 (fixes, 11–12 Nov)
 
 **In one line:** all 12 fixes (#76, #78–#88) are done, tested and pushed in both repos, before the Thursday 12:00 freeze. No new features. The long-term (harmonized) numbers did not change: the pipeline was not re-run and the snapshot test is green.
