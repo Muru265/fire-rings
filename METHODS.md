@@ -279,7 +279,9 @@ same-days baseline matches the app's "this month so far" baseline (pytest). It i
 Illustrative only. For each series (harmonized H, and raw = MODIS cell-days to 2011, VIIRS cell-days from 2012) and
 calendar month, the trigger level is the chosen percentile (linear interpolation) of that month's 2003–2022 values; a month
 "pays out" when its value is above the level. 2003–2025 is shown. The raw series' baseline mixes MODIS and VIIRS years, so
-post-2012 months trigger for the sensor change (counted as "raw-only payouts after 2012").
+post-2012 months trigger for the sensor change (counted as "raw-only payouts after 2012"). Slide 2 quotes the same count
+for Punjab at the 90th percentile, recomputed from `api/series/punjab.json` in `web/src/lib/content.ts` (claims_check
+recomputes it independently).
 
 ## 9d. NASA POWER weather (`tools/fetch_power.py` → `api/power/{region}.json`, P1.7c)
 
@@ -298,6 +300,21 @@ end + 5 days, fixed 5-day grid) are downloaded; other days are null, never zero.
 first-detection lag, detections and detection-days (days with ≥1 detection — the record's presence logic, which puts
 both sensors on one scale). Pre-eruption test: detections in the 30 days before each start, excluding days inside another
 eruption (+3 days); reported whatever the result. Not an eruption forecast. Results: `docs/reunion_check.md`.
+
+## 9f. Presentation rules (Round 4)
+
+- **Units in Ask (#85).** Long-term answers are MODIS-equivalent fire-days; High detail answers are native VIIRS fire-days
+  (High detail, 2012–now, baseline 2013–2022) and never say "MODIS-equivalent" (system prompt, caveats, tool units and a
+  deterministic guard on the final text; saved answers exist for both modes).
+- **Exchange-rate ranges (#82).** Ranges are taken over months with ≥ 200 calibration fire-days (`k.low_n_threshold`);
+  months below that are named separately as low reliability, e.g. Punjab "0.14–0.40 (Aug 1.20 rests on few fires)".
+- **Parity % (#81).** |API − record| ÷ record with 2 significant figures, one formatter for the Data page, paper and slides.
+  No value is ever printed as "-0".
+- **Provisional months (#81).** Named from the `provisional` month flags (currently Aug–Nov 2026), not typed by hand.
+- **Missing years/seasons (#83).** A year or season without a value (e.g. Jan 2012, before S-NPP's first full month) keeps
+  an empty hatched slot labelled "not enough satellite data (Jan 2012)"; axes never skip it.
+- **Cards vs Fire Watch (#84).** Home cards compare with the usual (median) value; Fire Watch flags a month only when even
+  the edge of the uncertainty range is outside P10–P90. When they differ the card says so.
 
 ## 9. Lat/lon boxes in the app
 

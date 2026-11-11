@@ -4,6 +4,13 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 4 (11–12 Nov, fixes #76, #78–88) — running log
+- started; work order: correctness (#85, #81, #82, #86, #87) then looks (#80, #78, #76, #79, #83, #84, #88).
+- #85 done: High detail answers say "native VIIRS fire-days (High detail, 2012–now)"; 32 saved High detail answers added (cache 64); deterministic unit guard; ask_e2e 32 → 64. Decision: get_quality/get_similar_years in High detail say the calibration belongs to the Long-term record (data_mode_note) instead of quoting MODIS units.
+- #81 done: S-NPP wording "data delivery ceased 2 Nov 2026" (paper, Guide, Landing, Region, Data, METHODS, README; NESDIS + Earthdata cited); parity 0.15% via one formatter (pctDiff2sig); never "-0" (noNegZero + scripts/format_test.ts); lag wording; figures chart + legend only (FigureCtx); provisional months from flags (also fixes Proof, which was hand-typed); reference title; author line.
+- #82 done: k range over months with ≥200 fire-days (k.low_n), e.g. Punjab "0.14–0.40 (Aug 1.20 rests on few fires, low reliability)".
+- #86 done: Watch trace per-region blocks + closing line; e2e with a mocked interleaved stream (Punjab 615 vs Madagascar 1,723).
+
 ## Summary for Muru — Round 3 (11 Nov): main app P1 + companion apps + control room
 
 **In one line:** everything in the brief is done and pushed. The long-term (harmonized) numbers did not change: the snapshot test is green. The companion site is live at **https://fire-rings-apps.vercel.app**: it deployed on the first push, so the /apps/ fallback wasn't needed.
