@@ -6,6 +6,7 @@ Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to
 
 ## Summary for Muru — Round 5A (looks, 12 Nov)
 
+**Deploys unblocked: commit author set to Muru265 (repos private)** — 13 Nov: both productions now serve the Round 5A builds; control-room fallback shots, slide-6 montage and PDFs re-shot from production.
 **In one line:** all four items (#89–#92) are built, tested and pushed to both repos. No data or pipeline changes: the long-term numbers are identical and the snapshot test is green.
 
 ⚠ **One thing needs you: Vercel stopped deploying around 16:00 UTC (11 Nov), on both projects.** Every push since then is on GitHub, but https://fire-rings.vercel.app still serves the Round 4 bundle and https://fire-rings-apps.vercel.app still serves the old companion. I can't see a build error from here, so it looks like an account-side limit or a stuck queue. To fix it:
