@@ -13,7 +13,7 @@ let failed = false
 const check = (name, ok, extra = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok || !extra ? '' : `  → ${extra}`}`); if (!ok) failed = true }
 
 // entries the QA list requires (Home, Explore, Proof, Story, Data, Ask)
-const REQUIRED = ['globe', 'region-cards', 'live-line', 'satellite-timeline', 'mode-toggle', 'header-badges', 'headline', 'kpi-cards', 'seam-slider',
+const REQUIRED = ['globe', 'region-cards', 'cards-vs-watch', 'live-line', 'satellite-timeline', 'mode-toggle', 'header-badges', 'headline', 'kpi-cards', 'seam-slider',
   'fire-rings', 'calendar', 'seasonality', 'annual-totals', 'gauge', 'similar-years', 'ask-chips', 'provenance', 'map', 'month-drawer',
   'daily-fire-days', 'baseline-strip', 'where-map', 'export', 'v1-error', 'v3-step', 'seasonal-shape', 'v9-peaks', 'before-after', 'orbit-drift',
   'calibration-ratio-by-month', 'outages', 'static-sources', 'detection-time', 'limitations', 'method-steps', 'story', 'data-page', 'ask-page',

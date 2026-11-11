@@ -64,6 +64,10 @@ export default function Landing() {
               // cards stay short: the full detection-time caveat lives on the region page; here a flag
               const h = j ? headline({ ...j, timingCaveat: null }) : null
               const flagged = !!j?.timingCaveat
+              // #84: when the card's plain label and the Fire Watch status point different ways, say so on the card
+              const ws = watch?.regions[r.id]?.status
+              const tone = j && j.value != null ? plainLevel(j.ratio, j.guard).tone : 'unknown'
+              const disagree = !!ws && tone !== 'unknown' && ((ws === 'Normal' && tone !== 'usual') || (ws !== 'Normal' && tone === 'usual'))
               return (
                 <li key={r.id} className="relative">
                   {watch?.regions[r.id] && (
@@ -71,7 +75,12 @@ export default function Landing() {
                       <span>Fire Watch</span><StatusBadge status={watch.regions[r.id].status} small trigger={triggerLabel(watch.regions[r.id].checks, watch.regions[r.id].status)} />
                     </Link>
                   )}
-                  <Link to={`/r/${r.id}`} className="card flex h-full items-start gap-4 pb-12 no-underline transition-colors duration-[var(--dur-fast)] hover:border-border-strong hover:bg-surface-2">
+                  {disagree && (
+                    <p className="absolute right-4 bottom-10 left-4 z-10 flex items-center text-[11px] text-muted" data-testid="card-watch-note">
+                      {ws === 'Normal' ? 'Fire Watch: within normal range (rule not triggered)' : `Fire Watch: ${ws} (rule triggered)`}<Help id="cards-vs-watch" />
+                    </p>
+                  )}
+                  <Link to={`/r/${r.id}`} className={`card flex h-full items-start gap-4 ${disagree ? 'pb-[4.5rem]' : 'pb-12'} no-underline transition-colors duration-[var(--dur-fast)] hover:border-border-strong hover:bg-surface-2`}>
                     <div className="shrink-0">{d ? <MiniRings months={d.months} label={`${r.name} mini Fire Rings`} /> : <div className="h-[72px] w-[72px] animate-pulse rounded-full bg-surface-3" />}</div>
                     <div className="min-w-0">
                       <span className="font-display text-lg font-semibold text-text">{d?.name ?? r.name}</span>

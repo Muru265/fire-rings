@@ -151,6 +151,11 @@ try {
   check(`range: CSV limited to the range (${rows.length} rows, first ${rows[0]?.slice(0, 7)})`, rows[0]?.startsWith('2015,1,') && rows.at(-1)?.startsWith('2020,3,'))
   await page.getByTestId('range-reset').click(); await page.waitForTimeout(200)
   check('range: Full record clears the URL', !page.url().includes('from='))
+  { // #83: annual bars keep a labelled, hatched slot for 2012 (Jan 2012 lacks satellite coverage) — the axis never skips a year
+    const gap = page.locator('[data-testid="annual-gap"][data-year="2012"]')
+    const t = await gap.locator('title').textContent().catch(() => '')
+    check(`#83 annual bars: hatched 2012 slot "${t}"`, (await gap.count()) === 1 && /not enough satellite data \(Jan 2012\)/.test(t))
+  }
   await page.setViewportSize({ width: 1440, height: 900 })
 
   // P1.2/P1.3: demo month (static file, never NASA live) — hotspot CSV from the drawer, dots on the map when zoomed in
@@ -256,6 +261,15 @@ try {
     })
     check(`${w}px: globe (r=${Math.round(globeR)} px) ends above the playback panel`, mapBottom <= panelTop + 2, `${Math.round(mapBottom)} vs ${Math.round(panelTop)}`)
     if (w === 1440) {
+      // #76: Day / Night lights at the default view come from /tiles (z0–3) — no GIBS request at z ≤ 3, every tile loads
+      const gibsLow = [], local = []
+      pg.on('request', (r) => { const u = r.url(); const m = /gibs\.earthdata\.nasa\.gov\/wmts\/.*\/(\d+)\/\d+\/\d+\.(png|jpeg)$/.exec(u); if (m && Number(m[1]) <= 3) gibsLow.push(u); if (u.includes('/tiles/')) local.push(r) })
+      for (const k of ['Day', 'Night lights']) {
+        await pg.getByTestId('globe-style').getByRole('button', { name: k }).click(); await pg.waitForTimeout(3000)
+      }
+      const failed = (await Promise.all(local.map(async (r) => (await r.response())?.status() ?? 0))).filter((st) => st !== 200 && st !== 304).length
+      const loaded = await pg.evaluate(() => window.__frGlobe.isSourceLoaded('gibs-day-local') && window.__frGlobe.isSourceLoaded('gibs-night-local'))
+      check(`#76 Day/Night at default view: ${local.length} local tile requests, ${gibsLow.length} GIBS requests at z ≤ 3, ${failed} failed, sources loaded`, local.length > 0 && gibsLow.length === 0 && failed === 0 && loaded)
       for (const k of ['Night lights', 'Day', 'Dark']) {
         await pg.getByTestId('globe-style').getByRole('button', { name: k }).click(); await pg.waitForTimeout(2500)
         await pg.screenshot({ path: resolve(out, `e2e_globe_${k.split(' ')[0].toLowerCase()}.png`) })
@@ -296,6 +310,20 @@ try {
   }
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
   check('home: paper / slides / how it works links', (await page.getByTestId('hero-docs').locator('a').count()) === 3)
+  { // #84: a card whose plain label disagrees with Fire Watch says so, with the ⓘ
+    await page.locator('[data-testid="card-watch"]').first().waitFor({ timeout: 15000 }).catch(() => {})
+    await page.waitForTimeout(800)
+    const cards = await page.locator('section[aria-labelledby="regions-h"] li').evaluateAll((lis) => lis.map((li) => ({
+      level: li.querySelector('[data-testid="card-level"]')?.textContent ?? '', watch: li.querySelector('[data-testid="card-watch"]')?.textContent ?? '',
+      note: li.querySelector('[data-testid="card-watch-note"]')?.textContent ?? '', help: !!li.querySelector('[data-testid="card-watch-note"] [data-help="cards-vs-watch"]') })))
+    const bad = cards.filter((c) => {
+      const usual = /About usual|Too little fire|No value/.test(c.level) || !c.level
+      const normal = /Normal/.test(c.watch)
+      const should = (normal && !usual) || (!normal && /About usual/.test(c.level))
+      return should ? !(c.help && (normal ? /within normal range \(rule not triggered\)/.test(c.note) : /rule triggered/.test(c.note))) : !!c.note
+    })
+    check(`#84 home cards: Fire Watch note exactly where the card label and Fire Watch differ (${cards.filter((c) => c.note).length} of ${cards.length})`, cards.length === 4 && bad.length === 0)
+  }
 
   // Final check: Mauritius on the globe — a small dot at world zoom, ~36 km² hexagons when zoomed in
   {
