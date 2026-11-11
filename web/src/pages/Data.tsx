@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useMeta } from '../lib/api'
+import { useJson, useMeta } from '../lib/api'
+import { fmtInt } from '../lib/format'
 import Help from '../components/Help'
 
 const REPO = 'https://github.com/Muru265/fire-rings'
@@ -11,6 +12,21 @@ const FILES = [
   { f: 'dataset/calibration_k_v1.csv', d: 'Calibration ratios k (MODIS÷S-NPP), q (MODIS÷Terra), k′ (S-NPP÷NOAA-20) per region × month with 90% bootstrap intervals and overlap counts.' },
   { f: 'dataset/validation_v1.json', d: 'Full validation results per region and method: V1 leave-one-year-out errors, V3 step test, V4 drift, V9 seasons.' },
   { f: 'meta.json', d: 'Index of regions, data end date, latest-month summaries, citation.' },
+]
+
+const API: [string, string, string][] = [
+  ['GET /data/v1/meta.json', 'regions, data end, latest-month summaries', '/data/v1/meta.json'],
+  ['GET /data/v1/regions/{id}.json', 'months[] (H, lo, hi, raw, flags, ratio, pct, rank…), k, validation, climatology, latest, annual, similar_years', '/data/v1/regions/madagascar.json'],
+  ['GET /data/v1/api/series/{id}.json', 'monthly harmonized vs raw (unconverted VIIRS after 2012) — for indices and raw-vs-fixed comparisons', '/data/v1/api/series/punjab.json'],
+  ['GET /data/v1/api/projection/{id}.json', '“what to expect”: projection from the month so far vs typical, backtested per month × day 5/10/15/20/25; current + next month', '/data/v1/api/projection/punjab.json'],
+  ['GET /data/v1/api/power/{id}.json', 'NASA POWER monthly rainfall (mm) + 2 m temperature (°C), 2001 → last full month, with 2003–2022 medians', '/data/v1/api/power/se_australia.json'],
+  ['GET /data/v1/api/reunion.json', 'Piton de la Fournaise: daily detections per sensor + Smithsonian GVP eruption periods and per-eruption checks', '/data/v1/api/reunion.json'],
+  ['GET /data/v1/daily/{id}.json', '{"YYYY-MM": {"modis": [...], "viirs": [...]}} daily raw cell-days', '/data/v1/daily/mauritius.json'],
+  ['GET /data/v1/hexes/{id}/{year}.json', 'per-month [cellIndex, cell-days, …]; cell ids in hexes/{id}/cells.json (H3 res 6)', '/data/v1/hexes/punjab/2016.json'],
+  ['GET /data/v1/watch.json', 'Fire Watch statuses, rules and the raw-vs-harmonized alert backtest', '/data/v1/watch.json'],
+  ['GET /api/hotspots?region=&start=&end=', 'filtered NASA FIRMS detections for ≤31 days (CSV or JSON), see below', '/api/hotspots?region=punjab&start=2016-10-01&end=2016-10-31'],
+  ['GET /api/live?region={id}', 'last 72 h near-real-time detections (provisional, not in the record)', '/api/live?region=punjab'],
+  ['GET /api/health?scope=data', 'service status (FIRMS key state, data version) — no AI call', '/api/health?scope=data'],
 ]
 
 const DICT: [string, string, string][] = [
@@ -49,6 +65,7 @@ references:
     url: "https://www.earthdata.nasa.gov/firms"`
 
 export default function Data() {
+  const par = useJson<{ start: string; end: string; api: number; record: number; diff_pct: number }>('api/hotspots_parity.json')
   const meta = useMeta()
   const [copied, setCopied] = useState(false)
   return (
@@ -110,22 +127,29 @@ export default function Data() {
         </div>
       </section>
 
-      <section aria-labelledby="api-h" className="max-w-4xl">
-        <h2 id="api-h" className="font-display text-xl font-semibold">Static JSON API</h2>
-        <p className="mt-2 text-sm text-muted">No key, no rate limit beyond the CDN. Every file is plain static JSON under <code className="num">/data/v1/</code>.</p>
-        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-[minmax(0,260px)_1fr]">
-          {[
-            ['GET /data/v1/meta.json', 'regions, data end, latest-month summaries'],
-            ['GET /data/v1/regions/{id}.json', 'months[] (H, lo, hi, raw, flags, ratio, pct, rank…), k, validation, climatology, latest, annual, similar_years'],
-            ['GET /data/v1/daily/{id}.json', '{"YYYY-MM": {"modis": [...], "viirs": [...]}} daily raw cell-days'],
-            ['GET /data/v1/hexes/{id}/{year}.json', 'per-month [cellIndex, cell-days, …] pairs; cell ids in hexes/{id}/cells.json (H3 res 6)'],
-            ['GET /data/v1/hotspots/{id}_{YYYY-MM}.csv', 'filtered detections for the latest months'],
-          ].map(([e, d]) => (
-            <div key={e} className="contents"><dt className="num break-all text-xs text-text">{e}</dt><dd className="text-xs text-muted">{d}</dd></div>
-          ))}
-        </dl>
-        <pre className="num mt-4 overflow-x-auto rounded-sm border border-border bg-surface-2 p-4 text-xs text-text"><code>{`curl -s ${SITE}/data/v1/regions/madagascar.json \\
-  | jq '.latest | {y, m, value, ratio, pct}'`}</code></pre>
+      <section aria-labelledby="api-h" className="max-w-5xl" data-testid="open-api">
+        <h2 id="api-h" className="font-display text-xl font-semibold">Open API<Help id="open-api" /></h2>
+        <p className="mt-2 text-sm text-muted">No key. Static files under <code className="num">/data/v1/</code> and the read-only GET endpoints below send
+          <code className="num"> Access-Control-Allow-Origin: *</code>, so any website or app can call them from the browser. Machine-readable list:
+          {' '}<a href="/data/v1/api/index.json" className="num">/data/v1/api/index.json</a>. Example apps built only on these calls: <a href="https://fire-rings-apps.vercel.app" target="_blank" rel="noreferrer">Fire Rings Apps ↗</a>.</p>
+        <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[640px] text-left text-xs">
+          <thead><tr className="text-faint"><th className="py-1.5 pr-3 font-medium">Endpoint</th><th className="pr-3 font-medium">What you get</th><th className="font-medium">Example</th></tr></thead>
+          <tbody>{API.map(([e, d, ex]) => (
+            <tr key={e} className="border-t border-border align-top">
+              <td className="num py-2 pr-3 break-all text-text">{e}</td>
+              <td className="py-2 pr-3 text-muted">{d}</td>
+              <td className="py-2"><a href={ex} target="_blank" rel="noreferrer" className="num break-all">{ex.replace(/^\/(data\/v1\/)?/, '')}</a></td>
+            </tr>))}</tbody>
+        </table></div>
+        <h3 className="mt-6 font-display text-base font-semibold">Hotspots for any search</h3>
+        <p className="mt-1 text-sm text-muted"><code className="num">GET /api/hotspots</code> fetches NASA FIRMS detections (MODIS + VIIRS; standard archive where processed,
+          near-real-time after) for up to <strong>31 days</strong> and applies the record’s filters: low confidence dropped, FIRMS volcano/static/offshore types dropped,
+          the known-static H3 mask and the region footprint. Parameters: <code className="num">region</code> and/or <code className="num">bbox=W,S,E,N</code> (free boxes up to 12° a side),
+          <code className="num"> start</code>, <code className="num">end</code> (YYYY-MM-DD), <code className="num">satellites=record|all</code>, <code className="num">format=csv|json</code>.
+          Same query = no new NASA call (cached). If NASA’s service is busy you get HTTP 503 with a plain message. {par.status === 'ready' && <>Checked against the record: Punjab {par.data.start} to {par.data.end}, {fmtInt(par.data.api)} detections from the API vs {fmtInt(par.data.record)} in the record ({par.data.diff_pct}% difference).</>}</p>
+        <pre className="num mt-3 overflow-x-auto rounded-sm border border-border bg-surface-2 p-4 text-xs text-text"><code>{`curl -s "${SITE}/api/hotspots?region=punjab&start=2020-11-01&end=2020-11-05" -o punjab.csv
+curl -s ${SITE}/data/v1/api/projection/punjab.json | jq '.current'
+curl -s ${SITE}/data/v1/regions/madagascar.json | jq '.latest | {y, m, value, ratio, pct}'`}</code></pre>
       </section>
 
       <section aria-labelledby="cite-h" className="max-w-4xl">

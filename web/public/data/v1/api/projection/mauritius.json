@@ -1,0 +1,282 @@
+{
+ "region": "mauritius",
+ "name": "Mauritius (incl. Rodrigues)",
+ "data_end": "2026-11-08",
+ "baseline": [
+  2003,
+  2022
+ ],
+ "unit": "fire-days (MODIS-equivalent)",
+ "checkpoints": [
+  5,
+  10,
+  15,
+  20,
+  25
+ ],
+ "method": "Leave-one-year-out over the baseline years. projection = month-so-far ÷ median same-days-so-far × median full month; typical = median full month. Error = median absolute % error vs the real full month (MdAPE). Range = projection × P10–P90 of past actual/projection. Not a weather-based forecast.",
+ "months": [
+  {
+   "m": 1,
+   "years": 19,
+   "typical": 0.0,
+   "p10": 0.0,
+   "p90": 0.6,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 2,
+   "years": 20,
+   "typical": 0.0,
+   "p10": 0.0,
+   "p90": 0.6,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 3,
+   "years": 20,
+   "typical": 0.1,
+   "p10": 0.0,
+   "p90": 0.3,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 4,
+   "years": 20,
+   "typical": 0.1,
+   "p10": 0.0,
+   "p90": 0.9,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 5,
+   "years": 20,
+   "typical": 0.2,
+   "p10": 0.0,
+   "p90": 1.0,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 6,
+   "years": 20,
+   "typical": 1.0,
+   "p10": 0.0,
+   "p90": 2.1,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 7,
+   "years": 20,
+   "typical": 1.8,
+   "p10": 0.4,
+   "p90": 3.1,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 8,
+   "years": 20,
+   "typical": 2.8,
+   "p10": 1.1,
+   "p90": 6.2,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 9,
+   "years": 20,
+   "typical": 6.2,
+   "p10": 2.9,
+   "p90": 11.3,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 52.0,
+     "mdape_typical": 39.5,
+     "better": "typical",
+     "range_factor": [
+      0.331,
+      1.792
+     ],
+     "typical_so_far": 1.0
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 19.4,
+     "mdape_typical": 39.5,
+     "better": "projection",
+     "range_factor": [
+      0.662,
+      1.853
+     ],
+     "typical_so_far": 2.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 16.3,
+     "mdape_typical": 39.5,
+     "better": "projection",
+     "range_factor": [
+      0.706,
+      1.429
+     ],
+     "typical_so_far": 3.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 17.6,
+     "mdape_typical": 39.5,
+     "better": "projection",
+     "range_factor": [
+      0.709,
+      1.259
+     ],
+     "typical_so_far": 3.5
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 21.1,
+     "mdape_typical": 39.5,
+     "better": "projection",
+     "range_factor": [
+      0.717,
+      1.44
+     ],
+     "typical_so_far": 4.5
+    }
+   ]
+  },
+  {
+   "m": 10,
+   "years": 20,
+   "typical": 6.7,
+   "p10": 2.7,
+   "p90": 11.6,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 100.0,
+     "mdape_typical": 48.9,
+     "better": "typical",
+     "range_factor": [
+      0.353,
+      1.2
+     ],
+     "typical_so_far": 0.6
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 30.1,
+     "mdape_typical": 48.9,
+     "better": "projection",
+     "range_factor": [
+      0.66,
+      1.775
+     ],
+     "typical_so_far": 1.8
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 27.9,
+     "mdape_typical": 48.9,
+     "better": "projection",
+     "range_factor": [
+      0.534,
+      1.555
+     ],
+     "typical_so_far": 3.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 23.0,
+     "mdape_typical": 48.9,
+     "better": "projection",
+     "range_factor": [
+      0.623,
+      1.25
+     ],
+     "typical_so_far": 4.3
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 14.3,
+     "mdape_typical": 48.9,
+     "better": "projection",
+     "range_factor": [
+      0.784,
+      1.226
+     ],
+     "typical_so_far": 5.3
+    }
+   ]
+  },
+  {
+   "m": 11,
+   "years": 20,
+   "typical": 2.7,
+   "p10": 1.0,
+   "p90": 5.1,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  },
+  {
+   "m": 12,
+   "years": 20,
+   "typical": 0.9,
+   "p10": 0.0,
+   "p90": 2.6,
+   "checkpoints": [],
+   "guard": true,
+   "note": "too little fire (or too few years) to test a projection — use typical"
+  }
+ ],
+ "current": {
+  "y": 2026,
+  "m": 11,
+  "days": 8,
+  "so_far": 0.5,
+  "typical_so_far": 1.0,
+  "typical_so_far_app": 1.0,
+  "typical": 2.7,
+  "p10": 1.0,
+  "p90": 5.1,
+  "projection": null,
+  "checkpoint": null,
+  "range": null,
+  "better": "typical",
+  "reason": "too little fire to project",
+  "provisional": true
+ },
+ "next_month": {
+  "y": 2026,
+  "m": 12,
+  "typical": 0.9,
+  "p10": 0.0,
+  "p90": 2.6
+ }
+}

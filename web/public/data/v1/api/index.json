@@ -1,0 +1,57 @@
+{
+ "base": "https://fire-rings.vercel.app",
+ "regions": [
+  "punjab",
+  "madagascar",
+  "se_australia",
+  "mauritius"
+ ],
+ "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
+ "endpoints": [
+  {
+   "path": "/data/v1/meta.json",
+   "what": "regions, record span, latest month per region"
+  },
+  {
+   "path": "/data/v1/regions/{region}.json",
+   "what": "full region record: monthly H + 90% range, percentiles, climatology, annual, validation"
+  },
+  {
+   "path": "/data/v1/api/series/{region}.json",
+   "what": "monthly harmonized vs raw series (insurance-style index, raw-vs-fixed comparisons)"
+  },
+  {
+   "path": "/data/v1/api/projection/{region}.json",
+   "what": "“what to expect”: projection-from-month-so-far vs typical, backtested; current month + next month"
+  },
+  {
+   "path": "/data/v1/api/power/{region}.json",
+   "what": "NASA POWER monthly rainfall + temperature for the region (cached)"
+  },
+  {
+   "path": "/data/v1/api/reunion.json",
+   "what": "Piton de la Fournaise: daily detections per sensor + Smithsonian GVP eruption dates"
+  },
+  {
+   "path": "/data/v1/watch.json",
+   "what": "Fire Watch statuses + raw-vs-harmonized alert backtest"
+  },
+  {
+   "path": "/data/v1/dataset/harmonized_monthly_regions_v1.csv",
+   "what": "the open dataset, all regions, one CSV"
+  },
+  {
+   "path": "/api/hotspots?region={region}&start=YYYY-MM-DD&end=YYYY-MM-DD[&bbox=W,S,E,N][&format=csv|json]",
+   "what": "filtered NASA FIRMS detections for ≤31 days (server-side, cached)"
+  },
+  {
+   "path": "/api/live?region={region}",
+   "what": "last 72 h near-real-time detections (provisional)"
+  },
+  {
+   "path": "/api/health?scope=data",
+   "what": "service status (no AI call)"
+  }
+ ],
+ "generated": "2026-11-11T10:03Z"
+}

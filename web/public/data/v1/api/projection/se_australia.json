@@ -1,0 +1,875 @@
+{
+ "region": "se_australia",
+ "name": "SE Australia (NSW + VIC)",
+ "data_end": "2026-11-08",
+ "baseline": [
+  2003,
+  2022
+ ],
+ "unit": "fire-days (MODIS-equivalent)",
+ "checkpoints": [
+  5,
+  10,
+  15,
+  20,
+  25
+ ],
+ "method": "Leave-one-year-out over the baseline years. projection = month-so-far ÷ median same-days-so-far × median full month; typical = median full month. Error = median absolute % error vs the real full month (MdAPE). Range = projection × P10–P90 of past actual/projection. Not a weather-based forecast.",
+ "months": [
+  {
+   "m": 1,
+   "years": 19,
+   "typical": 254.8,
+   "p10": 170.8,
+   "p90": 1291.5,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 19,
+     "mdape_projection": 36.0,
+     "mdape_typical": 38.3,
+     "better": "projection",
+     "range_factor": [
+      0.594,
+      2.668
+     ],
+     "typical_so_far": 27.5
+    },
+    {
+     "day": 10,
+     "n_years": 19,
+     "mdape_projection": 32.6,
+     "mdape_typical": 38.3,
+     "better": "projection",
+     "range_factor": [
+      0.733,
+      1.948
+     ],
+     "typical_so_far": 78.0
+    },
+    {
+     "day": 15,
+     "n_years": 19,
+     "mdape_projection": 18.9,
+     "mdape_typical": 38.3,
+     "better": "projection",
+     "range_factor": [
+      0.608,
+      1.38
+     ],
+     "typical_so_far": 101.0
+    },
+    {
+     "day": 20,
+     "n_years": 19,
+     "mdape_projection": 15.8,
+     "mdape_typical": 38.3,
+     "better": "projection",
+     "range_factor": [
+      0.78,
+      1.38
+     ],
+     "typical_so_far": 156.5
+    },
+    {
+     "day": 25,
+     "n_years": 19,
+     "mdape_projection": 7.0,
+     "mdape_typical": 38.3,
+     "better": "projection",
+     "range_factor": [
+      0.919,
+      1.196
+     ],
+     "typical_so_far": 212.0
+    }
+   ]
+  },
+  {
+   "m": 2,
+   "years": 20,
+   "typical": 362.5,
+   "p10": 208.1,
+   "p90": 565.3,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 38.1,
+     "mdape_typical": 30.2,
+     "better": "typical",
+     "range_factor": [
+      0.47,
+      2.038
+     ],
+     "typical_so_far": 53.2
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 25.3,
+     "mdape_typical": 30.2,
+     "better": "projection",
+     "range_factor": [
+      0.538,
+      1.44
+     ],
+     "typical_so_far": 119.2
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 24.9,
+     "mdape_typical": 30.2,
+     "better": "projection",
+     "range_factor": [
+      0.751,
+      1.644
+     ],
+     "typical_so_far": 199.4
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 10.4,
+     "mdape_typical": 30.2,
+     "better": "projection",
+     "range_factor": [
+      0.863,
+      1.448
+     ],
+     "typical_so_far": 267.1
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 5.4,
+     "mdape_typical": 30.2,
+     "better": "projection",
+     "range_factor": [
+      0.892,
+      1.11
+     ],
+     "typical_so_far": 321.0
+    }
+   ]
+  },
+  {
+   "m": 3,
+   "years": 20,
+   "typical": 829.2,
+   "p10": 578.9,
+   "p90": 1653.6,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 53.1,
+     "mdape_typical": 24.1,
+     "better": "typical",
+     "range_factor": [
+      0.562,
+      2.331
+     ],
+     "typical_so_far": 71.4
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 35.8,
+     "mdape_typical": 24.1,
+     "better": "typical",
+     "range_factor": [
+      0.645,
+      2.877
+     ],
+     "typical_so_far": 170.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 18.6,
+     "mdape_typical": 24.1,
+     "better": "projection",
+     "range_factor": [
+      0.724,
+      1.784
+     ],
+     "typical_so_far": 300.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 17.6,
+     "mdape_typical": 24.1,
+     "better": "projection",
+     "range_factor": [
+      0.8,
+      1.454
+     ],
+     "typical_so_far": 470.8
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 10.4,
+     "mdape_typical": 24.1,
+     "better": "projection",
+     "range_factor": [
+      0.907,
+      1.327
+     ],
+     "typical_so_far": 636.0
+    }
+   ]
+  },
+  {
+   "m": 4,
+   "years": 20,
+   "typical": 2256.2,
+   "p10": 1315.7,
+   "p90": 3264.6,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 30.3,
+     "mdape_typical": 24.0,
+     "better": "typical",
+     "range_factor": [
+      0.693,
+      2.103
+     ],
+     "typical_so_far": 359.7
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 19.7,
+     "mdape_typical": 24.0,
+     "better": "projection",
+     "range_factor": [
+      0.69,
+      1.355
+     ],
+     "typical_so_far": 648.5
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 14.5,
+     "mdape_typical": 24.0,
+     "better": "projection",
+     "range_factor": [
+      0.789,
+      1.28
+     ],
+     "typical_so_far": 1085.2
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 11.2,
+     "mdape_typical": 24.0,
+     "better": "projection",
+     "range_factor": [
+      0.783,
+      1.142
+     ],
+     "typical_so_far": 1428.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 6.3,
+     "mdape_typical": 24.0,
+     "better": "projection",
+     "range_factor": [
+      0.896,
+      1.157
+     ],
+     "typical_so_far": 1948.2
+    }
+   ]
+  },
+  {
+   "m": 5,
+   "years": 20,
+   "typical": 1397.2,
+   "p10": 837.3,
+   "p90": 2385.1,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 36.4,
+     "mdape_typical": 29.7,
+     "better": "typical",
+     "range_factor": [
+      0.703,
+      2.026
+     ],
+     "typical_so_far": 288.5
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 22.0,
+     "mdape_typical": 29.7,
+     "better": "projection",
+     "range_factor": [
+      0.735,
+      1.372
+     ],
+     "typical_so_far": 530.9
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 17.9,
+     "mdape_typical": 29.7,
+     "better": "projection",
+     "range_factor": [
+      0.781,
+      1.264
+     ],
+     "typical_so_far": 766.4
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 6.1,
+     "mdape_typical": 29.7,
+     "better": "projection",
+     "range_factor": [
+      0.827,
+      1.069
+     ],
+     "typical_so_far": 966.4
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.5,
+     "mdape_typical": 29.7,
+     "better": "projection",
+     "range_factor": [
+      0.94,
+      1.083
+     ],
+     "typical_so_far": 1227.6
+    }
+   ]
+  },
+  {
+   "m": 6,
+   "years": 20,
+   "typical": 489.4,
+   "p10": 211.8,
+   "p90": 1149.7,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 42.3,
+     "mdape_typical": 54.4,
+     "better": "projection",
+     "range_factor": [
+      0.512,
+      1.932
+     ],
+     "typical_so_far": 77.2
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 19.1,
+     "mdape_typical": 54.4,
+     "better": "projection",
+     "range_factor": [
+      0.776,
+      1.67
+     ],
+     "typical_so_far": 199.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 18.2,
+     "mdape_typical": 54.4,
+     "better": "projection",
+     "range_factor": [
+      0.828,
+      1.738
+     ],
+     "typical_so_far": 294.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 13.0,
+     "mdape_typical": 54.4,
+     "better": "projection",
+     "range_factor": [
+      0.859,
+      1.189
+     ],
+     "typical_so_far": 362.8
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 3.7,
+     "mdape_typical": 54.4,
+     "better": "projection",
+     "range_factor": [
+      0.914,
+      1.046
+     ],
+     "typical_so_far": 410.9
+    }
+   ]
+  },
+  {
+   "m": 7,
+   "years": 20,
+   "typical": 501.1,
+   "p10": 299.0,
+   "p90": 1092.5,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 34.4,
+     "mdape_typical": 30.4,
+     "better": "typical",
+     "range_factor": [
+      0.676,
+      1.784
+     ],
+     "typical_so_far": 77.5
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 29.5,
+     "mdape_typical": 30.4,
+     "better": "projection",
+     "range_factor": [
+      0.661,
+      1.694
+     ],
+     "typical_so_far": 158.6
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 16.7,
+     "mdape_typical": 30.4,
+     "better": "projection",
+     "range_factor": [
+      0.69,
+      1.534
+     ],
+     "typical_so_far": 208.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 16.4,
+     "mdape_typical": 30.4,
+     "better": "projection",
+     "range_factor": [
+      0.737,
+      1.054
+     ],
+     "typical_so_far": 258.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 12.8,
+     "mdape_typical": 30.4,
+     "better": "projection",
+     "range_factor": [
+      0.769,
+      1.135
+     ],
+     "typical_so_far": 347.1
+    }
+   ]
+  },
+  {
+   "m": 8,
+   "years": 20,
+   "typical": 933.6,
+   "p10": 554.8,
+   "p90": 1322.7,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 42.6,
+     "mdape_typical": 31.9,
+     "better": "typical",
+     "range_factor": [
+      0.601,
+      2.169
+     ],
+     "typical_so_far": 138.0
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 30.0,
+     "mdape_typical": 31.9,
+     "better": "projection",
+     "range_factor": [
+      0.629,
+      1.632
+     ],
+     "typical_so_far": 278.5
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 19.8,
+     "mdape_typical": 31.9,
+     "better": "projection",
+     "range_factor": [
+      0.787,
+      1.417
+     ],
+     "typical_so_far": 456.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 13.6,
+     "mdape_typical": 31.9,
+     "better": "projection",
+     "range_factor": [
+      0.953,
+      1.433
+     ],
+     "typical_so_far": 651.3
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 8.5,
+     "mdape_typical": 31.9,
+     "better": "projection",
+     "range_factor": [
+      0.983,
+      1.267
+     ],
+     "typical_so_far": 795.5
+    }
+   ]
+  },
+  {
+   "m": 9,
+   "years": 20,
+   "typical": 934.5,
+   "p10": 319.9,
+   "p90": 1160.5,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 34.7,
+     "mdape_typical": 18.5,
+     "better": "typical",
+     "range_factor": [
+      0.463,
+      1.46
+     ],
+     "typical_so_far": 112.5
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 46.0,
+     "mdape_typical": 18.5,
+     "better": "typical",
+     "range_factor": [
+      0.512,
+      1.127
+     ],
+     "typical_so_far": 207.7
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 18.8,
+     "mdape_typical": 18.5,
+     "better": "typical",
+     "range_factor": [
+      0.734,
+      1.347
+     ],
+     "typical_so_far": 421.6
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 7.8,
+     "mdape_typical": 18.5,
+     "better": "projection",
+     "range_factor": [
+      0.917,
+      1.169
+     ],
+     "typical_so_far": 622.7
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.7,
+     "mdape_typical": 18.5,
+     "better": "projection",
+     "range_factor": [
+      0.966,
+      1.237
+     ],
+     "typical_so_far": 804.7
+    }
+   ]
+  },
+  {
+   "m": 10,
+   "years": 20,
+   "typical": 502.0,
+   "p10": 298.8,
+   "p90": 724.2,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 42.8,
+     "mdape_typical": 28.4,
+     "better": "typical",
+     "range_factor": [
+      0.555,
+      2.462
+     ],
+     "typical_so_far": 97.3
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 14.4,
+     "mdape_typical": 28.4,
+     "better": "projection",
+     "range_factor": [
+      0.705,
+      1.505
+     ],
+     "typical_so_far": 192.1
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 23.1,
+     "mdape_typical": 28.4,
+     "better": "projection",
+     "range_factor": [
+      0.791,
+      1.492
+     ],
+     "typical_so_far": 286.4
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 13.8,
+     "mdape_typical": 28.4,
+     "better": "projection",
+     "range_factor": [
+      0.811,
+      1.346
+     ],
+     "typical_so_far": 354.5
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 10.7,
+     "mdape_typical": 28.4,
+     "better": "projection",
+     "range_factor": [
+      0.854,
+      1.224
+     ],
+     "typical_so_far": 426.0
+    }
+   ]
+  },
+  {
+   "m": 11,
+   "years": 20,
+   "typical": 332.9,
+   "p10": 120.9,
+   "p90": 534.3,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 60.5,
+     "mdape_typical": 45.6,
+     "better": "typical",
+     "range_factor": [
+      0.538,
+      2.899
+     ],
+     "typical_so_far": 51.5
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 48.7,
+     "mdape_typical": 45.6,
+     "better": "typical",
+     "range_factor": [
+      0.501,
+      1.778
+     ],
+     "typical_so_far": 98.8
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 32.9,
+     "mdape_typical": 45.6,
+     "better": "projection",
+     "range_factor": [
+      0.603,
+      1.303
+     ],
+     "typical_so_far": 142.5
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 20.8,
+     "mdape_typical": 45.6,
+     "better": "projection",
+     "range_factor": [
+      0.756,
+      1.193
+     ],
+     "typical_so_far": 216.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 9.8,
+     "mdape_typical": 45.6,
+     "better": "projection",
+     "range_factor": [
+      0.839,
+      1.058
+     ],
+     "typical_so_far": 270.2
+    }
+   ]
+  },
+  {
+   "m": 12,
+   "years": 20,
+   "typical": 233.3,
+   "p10": 70.3,
+   "p90": 727.3,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 33.1,
+     "mdape_typical": 37.7,
+     "better": "projection",
+     "range_factor": [
+      0.653,
+      2.021
+     ],
+     "typical_so_far": 37.7
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 18.7,
+     "mdape_typical": 37.7,
+     "better": "projection",
+     "range_factor": [
+      0.67,
+      1.321
+     ],
+     "typical_so_far": 83.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 12.1,
+     "mdape_typical": 37.7,
+     "better": "projection",
+     "range_factor": [
+      0.814,
+      1.419
+     ],
+     "typical_so_far": 132.1
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 9.4,
+     "mdape_typical": 37.7,
+     "better": "projection",
+     "range_factor": [
+      0.867,
+      1.18
+     ],
+     "typical_so_far": 175.3
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.9,
+     "mdape_typical": 37.7,
+     "better": "projection",
+     "range_factor": [
+      0.936,
+      1.082
+     ],
+     "typical_so_far": 201.0
+    }
+   ]
+  }
+ ],
+ "current": {
+  "y": 2026,
+  "m": 11,
+  "days": 8,
+  "so_far": 110.5,
+  "typical_so_far": 79.5,
+  "typical_so_far_app": 79.5,
+  "typical": 332.9,
+  "p10": 120.9,
+  "p90": 534.3,
+  "projection": 462.7,
+  "checkpoint": 10,
+  "range": [
+   231.8,
+   822.7
+  ],
+  "better": "typical",
+  "reason": null,
+  "provisional": true
+ },
+ "next_month": {
+  "y": 2026,
+  "m": 12,
+  "typical": 233.3,
+  "p10": 70.3,
+  "p90": 727.3
+ }
+}
