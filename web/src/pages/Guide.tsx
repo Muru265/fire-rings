@@ -15,6 +15,7 @@ import { headline, judgeMonth } from '../lib/headline'
 import { plainLevel } from '../lib/plain'
 import { REGIONS } from '../lib/regions'
 import { MONTHS, toGrid } from '../lib/series'
+import { kRangeText } from '../lib/calibration'
 import type { RegionDoc } from '../lib/types'
 import type { WatchDoc } from '../../api/_lib/watch'
 
@@ -61,8 +62,8 @@ function exampleFor(id: string, docs: Record<string, RegionDoc>, watch?: WatchDo
     case 'typical': return `Example: a typical October in ${name} = ${fmtInt(clim.median[9])} fire-days (median of ${p.baseline[0]}–${p.baseline[1]}).`
     case 'before-after': case 'v3-step': return p.validation ? `${name}: raw data jumps +${fmtInt(p.validation.step_raw_pct)}% at 2012; harmonized ${p.validation.step_harm_pct > 0 ? '+' : ''}${p.validation.step_harm_pct}%, MODIS alone ${p.validation.step_modis_pct > 0 ? '+' : ''}${p.validation.step_modis_pct}%.` : null
     case 'calibration-ratio-by-month': case 'exchange-rate': {
-      const k = p.k.month
-      return `${name}: monthly rates from ${Math.min(...k).toFixed(2)} to ${Math.max(...k).toFixed(2)}, region-wide ${p.k.pool.toFixed(2)} — so 100 VIIRS fire-days ≈ ${Math.round(p.k.pool * 100)} MODIS-equivalent fire-days.`
+      if (p.method === 'pooled') return `${name}: one rate for all months, ${p.k.pool.toFixed(2)} — so 100 VIIRS fire-days ≈ ${Math.round(p.k.pool * 100)} MODIS-equivalent fire-days.`
+      return `${name}: monthly rates ${kRangeText(p.k)}, region-wide ${p.k.pool.toFixed(2)} — so 100 VIIRS fire-days ≈ ${Math.round(p.k.pool * 100)} MODIS-equivalent fire-days.`
     }
     case 'v1-error': return p.validation ? `${name}: hiding each year 2012–2019 and predicting it misses the annual total by ${p.validation.loyo_err_pct}% on average (bias ${p.validation.loyo_bias_pct > 0 ? '+' : ''}${p.validation.loyo_bias_pct}%).` : null
     case 'orbit-drift': return p.validation?.drift_post2020_rel_pct != null ? `${name}: after the drift the yearly ratio moved by ${p.validation.drift_post2020_rel_pct}% on average.` : null
@@ -299,7 +300,7 @@ export default function Guide() {
               <li><strong className="text-text">Find the exchange rate</strong> in the years both cameras flew steadily (Jul 2012 – Dec 2019, before orbit drift).</li>
               <li><strong className="text-text">Convert the new camera into old-camera units</strong>: scale VIIRS down, never MODIS up.</li>
             </ol>
-            <p>Bridges: before July 2002 only Terra flew (hatched, not ranked); after Suomi-NPP ended in Nov 2026, NOAA-20 carries the record using a VIIRS-to-VIIRS rate.</p>
+            <p>Bridges: before July 2002 only Terra flew (hatched, not ranked); after Suomi-NPP data delivery ceased (2 Nov 2026), NOAA-20 carries the record using a VIIRS-to-VIIRS rate.</p>
           </Section>
           <Section id="two-views" title="Two views of the same data" flash={flash === 'two-views'}>
             <p>Think of an old blurry photo and a sharp new one. To compare them fairly you blur the new one to match: that is <strong className="text-text">Long-term</strong> (2001–now). To see today in full detail you look at the new photo as it is: that is <strong className="text-text">High detail</strong> (2012–now, VIIRS native). Nothing is thrown away.</p>

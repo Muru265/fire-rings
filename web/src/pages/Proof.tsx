@@ -6,12 +6,13 @@ import EmptyState from '../components/EmptyState'
 import LineChart from '../components/LineChart'
 import type { Series } from '../components/LineChart'
 import { useJson, useRegion } from '../lib/api'
+import { provisionalSpan } from '../lib/provisional'
 import { fmtCompact, fmtInt } from '../lib/format'
 import { REGIONS } from '../lib/regions'
 import { MONTHS, VIIRS_START } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
-import { calibrationSummary } from '../lib/calibration'
+import { calibrationSummary, kRangeText } from '../lib/calibration'
 import Help from '../components/Help'
 import WatchProof from '../components/WatchProof'
 import VolcanoCard from '../components/VolcanoCard'
@@ -76,7 +77,7 @@ export default function Proof() {
           {LIMITS.map((l) => (
             <article key={l.t} className="card flex flex-col gap-3">
               <h3 className="flex items-center gap-2 font-display text-base font-semibold text-text"><span aria-hidden="true" className="text-xl">{l.i}</span>{l.t}</h3>
-              <div><p className="eyebrow !text-[10px] !text-warn">The problem</p><p className="mt-1 text-sm text-muted">{l.p}</p></div>
+              <div><p className="eyebrow !text-[10px] !text-warn">The problem</p><p className="mt-1 text-sm text-muted">{l.p.replace('{provisional}', (doc.status === 'ready' && provisionalSpan(doc.data.months)) || 'The most recent months')}</p></div>
               <div><p className="eyebrow !text-[10px] !text-ok">What we do about it</p><p className="mt-1 text-sm text-muted">{l.m}</p></div>
             </article>
           ))}
@@ -286,7 +287,7 @@ function MethodFlow({ doc }: { doc: RegionDoc | null }) {
     { i: '✂️', t: 'Region', n: q?.rows_unified, u: 'inside the region' },
     { i: '🧹', t: 'Filter', n: q?.rows_kept, u: 'after dropping low-confidence and static sources' },
     { i: '⬡', t: 'Count', n: q?.cell_days ? (q.cell_days.MODIS ?? 0) + (q.cell_days.SNPP ?? 0) : null, u: 'fire-days (MODIS + S-NPP, ~36 km² tiles)' },
-    { i: '⚖️', t: 'Calibrate', n: null, u: doc ? `exchange rate fitted on Jul 2012 – Dec 2019 (${doc.method === 'pooled' ? doc.k.pool.toFixed(2) : `${Math.min(...doc.k.month).toFixed(2)}–${Math.max(...doc.k.month).toFixed(2)}`})` : '' },
+    { i: '⚖️', t: 'Calibrate', n: null, u: doc ? `exchange rate fitted on Jul 2012 – Dec 2019 (${doc.method === 'pooled' ? doc.k.pool.toFixed(2) : kRangeText(doc.k)})` : '' },
     { i: '📈', t: 'Record', n: totalH, u: 'MODIS-equivalent fire-days 2001–now, with 90% ranges from 500 re-runs' },
   ]
   return (
@@ -514,7 +515,7 @@ const LIMITS = [
     m: 'Monthly ratios with shrinkage, chosen by out-of-sample tests; regions fall back to a single ratio only when it validates better (recorded per region).' },
   { i: '1️⃣', t: 'Before July 2002 there is only Terra', p: 'Aqua launched in mid-2002. Earlier months are Terra scaled by a Terra→Terra+Aqua ratio, so 2001–Jun 2002 rankings are less certain.',
     m: 'The ratio is fitted on 2002–2019 and its uncertainty is in the bootstrap interval. These months are shown hatched and labelled "Terra only", and are excluded from rankings, return periods, season ranks and similar years.' },
-  { i: '⏳', t: 'Recent months are provisional', p: 'Aug–Nov 2026 come from near-real-time files, which lack FIRMS static-source flags and may be revised.',
+  { i: '⏳', t: 'Recent months are provisional', p: '{provisional} come from near-real-time files, which lack FIRMS static-source flags and may be revised.',
     m: 'Marked "provisional" everywhere; static locations learned from the archive are masked in NRT rows too.' },
   { i: '🏝️', t: 'Little fire, big percentages', p: 'In low-fire places (e.g. Mauritius) a handful of detections can swing a ratio wildly.',
     m: 'A low-activity guard (typical < 5 and value < 10 fire-days) replaces ratios with "too little fire to judge"; wide intervals are hatched.' },

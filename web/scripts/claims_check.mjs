@@ -15,6 +15,14 @@ const FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'A
 const nf0 = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 })
 const nf1 = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 })
 const fmtInt = (v) => (v == null ? '—' : nf0.format(Math.round(v)))
+const nf2s = new Intl.NumberFormat('en-GB', { maximumSignificantDigits: 2 })
+// #81b: parity % with 2 significant figures, computed here independently of the app
+const parityPct = (p) => `${nf2s.format((Math.abs(p.api - p.record) / p.record) * 100)}%`
+// #82: range over months with ≥ low_n_threshold fire-days; low-reliability months named separately
+const kRange = (k) => {
+  const ok = k.month.filter((_, i) => !k.low_n?.[i]); const low = k.month.map((v, i) => [v, i]).filter(([, i]) => k.low_n?.[i])
+  return `${Math.min(...ok).toFixed(2)}–${Math.max(...ok).toFixed(2)}` + (low.length ? ` (${low.map(([v, i]) => `${MONTHS[i]} ${v.toFixed(2)}`).join(', ')} ${low.length === 1 ? 'rests' : 'rest'} on few fires, low reliability)` : '')
+}
 const fmtRatio = (v) => (v == null ? '—' : `${nf1.format(v)}×`)
 const ord = (n) => { const s = ['th', 'st', 'nd', 'rd']; const v = n % 100; return `${n}${s[(v - 20) % 10] || s[v] || s[0]}` }
 
@@ -96,7 +104,7 @@ try {
     const prov = await page.locator('section[aria-labelledby="prov-h"]').innerText()
     if (d.method === 'pooled') check(P, 'calibration: single rate', prov, d.k.pool.toFixed(2))
     else {
-      check(P, 'calibration: range min–max of all months', prov, `${Math.min(...d.k.month).toFixed(2)}–${Math.max(...d.k.month).toFixed(2)}`)
+      check(P, 'calibration: range over reliable months (#82)', prov, kRange(d.k))
       const miss = MONTHS.filter((mn, i) => !contains(prov, `${mn} ${d.k.month[i].toFixed(2)}`))
       check(P, 'calibration: all 12 months listed', miss.length ? `missing ${miss.join(',')}` : 'ok', 'ok')
     }
@@ -235,6 +243,15 @@ try {
     if (!s.low_activity) check('/proof', `${id} MODIS-only step`, cards, `old satellite alone (${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%)`)
     else check('/proof', `${id} low-activity state`, cards, 'Too few fires')
     check('/proof', `${id} shape r`, cards, s.shape_r.toFixed(2))
+    { // #82: exchange-rate sentence + "Method in six steps" use the reliable-months range
+      const dk = J(`regions/${id}.json`); const main = await page.locator('main').innerText()
+      if (dk.method !== 'pooled') {
+        const n = main.split(kRange(dk.k)).length - 1
+        check('/proof', `${id} k range (reliable months) in exchange-rate line + six steps`, String(n >= 2), 'true')
+        const full = `${Math.min(...dk.k.month).toFixed(2)}–${Math.max(...dk.k.month).toFixed(2)}`
+        if (dk.k.low_n?.some(Boolean)) check('/proof', `${id} no all-months range`, main.includes(full) ? `found ${full}` : 'ok', 'ok')
+      }
+    }
     if (id === 'se_australia') check('/proof', 'Black Summer rank', cards, `#${res.V9.black_summer_rank_harmonized}`)
     if (id === 'punjab') check('/proof', 'Punjab Oct–Nov top 3', cards, res.V9.octnov_top3_harmonized.join(' · '))
     if (id !== 'se_australia' && id !== 'punjab') check('/proof', `${id} top seasons`, cards, res.V9.top3_harmonized.slice(0, 2).join(' · '))
@@ -255,7 +272,7 @@ try {
   {
     const par = J('api/hotspots_parity.json')
     const t = await page.getByTestId('open-api').innerText()
-    check('/data', 'hotspots parity (API)', t, fmtInt(par.api)); check('/data', 'hotspots parity (record)', t, fmtInt(par.record)); check('/data', 'hotspots parity %', t, `${par.diff_pct}%`)
+    check('/data', 'hotspots parity (API)', t, fmtInt(par.api)); check('/data', 'hotspots parity (record)', t, fmtInt(par.record)); check('/data', 'hotspots parity % (2 s.f.)', t, parityPct(par))
     const se = J('regions/se_australia.json')
     await page.goto(base + '/r/se_australia?from=2019-07&to=2020-03&mode=longterm', { waitUntil: 'load' })
     await page.getByTestId('range-total').waitFor({ timeout: 15000 })
@@ -273,7 +290,18 @@ try {
       check(path, 'Punjab raw step', txt, `${fmtInt(docs.punjab.validation.step_raw_pct)}%`)
       check(path, 'raw alerts', txt, String(w.raw_alerts)); check(path, 'harmonized alerts', txt, String(w.harmonized_alerts))
       const ru = J('api/reunion.json').summary
+      if (path === '/paper') {
+        const prov = docs.punjab.months.filter((r) => r.flags.includes('provisional'))
+        const span = prov.length ? (prov[0].y === prov.at(-1).y ? `${MONTHS[prov[0].m - 1]}–${MONTHS[prov.at(-1).m - 1]} ${prov[0].y}` : `${MONTHS[prov[0].m - 1]} ${prov[0].y} – ${MONTHS[prov.at(-1).m - 1]} ${prov.at(-1).y}`) : 'none'
+        check(path, 'provisional months from flags', txt, span)
+        check(path, 'S-NPP wording', txt, 'data delivery ceased 2 Nov 2026')
+        check(path, 'author line', txt, 'Murugun Sharma Roma Rishi (Muru)')
+        check(path, 'no bare "Link" reference', /^\s*.*\.\s*Link\s*$/m.test(txt) ? 'Link' : 'ok', 'ok')
+        if (ru.modis.median_lag_days === ru.viirs.median_lag_days) check(path, 'Réunion lag wording', txt, `median first-detection lag of ${ru.modis.median_lag_days} days for both sensors`)
+      }
       check(path, 'Réunion MODIS detected', txt, `${ru.modis.detected}`); check(path, 'Réunion VIIRS detected', txt, `${ru.viirs.detected}`)
+      check(path, 'hotspots parity % (2 s.f., same as /data)', txt, parityPct(J('api/hotspots_parity.json')))
+      check(path, 'never prints negative zero', /(?<![\d.])-0(?![.\d])/.test(txt) ? 'found -0' : 'ok', 'ok')
       check(path, 'Black Summer rank', txt, `#${docs.se_australia.validation.v9.black_summer_rank_harmonized} of ${docs.se_australia.validation.v9.n_seasons}`)
     }
   }
