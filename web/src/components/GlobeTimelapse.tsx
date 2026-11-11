@@ -26,6 +26,16 @@ const GIBS: Record<Exclude<GlobeStyle, 'dark'>, string> = {
   night: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png',
   day: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
 }
+// #76: zoom 0–3 of the same layers are served from /tiles (fetched once by scripts/fetch_gibs_tiles.mjs), so the default
+// views never wait on GIBS; GIBS itself is used only from zoom 4 up to 8 (Level8 = the deepest level it serves).
+const LOCAL: Record<Exclude<GlobeStyle, 'dark'>, string> = { night: '/tiles/night/{z}/{x}/{y}.png', day: '/tiles/day/{z}/{x}/{y}.jpeg' }
+const LOCAL_MAXZ = 3, GIBS_MAXZ = 8
+/** Warm the browser cache with the local z0–2 tiles (21 per layer) when a NASA style is picked. */
+function preloadLocal(k: Exclude<GlobeStyle, 'dark'>) {
+  for (let z = 0; z <= 2; z++) for (let x = 0; x < 2 ** z; x++) for (let y = 0; y < 2 ** z; y++) {
+    const img = new Image(); img.src = LOCAL[k].replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y))
+  }
+}
 const STYLE_LABEL: Record<GlobeStyle, string> = { dark: 'Dark', night: 'Night lights', day: 'Day' }
 function storedStyle(): GlobeStyle {
   try { const v = localStorage.getItem('fr.globeStyle'); return v === 'night' || v === 'day' ? v : 'dark' } catch { return 'dark' }
@@ -149,10 +159,13 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       // NASA GIBS rasters above the style's land/water fills, below borders, labels and the fire layers
       const firstLine = mp.getStyle().layers.find((l) => l.type === 'line' || l.type === 'symbol')?.id
       for (const k of ['night', 'day'] as const) {
-        mp.addSource(`gibs-${k}`, { type: 'raster', tiles: [GIBS[k]], tileSize: 256, maxzoom: 8, attribution: 'Imagery: NASA GIBS (VIIRS Black Marble · Blue Marble)' })
-        mp.addLayer({ id: `gibs-${k}`, type: 'raster', source: `gibs-${k}`, layout: { visibility: 'none' },
-          // night lights in grey so city lights never look like fire; day imagery dimmed so the hexagons keep contrast
-          paint: k === 'night' ? { 'raster-saturation': -1, 'raster-brightness-max': 0.7, 'raster-contrast': 0.1 } : { 'raster-brightness-max': 0.62, 'raster-saturation': -0.25 } }, firstLine)
+        // night lights in grey so city lights never look like fire; day imagery dimmed so the hexagons keep contrast
+        const paint = { ...(k === 'night' ? { 'raster-saturation': -1, 'raster-brightness-max': 0.7, 'raster-contrast': 0.1 } : { 'raster-brightness-max': 0.62, 'raster-saturation': -0.25 }), 'raster-fade-duration': 300 }
+        // local z0–3 (over-zoomed underneath at higher zoom, so a GIBS tile still loading never shows as a grey square)
+        mp.addSource(`gibs-${k}-local`, { type: 'raster', tiles: [LOCAL[k]], tileSize: 256, maxzoom: LOCAL_MAXZ, attribution: 'Imagery: NASA GIBS (VIIRS Black Marble · Blue Marble)' })
+        mp.addLayer({ id: `gibs-${k}-local`, type: 'raster', source: `gibs-${k}-local`, layout: { visibility: 'none' }, paint }, firstLine)
+        mp.addSource(`gibs-${k}`, { type: 'raster', tiles: [GIBS[k]], tileSize: 256, minzoom: LOCAL_MAXZ + 1, maxzoom: GIBS_MAXZ })
+        mp.addLayer({ id: `gibs-${k}`, type: 'raster', source: `gibs-${k}`, minzoom: LOCAL_MAXZ + 1, layout: { visibility: 'none' }, paint }, firstLine)
       }
       // QA #1/#65/#70: real fire hexagons. Colour = relative to the region's own record (seasons breathe);
       // glow size = absolute fire-days on one global scale (tiny places stay tiny).
@@ -218,7 +231,8 @@ export default function GlobeTimelapse({ docs, live }: Props) {
   useEffect(() => {
     const mp = map.current
     if (!ready || !mp) return
-    for (const k of ['night', 'day'] as const) if (mp.getLayer(`gibs-${k}`)) mp.setLayoutProperty(`gibs-${k}`, 'visibility', gstyle === k ? 'visible' : 'none')
+    for (const k of ['night', 'day'] as const) for (const id of [`gibs-${k}-local`, `gibs-${k}`]) if (mp.getLayer(id)) mp.setLayoutProperty(id, 'visibility', gstyle === k ? 'visible' : 'none')
+    if (gstyle !== 'dark') preloadLocal(gstyle)
     for (const id of ['hex-fill', 'hex6-fill']) if (mp.getLayer(id)) {
       mp.setPaintProperty(id, 'fill-outline-color', gstyle === 'day' ? '#0A0E14' : 'rgba(0,0,0,0)')
     }
