@@ -10,6 +10,11 @@ Every data source and software library used by Fire Rings. Updated as each is ad
 | NASA FIRMS — VIIRS 375 m active fire, Suomi-NPP (VNP14IMG) | SV-C2, SP (v2) + NRT (2.0NRT), 2012-01-20 → 2026-11-02 | Harmonized record 2012 → Oct 2026 | same | same |
 | NASA FIRMS — VIIRS 375 m active fire, NOAA-20 (VJ114IMG) | J1V-C2, SP + NRT, 2018-04-01 → 2026-11-08 | Continuity after S-NPP (k′ link) | same | same |
 | NASA FIRMS — VIIRS 375 m active fire, NOAA-21 (VJ214IMG) | J2V-C2, SP + NRT, 2023-03-01 → 2026-11-08 | Cross-check / continuity | same | same |
+| NASA POWER (Prediction Of Worldwide Energy Resources), MERRA-2 | Monthly + daily point API v2.10, PRECTOTCORR, T2M, community AG, 2001 → Oct 2026 | Rain + temperature per region (`api/power/*.json`, companion fact-check app) | https://power.larc.nasa.gov/ (fetched 11 Nov 2026, `pipeline/tools/fetch_power.py`) | NASA open data; "Data obtained from the NASA Langley Research Center POWER Project" |
+| NASA GIBS (Global Imagery Browse Services) | WMTS EPSG:3857 `VIIRS_Black_Marble` (2016), `BlueMarble_NextGeneration`; WMS EPSG:4326 `MERRA2_Total_Aerosol_Optical_Thickness_550nm_Extinction_Monthly` (1980-01 → 2026-08) | Home globe basemaps (Night lights / Day); companion smoke tracker aerosol layer | https://gibs.earthdata.nasa.gov (layer names from GetCapabilities, 11 Nov 2026) | NASA open data; imagery credited "NASA GIBS" |
+| NASA Worldview | deep links (date + area + MERRA-2 layer) | "See it on NASA Worldview" in the companion smoke tracker | https://worldview.earthdata.nasa.gov | NASA open data |
+| Smithsonian Institution Global Volcanism Program — Volcanoes of the World (VOTW) | Holocene eruptions, Piton de la Fournaise (233020), 30 eruption periods since 2000 | Eruption dates for the Réunion ground-truth check (`api/reunion.json`) | WFS https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows ; page https://volcano.si.edu/volcano.cfm?vn=233020 (fetched 11 Nov 2026) | Cite: Global Volcanism Program, Smithsonian Institution, Volcanoes of the World |
+| NASA FIRMS Area API — Piton de la Fournaise box | MODIS_SP, VIIRS_SNPP_SP, windows around each GVP eruption | Réunion check | https://firms.modaps.eosdis.nasa.gov/api/area/ | as FIRMS above |
 
 **FIRMS acknowledgement.** We acknowledge the use of data and/or imagery from NASA's Fire Information
 for Resource Management System (FIRMS) (https://www.earthdata.nasa.gov/firms), part of NASA's Earth
@@ -70,7 +75,8 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
   (b) `web/api/live.ts` live layer (last 72 h, all regions, `VIIRS_NOAA20_NRT` + `VIIRS_NOAA21_NRT`, cached 45 min,
   shown separately as "near-real-time, provisional", never added to the harmonized numbers). MAP_KEY is server-side only (Vercel env `FIRMS_MAP_KEY`).
 - **Google Gemini API** — in-app analyst (models listed in PROGRESS.md Decision 16); answers grounded only in Fire Rings data.
-- **Vercel** — hosting and serverless functions.
+- **NASA FIRMS Area API** (c) `web/api/hotspots.ts` — filtered detections for any search ≤31 days (archive SP + NRT), cached.
+- **Vercel** — hosting and serverless functions (main app and the companion site fire-rings-apps.vercel.app).
 
 ## Basemap and design references
 - **OpenFreeMap** "dark" style (https://openfreemap.org), no key. Map data © **OpenStreetMap contributors** (ODbL), tiles via OpenMapTiles schema.

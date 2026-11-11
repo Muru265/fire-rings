@@ -35,11 +35,24 @@ the same ruler. It then answers one question for responders and land managers: *
   - A Gemini briefing agent explains flagged regions using only verified numbers, with forecast wording rejected.
   - “▶ Run the agent now” streams every step.
   - **Why harmonization matters:** the same rules on raw data would have raised 99 alerts since 2012, 53 of them only because of the satellite switch, against 46 on harmonized data (`pipeline/09_watch.py`).
+- **Date range** on Explore (`?from=YYYY-MM&to=YYYY-MM`): total, typical, busiest month and rank of any stretch; rings,
+  calendar, annual bars and CSV/PNG exports follow the range.
+- **Hotspots for any search** (`/api/hotspots`): every filtered NASA FIRMS detection (MODIS + VIIRS) for up to 31 days,
+  same filters as the record (0.15% from the record on Punjab Oct 2016), cached; CSV from the month drawer and the range
+  card, and detection dots on the zoomed-in map for any month. Demo months are static files.
+- **Open API** (Data page, `/data/v1/api/index.json`): CORS-open JSON/CSV — raw vs harmonized series, a backtested
+  "what to expect" projection, NASA POWER weather, a Piton de la Fournaise ground-truth check — plus `/api/hotspots`,
+  `/api/live`, `/api/health?scope=data`.
+- **Use Cases** (`/use-cases`): a control room of six live windows onto **[Fire Rings Apps](https://fire-rings-apps.vercel.app)**
+  (separate repo `Muru265/fire-rings-apps`), example apps built only on the open API: what to expect, fact-check a season +
+  NASA POWER, insurance index, Punjab smoke tracker + NASA GIBS aerosol, volcano check, land screening.
+- **Paper and slides** (`/paper`, `/slides`): first drafts whose numbers are filled live from the JSON
+  (`web/content/*.md`), with PDFs (`npm run pdf`).
 - **Guide** (`/guide`): every chart and number explained in plain words, with worked examples computed from the data,
   annotated real charts, a glossary and typo-tolerant search. Every chart title on the site has an ⓘ linking to its entry.
 - **Globe time-lapse** with real fire hexagons, **stories** for all four regions (`/story`) and a **60-day NRT pull** of NOAA-20/21 for Punjab.
 - **QA**: `docs/QA_WALKTHROUGH.md` (click-by-click test script with the expected value and JSON path for every element)
-  and `npm run test:e2e` (keyboard/drawer/box/mode checks, a claims check comparing 131 on-screen numbers with the published
+  and `npm run test:e2e` (keyboard/drawer/box/mode checks, a claims check comparing 180 on-screen numbers with the published
   JSON, every Ask chip × region × style through the saved-answer fallback, and the Guide/ⓘ coverage check).
   `docs/ask_quality.md`: 60 questions with expected numbers read from the JSON (60/60 on the last run).
 

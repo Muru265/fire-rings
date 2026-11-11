@@ -248,6 +248,57 @@ Raw data also hides real drops: 5 "far below normal" months vs 33 on the harmoni
 
 Fire Watch is situational awareness for planning, not an emergency alert service, and never a forecast.
 
+## 9a. Hotspots for any search (`web/api/hotspots.ts`, P1.2)
+
+`GET /api/hotspots?region|bbox&start&end` fetches NASA FIRMS Area-API detections for up to 31 days and applies the
+record's filters: low confidence dropped; FIRMS type 1/2/3 dropped (SP rows; NRT has no type); the known-static +
+persistent H3 res-9 mask of the region (`live/{region}.json`); the region footprint; days by solar date (one extra UTC day
+is fetched at each end). Sources per day: the standard archive (`*_SP`) where FIRMS has processed it, NRT after;
+satellites "as in the record" (MODIS Terra+Aqua; VIIRS S-NPP to Oct 2026, NOAA-20 after) or `satellites=all`.
+FIRMS answers at most **5 days per call** (checked 11 Nov 2026) and one call costs ~15 transactions of the key's
+5,000 / 10 min, so results are cached (in memory per warm instance + CDN, 7 days for archive-only ranges) and limited per IP.
+**Parity:** Punjab, 1–31 Oct 2016: 48,666 detections from the API vs 48,595 in the record (+0.15%; per stream
++0.14% to +0.31%), `docs/hotspots_parity.md`. Demo months (Punjab Oct 2016, SE Australia Dec 2019, Madagascar Sep 2019)
+are static files written from the record by `08b_demo_hotspots.py`.
+
+## 9b. "What to expect": projection backtest (`10_api.py` → `api/projection/{region}.json`, P1.7b)
+
+For each region, calendar month m and checkpoint day d ∈ {5, 10, 15, 20, 25}, each baseline year t (2003–2022) is left
+out in turn and, using only the other years O:
+- so_far(y) = H(y, m) × (daily cell-days on days 1..d) ÷ (daily cell-days in the month) — H's own daily shape;
+- projection = so_far(t) ÷ median_O so_far(y) × median_O H(y, m)  ("on current pace");
+- typical = median_O H(y, m).
+Error = |estimate − H(t, m)| ÷ max(H(t, m), 1); the headline is the median over years (MdAPE). The method with the smaller
+MdAPE at the nearest checkpoint is the one the companion app shows. Range = projection × P10–P90 of H(t,m) ÷ projection.
+Months whose typical value is under 5 fire-days (low-activity guard) are not tested. Over all regions the projection beats
+"typical" in the counts given in `api/projection/*.json` (summarised live on the paper page). The current month's
+same-days baseline matches the app's "this month so far" baseline (pytest). It is not a weather-based forecast.
+
+## 9c. Insurance-style index (companion app 3, on `api/series/{region}.json`)
+
+Illustrative only. For each series (harmonized H, and raw = MODIS cell-days to 2011, VIIRS cell-days from 2012) and
+calendar month, the trigger level is the chosen percentile (linear interpolation) of that month's 2003–2022 values; a month
+"pays out" when its value is above the level. 2003–2025 is shown. The raw series' baseline mixes MODIS and VIIRS years, so
+post-2012 months trigger for the sensor change (counted as "raw-only payouts after 2012").
+
+## 9d. NASA POWER weather (`tools/fetch_power.py` → `api/power/{region}.json`, P1.7c)
+
+Monthly PRECTOTCORR (mm/day × days = mm per month) and T2M (°C) from the POWER monthly point API (2001–2025) and daily
+point API (2026 complete months), community AG, averaged over the region's most fire-active H3 res-3 cells (up to 9
+points: the parents of the fire footprint, ranked by footprint cells). The fact-check app compares the three months before
+a season with their 2003–2022 median and states no causal link.
+
+## 9e. Piton de la Fournaise ground-truth check (`tools/fetch_reunion.py`, `tools/reunion_series.py`, P1.7d)
+
+Box 55.60–55.86 E, 21.36–21.14 S. FIRMS standard products MODIS_SP (2000-11 →) and VIIRS_SNPP_SP (2012-01-20 →),
+low confidence dropped, FIRMS type kept (1 = presumed volcano), days by solar date. Eruption periods: Smithsonian Global
+Volcanism Program, *Volcanoes of the World* Holocene eruptions for volcano 233020 (WFS service), each with its source
+link. Because one Area-API call costs ~15 transactions, only the windows around each eruption (start − 35 days to
+end + 5 days, fixed 5-day grid) are downloaded; other days are null, never zero. Per eruption: detected by each sensor,
+first-detection lag, detections and detection-days (days with ≥1 detection — the record's presence logic, which puts
+both sensors on one scale). Pre-eruption test: detections in the 30 days before each start, excluding days inside another
+eruption (+3 days); reported whatever the result. Not an eruption forecast. Results: `docs/reunion_check.md`.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

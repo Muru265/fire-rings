@@ -234,6 +234,21 @@ try {
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
   check('home: paper / slides / how it works links', (await page.getByTestId('hero-docs').locator('a').count()) === 3)
 
+  // Final check: Mauritius on the globe — a small dot at world zoom, ~36 km² hexagons when zoomed in
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+    await pg.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
+    await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 }); await pg.waitForTimeout(2500)
+    const dot = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('small').filter((f) => f.properties.name === 'Mauritius').length)
+    check('globe: Mauritius is a small dot at world zoom', dot >= 1)
+    await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 7.5 }) })
+    await pg.waitForTimeout(4000)
+    const hexN = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('hex6').filter((f) => f.properties.name === 'Mauritius').length)
+    check(`globe: zoomed on Mauritius shows ~36 km² hexagons (${hexN})`, hexN >= 1)
+    await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_zoom.png') })
+    await pg.close()
+  }
+
   // QA #69: on phones the globe is not hidden behind the hero text
   for (const w of [360, 430]) {
     const ph = await browser.newPage({ viewport: { width: w, height: 900 } })
