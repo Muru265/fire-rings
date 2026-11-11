@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { checkSteps, liveCheck, pctWords, triggerLabel, worst } from '../../api/_lib/watch'
 import type { Briefing, Check, Status, WatchDoc } from '../../api/_lib/watch'
@@ -71,12 +71,43 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
   )
 }
 
+const short = (name: string) => name.split(' (')[0]
+
+/** #86: the last line of a region's trace block. */
+function closeStep(id: string, name: string, brief: { answer: string } | null, status?: string): Step {
+  if (!brief) return { region: id, kind: 'close', ok: true, text: `✓ ${short(name)} checked — ${status ?? 'Normal'}, no briefing needed` }
+  const n = (brief.answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).length
+  return { region: id, kind: 'close', ok: true, text: `✓ ${short(name)} briefing ready — ${n} numbers verified` }
+}
+
+function TraceLine({ s, prefix }: { s: Step & { times: number }; prefix?: string }) {
+  const cls = s.kind === 'status' || s.kind === 'close' ? 'font-semibold text-text' : s.kind === 'verify' ? (s.ok === false ? 'text-warn' : 'text-ok') : s.kind === 'info' ? 'text-accent-2' : 'text-muted'
+  const icon = s.kind === 'close' ? '' : s.kind === 'status' ? '■' : s.kind === 'verify' || s.kind === 'tool_done' ? '✓' : s.kind === 'info' ? 'ⓘ' : '›'
+  // the region name leads every line (unless the line already starts with it)
+  const text = s.text.replace(/ ✓$/, '')
+  const showPrefix = prefix && s.kind !== 'close' && !text.includes(prefix)
+  return (
+    <li className={`flex gap-2 ${s.kind === 'close' ? 'text-ok' : cls}`} data-kind={s.kind}>
+      {icon && <span aria-hidden="true" className="w-4 shrink-0 text-center">{icon}</span>}
+      <span className="min-w-0">{showPrefix && <span className="text-faint">{prefix} · </span>}{text}{s.times > 1 && <span className="num ml-1 text-faint">×{s.times}</span>}</span>
+    </li>
+  )
+}
+
 export default function Watch() {
   const [doc, setDoc] = useState<WatchDoc | null>(null)
   const [saved, setSaved] = useState<Saved>({})
   const [regions, setRegions] = useState<Record<string, RegionState>>({})
   const [briefs, setBriefs] = useState<Record<string, Briefing>>({})
   const [steps, setSteps] = useState<Step[]>([])
+  // #86: a region's block is closed by its last line ("briefing ready" / "no briefing needed"); later lines are dropped
+  const closed = useRef<Set<string>>(new Set())
+  const push = useCallback((st: Step) => {
+    if (st.region && closed.current.has(st.region)) return
+    if (st.kind === 'close' && st.region) closed.current.add(st.region)
+    setSteps((x) => [...x, st])
+  }, [])
+  const resetSteps = () => { closed.current = new Set(); setSteps([]) }
   const [run, setRun] = useState<'idle' | 'running' | 'done' | 'replay'>('idle')
   const traceRef = useRef<HTMLOListElement>(null)
 
@@ -94,7 +125,7 @@ export default function Watch() {
   const replay = async (w: WatchDoc) => {
     // offline: the same rules re-applied to the published record + saved briefings (no live feed, no live AI)
     setRun('replay')
-    const add = (s: Step) => setSteps((x) => [...x, s])
+    const add = push
     add({ kind: 'info', text: 'Live agent unavailable here — replaying the rules on the published data with saved briefings.' })
     for (const [id, r] of Object.entries(w.regions)) {
       const checks = [...r.checks, liveCheck(r, null, w.rules, w.rule_text)]
@@ -103,16 +134,16 @@ export default function Watch() {
       add({ region: id, kind: 'status', text: `Status: ${status} — ${r.name.split(' (')[0]}` })
       setRegions((x) => ({ ...x, [id]: { ...x[id], status, checks } }))
       if (status !== 'Normal' && saved[`${id}|responder`]) {
-        const n = (saved[`${id}|responder`].answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).length
-        add({ region: id, kind: 'verify', ok: true, text: `⚡ Saved briefing — ${n} numbers verified against its lookups when it was made ✓` })
-      }
+        add({ region: id, kind: 'info', text: '⚡ Saved briefing (verified against its lookups when it was made)' })
+        add(closeStep(id, r.name, saved[`${id}|responder`]))
+      } else add(closeStep(id, r.name, null, status))
     }
     add({ kind: 'info', text: 'Done.' })
   }
 
   const start = async () => {
     if (!doc || run === 'running') return
-    setSteps([])
+    resetSteps()
     setRun('running')
     try {
       const r = await fetch('/api/watch?stream=1&brief=1')
@@ -131,9 +162,14 @@ export default function Watch() {
           buf = buf.slice(nl + 1)
           if (!line) continue
           const ev = JSON.parse(line)
-          if (ev.type === 'step') setSteps((x) => [...x, { region: ev.region, kind: ev.kind, text: ev.text, ok: ev.ok }])
-          else if (ev.type === 'region') setRegions((x) => ({ ...x, [ev.region]: { status: ev.status, checks: ev.checks, relevant_for: ev.relevant_for, flags: ev.flags } }))
-          else if (ev.type === 'briefing') setBriefs((x) => ({ ...x, [ev.region]: ev.briefing }))
+          if (ev.type === 'step') push({ region: ev.region, kind: ev.kind, text: ev.text, ok: ev.ok })
+          else if (ev.type === 'region') {
+            setRegions((x) => ({ ...x, [ev.region]: { status: ev.status, checks: ev.checks, relevant_for: ev.relevant_for, flags: ev.flags } }))
+            if (ev.status === 'Normal') push(closeStep(ev.region, doc.regions[ev.region]?.name ?? ev.region, null, ev.status))
+          } else if (ev.type === 'briefing') {
+            setBriefs((x) => ({ ...x, [ev.region]: ev.briefing }))
+            push(closeStep(ev.region, doc.regions[ev.region]?.name ?? ev.region, ev.briefing))
+          }
           else if (ev.type === 'done') gotDone = true
           else if (ev.type === 'error') throw new Error(ev.message)
         }
@@ -167,14 +203,18 @@ export default function Watch() {
               className="mt-3 w-full rounded-sm bg-accent px-4 py-2.5 text-sm font-semibold text-bg hover:brightness-110 disabled:cursor-wait disabled:opacity-70">
               {run === 'running' ? 'Running…' : '▶ Run the agent now'}</button>
             <p className="mt-2 text-[11px] text-faint">Checks the month so far, the last full month and the live 72-hour feed for each region, then asks for briefings where a rule fired.</p>
-            <ol ref={traceRef} className="mt-3 max-h-[420px] space-y-1 overflow-auto text-[13px]" aria-live="polite" data-testid="watch-trace">
+            <ol ref={traceRef} className="mt-3 max-h-[520px] space-y-2 overflow-auto text-[13px]" aria-live="polite" data-testid="watch-trace">
               {!steps.length && <li className="text-muted">Press ▶ to watch the agent work, step by step.</li>}
-              {collapseSteps(steps).map((s, i) => (
-                <li key={i} className={`flex gap-2 ${s.kind === 'status' ? 'font-semibold text-text' : s.kind === 'verify' ? (s.ok === false ? 'text-warn' : 'text-ok') : s.kind === 'info' ? 'text-accent-2' : 'text-muted'}`}>
-                  <span aria-hidden="true" className="w-4 shrink-0 text-center">{s.kind === 'status' ? '■' : s.kind === 'verify' ? '✓' : s.kind === 'tool_done' ? '✓' : s.kind === 'info' ? 'ⓘ' : '›'}</span>
-                  <span className="min-w-0">{s.text.replace(/ ✓$/, '')}{s.times > 1 && <span className="num ml-1 text-faint">×{s.times}</span>}</span>
+              {collapseSteps(steps.filter((x) => !x.region && x.text !== 'Done.')).map((s, i) => <TraceLine key={`g${i}`} s={s} />)}
+              {Object.keys(doc.regions).filter((id) => steps.some((x) => x.region === id)).map((id) => (
+                <li key={id} className="rounded-sm border border-border bg-surface-2/60 p-2" data-testid="trace-block" data-region={id}>
+                  <p className="mb-1 font-display text-[12px] font-semibold tracking-wide text-text">{short(names[id])}</p>
+                  <ol className="space-y-1">
+                    {collapseSteps(steps.filter((x) => x.region === id)).map((s, i) => <TraceLine key={i} s={s} prefix={short(names[id])} />)}
+                  </ol>
                 </li>
               ))}
+              {steps.some((x) => x.text === 'Done.') && <TraceLine s={{ kind: 'info', text: 'Done.', times: 1 }} />}
               {run === 'running' && <li className="flex items-center gap-2 text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent" />working…</li>}
             </ol>
           </section>

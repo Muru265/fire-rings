@@ -1,6 +1,7 @@
 // Interaction smoke test: keyboard-open month drawer, apply a lat/lon box, anomaly mode, seam frames.
 // Saves screenshots to ../docs/screens/e2e_*.png and fails on console errors.
 import { spawn, spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -177,6 +178,41 @@ try {
   const tr = await page.getByTestId('watch-trace').locator('li').allInnerTexts()
   check('#74 trace has no repeated identical lines', new Set(tr).size === tr.length)
   check('Fire Watch: raw-vs-harmonized proof shown', await page.getByTestId('watch-proof-headline').isVisible())
+
+  // #86: a live run with interleaved parallel briefings → one block per region, each with only its own numbers
+  {
+    const D = resolve(here, '../public/data/v1')
+    const RJ = (p) => JSON.parse(readFileSync(resolve(D, p), 'utf-8'))
+    const nf = new Intl.NumberFormat('en-GB')
+    const w = RJ('watch.json'), sv = RJ('watch_cache.json').briefings
+    const last = (id) => RJ(`regions/${id}.json`).months.at(-1)
+    const num = { punjab: nf.format(Math.round(last('punjab').H)), madagascar: nf.format(Math.round(last('madagascar').H)) }
+    const lab = (id) => `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][last(id).m - 1]} ${last(id).y}`
+    const ev = [{ type: 'step', kind: 'info', text: 'Rules: (mock stream for the test)' }]
+    for (const id of Object.keys(w.regions)) {
+      const flagged = id === 'punjab' || id === 'madagascar'
+      ev.push({ type: 'step', region: id, kind: 'status', text: `Status: ${flagged ? 'Watch' : 'Normal'} — ${w.regions[id].name.split(' (')[0]}` })
+      ev.push({ type: 'region', region: id, status: flagged ? 'Watch' : 'Normal', checks: w.regions[id].checks, relevant_for: w.regions[id].relevant_for, flags: w.regions[id].flags })
+    }
+    for (let i = 0; i < 3; i++) for (const id of ['punjab', 'madagascar']) ev.push({ type: 'step', region: id, kind: 'tool', text: 'Looking up the latest month…' })
+    for (let i = 0; i < 2; i++) for (const id of ['madagascar', 'punjab']) ev.push({ type: 'step', region: id, kind: 'tool_done', text: `${lab(id)}: ${num[id]} fire-days` })
+    ev.push({ type: 'briefing', region: 'punjab', voice: 'responder', briefing: { ...sv['punjab|responder'], source: 'live' } })
+    ev.push({ type: 'step', region: 'punjab', kind: 'tool_done', text: 'stray line after the block ended' })
+    ev.push({ type: 'briefing', region: 'madagascar', voice: 'responder', briefing: { ...sv['madagascar|responder'], source: 'live' } })
+    ev.push({ type: 'done', ms: 1, data_end: w.data_end })
+    await page.route('**/api/watch*', (r) => r.fulfill({ status: 200, contentType: 'application/x-ndjson', body: ev.map((e) => JSON.stringify(e)).join('\n') + '\n' }))
+    await page.goto(`http://localhost:${PORT}/watch`, { waitUntil: 'load' })
+    await page.getByTestId('run-agent').click()
+    await page.locator('[data-testid="trace-block"][data-region="madagascar"]').getByText('briefing ready').waitFor({ timeout: 10000 }).catch(() => {})
+    const pj = await page.locator('[data-testid="trace-block"][data-region="punjab"]').innerText().catch(() => '')
+    const md = await page.locator('[data-testid="trace-block"][data-region="madagascar"]').innerText().catch(() => '')
+    check(`#86 Punjab block shows only its own numbers (${num.punjab}, never ${num.madagascar})`, pj.includes(num.punjab) && !pj.includes(num.madagascar))
+    check(`#86 Madagascar block shows only its own numbers (${num.madagascar}, never ${num.punjab})`, md.includes(num.madagascar) && !md.includes(num.punjab))
+    check('#86 each block ends with "briefing ready — N numbers verified"', /briefing ready — \d+ numbers verified\s*$/.test(pj.trim()) && /briefing ready — \d+ numbers verified\s*$/.test(md.trim()))
+    check('#86 ×N only within a region (×3 per block, no stray line after the block ended)', /×3/.test(pj) && /×3/.test(md) && !pj.includes('stray line'))
+    await page.getByTestId('watch-trace').screenshot({ path: resolve(out, 'e2e_watch_trace_blocks.png') })
+    await page.unroute('**/api/watch*')
+  }
 
   // P2.2 control room: six live windows; at least one reports its last API call via postMessage
   await page.goto(`http://localhost:${PORT}/use-cases`, { waitUntil: 'load' })
