@@ -10,6 +10,7 @@ import { MONTHS } from '../lib/series'
 import type { DataMode, RegionDoc } from '../lib/types'
 import AnswerCard from './AnswerCard'
 import MiniRings from './MiniRings'
+import { collapseSteps } from '../lib/steps'
 
 /** One question and what happened to it — errors stay attached to their own question (QA #58). */
 interface Turn { id: number; question: string; region: string; voice: Voice; status: 'loading' | 'done' | 'error'; answer?: Answer; error?: string; steps: StepEvent[] }
@@ -71,10 +72,10 @@ function SidePanel({ region, mode, turn }: { region: string; mode: DataMode; tur
           <>
             <p className="mt-2 truncate text-xs text-faint">“{turn.question}”</p>
             <ol className="mt-2 space-y-1.5 text-sm" data-testid="ask-trace">
-              {turn.steps.map((s, i) => (
+              {collapseSteps(turn.steps).map((s, i) => (
                 <li key={i} className={`flex gap-2 ${s.kind === 'verify' ? (s.ok ? 'text-ok' : 'text-warn') : s.kind === 'tool_done' ? 'text-text' : 'text-muted'}`}>
                   <span aria-hidden="true" className="w-4 shrink-0 text-center">{s.kind === 'tool_done' ? '✓' : s.kind === 'verify' ? (s.ok ? '✓' : '!') : s.kind === 'info' ? 'ⓘ' : '…'}</span>
-                  <span className="min-w-0">{s.text.replace(/ ✓$/, '')}</span>
+                  <span className="min-w-0">{s.text.replace(/ ✓$/, '')}{s.times > 1 && <span className="num ml-1 text-faint">×{s.times}</span>}</span>
                 </li>
               ))}
               {turn.status === 'loading' && <li className="flex items-center gap-2 text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent" />working…</li>}

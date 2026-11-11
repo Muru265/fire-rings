@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { checkSteps, liveCheck, pctWords, worst } from '../../api/_lib/watch'
+import { checkSteps, liveCheck, pctWords, triggerLabel, worst } from '../../api/_lib/watch'
 import type { Briefing, Check, Status, WatchDoc } from '../../api/_lib/watch'
 import Help from '../components/Help'
 import WatchProof from '../components/WatchProof'
 import { fetchJson } from '../lib/api'
 import { fmtInt, fmtRatio } from '../lib/format'
 import StatusBadge from '../components/StatusBadge'
+import { formatNumbersInText } from '../../api/_lib/numfmt'
+import { collapseSteps } from '../lib/steps'
 
 interface Step { region?: string; kind: string; text: string; ok?: boolean }
 interface RegionState { status: Status; checks: Check[]; relevant_for: string; flags: string[] }
@@ -22,7 +24,7 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
     <article className="card flex flex-col gap-3" data-testid="watch-card" data-region={id} data-status={st.status}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="font-display text-lg font-semibold text-text">{name}</h3>
-        <StatusBadge status={st.status} />
+        <StatusBadge status={st.status} trigger={triggerLabel(st.checks, st.status)} />
       </div>
       <div>
         <p className="eyebrow !text-[10px]">Why this {st.status === 'Normal' ? 'status' : 'alert'}?</p>
@@ -43,7 +45,7 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
               ? <span className="rounded-full bg-accent-2/15 px-2 py-px text-accent-2" title="Precomputed from the same data and verified the same way">⚡ saved briefing</span>
               : <span className="rounded-full bg-ok/15 px-2 py-px text-ok">live · every number verified ✓</span>}
           </div>
-          <p className="text-[15px] leading-relaxed text-text">{shown.answer}</p>
+          <p className="text-[15px] leading-relaxed text-text">{formatNumbersInText(shown.answer)}</p>
           {shown.caveat && <p className="mt-1.5 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {shown.caveat}</p>}
         </div>
       ) : st.status !== 'Normal' ? <p className="text-xs text-faint">Briefing: run the agent to generate one.</p> : null}
@@ -98,7 +100,7 @@ export default function Watch() {
       const checks = [...r.checks, liveCheck(r, null, w.rules, w.rule_text)]
       for (const text of checkSteps(r.name, checks)) { add({ region: id, kind: 'rule', text }); await new Promise((res) => setTimeout(res, 120)) }
       const status = worst(checks)
-      add({ region: id, kind: 'status', text: `Status: ${status}` })
+      add({ region: id, kind: 'status', text: `Status: ${status} — ${r.name.split(' (')[0]}` })
       setRegions((x) => ({ ...x, [id]: { ...x[id], status, checks } }))
       if (status !== 'Normal' && saved[`${id}|responder`]) {
         const n = (saved[`${id}|responder`].answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).length
@@ -167,10 +169,10 @@ export default function Watch() {
             <p className="mt-2 text-[11px] text-faint">Checks the month so far, the last full month and the live 72-hour feed for each region, then asks for briefings where a rule fired.</p>
             <ol ref={traceRef} className="mt-3 max-h-[420px] space-y-1 overflow-auto text-[13px]" aria-live="polite" data-testid="watch-trace">
               {!steps.length && <li className="text-muted">Press ▶ to watch the agent work, step by step.</li>}
-              {steps.map((s, i) => (
+              {collapseSteps(steps).map((s, i) => (
                 <li key={i} className={`flex gap-2 ${s.kind === 'status' ? 'font-semibold text-text' : s.kind === 'verify' ? (s.ok === false ? 'text-warn' : 'text-ok') : s.kind === 'info' ? 'text-accent-2' : 'text-muted'}`}>
                   <span aria-hidden="true" className="w-4 shrink-0 text-center">{s.kind === 'status' ? '■' : s.kind === 'verify' ? '✓' : s.kind === 'tool_done' ? '✓' : s.kind === 'info' ? 'ⓘ' : '›'}</span>
-                  <span className="min-w-0">{s.text.replace(/ ✓$/, '')}</span>
+                  <span className="min-w-0">{s.text.replace(/ ✓$/, '')}{s.times > 1 && <span className="num ml-1 text-faint">×{s.times}</span>}</span>
                 </li>
               ))}
               {run === 'running' && <li className="flex items-center gap-2 text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent" />working…</li>}

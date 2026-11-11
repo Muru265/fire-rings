@@ -6,6 +6,7 @@ import type { StepEvent } from '../tools.js'
 
 const NO_TOOL_CAVEAT = CAVEATS.no_forecast
 import type { Loader, Mode } from '../tools.js'
+import { formatNumbersInText } from './numfmt.js'
 
 export type Voice = 'responder' | 'scientist'
 export interface TraceItem { tool: string; args: Record<string, unknown>; result_summary: string; result: unknown }
@@ -49,7 +50,8 @@ Rules — follow all of them:
 4. Never forecast. Similar years are analogues, not predictions.
 5. If too_little_fire_to_judge is true, say there is too little fire to judge against normal instead of quoting a ratio.
 6. If data is missing, say so plainly.
-7. Always state the key fire-day count(s) the tool returned for the question (e.g. this month's fire-days and the typical value,
+7. Facts and caveats only: no opinions, advice or recommendations, nothing about what anyone should do.
+8. Always state the key fire-day count(s) the tool returned for the question (e.g. this month's fire-days and the typical value,
    the peak month's typical fire-days, the validation error %). A ratio or a month name alone is not enough.
 Output format, exactly two lines:
 ANSWER: <your answer>
@@ -206,7 +208,7 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
         return { answer: 'I could not produce an answer that uses only verified numbers. Please see the "Numbers used" panel for the data I retrieved.',
           caveat: 'Answer withheld because it contained unverified numbers.', trace, model, verified: false, unverified_numbers: bad, ...base }
       }
-      return { answer: out.answer, caveat, trace, model, verified: true, ...base }
+      return { answer: formatNumbersInText(out.answer), caveat, trace, model, verified: true, ...base }
     } catch (e) {
       lastErr = e
       const msg = String((e as Error)?.message ?? e)

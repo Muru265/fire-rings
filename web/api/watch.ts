@@ -7,7 +7,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { FALLBACK_MODELS, ask, classify } from './_lib/core.js'
-import { briefingQuestion, checkSteps, liveCheck, looksLikeForecast, worst } from './_lib/watch.js'
+import { briefingQuestion, checkSteps, liveCheck, rejectReason, worst } from './_lib/watch.js'
 import type { Briefing, Check, WatchDoc } from './_lib/watch.js'
 
 export async function GET(req: Request): Promise<Response> {
@@ -40,35 +40,44 @@ export async function GET(req: Request): Promise<Response> {
       } catch { return [id, null] as const }
     })))
     send({ type: 'step', kind: 'info', text: `Rules: far above normal > P${w.rules.far_above_pct}, alert = above every baseline year, far below < P${w.rules.far_below_pct}, live spike ≥ ${w.rules.live_spike_ratio}× expected; low-activity guard first.` })
+    // 1) rules for every region (deterministic, instant)
+    const flagged: { id: string; reg: WatchDoc['regions'][string]; status: ReturnType<typeof worst>; checks: Check[] }[] = []
     for (const [id, reg] of Object.entries(w.regions)) {
       const checks: Check[] = [...reg.checks, liveCheck(reg, live[id], w.rules, w.rule_text)]
       for (const text of checkSteps(reg.name, checks)) send({ type: 'step', region: id, kind: 'rule', text })
       const status = worst(checks)
-      send({ type: 'step', region: id, kind: 'status', text: `Status: ${status}` })
+      send({ type: 'step', region: id, kind: 'status', text: `Status: ${status} — ${reg.name.split(' (')[0]}` })
       send({ type: 'region', region: id, status, checks, relevant_for: reg.relevant_for, flags: reg.flags })
-      if (!brief || status === 'Normal') continue
+      if (brief && status !== 'Normal') flagged.push({ id, reg, status, checks })
+    }
+    // 2) briefings for flagged regions in parallel (#74: faster); facts + caveat only, numbers verified, no forecast/opinion
+    await Promise.all(flagged.map(async ({ id, reg, status, checks }) => {
       let b: Briefing | null = null
+      let why = ''
       if (key && Date.now() - t0 < 38_000) {
-        send({ type: 'step', region: id, kind: 'model', text: 'Asking the briefing agent (Gemini, Ask tools)…' })
+        send({ type: 'step', region: id, kind: 'model', text: `${reg.name.split(' (')[0]}: asking the briefing agent (Gemini, Ask tools)…` })
         for (let attempt = 0; attempt < 2 && !b && Date.now() - t0 < 45_000; attempt++) {
           try {
             const out = await ask({ apiKey: key, models, load, question: briefingQuestion(reg.name, reg, status, checks), voice: 'responder', region: id, mode: 'longterm',
               perModelMs: 12_000, budgetMs: Math.max(5000, 52_000 - (Date.now() - t0)), log, onStep: (s) => send({ type: 'step', region: id, ...s }) })
-            if (out.verified && looksLikeForecast(out.answer)) send({ type: 'step', region: id, kind: 'verify', ok: false, text: 'Rejected (it sounded like a forecast) — regenerating…' })
-            else if (out.verified) b = { answer: out.answer, caveat: out.caveat, trace: out.trace.map((t) => ({ tool: t.tool, args: t.args, result_summary: t.result_summary })), verified: true, model: out.model, source: 'live' }
-            else send({ type: 'step', region: id, kind: 'verify', ok: false, text: 'Rejected (a number was not in the lookups) — regenerating…' })
+            const reason = out.verified ? rejectReason(out.answer) : null
+            if (!out.verified) { why = 'a number was not in the lookups'; send({ type: 'step', region: id, kind: 'verify', ok: false, text: 'Rejected (a number was not in the lookups) — regenerating…' }) }
+            else if (reason) { why = reason === 'forecast' ? 'it sounded like a forecast' : 'it gave an opinion or advice'; send({ type: 'step', region: id, kind: 'verify', ok: false, text: `Rejected (${why}) — regenerating…` }) }
+            else b = { answer: out.answer, caveat: out.caveat, trace: out.trace.map((t) => ({ tool: t.tool, args: t.args, result_summary: t.result_summary })), verified: true, model: out.model, source: 'live' }
           } catch (e) {
+            why = 'the AI service did not answer in time'
             log({ ev: 'brief_failed', region: id, error_class: classify(String((e as Error).message)) })
             break
           }
         }
-      }
+      } else why = key ? 'out of time for a live briefing' : 'the AI service is not configured'
       if (!b && saved.briefings[`${id}|responder`]) {
-        b = { ...saved.briefings[`${id}|responder`], source: 'saved' }
-        send({ type: 'step', region: id, kind: 'info', text: '⚡ Using the saved briefing (verified when it was made)' })
+        const sv = saved.briefings[`${id}|responder`]
+        b = { ...sv, source: 'saved' }
+        send({ type: 'step', region: id, kind: 'info', text: `${reg.name.split(' (')[0]}: saved briefing used${why ? ` (${why})` : ''} — verified when it was made${sv.generated ? ` on ${sv.generated.slice(0, 10)}` : ''}` })
       }
       if (b) send({ type: 'briefing', region: id, voice: 'responder', briefing: b })
-    }
+    }))
     send({ type: 'done', ms: Date.now() - t0, data_end: w.data_end })
   }
 

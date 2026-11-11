@@ -45,7 +45,7 @@ export function checkSteps(name: string, checks: Check[]): string[] {
   const out = [`Checking ${name}…`]
   for (const c of checks) {
     if (c.id === 'live') {
-      out.push(c.value == null ? `Live 72 h: feed unavailable — skipped` : `Live 72 h: ${nf(c.value)} raw detections vs ~${nf(c.expected)} expected${c.rule === 'live_spike' ? ` → rule “live spike”` : c.rule === 'low_activity_guard' ? ' → too few expected, no live rule' : ' → normal'}`)
+      out.push(c.value == null ? `Live 72 h (${name.split(' (')[0]}): feed unavailable — skipped` : `Live 72 h: ${nf(c.value)} raw detections vs ~${nf(c.expected)} expected${c.rule === 'live_spike' ? ` → rule “live spike”` : c.rule === 'low_activity_guard' ? ' → too few expected, no live rule' : ' → normal'}`)
       continue
     }
     const what = c.guard ? 'too little fire to judge' : `${nf(c.value)} fire-days, ${c.ratio != null ? `${(Math.round(c.ratio * 10) / 10).toFixed(1)}× typical` : 'no ratio'}, ${pctWords(c.pct)}`
@@ -59,14 +59,35 @@ export function looksLikeForecast(text: string): boolean {
   return /\b(expect(ed)? to|can expect|will (be|likely|continue|see|rise|fall|increase|decrease)|is likely to|are likely to|forecast(s|ed)?|coming (days|weeks|months)|upcoming|in the next|next (week|month|season))\b/i.test(text)
 }
 
+/** #72 Briefings state facts + caveats only: reject (and regenerate) opinions, advice or claims about consequences. */
+export function looksLikeOpinion(text: string): boolean {
+  return /\b(should|must|ought to|need(s)? to|advis(e|ed|able)|recommend(s|ed)?|urge[sd]?|remain (alert|vigilant|on guard)|stay (alert|vigilant)|be (prepared|ready|alert|vigilant)|ease[sd]? (the )?(strain|pressure|burden)|reliev(e|es|ing) (the )?(strain|pressure)|good news|welcome|encouraging|reassuring|concerning|worrying|alarming|fortunately|unfortunately|thankfully|relief for|helps? (fire|ground|emergency)|ground teams?|fire services (can|may|will)|important for|matters? for|crucial|vital|planning|agency responses?|responders? (can|may|should))\b/i.test(text)
+}
+
+/** Why a briefing is rejected, or null when it is facts + caveat only. */
+export function rejectReason(text: string): 'forecast' | 'opinion' | null {
+  return looksLikeForecast(text) ? 'forecast' : looksLikeOpinion(text) ? 'opinion' : null
+}
+
+/** #75 Which month(s) set the status, short: "Oct", "Nov so far", "live 72 h". */
+export function triggerLabel(checks: Check[], status: Status): string | null {
+  if (status === 'Normal') return null
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const t = checks.filter((c) => c.status === status && c.rule && c.rule !== 'low_activity_guard')
+    .map((c) => (c.id === 'live' ? 'live 72 h' : c.m ? `${MON[c.m - 1]}${c.id === 'mtd' ? ' so far' : ''}` : null)).filter(Boolean)
+  return t.length ? t.join(', ') : null
+}
+
 /** The briefing request: the facts the rules used are named in words; numbers come from the tools (verified server-side). */
-export function briefingQuestion(name: string, reg: WatchRegion, status: Status, checks: Check[]): string {
+export function briefingQuestion(name: string, _reg: WatchRegion, status: Status, checks: Check[]): string {
   const fired = checks.filter((c) => c.rule && c.rule !== 'low_activity_guard')
   const why = fired.map((c) => `${c.label.toLowerCase()} (${c.month ?? 'last 72 hours'}): ${c.rule!.replace(/_/g, ' ')}`).join('; ')
   const months = checks.filter((c) => c.y && c.m).map((c) => `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][c.m! - 1]} ${c.y}`)
   const timing = checks.some((c) => c.flags?.includes('overpass_timing'))
   return `Write a Fire Watch briefing for ${name}. The monitoring rules gave status "${status}" because ${why || 'no rule fired'}. `
-    + `Look up ${months.join(' and ')} with get_month, then say how unusual it is compared with a typical year and why it matters for ${reg.relevant_for.split(',')[0]}. `
-    + 'Describe only detected fire (fire-days); do not claim effects on smoke, air quality, health or crops, and no forecast. '
+    + `Look up ${months.join(' and ')} with get_month, then state how unusual it is compared with a typical year. `
+    + 'State facts and the caveat only: detected fire (fire-days), how it compares with normal, and data limits. '
+    + 'No opinions, no advice, no recommendations, no statements about what anyone should do or about effects on people, '
+    + 'fire services, smoke, air quality, health or crops, and no forecast. '
     + (timing ? 'A detection-time caveat applies: say that part of the drop may be fires burning after the satellite pass that are no longer detected, and use that detection-time caveat in the CAVEAT line.' : '')
 }

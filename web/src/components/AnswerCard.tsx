@@ -8,6 +8,7 @@ import { REGIONS } from '../lib/regions'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import Help from './Help'
+import { formatNumbersInText } from '../../api/_lib/numfmt'
 
 const TOOL_LABEL: Record<string, string> = {
   list_regions: 'List regions', get_month: 'Month vs typical', get_year_total: 'Year total', get_typical: 'Typical month',
@@ -111,7 +112,7 @@ export default function AnswerCard({ a, onFollow }: { a: Answer; onFollow?: (q: 
   }, [a, region])
   return (
     <div className="fade-up rounded-sm border border-border bg-surface-2 p-4">
-      <p className="text-[17px] leading-relaxed text-text">{a.answer}</p>
+      <p className="text-[17px] leading-relaxed text-text">{formatNumbersInText(a.answer)}</p>
       {a.caveat && <p className="mt-2 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {a.caveat}</p>}
       {doc && <MiniVisual a={a} doc={doc} />}
       <p className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-faint">

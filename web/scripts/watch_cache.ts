@@ -5,7 +5,7 @@ import { writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FALLBACK_MODELS, ask } from '../api/_lib/core.js'
-import { briefingQuestion, looksLikeForecast, worst } from '../api/_lib/watch.js'
+import { briefingQuestion, rejectReason, worst } from '../api/_lib/watch.js'
 import type { WatchDoc } from '../api/_lib/watch.js'
 import { apiKey, load, sleep } from './ask_local.js'
 
@@ -18,11 +18,12 @@ for (const [id, reg] of Object.entries(w.regions)) {
   if (status === 'Normal') { console.log(`${id}: Normal — no briefing`); continue }
   for (const voice of ['responder', 'scientist'] as const) {
     let saved = false
-    for (let a = 0; a < 3 && !saved; a++) {
+    for (let a = 0; a < 5 && !saved; a++) {
       try {
         const out = await ask({ apiKey: apiKey(), models, load, question: briefingQuestion(reg.name, reg, status, reg.checks), voice, region: id, mode: 'longterm', perModelMs: 20_000 })
         if (!out.verified) { console.log(`${id}|${voice}: unverified, retrying`); continue }
-        if (looksLikeForecast(out.answer)) { console.log(`${id}|${voice}: sounded like a forecast, retrying`); continue }
+        const rr = rejectReason(out.answer)
+        if (rr) { console.log(`${id}|${voice}: rejected (${rr}), retrying: ${out.answer.slice(0, 120)}`); continue }
         briefings[`${id}|${voice}`] = { answer: out.answer, caveat: out.caveat, verified: true, model: out.model, generated: new Date().toISOString(), status,
           trace: out.trace.map((t) => ({ tool: t.tool, args: t.args, result_summary: t.result_summary, result: t.result })) }
         console.log(`${id}|${voice}: saved · ${out.model}`)

@@ -172,6 +172,10 @@ try {
   check('Fire Watch: every region card has a status', statuses.length === 4 && statuses.every((s) => ['Normal', 'Watch', 'Alert', 'Unusually low'].includes(s)))
   const flaggedNoBrief = await page.locator('[data-testid="watch-card"]:not([data-status="Normal"])').evaluateAll((els) => els.filter((e) => !e.querySelector('[data-testid="watch-briefing"]')).length)
   check('Fire Watch: every flagged region shows a briefing', flaggedNoBrief === 0)
+  const trig = await page.locator('[data-testid="watch-card"][data-region="punjab"] [data-testid="status-trigger"]').innerText().catch(() => '')
+  check(`#75 status badge names the month (${trig.trim()})`, /\((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(trig))
+  const tr = await page.getByTestId('watch-trace').locator('li').allInnerTexts()
+  check('#74 trace has no repeated identical lines', new Set(tr).size === tr.length)
   check('Fire Watch: raw-vs-harmonized proof shown', await page.getByTestId('watch-proof-headline').isVisible())
 
   // QA #69: on phones the globe is not hidden behind the hero text

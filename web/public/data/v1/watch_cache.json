@@ -1,75 +1,21 @@
 {
  "data_end": "2026-11-09",
- "generated": "2026-11-10T13:31:33.033Z",
+ "generated": "2026-11-11T09:55:32.593Z",
  "briefings": {
   "punjab|responder": {
-   "answer": "Fire-days for November 2026 so far are 615 compared with a typical 2539, which is 0.2× typical. This drop is important for tracking the annual agricultural burning season and planning agency responses.",
+   "answer": "November 2026 has recorded 615 fire-days (0.2× typical), and October 2026 recorded 392 fire-days (0.1× typical). Both months are below every year in the 2003–2022 baseline.",
    "caveat": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-10T13:30:54.663Z",
-   "status": "Unusually low",
-   "trace": [
-    {
-     "tool": "get_month",
-     "args": {
-      "region": "punjab",
-      "mode": "longterm",
-      "year": 2026,
-      "month": 11
-     },
-     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
-     "result": {
-      "region": "Punjab–Haryana",
-      "month": "November 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–9 only, compared with the same days of baseline years",
-      "fire_days": 615,
-      "range_90": [
-       577,
-       654
-      ],
-      "typical_fire_days": 2539,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 0.2,
-      "percentile": "below every year in the 2003–2022 baseline",
-      "return_period_years": null,
-      "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 21,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 3295,
-       "viirs": 2405
-      },
-      "flags": [
-       "mtd",
-       "provisional",
-       "overpass_timing"
-      ],
-      "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "This month is not over yet, so it is compared with the same days in past years.",
-       "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
-     }
-    }
-   ]
-  },
-  "punjab|scientist": {
-   "answer": "In November 2026 (days 1–9 only), Punjab–Haryana recorded 615 MODIS-equivalent fire-days, which is 0.2× typical and below every year in the 2003–2022 baseline, with a normal 90% range of [577, 654] and a typical value of 2539. In October 2026, the region recorded 392 fire-days, which is 0.1× typical and below every year in the 2003–2022 baseline, with a normal 90% range of [371, 417] and a typical value of 4904. All values are MODIS-equivalent fire-days based on a 2003–2022 baseline. Method: see the Proof page.",
-   "caveat": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
-   "verified": true,
-   "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-10T13:31:06.620Z",
+   "generated": "2026-11-11T09:54:58.968Z",
    "status": "Unusually low",
    "trace": [
     {
      "tool": "get_month",
      "args": {
       "mode": "longterm",
-      "region": "punjab",
-      "month": 11
+      "month": 11,
+      "region": "punjab"
      },
      "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
      "result": {
@@ -213,65 +159,168 @@
        ]
       }
      }
-    }
-   ]
-  },
-  "madagascar|responder": {
-   "answer": "October 2026 recorded 5,612 fire-days, which is far below the typical 7,760 fire-days for the month and stands at 0.7× typical. This low fire activity helps ease strain on fire services, though ground teams must remain alert.",
-   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-   "verified": true,
-   "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-10T13:31:19.580Z",
-   "status": "Unusually low",
-   "trace": [
+    },
     {
-     "tool": "get_month",
+     "tool": "get_quality",
      "args": {
-      "month": 10,
-      "year": 2026,
-      "region": "madagascar",
-      "mode": "longterm"
+      "region": "punjab"
      },
-     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":5612,\"range_90\":[5464,5739],\"typical_fire_days\":7760,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.7,\"percentile\":\"5th perc…",
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"calibration_window\":\"July 2012 – December 2019\",\"method\":\"monthly exchange rates shrunk toward the region-wide rate 0.347\",\"low_activity_region\":false,\"out_of_sample_annual_error_pct\":5.6,\"out_of_sample_bias_p…",
      "result": {
-      "region": "Madagascar",
-      "month": "October 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": false,
-      "fire_days": 5612,
-      "range_90": [
-       5464,
-       5739
+      "region": "Punjab–Haryana",
+      "calibration_window": "July 2012 – December 2019",
+      "method": "monthly exchange rates shrunk toward the region-wide rate 0.347",
+      "low_activity_region": false,
+      "out_of_sample_annual_error_pct": 5.6,
+      "out_of_sample_bias_pct": 0,
+      "validation_v1_pass": true,
+      "step_at_2012_raw_pct": 199.4,
+      "step_at_2012_harmonized_pct": 3.1,
+      "step_at_2012_modis_only_pct": 4.2,
+      "validation_v3_pass": true,
+      "uncertain_months_in_record": 61,
+      "provisional_months": [
+       "August 2026",
+       "September 2026",
+       "October 2026",
+       "November 2026"
       ],
-      "typical_fire_days": 7760,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 0.7,
-      "percentile": "5th percentile",
-      "return_period_years": null,
-      "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 23,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 8864,
-       "viirs": 46581
+      "static_source_detections_removed": 50179,
+      "data_through": "2026-11-09",
+      "famous_seasons": {
+       "season_definition": "July–June",
+       "seasons_ranked": 23,
+       "top3_seasons": [
+        "2016–17",
+        "2007–08",
+        "2021–22"
+       ],
+       "oct_nov_crop_burning_top3_years": [
+        2016,
+        2005,
+        2021
+       ]
       },
-      "flags": [
-       "provisional"
-      ],
+      "detection_time_caveat": {
+       "applies_to": "October–November from 2022",
+       "text": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
+       "evidence": {
+        "aqua_to_viirs_ratio_2022_2026_vs_2013_2019": 1.461,
+        "same_vs_noaa20": 1.336,
+        "note": "Aqua passes later in the afternoon since Dec 2021; numbers are not adjusted"
+       }
+      },
+      "flags": [],
       "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "Months before July 2002 come from one satellite only (Terra), so they are less certain and are not ranked.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
       ]
      }
     }
    ]
   },
-  "madagascar|scientist": {
-   "answer": "In October 2026, Madagascar recorded 5612 MODIS-equivalent fire-days, which is far below the typical value of 7760 fire-days for a baseline period of 2003–2022. This total placed October at the 5th percentile, with a 90% range of 5464 to 5739 and a ratio to typical of 0.7. For November 2026 (days 1–8 only, compared with the same days of baseline years), the region recorded 1723 fire-days against a typical value of 1800 fire-days, sitting at the 38th–48th percentile with a 90% range of 1625 to 1807 and a ratio to typical of 1. All numbers are MODIS-equivalent fire-days on the old satellite's scale. Method: see the Proof page.",
+  "punjab|scientist": {
+   "answer": "In November 2026 (days 1–9 only), Punjab–Haryana recorded 615 fire-days compared with a typical 2,539 fire-days, a ratio of 0.2× typical, placing it below every year in the 2003–2022 baseline with a 90% range of [577, 654]. Last full month (October 2026) recorded 392 fire-days compared with a typical 4,904 fire-days, a ratio of 0.1× typical, ranking below every year in the 2003–2022 baseline with a 90% range of [371, 417]. All numbers are MODIS-equivalent fire-days on the 2003–2022 baseline. Method: see the Proof page.",
+   "caveat": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
+   "verified": true,
+   "model": "gemini-3.5-flash-lite",
+   "generated": "2026-11-11T09:55:11.033Z",
+   "status": "Unusually low",
+   "trace": [
+    {
+     "tool": "get_month",
+     "args": {
+      "year": 2026,
+      "mode": "longterm",
+      "month": 11,
+      "region": "punjab"
+     },
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
+     "result": {
+      "region": "Punjab–Haryana",
+      "month": "November 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": "days 1–9 only, compared with the same days of baseline years",
+      "fire_days": 615,
+      "range_90": [
+       577,
+       654
+      ],
+      "typical_fire_days": 2539,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 0.2,
+      "percentile": "below every year in the 2003–2022 baseline",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 21,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 3295,
+       "viirs": 2405
+      },
+      "flags": [
+       "mtd",
+       "provisional",
+       "overpass_timing"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "This month is not over yet, so it is compared with the same days in past years.",
+       "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_month",
+     "args": {
+      "month": 10,
+      "year": 2026,
+      "region": "punjab",
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":392,\"range_90\":[371,417],\"typical_fire_days\":4904,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.1,\"percentile\":\"below e…",
+     "result": {
+      "region": "Punjab–Haryana",
+      "month": "October 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": false,
+      "fire_days": 392,
+      "range_90": [
+       371,
+       417
+      ],
+      "typical_fire_days": 4904,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 0.1,
+      "percentile": "below every year in the 2003–2022 baseline",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 25,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 980,
+       "viirs": 1459
+      },
+      "flags": [
+       "provisional",
+       "overpass_timing"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    }
+   ]
+  },
+  "madagascar|responder": {
+   "answer": "October 2026 recorded 5,612 fire-days compared with a typical 7760, which is 0.7× typical. November 2026 (days 1–8) recorded 1,723 fire-days compared with a typical 1800, which is 1.0× typical.",
    "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-10T13:31:31.530Z",
+   "generated": "2026-11-11T09:55:24.228Z",
    "status": "Unusually low",
    "trace": [
     {
@@ -317,6 +366,8 @@
     {
      "tool": "get_month",
      "args": {
+      "month": 11,
+      "year": 2026,
       "mode": "longterm",
       "region": "madagascar"
      },
@@ -351,37 +402,99 @@
        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
        "This month is not over yet, so it is compared with the same days in past years.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    }
+   ]
+  },
+  "madagascar|scientist": {
+   "answer": "In October 2026, Madagascar recorded 5,612 MODIS-equivalent fire-days, which is 0.7× typical with a 90% range of 5,464 to 5,739 fire-days and a typical value of 7,760 fire-days, ranking at the 5th percentile. For November 2026 (days 1–8 only, compared with the same days of baseline years), the region recorded 1,723 MODIS-equivalent fire-days, which is 1× typical with a 90% range of 1,625 to 1,807 fire-days and a typical value of 1,800 fire-days, ranking at the 38th–48th percentile. The baseline period is 2003–2022. Method: see the Proof page.",
+   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+   "verified": true,
+   "model": "gemini-3.5-flash-lite",
+   "generated": "2026-11-11T09:55:31.087Z",
+   "status": "Unusually low",
+   "trace": [
+    {
+     "tool": "get_month",
+     "args": {
+      "year": 2026,
+      "month": 10,
+      "region": "madagascar",
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":5612,\"range_90\":[5464,5739],\"typical_fire_days\":7760,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.7,\"percentile\":\"5th perc…",
+     "result": {
+      "region": "Madagascar",
+      "month": "October 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": false,
+      "fire_days": 5612,
+      "range_90": [
+       5464,
+       5739
       ],
-      "last_complete_month": {
-       "region": "Madagascar",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 5612,
-       "range_90": [
-        5464,
-        5739
-       ],
-       "typical_fire_days": 7760,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 0.7,
-       "percentile": "5th percentile",
-       "return_period_years": null,
-       "beyond_baseline_record": false,
-       "rank_among_years_for_this_month": 23,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 8864,
-        "viirs": 46581
-       },
-       "flags": [
-        "provisional"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
+      "typical_fire_days": 7760,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 0.7,
+      "percentile": "5th percentile",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 23,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 8864,
+       "viirs": 46581
+      },
+      "flags": [
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_month",
+     "args": {
+      "region": "madagascar",
+      "year": 2026,
+      "mode": "longterm",
+      "month": 11
+     },
+     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–8 only, compared with the same days of baseline years\",\"fire_days\":1723,\"range_90\":[1625,1807],\"typical_fire_days\":1800,\"baseline\"…",
+     "result": {
+      "region": "Madagascar",
+      "month": "November 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": "days 1–8 only, compared with the same days of baseline years",
+      "fire_days": 1723,
+      "range_90": [
+       1625,
+       1807
+      ],
+      "typical_fire_days": 1800,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 1,
+      "percentile": "38th–48th percentile",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 12,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 2837,
+       "viirs": 15020
+      },
+      "flags": [
+       "mtd",
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "This month is not over yet, so it is compared with the same days in past years.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
      }
     }
    ]

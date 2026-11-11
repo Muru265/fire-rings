@@ -178,13 +178,13 @@ try {
       check('/watch', `${id} status`, (await card.getAttribute('data-status')) ?? '', r.status)
       const b = cache.briefings[`${id}|responder`]
       if (r.status !== 'Normal') {
-        check('/watch', `${id} briefing shown`, await card.getByTestId('watch-briefing').innerText(), b.answer.slice(0, 60))
+        check('/watch', `${id} briefing shown`, (await card.getByTestId('watch-briefing').innerText()).replace(/,(?=\d{3})/g, ''), b.answer.slice(0, 60).replace(/,(?=\d{3})/g, ''))
         // every number in a saved briefing appears in its lookups (same rule as the server-side check)
         for (const k of ['responder', 'scientist']) {
           const bb = cache.briefings[`${id}|${k}`]
           const pool = bb.trace.map((x) => JSON.stringify(x.result ?? x.result_summary)).join(' ').replace(/,(?=\d{3})/g, '')
           const nums = (bb.answer.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((s) => s.replace(/,/g, ''))
-          const bad = nums.filter((n) => !pool.includes(n))
+          const bad = nums.filter((n) => !pool.includes(n) && !pool.includes(n.replace(/\.0$/, '')))
           check('/watch', `${id} ${k} briefing numbers all in its lookups`, bad.length ? `unverified ${bad.join(',')}` : 'ok', 'ok')
           const fc = /\b(expect(ed)? to|can expect|will (be|likely|continue|see|rise|fall|increase|decrease)|is likely to|are likely to|forecast(s|ed)?|coming (days|weeks|months)|upcoming|in the next|next (week|month|season))\b/i.test(bb.answer)
           check('/watch', `${id} ${k} briefing has no forecast language`, fc ? 'forecast wording' : 'ok', 'ok')
