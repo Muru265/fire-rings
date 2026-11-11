@@ -14,7 +14,7 @@ const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd']; const v = n % 1
 /** The only caveat sentences the analyst may use (full sentences, never a bare word). */
 export const CAVEATS = {
   units: 'All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale.',
-  units_detail: 'High-detail numbers use the new satellites’ full 375 m view and are not comparable with years before 2012.',
+  units_detail: 'High-detail numbers are native VIIRS fire-days (High detail, 2012–now): the new satellites’ full 375 m view, not comparable with years before 2012.',
   provisional: 'This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.',
   mtd: 'This month is not over yet, so it is compared with the same days in past years.',
   low_activity: (name: string) => `${name} has very little fire, so small changes look big and comparisons and rankings are uncertain.`,
@@ -70,9 +70,9 @@ export const TOOL_DECLARATIONS = [
     parameters: { type: 'object', properties: { region: { type: 'string' }, by: { type: 'string', enum: ['year', 'month'] }, month: { type: 'integer' }, mode: MODE_PARAM }, required: ['region', 'by'] },
   },
   { name: 'get_similar_years', description: 'Past years whose year-to-date monthly pattern looks most like the current year (analogues, not forecasts).',
-    parameters: { type: 'object', properties: { region: { type: 'string' } }, required: ['region'] } },
+    parameters: { type: 'object', properties: { region: { type: 'string' }, mode: MODE_PARAM }, required: ['region'] } },
   { name: 'get_quality', description: 'How reliable the record is for a region: validation results, calibration method, uncertainty, provisional months, outages and masking.',
-    parameters: { type: 'object', properties: { region: { type: 'string' } }, required: ['region'] } },
+    parameters: { type: 'object', properties: { region: { type: 'string' }, mode: MODE_PARAM }, required: ['region'] } },
 ]
 
 async function region(load: Loader, id: string) {
@@ -93,7 +93,7 @@ function modeView(doc: any, mode: Mode) {
     baseline: detail ? doc.detail.baseline : doc.baseline,
     latest: detail ? doc.detail.latest : doc.latest,
     rp: (r: any) => (detail ? r.V_rp : r.rp), beyond: (r: any) => (detail ? r.V_beyond : r.beyond), rank: (r: any) => (detail ? r.V_rank : r.rank),
-    unit: detail ? 'VIIRS fire-days (native 375 m, S-NPP-equivalent)' : 'MODIS-equivalent fire-days',
+    unit: detail ? 'native VIIRS fire-days (High detail, 2012–now)' : 'MODIS-equivalent fire-days',
     note: mode === 'detail' && !doc.detail ? 'High-detail data is not published for this region; Long-term values are shown.' : undefined,
   }
 }
@@ -266,7 +266,9 @@ export async function runTool(load: Loader, name: string, rawArgs: any): Promise
       const upto = Number(String(d.months).split('–')[1])
       return { region: doc.name, current_year: doc.months.at(-1).y, compared_months: `January–${MONTHS[upto - 1]}`,
         similar_years: d.years.map((s: any) => ({ year: s.y, shape_similarity_percent: Math.round(s.r * 100) })),
-        note: 'Same shape of season, not the same size; analogues, not a forecast.', ...caveatsFor(doc, null, modeView(doc, 'longterm')) }
+        note: 'Same shape of season, not the same size; analogues, not a forecast.',
+        ...(mode === 'detail' ? { data_mode_note: 'Shape similarity is computed on the Long-term record; it has no fire-day counts.' } : {}),
+        ...caveatsFor(doc, null, modeView(doc, mode)) }
     }
     case 'get_quality': {
       const doc = await region(load, args.region)
@@ -275,6 +277,7 @@ export async function runTool(load: Loader, name: string, rawArgs: any): Promise
       const q = doc.quality
       const k = doc.k
       return { region: doc.name, calibration_window: 'July 2012 – December 2019',
+        ...(mode === 'detail' ? { data_mode_note: 'High detail shows native VIIRS fire-days (High detail, 2012–now) with no exchange rate applied; the calibration and validation below belong to the Long-term record.' } : {}),
         method: doc.method === 'pooled' ? `one exchange rate for all months (${k?.pool}); it predicted better than monthly rates in our tests`
           : `monthly exchange rates shrunk toward the region-wide rate ${k?.pool}`,
         low_activity_region: v?.low_activity ?? null,
@@ -297,7 +300,7 @@ export async function runTool(load: Loader, name: string, rawArgs: any): Promise
             return { aqua_to_viirs_ratio_2022_2026_vs_2013_2019: p.aqua_rel_2022_2026, same_vs_noaa20: p.aqua_n20_rel_2022_2026,
               note: 'Aqua passes later in the afternoon since Dec 2021; numbers are not adjusted' }
           }).catch(() => null) } } : {}),
-        ...caveatsFor(doc, null, modeView(doc, 'longterm'), [CAVEATS.terra_only]) }
+        ...caveatsFor(doc, null, modeView(doc, mode), mode === 'detail' ? [] : [CAVEATS.terra_only]) }
     }
     default:
       return { error: `unknown tool ${name}` }

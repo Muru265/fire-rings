@@ -112,8 +112,8 @@ export default function AnswerCard({ a, onFollow }: { a: Answer; onFollow?: (q: 
   }, [a, region])
   return (
     <div className="fade-up rounded-sm border border-border bg-surface-2 p-4">
-      <p className="text-[17px] leading-relaxed text-text">{formatNumbersInText(a.answer)}</p>
-      {a.caveat && <p className="mt-2 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {a.caveat}</p>}
+      <p className="text-[17px] leading-relaxed text-text" data-testid="answer-text">{formatNumbersInText(a.answer)}</p>
+      {a.caveat && <p className="mt-2 text-xs text-muted" data-testid="answer-caveat"><span className="font-semibold text-warn">Caveat:</span> {a.caveat}</p>}
       {doc && <MiniVisual a={a} doc={doc} />}
       <p className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-faint">
         <span className="rounded-full border border-border-strong px-1.5 py-px font-mono text-[10px] capitalize" data-testid="voice-badge">{a.voice}</span>

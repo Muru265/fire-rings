@@ -1,5 +1,6 @@
 // QA #33: every chip × region × style answers on /ask even when the live AI is unavailable (local preview has no
 // /api, so this exercises the saved-answer fallback). Checks the answer card appears and its style badge matches (#52).
+// #85: run in both data modes; High detail answers never say "MODIS-equivalent" and do say "VIIRS"; Long-term never claims "native VIIRS".
 import { spawn, spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -15,11 +16,12 @@ const browser = await chromium.launch()
 let fail = 0
 let n = 0
 try {
-  for (const region of REGIONS) {
+  for (const mode of ['longterm', 'detail']) for (const region of REGIONS) {
     for (const voice of ['responder', 'scientist']) {
       const page = await browser.newPage()
       await page.goto(`http://localhost:${PORT}/ask?region=${region}`, { waitUntil: 'load' })
       await page.getByRole('button', { name: voice[0].toUpperCase() + voice.slice(1), exact: true }).click()
+      await page.getByRole('button', { name: mode === 'detail' ? 'High detail' : 'Long-term', exact: true }).click()
       for (const chip of CHIPS) {
         n++
         await page.getByRole('button', { name: chip, exact: true }).click()
@@ -36,11 +38,13 @@ try {
           }))
           // QA #71: the side panel shows the step trace (live, or replayed lookups for a saved answer)
           const traceN = await page.getByTestId('ask-trace').locator('li').count()
-          const ok = v === voice && q.includes(chip) && !badYear && traceN >= 3
-          if (!ok) { fail++; console.log(`FAIL  ${region} ${voice} ${chip}: badge=${v}`) }
-          else console.log(`PASS  ${region} ${voice} ${chip}`)
+          const said = `${await card.getByTestId('answer-text').innerText()} ${await card.getByTestId('answer-caveat').innerText().catch(() => '')}`
+          const unitOk = mode === 'detail' ? !/MODIS[- ]equivalent/i.test(said) && /VIIRS/.test(said) : !/native VIIRS/i.test(said)
+          const ok = v === voice && q.includes(chip) && !badYear && traceN >= 3 && unitOk
+          if (!ok) { fail++; console.log(`FAIL  ${mode} ${region} ${voice} ${chip}: badge=${v}${unitOk ? '' : ` unit wording: ${said.slice(0, 120)}`}`) }
+          else console.log(`PASS  ${mode} ${region} ${voice} ${chip}`)
         } catch {
-          fail++; console.log(`FAIL  ${region} ${voice} ${chip}: no answer (${await page.locator('[data-turn="error"]').count() ? 'error shown' : 'timeout'})`)
+          fail++; console.log(`FAIL  ${mode} ${region} ${voice} ${chip}: no answer (${await page.locator('[data-turn="error"]').count() ? 'error shown' : 'timeout'})`)
         }
         await page.waitForTimeout(150)
       }

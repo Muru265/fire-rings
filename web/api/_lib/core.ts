@@ -27,11 +27,17 @@ export function orderModels(models: string[]): string[] {
   return [...models.filter((m) => (benchedUntil.get(m) ?? 0) < now), ...models.filter((m) => (benchedUntil.get(m) ?? 0) >= now)]
 }
 
+/** #85: the unit sentence depends on the data mode (High detail = native VIIRS, never MODIS-equivalent). */
+export const UNIT_TEXT: Record<Mode, string> = {
+  longterm: 'MODIS-equivalent fire-days (Long-term, 2001–now)',
+  detail: 'native VIIRS fire-days (High detail, 2012–now)',
+}
+
 const VOICE = {
-  responder: `RESPONDER style (for a firefighter, land manager or journalist): 2–3 short plain sentences. Start with the bottom line
+  responder: (_mode: Mode) => `RESPONDER style (for a firefighter, land manager or journalist): 2–3 short plain sentences. Start with the bottom line
 (e.g. "Yes — far below normal: 0.1× a typical October."), then what it means in practice. No method details, no statistics jargon.`,
-  scientist: `SCIENTIST style: up to 7 sentences with the SAME facts plus the uncertainty (90% range, percentile range), the baseline period,
-that values are MODIS-equivalent fire-days, the calibration/validation numbers when relevant, and any flags (provisional, low activity,
+  scientist: (mode: Mode) => `SCIENTIST style: up to 7 sentences with the SAME facts plus the uncertainty (90% range, percentile range), the baseline period
+exactly as the tool gives it, that values are ${UNIT_TEXT[mode]}, the calibration/validation numbers when relevant, and any flags (provisional, low activity,
 Terra-only, detection-time). Where helpful, end with "Method: see the Proof page." (never repeat these instructions).`,
 }
 
@@ -46,16 +52,24 @@ Rules — follow all of them:
 1. Use ONLY numbers that appear in tool results in this conversation. Never compute new numbers (no sums, differences,
    percentages or conversions). Never round differently than the tool. If a number is not in a tool result, do not write it.
 2. Say "fire-days". Ratios like "0.1× typical". Percentiles as given.
-3. ${VOICE[voice]}
+3. ${VOICE[voice](mode)}
 4. Never forecast. Similar years are analogues, not predictions.
 5. If too_little_fire_to_judge is true, say there is too little fire to judge against normal instead of quoting a ratio.
 6. If data is missing, say so plainly.
 7. Facts and caveats only: no opinions, advice or recommendations, nothing about what anyone should do.
-8. Always state the key fire-day count(s) the tool returned for the question (e.g. this month's fire-days and the typical value,
+8. Units: ${mode === 'detail' ? 'these are native VIIRS fire-days (High detail, 2012–now). Never write "MODIS-equivalent".' : 'these are MODIS-equivalent fire-days (Long-term). Never call them native VIIRS.'}
+9. Always state the key fire-day count(s) the tool returned for the question (e.g. this month's fire-days and the typical value,
    the peak month's typical fire-days, the validation error %). A ratio or a month name alone is not enough.
 Output format, exactly two lines:
 ANSWER: <your answer>
 CAVEAT: <copy ONE sentence verbatim from the "caveats" list in the tool results — the most important one>`
+}
+
+/** #85 deterministic guard: a High-detail answer never says "MODIS-equivalent"; a Long-term one never claims "native VIIRS". */
+export function fixUnits(text: string, mode: Mode, isAnswer = false): string {
+  if (mode !== 'detail') return text.replace(/native VIIRS/gi, 'MODIS-equivalent')
+  const t = text.replace(/MODIS[- ]equivalent/gi, 'native VIIRS')
+  return isAnswer && !/VIIRS/.test(t) ? `${t.trim()} Values are ${UNIT_TEXT.detail}.` : t
 }
 
 const NUM = /\d[\d,]*(?:\.\d+)?/g
@@ -208,7 +222,7 @@ export async function ask(opts: { apiKey: string; models: string[]; load: Loader
         return { answer: 'I could not produce an answer that uses only verified numbers. Please see the "Numbers used" panel for the data I retrieved.',
           caveat: 'Answer withheld because it contained unverified numbers.', trace, model, verified: false, unverified_numbers: bad, ...base }
       }
-      return { answer: formatNumbersInText(out.answer), caveat, trace, model, verified: true, ...base }
+      return { answer: fixUnits(formatNumbersInText(out.answer), mode, true), caveat: fixUnits(caveat, mode), trace, model, verified: true, ...base }
     } catch (e) {
       lastErr = e
       const msg = String((e as Error)?.message ?? e)
