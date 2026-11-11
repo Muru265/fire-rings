@@ -4,8 +4,87 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Summary for Muru — Round 5A (looks, 12 Nov)
+
+**In one line:** all four items (#89–#92) are built, tested and pushed to both repos. No data or pipeline changes: the long-term numbers are identical and the snapshot test is green.
+
+⚠ **One thing needs you: Vercel stopped deploying around 16:00 UTC (11 Nov), on both projects.** Every push since then is on GitHub, but https://fire-rings.vercel.app still serves the Round 4 bundle and https://fire-rings-apps.vercel.app still serves the old companion. I can't see a build error from here, so it looks like an account-side limit or a stuck queue. To fix it:
+1. Open the Vercel dashboard and check the **Deployments** tab of each project.
+2. If a deployment failed, click **Redeploy** on the latest commit.
+3. If you hit the daily deployment limit, it resets after 24 h; don't change billing.
+4. Once both sites are live, run `node scripts/usecase_shots.mjs` in `web/`. The fallback shots were already taken from a local build of the new companion, so this is optional.
+
+**What each companion app looks like now** (default region, answer exactly as shown)
+- **1 What to expect.** Calm field green and cream, calendar with a small flame.
+  - Answer: "November in Punjab–Haryana: quieter than usual."
+  - Supporting line: "About 1,000 fire-days expected (range 721–1,195) · tested on 20 years."
+  - The class is used only when the projection beat "typical" in the backtest: below the usual P10 = quieter, above P90 = busier.
+- **2 Fact-check a season.** Newspaper: off-white paper, serif headline, a rotated verdict stamp, magnifying glass.
+  - Answer: "Was Sep 2019 – Feb 2020 SE Australia's worst season on record?"
+  - Stamp: "TRUE — 1st of 23 seasons".
+  - Then the NASA POWER rain and temperature fact, and "Does not show the weather caused the fires."
+- **3 Fire index for insurance.** White policy document, navy and gold, shield.
+  - Answer: "With raw satellite data, 14 of 31 payouts would have been triggered by the satellite switch, not by fire."
+  - Recomputed live when you move the slider.
+- **4 Smoke-season tracker.** Hazy grey sky with warm orange haze, cloud and sun.
+  - Answer: "Oct–Nov 2025: the smallest burning season in 24 years*".
+  - The published detection-time caveat sits right under it.
+- **5 Volcano check.** Dark basalt, an original volcano drawing with a softly glowing lava top; the glow stops under reduced motion.
+  - Answer: "The satellites saw 27 of 28 eruptions — most on the first day."
+  - I wrote "most" because the per-eruption data show not every eruption was seen on day 0. The median delay is 0 days.
+  - Chip "VIIRS: 17 of 17".
+- **6 Land & loan screening.** Bank report: white, slate, thin rules, monospace figures, traffic light.
+  - Answer: "Fire history: About normal — last 10 years 0.9× normal."
+  - The bands are stated on the card: below 0.8×, about 0.8–1.2×, above 1.2×.
+- **Every page:**
+  - The previous charts, tables and controls are behind "Show the data ▾", which is remembered per visitor.
+  - The credit line and the API inspector are always visible.
+  - The companion home page has six tiles, each in its app's colours with its icon and question.
+  - Embed mode (control room) shows only the card plus "Open full app ↗", and the card scales up to fill the window.
+
+**Main app**
+- **#89 Day globe.** NASA's Blue Marble source imagery has near-black oceans (2, 5, 20), so Day mode lifts the darkest tones and adds saturation: oceans now read blue and land green or brown. The fire glow is a little stronger in Day only. A screenshot check measures globe brightness: Day 63 vs Dark 28, with fire hexes visible. Dark is still the default; Night lights is still grey.
+- **#91 Preset label.** Now reads "Biggest season on record: 2019–20 season (Black Summer)", with "Jul 2019 – Jun 2020" in small text.
+- **#92 Control room and slides.** On phones, /use-cases shows six cards in each app's colours, with its icon and its live answer, computed from the published JSON with the same rules. The fallback screenshots, the slide-6 montage and both PDFs are refreshed (7 pages; the figure-fit checks pass).
+
+**Tests, before → after**
+
+| Test | Round 4 | Round 5A |
+|---|---|---|
+| Main e2e | 69 | 70 |
+| Companion e2e | 61 | 87 |
+| claims_check | 203 | 203 |
+| guide_check | 22 | 22 |
+| ask_e2e | 64 | 64 |
+| pytest | 92 | 92 |
+
+Lint is clean, the hotspot and format tests pass, and no preview servers are left running.
+
+**Decisions to review**
+- **Volcano wording:** "most on the first day", because the data don't support "on the first day" for every eruption.
+- **What to expect:** when the projection didn't beat "typical", the answer says "Typical for {Month} in {Region}: N fire-days" and claims no class.
+- **Land bands:** 0.8× and 1.2×.
+- **Insurance sentence:** kept exactly as specified, even though it is 19 words (over the 15-word guideline).
+- **Embed mode:** has no on-card ticker. The control room still gets each "last API call" by postMessage, unchanged.
+- **Phone cards:** dropped the screenshot in favour of colour, icon and answer.
+
+**What to check first** (once Vercel deploys)
+1. https://fire-rings.vercel.app/use-cases: six live windows in six different looks. Also check at phone width.
+2. https://fire-rings-apps.vercel.app/: the six coloured tiles.
+3. https://fire-rings-apps.vercel.app/factcheck: the verdict stamp.
+4. https://fire-rings-apps.vercel.app/volcano: the lava glow.
+5. https://fire-rings-apps.vercel.app/insurance: move the slider under "Show the data"; the answer updates.
+6. https://fire-rings-apps.vercel.app/land?embed=1: card-only embed.
+7. https://fire-rings.vercel.app/: switch to **Day**; oceans should be blue.
+8. https://fire-rings.vercel.app/r/se_australia: the "2019–20 season (Black Summer)" preset.
+
 ## Round 5A (12 Nov, looks: #89–#92) — running log
 - started; order: #91, #89 (main), #90 (companion redesign), #92 (control room + slides refresh).
+- #91 done: preset reads "Biggest season on record: 2019–20 season (Black Summer)" + small "Jul 2019 – Jun 2020".
+- #89 done: Day mode lifts Blue Marble's near-black source oceans (2,5,20) with brightness-min 0.18 / max 0.95 / saturation +0.45; stronger fire glow in Day only; e2e Day mean 63 vs Dark 28.
+- #90 done (companion): hero answer card per app, own themes, Show the data, embed = card only (scaled up at the control room's 900×620); e2e 61 → 87 checks.
+- #92: phone cards (colour + icon + answer), fallback shots + slide montage + PDFs refreshed from a LOCAL preview of the new companion build.
+- BLOCKER: from ~16:00 UTC neither Vercel project deploys new pushes (main still serves the Round 4 bundle, companion the Round 4 build) — no build error visible from here; likely an account-side deploy limit/queue. Needs Muru to check the Vercel dashboard (Deployments tab of both projects).
 
 ## Summary for Muru — Round 4 (fixes, 11–12 Nov)
 
