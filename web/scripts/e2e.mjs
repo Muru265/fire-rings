@@ -270,6 +270,22 @@ try {
       const failed = (await Promise.all(local.map(async (r) => (await r.response())?.status() ?? 0))).filter((st) => st !== 200 && st !== 304).length
       const loaded = await pg.evaluate(() => window.__frGlobe.isSourceLoaded('gibs-day-local') && window.__frGlobe.isSourceLoaded('gibs-night-local'))
       check(`#76 Day/Night at default view: ${local.length} local tile requests, ${gibsLow.length} GIBS requests at z ≤ 3, ${failed} failed, sources loaded`, local.length > 0 && gibsLow.length === 0 && failed === 0 && loaded)
+      { // #89: Day is clearly a daytime Earth — globe area much brighter than Dark — and fire hexes stay visible
+        const { PNG } = await import('pngjs')
+        await pg.evaluate(() => { window.__frGlobe.fire('mousedown') }) // stop the spin so both shots show the same view
+        const stats = async () => {
+          const box = await pg.getByTestId('globe-map').boundingBox()
+          const png = PNG.sync.read(await pg.screenshot({ clip: { x: box.x + box.width * 0.3, y: box.y + box.height * 0.25, width: box.width * 0.4, height: box.height * 0.5 } }))
+          let sum = 0, fire = 0
+          for (let k = 0; k < png.data.length; k += 4) { const [r, g, b] = [png.data[k], png.data[k + 1], png.data[k + 2]]; sum += (r + g + b) / 3; if (r > 200 && g > 60 && g < 190 && b < 110) fire++ }
+          return { mean: sum / (png.data.length / 4), fire }
+        }
+        await pg.getByTestId('globe-style').getByRole('button', { name: 'Dark' }).click(); await pg.waitForTimeout(2500)
+        const dark = await stats()
+        await pg.getByTestId('globe-style').getByRole('button', { name: 'Day' }).click(); await pg.waitForTimeout(3500)
+        const day = await stats()
+        check(`#89 Day brighter than Dark (mean ${day.mean.toFixed(0)} vs ${dark.mean.toFixed(0)}) and fire hexes visible on Day (${day.fire} fire-coloured px)`, day.mean > dark.mean + 15 && day.fire > 40)
+      }
       for (const k of ['Night lights', 'Day', 'Dark']) {
         await pg.getByTestId('globe-style').getByRole('button', { name: k }).click(); await pg.waitForTimeout(2500)
         await pg.screenshot({ path: resolve(out, `e2e_globe_${k.split(' ')[0].toLowerCase()}.png`) })

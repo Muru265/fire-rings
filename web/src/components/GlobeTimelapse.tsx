@@ -159,8 +159,8 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       // NASA GIBS rasters above the style's land/water fills, below borders, labels and the fire layers
       const firstLine = mp.getStyle().layers.find((l) => l.type === 'line' || l.type === 'symbol')?.id
       for (const k of ['night', 'day'] as const) {
-        // night lights in grey so city lights never look like fire; day imagery dimmed so the hexagons keep contrast
-        const paint = { ...(k === 'night' ? { 'raster-saturation': -1, 'raster-brightness-max': 0.7, 'raster-contrast': 0.1 } : { 'raster-brightness-max': 0.62, 'raster-saturation': -0.25 }), 'raster-fade-duration': 300 }
+        // night lights in grey so city lights never look like fire; #89: Blue Marble oceans are near-black navy (2,5,20) in the source, so Day lifts the darks a little and adds saturation: oceans read blue, land green/brown
+        const paint = { ...(k === 'night' ? { 'raster-saturation': -1, 'raster-brightness-max': 0.7, 'raster-contrast': 0.1 } : { 'raster-brightness-min': 0.18, 'raster-brightness-max': 0.95, 'raster-saturation': 0.45 }), 'raster-fade-duration': 300 }
         // local z0–3 (over-zoomed underneath at higher zoom, so a GIBS tile still loading never shows as a grey square)
         mp.addSource(`gibs-${k}-local`, { type: 'raster', tiles: [LOCAL[k]], tileSize: 256, maxzoom: LOCAL_MAXZ, attribution: 'Imagery: NASA GIBS (VIIRS Black Marble · Blue Marble)' })
         mp.addLayer({ id: `gibs-${k}-local`, type: 'raster', source: `gibs-${k}-local`, layout: { visibility: 'none' }, paint }, firstLine)
@@ -236,6 +236,10 @@ export default function GlobeTimelapse({ docs, live }: Props) {
     for (const id of ['hex-fill', 'hex6-fill']) if (mp.getLayer(id)) {
       mp.setPaintProperty(id, 'fill-outline-color', gstyle === 'day' ? '#0A0E14' : 'rgba(0,0,0,0)')
     }
+    // #89: on the bright Day imagery the fire glow is a little stronger so hexagons stay clearly visible
+    if (mp.getLayer('hex-glow')) mp.setPaintProperty('hex-glow', 'circle-opacity', ['*', gstyle === 'day' ? 1 : 0.75, ['get', 'a']])
+    if (mp.getLayer('small-dot')) mp.setPaintProperty('small-dot', 'circle-opacity', gstyle === 'day' ? 1 : 0.85)
+    for (const id of ['hex-fill', 'hex6-fill']) if (mp.getLayer(id)) mp.setPaintProperty(id, 'fill-opacity', ['interpolate', ['linear'], ['get', 't'], 0, gstyle === 'day' ? 0.8 : 0.6, 1, gstyle === 'day' ? 1 : 0.95])
     try { localStorage.setItem('fr.globeStyle', gstyle) } catch { /* private mode */ }
   }, [ready, gstyle])
 
