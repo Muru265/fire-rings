@@ -93,3 +93,31 @@ input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; ba
 
 /* P1.6 starfield canvas */
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* P1.8 paper + slides */
+.md > * + * { margin-top: 0.9em; }
+.md h2 { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; margin-top: 1.6em; color: var(--text); }
+.md h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-top: 1.2em; }
+.md p, .md li { color: var(--text-muted); line-height: 1.65; }
+.md ul { list-style: disc; padding-left: 1.3em; } .md ol { list-style: decimal; padding-left: 1.3em; }
+.md li + li { margin-top: 0.3em; }
+.md blockquote { border-left: 3px solid var(--accent); padding: 0.6em 1em; background: var(--surface-2); border-radius: 0 8px 8px 0; color: var(--text); }
+.md blockquote, .md blockquote * { color: var(--text); }
+.md-table { width: 100%; font-size: 0.9rem; border-collapse: collapse; }
+.md-table th { text-align: left; color: var(--text-faint); font-weight: 500; padding: 6px 10px 6px 0; }
+.md-table td { border-top: 1px solid var(--border); padding: 6px 10px 6px 0; color: var(--text-muted); }
+.md-figure { margin: 1.4em 0; }
+.slide-md h1 { font-family: var(--font-display); font-size: clamp(22px, 3.4vw, 44px); font-weight: 700; line-height: 1.1; color: var(--text); }
+.slide-md p, .slide-md li { font-size: clamp(12px, 1.45vw, 19px); color: var(--text-muted); }
+.slide-md strong { color: var(--text); }
+.slides-stage:fullscreen { display: flex; align-items: center; justify-content: center; padding: 2vw; background: var(--bg); }
+.slides-stage:fullscreen .slide { max-width: calc(96vh * 16 / 9); }
+@media print {
+  header, footer, .no-print, .stars { display: none !important; }
+  body { background: var(--bg) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { padding: 0 !important; }
+  .paper .card { break-inside: auto; border: none; }
+  .md-figure, .md-table, .md blockquote { break-inside: avoid; }
+  .slides-print .slide { break-after: page; border-radius: 0; border: none; }
+  .slides-print > :last-child .slide, .slides-print > .slide:last-child { break-after: auto; }
+}

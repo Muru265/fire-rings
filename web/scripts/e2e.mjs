@@ -221,6 +221,19 @@ try {
     await pg.close()
   }
 
+  // P1.8 slides: ←/→ keys, counter, hidden presenter notes; paper + hero links
+  await page.goto(`http://localhost:${PORT}/slides`, { waitUntil: 'load' })
+  await page.getByTestId('slide-counter').waitFor({ timeout: 15000 })
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight')
+  check('slides: → moves to slide 3', (await page.getByTestId('slide-counter').innerText()).startsWith('3 /'))
+  await page.keyboard.press('ArrowLeft')
+  check('slides: ← goes back', (await page.getByTestId('slide-counter').innerText()).startsWith('2 /'))
+  check('slides: notes hidden by default', (await page.getByTestId('slide-notes').count()) === 0)
+  await page.keyboard.press('n')
+  check('slides: N shows presenter notes', await page.getByTestId('slide-notes').isVisible())
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
+  check('home: paper / slides / how it works links', (await page.getByTestId('hero-docs').locator('a').count()) === 3)
+
   // QA #69: on phones the globe is not hidden behind the hero text
   for (const w of [360, 430]) {
     const ph = await browser.newPage({ viewport: { width: w, height: 900 } })

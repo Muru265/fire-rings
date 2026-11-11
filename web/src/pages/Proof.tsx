@@ -14,6 +14,7 @@ import { useWidth } from '../lib/useWidth'
 import { calibrationSummary } from '../lib/calibration'
 import Help from '../components/Help'
 import WatchProof from '../components/WatchProof'
+import links from '../../content/links.json'
 
 const C_HARM = '#D97706'
 const C_MODIS = '#3B8FCC'
@@ -36,6 +37,7 @@ export default function Proof() {
       <header className="max-w-3xl">
         <p className="eyebrow">Validation</p>
         <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">How we know it works</h1>
+        <p className="mt-2 text-sm" data-testid="doc-links"><Link to={links.paper}>Read the paper</Link> · <Link to={links.slides}>View the slides</Link></p>
         <p className="mt-4 text-muted">
           VIIRS is converted into MODIS-equivalent fire-days using ratios fitted only on <strong className="text-text">July 2012 – December 2019</strong>,
           when both satellite families flew stable orbits. Every number below comes from{' '}

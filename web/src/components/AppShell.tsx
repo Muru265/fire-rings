@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import Stars from './Stars'
+import links from '../../content/links.json'
 
 const NAV = [
   { to: '/r/punjab', label: 'Explore', match: '/r/' },
@@ -79,6 +80,7 @@ export default function AppShell() {
       <footer className="relative z-[1] border-t border-border bg-bg/70">
         <div className="mx-auto max-w-[1440px] px-4 py-6 text-xs text-faint sm:px-6">
           Active-fire data: NASA FIRMS (MODIS C6.1, VIIRS 375 m S-NPP / NOAA-20 / NOAA-21). NASA Space Apps 2026 · Port Louis.
+          {' '}· <Link to={links.paper}>Paper</Link> · <Link to={links.slides}>Slides</Link> · <Link to="/data#api-h">Open API</Link> · <Link to="/use-cases">Use Cases</Link>
         </div>
       </footer>
     </div>

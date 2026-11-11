@@ -1,0 +1,7 @@
+{
+  "_comment": "Where the 'Read the paper' / 'View the slides' buttons point. Swap to your own files (e.g. /my-paper.pdf placed in web/public/) any time.",
+  "paper": "/paper",
+  "slides": "/slides",
+  "paper_pdf": "/fire-rings-paper.pdf",
+  "slides_pdf": "/fire-rings-slides.pdf"
+}

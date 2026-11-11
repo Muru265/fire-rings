@@ -60,6 +60,7 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 | Playwright | (dev) | Apache-2.0 | Screenshots + interaction smoke tests |
 | @google/genai (Google Gen AI SDK) | 2.32.0 | Apache-2.0 | Gemini function calling in web/api/ask.ts |
 | scrollama | 3.2.0 | MIT | Story mode scroll steps |
+| qrcode | 1.5.4 | MIT | QR code on the last slide (P1.8) |
 | tsx | (dev) | MIT | Running TypeScript scripts (AI eval, cache) |
 | gifenc, pngjs | (dev) | MIT | Seam-slider GIF for the README |
 

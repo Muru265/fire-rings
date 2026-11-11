@@ -251,6 +251,30 @@ try {
   await page.goto(base + '/data', { waitUntil: 'load' })
   await page.waitForTimeout(800)
   check('/data', 'data end', await page.locator('header').filter({ hasText: 'Harmonized Hotspot Record' }).innerText(), `Data through ${meta.data_end}`)
+  // ---- P1.7 Data page parity line, P1.1 range summary, P1.8 paper + slides ------------------------------------------
+  {
+    const par = J('api/hotspots_parity.json')
+    const t = await page.getByTestId('open-api').innerText()
+    check('/data', 'hotspots parity (API)', t, fmtInt(par.api)); check('/data', 'hotspots parity (record)', t, fmtInt(par.record)); check('/data', 'hotspots parity %', t, `${par.diff_pct}%`)
+    const se = J('regions/se_australia.json')
+    await page.goto(base + '/r/se_australia?from=2019-07&to=2020-03&mode=longterm', { waitUntil: 'load' })
+    await page.getByTestId('range-total').waitFor({ timeout: 15000 })
+    const sel = se.months.filter((r) => (r.y === 2019 && r.m >= 7) || (r.y === 2020 && r.m <= 3))
+    check('/r/se_australia range', 'total fire-days', await page.getByTestId('range-total').innerText(), fmtInt(sel.reduce((a, r) => a + r.H, 0)))
+    check('/r/se_australia range', 'typical', await page.getByTestId('range-typical').innerText(), fmtInt(sel.reduce((a, r) => a + se.climatology.median[r.m - 1], 0)))
+    const docs = Object.fromEntries(meta.regions.map(({ id }) => [id, J(`regions/${id}.json`)]))
+    const w = J('watch.json').backtest.totals
+    for (const [path, sel2] of [['/paper', '[data-testid="paper"]'], ['/slides?print=1', '[data-testid="slides-print"]']]) {
+      await page.goto(base + path, { waitUntil: 'load' })
+      await page.locator(sel2).waitFor({ timeout: 20000 }); await page.waitForTimeout(800)
+      const txt = await page.locator('main').innerText()
+      check(path, 'no missing placeholder', txt.includes('⟨missing') ? 'missing' : 'ok', 'ok')
+      for (const id of ['punjab', 'madagascar', 'se_australia']) check(path, `${id} V1 error`, txt, `${nf1.format(docs[id].validation.loyo_err_pct)}%`)
+      check(path, 'Punjab raw step', txt, `${fmtInt(docs.punjab.validation.step_raw_pct)}%`)
+      check(path, 'raw alerts', txt, String(w.raw_alerts)); check(path, 'harmonized alerts', txt, String(w.harmonized_alerts))
+      check(path, 'Black Summer rank', txt, `#${docs.se_australia.validation.v9.black_summer_rank_harmonized} of ${docs.se_australia.validation.v9.n_seasons}`)
+    }
+  }
 } catch (e) {
   results.push({ page: '?', what: 'exception', expected: '', ok: false, shown: String(e.message).slice(0, 200) })
 } finally {

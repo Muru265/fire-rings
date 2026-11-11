@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import links from '../../content/links.json'
 import MiniRings from '../components/MiniRings'
 import Help from '../components/Help'
 import SensorTimeline from '../components/SensorTimeline'
@@ -38,6 +39,11 @@ export default function Landing() {
           <div className="mt-5 flex flex-wrap gap-3 lg:mt-7">
             <Link to="/r/punjab" className="rounded-sm bg-accent px-5 py-2.5 text-sm font-semibold text-bg no-underline hover:brightness-110">Explore a region</Link>
             <Link to="/story" className="rounded-sm border border-border-strong bg-bg/60 px-5 py-2.5 text-sm font-semibold text-text no-underline hover:bg-surface-2">Watch the stories</Link>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm" data-testid="hero-docs">
+            <Link to={links.paper}>Read the paper →</Link>
+            <Link to={links.slides}>View the slides →</Link>
+            <Link to="/proof">How it works →</Link>
           </div>
         </div>
         <div className="relative h-[560px] sm:h-[600px] lg:absolute lg:inset-0 lg:left-[28%] lg:h-auto" data-testid="hero-globe">

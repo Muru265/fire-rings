@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useJson, useMeta } from '../lib/api'
 import { fmtInt } from '../lib/format'
 import Help from '../components/Help'
+import links from '../../content/links.json'
 
 const REPO = 'https://github.com/Muru265/fire-rings'
 const SITE = 'https://fire-rings.vercel.app'
@@ -73,6 +75,7 @@ export default function Data() {
       <header className="max-w-3xl">
         <p className="eyebrow">Open data</p>
         <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">Fire Rings Harmonized Hotspot Record v1.0<Help id="data-page" /></h1>
+        <p className="mt-2 text-sm" data-testid="doc-links"><Link to={links.paper}>Read the paper</Link> · <Link to={links.slides}>View the slides</Link></p>
         <p className="mt-4 text-muted">Open, versioned, citable. 25 years of MODIS and VIIRS active-fire detections in one consistent monthly unit, with uncertainty, for anyone to build on.</p>
         {meta.status === 'ready' && (
           <p className="num mt-3 text-xs text-faint">Data through {meta.data.data_end} · generated {meta.data.generated} · {meta.data.regions.length} regions · version {meta.data.version}</p>
