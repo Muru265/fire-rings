@@ -4,12 +4,103 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
-## Round 3 (11 Nov) — running log (P1 main app → P2 companion + control room)
+## Summary for Muru — Round 3 (11 Nov): main app P1 + companion apps + control room
+
+**In one line:** everything in the brief is done and pushed. The long-term (harmonized) numbers did not change: the snapshot test is green. The companion site is live at **https://fire-rings-apps.vercel.app**: it deployed on the first push, so the /apps/ fallback wasn't needed.
+
+**Done, by item**
+- **P1.1 Date range.** On Explore, pick From/To months (the link keeps them: `?from=2019-07&to=2020-03`). The summary card shows:
+  - total fire-days
+  - typical for the same months
+  - busiest month
+  - rank among the same months in other years (up to 12 months)
+  - Months outside the range fade on the rings, calendar and annual bars, and CSV/PNG cover only the range. It works in Long-term and High detail and with a box. Black Summer, Jul 2019–Mar 2020, ranks 1st of 23.
+- **P1.2 Hotspot CSV for any search.** `/api/hotspots` gets NASA FIRMS data for up to 31 days and applies the same filters as the record.
+  - Download buttons: in the month drawer for any month, and on the range card for a single month.
+  - The same request is cached and never calls NASA twice. Each address gets a fixed number of downloads, and when NASA is busy the page shows a calm message.
+  - Demo months are static files: Punjab Oct 2016, SE Australia Dec 2019, Madagascar Sep 2019.
+  - Checked against the record: 48,666 vs 48,595 detections (0.15%).
+- **P1.3 Map dots for any month.** Zoom in (level 9+) and the ▲ VIIRS / ● MODIS dots load from the API, or from the static files for demo months.
+- **P1.4 Fixes.**
+  - #72 Briefings state facts and caveats only: a new check rejects opinion or advice, and the saved briefings were regenerated.
+  - #73 Numbers inside AI text read "15,346"; years are never written as "2,015".
+  - #74 The trace shows each line once (×N), briefings run in parallel, and the saved-briefing fallback says why it was used.
+  - #75 The status badge names the month, e.g. "Unusually low (Nov so far, Oct)".
+- **P1.5 Globe.**
+  - Dark / Night lights / Day switcher using NASA GIBS imagery, remembered per visitor.
+  - Default stays **Dark**, because city lights could look like fire. Night lights are shown in grey.
+  - Atmosphere glow added.
+  - The play panel now sits under the globe and the zoom is fitted to the space, so they never overlap at 1280–1920 px (e2e check).
+- **P1.6 Star background.** Subtle twinkling, paused when the tab is hidden, a still frame when reduced motion is on, and always behind the cards.
+- **P1.7 Open API.**
+  - CORS is open on `/data/v1/*`, `/api/hotspots`, `/api/live` and `/api/health?scope=data`; `/api/ask` stays same-origin.
+  - New files:
+    - `api/series` (raw vs harmonized)
+    - `api/projection` (tested "what to expect")
+    - `api/power` (NASA POWER rain and temperature)
+    - `api/reunion` (volcano check)
+    - `api/index.json`
+  - The Data page lists every endpoint with an example call.
+- **P1.8 Paper + slides.**
+  - `/paper` and `/slides`: every number is filled live from the JSON, and a missing one shows as ⟨missing⟩, which the tests catch.
+  - The figures are the app's real charts.
+  - The slides support ←/→, F (fullscreen) and N (presenter notes), plus a QR code.
+  - PDFs are in `web/public/`; run `npm run pdf` after editing.
+  - Edit the text in `web/content/paper.md` and `slides.md`. Point the buttons at your own PDFs in `web/content/links.json`.
+- **P2.1 Companion "Fire Rings Apps"** (repo `Muru265/fire-rings-apps`). Six apps that only call the Fire Rings API and public NASA services:
+  - each page has an API inspector, an `?embed=1` mode that posts its last call time to the control room, and the star background
+  - framing is allowed only for fire-rings.vercel.app (plus localhost)
+  - Playwright tests: every page in normal and embed mode, at 360 px.
+- **P2.2 Use Cases control room** (`/use-cases`, now in the nav). Six live windows labelled "CAM n · ● LIVE · last call time ✓", with expand and open-full-app buttons. A screenshot shows if a window can't load, and phones get a list of cards. Guide entry added.
+- **Volcano check: Piton de la Fournaise.** Eruption dates come from the **Smithsonian Global Volcanism Program** (30 eruption periods since 2000, each linked).
+  - MODIS saw **27 of 28** eruptions in its period; it missed the one-day May 2016 event.
+  - VIIRS saw **17 of 17**.
+  - Median first-detection lag: 0 days.
+  - Heat in the 30 days before an eruption: 2 of 28 (MODIS) and 6 of 17 (VIIRS), stated as found, not as a warning signal.
+  - The result is on the Proof card, in the paper and slides, and in companion app 5.
+
+**Skipped or changed, and why**
+- **No persistent hotspot cache.** Vercel KV/Blob isn't connected, so the cache lives in memory per warm instance plus the CDN.
+- **Réunion covers only the windows around each eruption** (start −35 days to end +5 days), not all 26 years. One FIRMS call costs about 15 transactions; my first full download hit the key's 5,000/10 min limit for a few minutes, and the live layer may have answered "busy" during that time. Days outside the windows are blank, never zero.
+- **FIRMS allows at most 5 days per call** (not 10), so a 31-day download takes 7 calls per satellite.
+- **No 0.7 km² Mauritius hexagons.** Mauritius already shows every detection as a dot.
+- **Default globe is Dark**, not Night lights (see P1.5).
+
+**Numbers that changed (before → after)**
+- Long-term H, lo and hi: **unchanged**.
+- Fire Watch statuses: unchanged. The saved briefings' wording changed (facts only); their numbers are the same.
+- Tests:
+  - pytest 74 → 92
+  - claims_check 159 → 184
+  - e2e 39 → 53
+  - new: hotspot tests (incl. the parity check) and companion tests
+
+**Muru to do**
+1. Optional: connect Vercel KV or Blob if you want the hotspot cache to survive restarts.
+2. Read the paper and slides drafts. Edit `web/content/*.md`, then run `npm run pdf` and commit.
+3. If you edit the companion, its tests run with `npm test` in `fire-rings-apps`.
+
+**What to check first**
+1. `/use-cases`: six windows go ● LIVE with a last-call time; click one, Expand, then "Open full app ↗".
+2. https://fire-rings-apps.vercel.app/volcano: the eruption table with GVP links, and 27/28 · 17/17.
+3. `/r/se_australia?from=2019-07&to=2020-03`: the range card says 1st of 23; download the CSV and check it starts Jul 2019.
+4. `/r/punjab`: click Oct 2016 → "Download this month's hotspots (CSV)" (demo file); then zoom the map in to see the dots.
+5. Any other month's hotspot download, on production (live NASA call): if NASA is busy, the calm message should appear.
+6. `/watch`: badges read "Unusually low (Nov so far, Oct)", and the briefings contain no advice.
+7. Home: switch the globe between Dark, Night lights and Day; the globe never sits under the play panel.
+8. `/paper` and `/slides` (press N for notes), plus both "Download PDF" buttons.
+9. `/data` → Open API table: try a few example links.
+10. Companion app 1 "What to expect" for Punjab, and app 3's insurance slider (raw-only payouts after 2012).
+11. Phone (360 px): the home globe is visible, and `/use-cases` shows the card list.
+12. `/proof` → "Ground-truth test: Piton de la Fournaise" card.
+
+## Round 3 (11 Nov) — running log
+- **P1.5, P1.6, P1.8, P2.1 (live), P2.2, Réunion: done** — details in the summary above. (P1 main app → P2 companion + control room)
 - **P1.1 ✅ date range** on Explore: From/To months (URL `?from=YYYY-MM&to=YYYY-MM`), summary card (total, typical = sum of monthly medians, busiest month, rank among the same months in other complete years when ≤12 months), range highlighted on rings/calendar/annual bars, CSV/PNG limited to the range, Guide entry, e2e. Black Summer Jul 2019–Mar 2020 ranks 1st of 23.
 - **P1.2 ✅ `/api/hotspots`**: FIRMS Area API (SP where processed, NRT after; MODIS + VIIRS as in the record, `satellites=all` adds NOAA-20/21), the record's filters, ≤31 days. Decision: FIRMS now allows **≤5 days per call** (API answered "Expects [1..5]"), so 31 days = 7 calls per source. Cache: in-memory per warm instance + CDN `s-maxage` (7 days for SP-only ranges, 30 min with NRT); Vercel KV/Blob is not connected (needs Muru's account) so no persistent cache. Per-IP 30 uncached/10 min, ≤300 FIRMS calls/10 min/instance, calm 503 "busy" message. Demo months are static files made from the record (Punjab Oct 2016, SE Australia Dec 2019, Madagascar Sep 2019). Parity vs record, Punjab Oct 2016: 48,666 vs 48,595 detections (0.15%). Production checked: miss → hit, 307 for demo months, CORS.
 - **P1.3 ✅ map dots** for any month at zoom ≥9 (visible 0.5° tiles, cached), demo months static. Res-8 Mauritius hexes skipped (Mauritius already shows every detection as a dot).
 - **P1.4 ✅** #72 opinion/advice rejection (briefings regenerated: no "ease strain…", no "planning agency responses"); #73 numbers in AI text formatted (years never); #74 trace lines shown once with ×N, region names on status lines, briefings in parallel, labelled fallback with reason; #75 badge "Unusually low (Nov so far, Oct)".
-- **P1.7 ✅ (Réunion pending)** CORS on `/data/v1/*` + `/api/hotspots|live|health`; `api/series`, `api/projection` (backtest), `api/power` (NASA POWER, 9 points/region), `api/index.json`; Data page lists every endpoint.
+- **P1.7 ✅** CORS on `/data/v1/*` + `/api/hotspots|live|health`; `api/series`, `api/projection` (backtest), `api/power` (NASA POWER, 9 points/region), `api/index.json`; Data page lists every endpoint.
   - ⚠ **FIRMS budget incident**: one Area-API call costs ~15 transactions. The first full Réunion download hit the 5,000/10 min key limit for a few minutes (the live layer/hotspots would have answered "busy" meanwhile). Decision: Réunion downloads only the windows around each GVP eruption (start −35 d → end +5 d), one call every 6 s (~30% of the budget).
   - Eruption dates: **Smithsonian GVP** VOTW Holocene eruptions (volcano 233020), 30 eruption periods since 2000, each with its source link.
 
