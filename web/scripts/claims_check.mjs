@@ -1,7 +1,7 @@
 // Claims check: every number shown in headlines, KPI cards, gauges, validation cards, the globe panel and the Proof
 // timing card must match the published JSON (same rounding as the app). Exits 1 on any mismatch.
 // Usage: npm run build && node scripts/claims_check.mjs [baseUrl]   (starts `vite preview` unless a URL is given)
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -272,6 +272,8 @@ try {
       for (const id of ['punjab', 'madagascar', 'se_australia']) check(path, `${id} V1 error`, txt, `${nf1.format(docs[id].validation.loyo_err_pct)}%`)
       check(path, 'Punjab raw step', txt, `${fmtInt(docs.punjab.validation.step_raw_pct)}%`)
       check(path, 'raw alerts', txt, String(w.raw_alerts)); check(path, 'harmonized alerts', txt, String(w.harmonized_alerts))
+      const ru = J('api/reunion.json').summary
+      check(path, 'Réunion MODIS detected', txt, `${ru.modis.detected}`); check(path, 'Réunion VIIRS detected', txt, `${ru.viirs.detected}`)
       check(path, 'Black Summer rank', txt, `#${docs.se_australia.validation.v9.black_summer_rank_harmonized} of ${docs.se_australia.validation.v9.n_seasons}`)
     }
   }
@@ -279,7 +281,7 @@ try {
   results.push({ page: '?', what: 'exception', expected: '', ok: false, shown: String(e.message).slice(0, 200) })
 } finally {
   await browser.close()
-  if (server) { server.kill(); if (process.platform === 'win32') spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' }) }
+  if (server) { if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' }); server.kill() }
 }
 const bad = results.filter((r) => !r.ok)
 for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.page.padEnd(16)} ${r.what}${r.ok ? '' : `\n      expected "${r.expected}" in: ${r.shown}`}`)

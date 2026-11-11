@@ -1,5 +1,5 @@
 // QA #9: every chart/section on the site has a Guide entry, every ⓘ deep-links to an existing entry, and search works.
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -99,7 +99,7 @@ try {
 } finally {
   if (errors.length) { console.log('page errors:', errors); failed = true }
   await browser.close()
+  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   server.kill()
-  if (process.platform === 'win32') spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   process.exitCode = failed ? 1 : 0
 }

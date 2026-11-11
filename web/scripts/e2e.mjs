@@ -1,6 +1,6 @@
 // Interaction smoke test: keyboard-open month drawer, apply a lat/lon box, anomaly mode, seam frames.
 // Saves screenshots to ../docs/screens/e2e_*.png and fails on console errors.
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -280,7 +280,7 @@ try {
 } finally {
   if (errors.length) { console.log('console errors:', errors); failed = true }
   await browser.close()
+  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   server.kill()
-  if (process.platform === 'win32') spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   process.exitCode = failed ? 1 : 0
 }

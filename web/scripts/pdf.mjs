@@ -1,6 +1,6 @@
 // P1.8 PDFs of the paper and the slides (Playwright print) → public/fire-rings-paper.pdf, public/fire-rings-slides.pdf.
 // Run locally and commit the files (Vercel's build has no Chromium). Usage: npm run build && npm run pdf
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -28,6 +28,6 @@ try {
   console.log('saved public/fire-rings-slides.pdf')
 } finally {
   await browser.close()
+  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   server.kill()
-  if (process.platform === 'win32') spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
 }

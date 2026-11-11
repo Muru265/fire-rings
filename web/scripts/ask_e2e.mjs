@@ -1,6 +1,6 @@
 // QA #33: every chip × region × style answers on /ask even when the live AI is unavailable (local preview has no
 // /api, so this exercises the saved-answer fallback). Checks the answer card appears and its style badge matches (#52).
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -49,8 +49,8 @@ try {
   }
 } finally {
   await browser.close()
+  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
   server.kill()
-  if (process.platform === 'win32') spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' })
 }
 console.log(`\n${n - fail}/${n} chip × region × style answered`)
 process.exitCode = fail ? 1 : 0
