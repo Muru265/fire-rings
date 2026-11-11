@@ -196,6 +196,31 @@ try {
     await ph.close()
   }
 
+  // P1.5: the globe's box never runs under the playback panel (1280–1920), style switcher works and is remembered
+  for (const w of [1280, 1440, 1920]) {
+    const pg = await browser.newPage({ viewport: { width: w, height: w === 1920 ? 1080 : 800 } })
+    await pg.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
+    await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 })
+    await pg.waitForTimeout(1500)
+    const [mapBottom, panelTop, globeR] = await pg.evaluate(() => {
+      const mp = window.__frGlobe; const c = mp.getCanvas().getBoundingClientRect(); const p = document.querySelector('[data-testid="globe-panel"]').getBoundingClientRect()
+      const r = (512 * 2 ** mp.getZoom()) / Math.PI / 2
+      return [c.top + c.height / 2 + r, p.top, r]
+    })
+    check(`${w}px: globe (r=${Math.round(globeR)} px) ends above the playback panel`, mapBottom <= panelTop + 2, `${Math.round(mapBottom)} vs ${Math.round(panelTop)}`)
+    if (w === 1440) {
+      for (const k of ['Night lights', 'Day', 'Dark']) {
+        await pg.getByTestId('globe-style').getByRole('button', { name: k }).click(); await pg.waitForTimeout(2500)
+        await pg.screenshot({ path: resolve(out, `e2e_globe_${k.split(' ')[0].toLowerCase()}.png`) })
+      }
+      await pg.getByTestId('globe-style').getByRole('button', { name: 'Day' }).click()
+      await pg.reload({ waitUntil: 'load' }); await pg.waitForSelector('[data-testid="globe-style"]', { timeout: 20000 })
+      check('globe style remembered per visitor', (await pg.getByTestId('globe-style').getByRole('button', { name: 'Day' }).getAttribute('aria-pressed')) === 'true')
+      await pg.getByTestId('globe-style').getByRole('button', { name: 'Dark' }).click()
+    }
+    await pg.close()
+  }
+
   // QA #69: on phones the globe is not hidden behind the hero text
   for (const w of [360, 430]) {
     const ph = await browser.newPage({ viewport: { width: w, height: 900 } })

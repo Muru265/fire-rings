@@ -18,6 +18,20 @@ setWorkerUrl(workerUrl)
 
 interface Props { docs: RegionDoc[]; live?: Record<string, LiveData | null> }
 
+// P1.5 basemaps from NASA GIBS (no key). Layer names + tile templates checked in the GIBS WMTS GetCapabilities (11 Nov 2026):
+// VIIRS_Black_Marble (2016 composite) and BlueMarble_NextGeneration, EPSG:3857 GoogleMapsCompatible_Level8.
+type GlobeStyle = 'dark' | 'night' | 'day'
+const GIBS: Record<Exclude<GlobeStyle, 'dark'>, string> = {
+  night: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png',
+  day: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
+}
+const STYLE_LABEL: Record<GlobeStyle, string> = { dark: 'Dark', night: 'Night lights', day: 'Day' }
+function storedStyle(): GlobeStyle {
+  try { const v = localStorage.getItem('fr.globeStyle'); return v === 'night' || v === 'day' ? v : 'dark' } catch { return 'dark' }
+}
+/** Zoom at which the globe fills ~88% of the smaller side of its box (globe diameter ≈ 512·2^z/π px). */
+const fitZoom = (w: number, h: number) => Math.max(0.3, Math.min(2.2, Math.log2((0.88 * Math.min(w, h) * Math.PI) / 512)))
+
 function LivePanelLine({ docs, live }: { docs: RegionDoc[]; live: Record<string, LiveData | null> }) {
   const ok = docs.map((d) => live[d.id]).filter((l): l is LiveData => !!l?.ok)
   if (!Object.values(live).some(Boolean)) return <div className="mt-1.5 text-[11px] text-faint">LIVE (raw detections, last 72 h) · checking NASA FIRMS…</div>
@@ -103,22 +117,37 @@ export default function GlobeTimelapse({ docs, live }: Props) {
 
   const globe = useGlobe(ready)
   const [fine, setFine] = useState(false)
+  const [gstyle, setGstyle] = useState<GlobeStyle>(storedStyle)
   const maxH = useMemo(() => Object.fromEntries(docs.map((d) => [d.id, Math.max(...d.months.map((r) => r.H ?? 0)) || 1])), [docs])
 
   useEffect(() => {
     if (!el.current) return
     const mp = new MlMap({
       container: el.current, style: 'https://tiles.openfreemap.org/styles/dark', center: [70, -5],
-      zoom: window.innerWidth < 640 ? 0.9 : window.innerWidth < 1024 ? 1.3 : 1.75,
+      // P1.5: zoom fitted to the map box, so the globe never runs under the playback panel
+      zoom: fitZoom(el.current.clientWidth, el.current.clientHeight),
       attributionControl: { compact: true }, interactive: true,
     })
     map.current = mp
     ;(window as unknown as { __frGlobe?: MlMap }).__frGlobe = mp // for screenshot checks (zoom tests)
     mp.on('style.load', () => {
       mp.setProjection({ type: 'globe' })
+      // P1.5: soft atmosphere glow at the globe's edge
+      try {
+        mp.setSky({ 'sky-color': '#0A0E14', 'horizon-color': '#1E3A5F', 'fog-color': '#0A0E14', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.9,
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 4, 0.9, 6, 0] as never })
+      } catch { /* older renderer: no glow */ }
     })
     mp.on('load', () => {
       tidyBasemap(mp, { borderOpacity: 0.35 })
+      // NASA GIBS rasters above the style's land/water fills, below borders, labels and the fire layers
+      const firstLine = mp.getStyle().layers.find((l) => l.type === 'line' || l.type === 'symbol')?.id
+      for (const k of ['night', 'day'] as const) {
+        mp.addSource(`gibs-${k}`, { type: 'raster', tiles: [GIBS[k]], tileSize: 256, maxzoom: 8, attribution: 'Imagery: NASA GIBS (VIIRS Black Marble · Blue Marble)' })
+        mp.addLayer({ id: `gibs-${k}`, type: 'raster', source: `gibs-${k}`, layout: { visibility: 'none' },
+          // night lights in grey so city lights never look like fire; day imagery dimmed so the hexagons keep contrast
+          paint: k === 'night' ? { 'raster-saturation': -1, 'raster-brightness-max': 0.7, 'raster-contrast': 0.1 } : { 'raster-brightness-max': 0.62, 'raster-saturation': -0.25 } }, firstLine)
+      }
       // QA #1/#65/#70: real fire hexagons. Colour = relative to the region's own record (seasons breathe);
       // glow size = absolute fire-days on one global scale (tiny places stay tiny).
       mp.addSource('hex', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
@@ -171,6 +200,17 @@ export default function GlobeTimelapse({ docs, live }: Props) {
     raf = requestAnimationFrame(spin)
     return () => { cancelAnimationFrame(raf); mp.remove(); map.current = null }
   }, [reduced])
+
+  // P1.5 style switcher (remembered per visitor)
+  useEffect(() => {
+    const mp = map.current
+    if (!ready || !mp) return
+    for (const k of ['night', 'day'] as const) if (mp.getLayer(`gibs-${k}`)) mp.setLayoutProperty(`gibs-${k}`, 'visibility', gstyle === k ? 'visible' : 'none')
+    for (const id of ['hex-fill', 'hex6-fill']) if (mp.getLayer(id)) {
+      mp.setPaintProperty(id, 'fill-outline-color', gstyle === 'day' ? '#0A0E14' : 'rgba(0,0,0,0)')
+    }
+    try { localStorage.setItem('fr.globeStyle', gstyle) } catch { /* private mode */ }
+  }, [ready, gstyle])
 
   // draw current frame
   useEffect(() => {
@@ -250,9 +290,15 @@ export default function GlobeTimelapse({ docs, live }: Props) {
   return (
     <div className="relative flex h-full w-full flex-col">
       <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label="Globe showing monthly fire activity in the four hero regions" />
-      {/* QA #69: below large screens the panel sits under the globe instead of covering it */}
+        <div role="group" aria-label="Globe style" className="absolute top-3 right-3 z-10 flex rounded-sm border border-border bg-surface/85 p-0.5 text-[11px] backdrop-blur" data-testid="globe-style">
+          {(['dark', 'night', 'day'] as GlobeStyle[]).map((k) => (
+            <button key={k} onClick={() => setGstyle(k)} aria-pressed={gstyle === k}
+              className={`rounded-[6px] px-2.5 py-1 ${gstyle === k ? 'bg-surface-3 text-text' : 'text-muted hover:text-text'}`}>{STYLE_LABEL[k]}</button>
+          ))}
+        </div>
+      {/* QA #69 + P1.5: the panel always sits under the globe's box (never over it) */}
       {f && (
-        <div className="z-10 mx-3 mb-3 rounded-card border border-border bg-surface/85 px-4 py-3 backdrop-blur lg:absolute lg:inset-x-3 lg:bottom-9 lg:mx-auto lg:mb-0 lg:max-w-[760px]">
+        <div className="z-10 mx-3 mb-3 rounded-card border border-border bg-surface/85 px-4 py-3 backdrop-blur lg:mx-auto lg:w-[calc(100%-24px)] lg:max-w-[760px]" data-testid="globe-panel">
           <div className="flex items-center gap-3">
             <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play 2001 to 2026'}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-bg">{playing ? '❚❚' : '▶'}</button>
@@ -270,7 +316,7 @@ export default function GlobeTimelapse({ docs, live }: Props) {
               const r = d.months.find((x) => x.y === f.y && x.m === f.m)
               return <span key={d.id}>{d.name.split(' (')[0]}: <span className="num text-text">{r?.H != null ? fmtInt(r.H) : '—'}</span></span>
             })}
-            <span className="text-faint" data-testid="globe-caption">fire-days (MODIS-equivalent) · colour = busy vs that region’s own record · glow size = real number of fire-days (tiny places stay tiny) · hover for counts · zoom in for ~36 km² hexagons · hero regions only</span>
+            <span className="text-faint" data-testid="globe-caption">fire-days (MODIS-equivalent) · colour = busy vs that region’s own record · glow size = real number of fire-days (tiny places stay tiny) · hover for counts · zoom in for ~36 km² hexagons · hero regions only{gstyle !== 'dark' ? ' · basemap: NASA GIBS' : ''}</span>
           </div>
           {live && <LivePanelLine docs={docs} live={live} />}
         </div>
