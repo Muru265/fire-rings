@@ -244,7 +244,9 @@ try {
     const ph = await browser.newPage({ viewport: { width: 360, height: 800 } })
     await ph.goto(`http://localhost:${PORT}/use-cases`, { waitUntil: 'load' })
     await ph.getByTestId('usecase-list').waitFor({ timeout: 10000 })
-    check('use-cases 360px: card list with 6 screenshots', (await ph.locator('[data-testid="usecase-list"] img').count()) === 6)
+    await ph.getByTestId('usecase-answer').last().filter({ hasNotText: 'Loading' }).waitFor({ timeout: 10000 }).catch(() => {})
+    const cards = await ph.getByTestId('usecase-card').evaluateAll((els) => els.map((e) => ({ svg: !!e.querySelector('svg'), ans: e.querySelector('[data-testid="usecase-answer"]')?.textContent ?? '', bg: getComputedStyle(e).backgroundColor })))
+    check(`#92 use-cases 360px: 6 phone cards, each with its icon, own colour and an answer with numbers`, cards.length === 6 && cards.every((c) => c.svg && /\d/.test(c.ans) && !/Loading/.test(c.ans)) && new Set(cards.map((c) => c.bg)).size >= 5)
     await ph.close()
   }
 

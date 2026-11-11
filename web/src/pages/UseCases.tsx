@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Help from '../components/Help'
 import { COMPANION, COMPANION_APPS } from '../lib/companion'
+import { APP_ANSWERS } from '../lib/appAnswers'
+import { CalendarFlame, HazeCloud, Magnifier, Shield, TrafficLight, Volcano } from '../components/AppIcons'
 import type { CompanionApp } from '../lib/companion'
 import { useWidth } from '../lib/useWidth'
 
@@ -36,14 +38,7 @@ export default function UseCases() {
       </header>
       {phone ? (
         <ul className="space-y-4" data-testid="usecase-list">
-          {COMPANION_APPS.map((a) => (
-            <li key={a.page} className="card">
-              <p className="eyebrow">CAM {a.n} · {a.who}</p>
-              <h2 className="mt-1 font-display text-lg font-semibold">{a.title}</h2>
-              <img src={a.shot} alt={`Screenshot of ${a.title}`} loading="lazy" className="mt-3 w-full rounded-sm border border-border" />
-              <a href={`${COMPANION}${a.path}`} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-sm bg-accent px-3 py-1.5 text-sm font-semibold text-bg no-underline">Open app ↗</a>
-            </li>
-          ))}
+          {COMPANION_APPS.map((a) => <PhoneCard key={a.page} app={a} />)}
         </ul>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="usecase-grid">
@@ -53,6 +48,31 @@ export default function UseCases() {
       <p className="text-xs text-faint">The apps site imports no Fire Rings code: it only makes HTTP calls to fire-rings.vercel.app and public NASA services (each page has an API inspector). Windows load when they scroll into view; if one cannot load, a recent screenshot is shown instead.</p>
       {open && <Modal app={open} onClose={() => setOpen(null)} />}
     </div>
+  )
+}
+
+const ICON: Record<string, () => React.ReactElement> = {
+  expect: CalendarFlame, factcheck: Magnifier, insurance: Shield, smoke: HazeCloud, volcano: Volcano, land: () => <TrafficLight level={null} />,
+}
+
+/** #92 phone card: the app's own colours + icon + the answer it shows for its default region (from the published JSON). */
+function PhoneCard({ app: a }: { app: CompanionApp }) {
+  const [ans, setAns] = useState<string | null>(null)
+  const page = a.page
+  useEffect(() => { let alive = true; APP_ANSWERS[page]?.().then((t) => alive && setAns(t)).catch(() => alive && setAns(null)); return () => { alive = false } }, [page])
+  const Icon = ICON[a.page]
+  return (
+    <li className="rounded-[var(--radius)] border-2 p-4" style={{ background: a.bg, borderColor: a.color, color: a.fg }} data-testid="usecase-card" data-page={a.page}>
+      <div className="flex items-start gap-3">
+        <span className="h-14 w-14 shrink-0"><Icon /></span>
+        <div className="min-w-0">
+          <p className="font-mono text-[11px] tracking-[0.12em] uppercase opacity-90">CAM {a.n} · {a.title}</p>
+          <p className="mt-1 text-sm opacity-90">{a.q}</p>
+        </div>
+      </div>
+      <p className="mt-3 font-display text-lg leading-snug font-bold" data-testid="usecase-answer">{ans ?? 'Loading the answer from Fire Rings…'}</p>
+      <a href={`${COMPANION}${a.path}`} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-sm px-3 py-1.5 text-sm font-semibold no-underline" style={{ background: a.color, color: a.page === 'volcano' ? '#140C08' : '#FFFFFF' }}>Open app ↗</a>
+    </li>
   )
 }
 
