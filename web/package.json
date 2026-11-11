@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test:hotspots": "tsx scripts/hotspots_test.ts",
+    "test:format": "tsx scripts/format_test.ts",
     "pdf": "node scripts/pdf.mjs",
     "test:e2e": "node scripts/e2e.mjs && node scripts/claims_check.mjs && node scripts/ask_e2e.mjs && node scripts/guide_check.mjs",
     "screens": "node scripts/screens.mjs",

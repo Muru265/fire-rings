@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useJson, useMeta } from '../lib/api'
-import { fmtInt } from '../lib/format'
+import { fmtInt, pctDiff2sig } from '../lib/format'
 import Help from '../components/Help'
 import links from '../../content/links.json'
 
@@ -35,7 +35,7 @@ const DICT: [string, string, string][] = [
   ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius'],
   ['year, month', '—', 'Calendar month (local solar day = UTC + longitude/15 h)'],
   ['H', 'fire cell-days (MODIS-equivalent)', 'Harmonized monthly value. One fire cell-day = one H3 resolution-6 hexagon (~36 km²) with ≥1 kept detection on one solar day'],
-  ['V_native, V_lo, V_hi', 'fire cell-days (VIIRS native)', 'High detail (2012+): VIIRS 375 m fire cell-days as seen, S-NPP-equivalent (NOAA-20 × k′ after S-NPP ended), not converted to MODIS units. V_lo/V_hi = 5th/95th percentile of Poisson counting noise. H = k × V on these months'],
+  ['V_native, V_lo, V_hi', 'fire cell-days (VIIRS native)', 'High detail (2012+): VIIRS 375 m fire cell-days as seen, S-NPP-equivalent (NOAA-20 × k′ after S-NPP data delivery ceased on 2 Nov 2026), not converted to MODIS units. V_lo/V_hi = 5th/95th percentile of Poisson counting noise. H = k × V on these months'],
   ['H_lo, H_hi', 'fire cell-days', '5th and 95th percentiles of 500 year-block bootstrap draws (+ Poisson noise)'],
   ['raw_modis_celldays', 'fire cell-days', 'MODIS Terra ∪ Aqua cell-days, coverage-adjusted, no calibration'],
   ['raw_viirs_celldays', 'fire cell-days', 'VIIRS cell-days (S-NPP to Oct 2026, NOAA-20 from Nov 2026), coverage-adjusted, no calibration'],
@@ -149,7 +149,7 @@ export default function Data() {
           near-real-time after) for up to <strong>31 days</strong> and applies the record’s filters: low confidence dropped, FIRMS volcano/static/offshore types dropped,
           the known-static H3 mask and the region footprint. Parameters: <code className="num">region</code> and/or <code className="num">bbox=W,S,E,N</code> (free boxes up to 12° a side),
           <code className="num"> start</code>, <code className="num">end</code> (YYYY-MM-DD), <code className="num">satellites=record|all</code>, <code className="num">format=csv|json</code>.
-          Same query = no new NASA call (cached). If NASA’s service is busy you get HTTP 503 with a plain message. {par.status === 'ready' && <>Checked against the record: Punjab {par.data.start} to {par.data.end}, {fmtInt(par.data.api)} detections from the API vs {fmtInt(par.data.record)} in the record ({par.data.diff_pct}% difference).</>}</p>
+          Same query = no new NASA call (cached). If NASA’s service is busy you get HTTP 503 with a plain message. {par.status === 'ready' && <>Checked against the record: Punjab {par.data.start} to {par.data.end}, {fmtInt(par.data.api)} detections from the API vs {fmtInt(par.data.record)} in the record ({pctDiff2sig(par.data.api, par.data.record)}% difference).</>}</p>
         <pre className="num mt-3 overflow-x-auto rounded-sm border border-border bg-surface-2 p-4 text-xs text-text"><code>{`curl -s "${SITE}/api/hotspots?region=punjab&start=2020-11-01&end=2020-11-05" -o punjab.csv
 curl -s ${SITE}/data/v1/api/projection/punjab.json | jq '.current'
 curl -s ${SITE}/data/v1/regions/madagascar.json | jq '.latest | {y, m, value, ratio, pct}'`}</code></pre>

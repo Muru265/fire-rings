@@ -121,3 +121,6 @@ input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; ba
   .slides-print .slide { break-after: page; border-radius: 0; border: none; }
   .slides-print > :last-child .slide, .slides-print > .slide:last-child { break-after: auto; }
 }
+
+/* #81e/#87: paper + slide figures show chart + legend only */
+.figure-bare .fig-hide, .figure-bare [role="tooltip"], .figure-bare [data-help] { display: none !important; }

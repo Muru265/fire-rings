@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import Help from './Help'
+import { useFigure } from '../lib/figureCtx'
 
 export interface TableSpec {
   caption: string
@@ -15,6 +16,8 @@ export default function ChartCard({ title, subtitle, table, children, actions, i
   help?: string
 }) {
   const [asTable, setAsTable] = useState(false)
+  const bare = useFigure()
+  if (bare) return <div className="min-w-0" data-figure-chart={id}>{children}</div>
   return (
     <section className="card min-w-0" aria-labelledby={id ? `${id}-h` : undefined}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">

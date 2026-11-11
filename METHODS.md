@@ -13,7 +13,7 @@ NASA FIRMS active-fire detections, Archive Download (standard "SP" files) plus n
 |---|---|---|
 | Terra MODIS | MCD14 C6.1 (M-C61) | 2000-11 → |
 | Aqua MODIS | MCD14 C6.1 (M-C61) | 2002-07 → |
-| Suomi-NPP VIIRS | VNP14IMG 375 m (SV-C2) | 2012-01-20 → 2026-11-02 (end of mission) |
+| Suomi-NPP VIIRS | VNP14IMG 375 m (SV-C2) | 2012-01-20 → 2026-11-02 (data delivery ceased 2 Nov 2026; NOAA NESDIS, NASA Earthdata — see DATA_SOURCES.md) |
 | NOAA-20 VIIRS | VJ114IMG 375 m (J1V-C2) | 2018-04 → |
 | NOAA-21 VIIRS | VJ214IMG 375 m (J2V-C2) | 2023-03 → (cross-check only) |
 
@@ -32,8 +32,8 @@ country (India), so API rows are kept only inside the region's historical footpr
 detections in the downloaded files); this removed 4,869 of 13,713 rows (Pakistani Punjab). Exact duplicates of rows already
 in the downloaded NRT files are removed, and Punjab's record is extended to the last fetched day (per-region `data_end`).
 
-**S-NPP end-of-life check (`tools/snpp_endcheck.py`, `docs/snpp_endcheck.md`).** S-NPP stopped delivering data in early
-November 2026. We checked whether it degraded in its final months by comparing Aug–Oct 2026 MODIS-equivalent values from
+**S-NPP end-of-life check (`tools/snpp_endcheck.py`, `docs/snpp_endcheck.md`).** S-NPP data delivery to users ceased on
+2 Nov 2026 (NOAA NESDIS notice; NASA Earthdata transition page). We checked whether it degraded in its final months by comparing Aug–Oct 2026 MODIS-equivalent values from
 S-NPP (k·S-NPP), NOAA-20 (k·k′·N20) and NOAA-21 (k·k″·N21). In October 2026 they agree within about ±11 % in Punjab
 (392 / 438 / 368 fire-days) and ±4 % in Madagascar, so S-NPP is kept as the source through October 2026 and NOAA-20 takes
 over from November 2026 as planned.
@@ -89,7 +89,7 @@ ln k*_m = w·ln k_m + (1 − w)·ln k_pool,   w = ΣB_m / (ΣB_m + τ)
 - τ ∈ {10, 30, 100, 300} is chosen by **leave-one-year-out** Poisson deviance of monthly predictions.
 - A ratio of sums (not a regression) is used because counts are zero-heavy and skewed, and an intercept would invent fire.
 - **q** = MODIS ÷ Terra (Jul 2002 – Dec 2019) bridges the months before Aqua.
-- **k′** = S-NPP ÷ NOAA-20 (Apr 2018 – Jul 2026, both VIIRS on stable orbits) carries the record past the end of S-NPP.
+- **k′** = S-NPP ÷ NOAA-20 (Apr 2018 – Jul 2026, both VIIRS on stable orbits) carries the record past 2 Nov 2026, when S-NPP data delivery ceased.
 - **Fallback 1** ("pooled"): one region-wide ratio for all months. It is computed for every region and used only where
   it validates better than the monthly method (see §7).
 

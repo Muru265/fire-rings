@@ -14,7 +14,7 @@ All detections come from NASA FIRMS ([firms.modaps.eosdis.nasa.gov](https://firm
 |---|---|---|
 | Terra MODIS | MCD14 C6.1, ~1 km | 2001 → (Terra-only months Jan 2001 – Jun 2002, bridged by q) |
 | Aqua MODIS | MCD14 C6.1, ~1 km | 2002-07 → (MODIS = Terra ∪ Aqua) |
-| Suomi-NPP VIIRS | VNP14IMG, 375 m | 2012 → Oct 2026 (end of mission) |
+| Suomi-NPP VIIRS | VNP14IMG, 375 m | 2012 → Oct 2026 (data delivery ceased 2 Nov 2026) |
 | NOAA-20 VIIRS | VJ114IMG, 375 m | Nov 2026 → (bridged by k′) |
 | NOAA-21 VIIRS | VJ214IMG, 375 m | cross-check |
 
@@ -28,7 +28,7 @@ Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-se
 
 **Calibration window.** Per region and calendar month, k = (MODIS fire-days + 0.5) ÷ (S-NPP fire-days + 0.5) over **July 2012 – December 2019 only** — after 2020 Terra and Aqua drift to different overpass times, so later years are never used. Monthly ratios are shrunk on the log scale towards the region-wide ratio with weight w = B/(B+τ); τ is chosen by leave-one-year-out. VIIRS is scaled **down** to MODIS-equivalent; MODIS is never scaled up.
 
-**Bridges.** q = MODIS ÷ Terra (July 2002 – December 2019) covers the months before Aqua; k′ = S-NPP ÷ NOAA-20 (April 2018 – July 2026) carries the record past the end of S-NPP in November 2026.
+**Bridges.** q = MODIS ÷ Terra (July 2002 – December 2019) covers the months before Aqua; k′ = S-NPP ÷ NOAA-20 (April 2018 – July 2026) carries the record past November 2026, when S-NPP data delivery ceased (2 Nov 2026).
 
 **Uncertainty.** Calibration years are resampled 500 times (year blocks, with a Poisson draw for each month's count) and all ratios refitted; the 90% interval is the 5th–95th percentile of the draws. Months with a wide interval are hatched as "uncertain".
 
@@ -60,7 +60,7 @@ Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-se
 
 **Hotspots on demand.** The `/api/hotspots` endpoint re-applies the record's filters to NASA FIRMS Area-API data; for Punjab in October 2016 it returned {{parity.api}} detections versus {{parity.record}} in the record ({{parity.diff}}% difference).
 
-?reunion **Ground truth: Piton de la Fournaise.** Against the Smithsonian Global Volcanism Program's eruption list ({{reunion.n}} eruption periods since 2000), MODIS detected {{reunion.modis_detected}} of {{reunion.modis_n}} eruptions in its downloaded windows and VIIRS {{reunion.viirs_detected}} of {{reunion.viirs_n}}, with a median first-detection lag of {{reunion.lag_modis}} and {{reunion.lag_viirs}} days. Heat in the 30 days before an eruption (outside other eruptions): MODIS {{reunion.pre_modis}}, VIIRS {{reunion.pre_viirs}} eruptions — reported as found, not as a warning signal.
+?reunion **Ground truth: Piton de la Fournaise.** Against the Smithsonian Global Volcanism Program's eruption list ({{reunion.n}} eruption periods since 2000), MODIS detected {{reunion.modis_detected}} of {{reunion.modis_n}} eruptions in its downloaded windows and VIIRS {{reunion.viirs_detected}} of {{reunion.viirs_n}}, with {{reunion.lag_text}}. Heat in the 30 days before an eruption (outside other eruptions): MODIS {{reunion.pre_modis}}, VIIRS {{reunion.pre_viirs}} eruptions — reported as found, not as a warning signal.
 ?!reunion **Ground truth: Piton de la Fournaise.** The volcano check is being built from the Smithsonian Global Volcanism Program's eruption list; results will appear here when the data are published.
 
 ## 5. Applications
@@ -75,7 +75,7 @@ Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-se
 - Fire-days count heat detected at overpass times on ~36 km² cells — not burned area, damage or emissions. In Punjab, burning has reportedly shifted to late afternoon, after the satellite passes, so recent seasons may be undercounted.
 - Ratios are fitted on 2012–2019 and assumed stable; post-2020 MODIS orbit drift is monitored (V4) but not corrected.
 - Low-fire places (Mauritius) cannot be validated; the app says "too little fire to judge".
-- Months after July/August 2026 are near-real-time and provisional until NASA reprocesses them.
+- {{provisional}} are near-real-time months and provisional until NASA reprocesses them.
 - The projection tool uses only the month so far and 20 years of history; it is not a weather-based forecast.
 
 ## 7. Open data and reproducibility
@@ -91,4 +91,6 @@ The harmonized monthly record, calibration ratios and validation results are pub
 - NASA POWER (Prediction Of Worldwide Energy Resources). [power.larc.nasa.gov](https://power.larc.nasa.gov/)
 - NASA Global Imagery Browse Services (GIBS), [API documentation](https://nasa-gibs.github.io/gibs-api-docs/); NASA Worldview, [worldview.earthdata.nasa.gov](https://worldview.earthdata.nasa.gov/)
 - Global Volcanism Program, Smithsonian Institution. Piton de la Fournaise (233020), *Volcanoes of the World*. [volcano.si.edu](https://volcano.si.edu/volcano.cfm?vn=233020)
-- {{bs.source_name}}. [Link]({{bs.source_url}})
+- {{bs.source_name}}. [Ministerial statement: tabling the report of the Royal Commission (minister.homeaffairs.gov.au)]({{bs.source_url}})
+- NOAA NESDIS. Cessation of Suomi National Polar-orbiting Partnership (S-NPP) data to users. [nesdis.noaa.gov](https://www.nesdis.noaa.gov/news/cessation-of-suomi-national-polar-orbiting-partnership-s-npp-data-users-onafter-november-01-2026)
+- NASA Earthdata. Suomi NPP Transition Resources. [earthdata.nasa.gov](https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/suomi-npp/transition-resources)

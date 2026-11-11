@@ -89,7 +89,7 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
         </svg>
       </div>
       {/* readout below the plot: never covers axes or the hovered element (QA #13) */}
-      <p className="mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
+      <p className="fig-hide mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
         {hover != null ? (
           <>
             <span className="font-semibold text-text">{MONTHS[hover]}</span> · typical <span className="num text-text">{fmtInt(c.median[hover])}</span>

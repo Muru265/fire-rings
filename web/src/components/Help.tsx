@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { helpFor } from '../lib/glossary'
+import { useFigure } from '../lib/figureCtx'
 
 /** ⓘ next to a chart title, KPI or control: one-line explanation + "Learn more" deep link into /guide (QA #9). */
 export default function Help({ id, label }: { id: string; label?: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
   const h = helpFor(id)
+  const bare = useFigure()
   useEffect(() => {
     if (!open) return
     const close = (e: MouseEvent | KeyboardEvent) => {
@@ -16,7 +18,7 @@ export default function Help({ id, label }: { id: string; label?: string }) {
     document.addEventListener('keydown', close)
     return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', close) }
   }, [open])
-  if (!h) return null
+  if (!h || bare) return null
   return (
     <span ref={ref} className="relative inline-flex align-middle normal-case tracking-normal" data-help={id}>
       <button type="button" onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }} aria-expanded={open}

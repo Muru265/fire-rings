@@ -109,7 +109,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
           })}
         </svg>
       </div>
-      <p className="mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
+      <p className="fig-hide mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
         {hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> {unitOf(doc)}
           {hv.lo != null && <> · 90% range {fmtInt(hv.lo)}–{fmtInt(hv.hi)}</>}{hv.rankable === false && hv.terra_only_months ? ' · Terra only, not ranked' : ''}</> : 'Hover a year for its values.'}
       </p>

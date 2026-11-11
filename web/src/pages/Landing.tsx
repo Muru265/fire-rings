@@ -93,7 +93,7 @@ export default function Landing() {
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 id="sensors-h" className="font-display text-lg font-semibold">Five satellites, one record<Help id="satellite-timeline" /></h2>
-              <p className="mt-0.5 text-xs text-muted">MODIS is drifting and ending; Suomi-NPP's data stopped this month. Fire Rings calibrates VIIRS to MODIS while both were stable, then follows NOAA-20.</p>
+              <p className="mt-0.5 text-xs text-muted">MODIS is drifting and ending; Suomi-NPP data delivery ceased on 2 Nov 2026. Fire Rings calibrates VIIRS to MODIS while both were stable, then follows NOAA-20.</p>
             </div>
             <Link to="/proof" className="text-sm">The evidence →</Link>
           </div>

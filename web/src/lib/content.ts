@@ -2,14 +2,15 @@
 // A placeholder with no value renders as a visible "⟨missing: key⟩" (never a made-up number); claims_check fails on it.
 import { useEffect, useState } from 'react'
 import { fetchJson } from './api'
-import { fmtInt } from './format'
+import { fmt1, fmtInt, pctDiff2sig } from './format'
+import { provisionalSpan } from './provisional'
 import type { RegionDoc } from './types'
 import type { WatchDoc } from '../../api/_lib/watch'
 
 export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius'] as const
 export interface ContentData { values: Record<string, string>; docs: Record<string, RegionDoc>; watch: WatchDoc | null; reunion: boolean }
 
-const n1 = (v: number | null | undefined) => (v == null ? undefined : (Math.round(v * 10) / 10).toLocaleString('en-GB'))
+const n1 = (v: number | null | undefined) => (v == null ? undefined : fmt1(v))
 const n0 = (v: number | null | undefined) => (v == null ? undefined : fmtInt(v))
 
 interface ProjFile { months: { checkpoints: { better: string }[] }[] }
@@ -42,6 +43,7 @@ export async function loadContent(): Promise<ContentData> {
     read += d.quality?.rows_read ?? 0; kept += d.quality?.rows_kept ?? 0
   }
   set('rows_read', n0(read)); set('rows_kept', n0(kept))
+  set('provisional', provisionalSpan(docs[0]?.months ?? []) ?? undefined)
   const v9 = byId.se_australia?.validation?.v9 as { black_summer_rank_harmonized?: number; black_summer_rank_raw?: number; n_seasons?: number; known_event?: { source?: { url?: string; name?: string } } } | undefined
   set('bs.rank', v9?.black_summer_rank_harmonized != null ? String(v9.black_summer_rank_harmonized) : undefined)
   set('bs.rank_raw', v9?.black_summer_rank_raw != null ? String(v9.black_summer_rank_raw) : undefined)
@@ -53,7 +55,7 @@ export async function loadContent(): Promise<ContentData> {
     set('watch.raw_lows', String(t.raw_lows)); set('watch.harm_lows', String(t.harmonized_lows))
     set('watch.period', `${watch.backtest.period[0].slice(0, 4)}–${watch.backtest.period[1].slice(0, 4)}`)
   }
-  if (parity) { set('parity.api', n0(parity.api)); set('parity.record', n0(parity.record)); set('parity.diff', n1(parity.diff_pct)) }
+  if (parity) { set('parity.api', n0(parity.api)); set('parity.record', n0(parity.record)); set('parity.diff', pctDiff2sig(parity.api, parity.record)) }
   const projs = await Promise.all(REGION_IDS.map((id) => fetchJson<ProjFile>(`api/projection/${id}.json`).catch(() => null)))
   let wins = 0, cells = 0
   for (const p of projs) for (const m of p?.months ?? []) for (const c of m.checkpoints) { cells++; if (c.better === 'projection') wins++ }
@@ -66,6 +68,9 @@ export async function loadContent(): Promise<ContentData> {
     set('reunion.viirs_detected', String(s.viirs.detected)); set('reunion.viirs_n', String(s.viirs.eruptions_in_period))
     set('reunion.lag_modis', s.modis.median_lag_days != null ? String(s.modis.median_lag_days) : undefined)
     set('reunion.lag_viirs', s.viirs.median_lag_days != null ? String(s.viirs.median_lag_days) : undefined)
+    const [lm, lv] = [s.modis.median_lag_days, s.viirs.median_lag_days]
+    set('reunion.lag_text', lm == null || lv == null ? undefined : lm === lv ? `a median first-detection lag of ${lm} days for both sensors`
+      : `a median first-detection lag of ${lm} and ${lv} days (MODIS, VIIRS)`)
     set('reunion.pre_modis', `${s.modis.pre30_eruptions_with_detections} of ${s.modis.pre30_eruptions_tested}`)
     set('reunion.pre_viirs', `${s.viirs.pre30_eruptions_with_detections} of ${s.viirs.pre30_eruptions_tested}`)
     set('reunion.dd_modis', n0(s.both.detection_days_modis)); set('reunion.dd_viirs', n0(s.both.detection_days_viirs)); set('reunion.both', String(s.both.eruptions))

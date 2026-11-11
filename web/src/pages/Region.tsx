@@ -329,7 +329,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
               <dt className="text-faint">Through</dt><dd><span className="num">{new Date(regionDoc.data_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span> · Aug–Nov 2026 are NRT = quick-look data, replaced by NASA’s final data about 5 months later</dd>
               <dt className="text-faint">Unit</dt><dd>fire-day = one ~36 km² hexagon with at least one fire on one day ({detail ? 'VIIRS native 375 m, S-NPP-equivalent' : 'MODIS-equivalent'})</dd>
               <dt className="text-faint">Calibration</dt><dd>{detail
-                ? 'none — High detail shows VIIRS as seen; only NOAA-20 months (after S-NPP ended) use the VIIRS-to-VIIRS rate k′'
+                ? 'none — High detail shows VIIRS as seen; only NOAA-20 months (after S-NPP data delivery ceased, 2 Nov 2026) use the VIIRS-to-VIIRS rate k′'
                 : <>fitted Jul 2012 – Dec 2019 only · <CalibrationText doc={baseDoc} /></>}</dd>
               <dt className="text-faint">Baseline</dt><dd>“typical” = median of {regionDoc.baseline[0]}–{regionDoc.baseline[1]}{detail ? ' (10 VIIRS years: shorter, so wider uncertainty)' : ''}</dd>
               <dt className="text-faint">Mode</dt><dd>{detail ? 'High detail (2012–now, native VIIRS 375 m)' : 'Long-term (2001–now, MODIS-equivalent)'}</dd>

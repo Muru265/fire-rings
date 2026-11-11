@@ -54,7 +54,7 @@ export default function SensorTimeline({ compact }: { compact?: boolean }) {
         <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full" style={{ background: C.MODIS }} />MODIS (1 km)</span>
         <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full" style={{ background: C.VIIRS }} />VIIRS (375 m)</span>
         <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full" style={{ background: 'repeating-linear-gradient(45deg, rgba(255,255,255,.6) 0 1.5px, #3B8FCC 1.5px 4px)' }} />orbit drift</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: C.VIIRS }} />mission data ended</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: C.VIIRS }} />data delivery ended</span>
       </figcaption>
     </figure>
   )

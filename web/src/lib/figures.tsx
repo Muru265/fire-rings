@@ -4,9 +4,14 @@ import Qr from '../components/Qr'
 import SeasonalityChart from '../components/SeasonalityChart'
 import WatchProof from '../components/WatchProof'
 import type { ContentData } from './content'
+import { FigureCtx } from './figureCtx'
 
 /** The app's real charts, used as figures in the paper and slides (P1.8). */
 export function renderFigure(c: ContentData, name: string, arg: string | undefined, compact = false) {
+  return <FigureCtx.Provider value={true}><div className="figure-bare" data-figure={name}>{figureBody(c, name, arg, compact)}</div></FigureCtx.Provider>
+}
+
+function figureBody(c: ContentData, name: string, arg: string | undefined, compact: boolean) {
   const doc = arg ? c.docs[arg] : undefined
   if (name === 'qr') return <Qr />
   if (name === 'watchproof') return <WatchProof doc={c.watch} />

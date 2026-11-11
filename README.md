@@ -82,7 +82,7 @@ Months before July 2002 (Terra only) are shown but not ranked; Madagascar's bigg
 1. Unify 5 satellite streams from NASA FIRMS (archive + near-real-time) into one schema, using the local solar day.
 2. Apply the same filters to both sensors: drop low-confidence detections; mask static sources (flares, kilns, industry) using FIRMS flags and persistence.
 3. Count **fire cell-days** on an H3 res-6 grid (~36 km²), adjusting for satellite outages detected in the data.
-4. Calibrate MODIS ÷ VIIRS per calendar month, shrunk toward the region-wide ratio (τ chosen by leave-one-year-out); bridge to Terra-only before July 2002 and to NOAA-20 after S-NPP.
+4. Calibrate MODIS ÷ VIIRS per calendar month, shrunk toward the region-wide ratio (τ chosen by leave-one-year-out); bridge to Terra-only before July 2002 and to NOAA-20 after S-NPP data delivery ceased (2 Nov 2026).
 5. Estimate uncertainty with a year-block bootstrap ×500 plus Poisson noise, and judge "normal" against a 2003–2022 baseline.
 6. High detail: the same coverage-adjusted VIIRS cell-days *without* the conversion (H = k · V), judged against 2013–2022 (`pipeline/07b_detail.py`).
 

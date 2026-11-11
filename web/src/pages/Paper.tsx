@@ -25,7 +25,7 @@ export default function Paper() {
       <header className="card mb-8">
         <p className="eyebrow">Research paper · first draft</p>
         <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[36px]">{title.replace(/^#\s*/, '')}</h1>
-        <p className="mt-3 text-muted">Muru · NASA Space Apps 2026 · Port Louis</p>
+        <p className="mt-3 text-muted" data-testid="paper-author">Murugun Sharma Roma Rishi (Muru) · NASA Space Apps 2026 · Port Louis</p>
         <p className="mt-1 text-xs text-faint">Every number in this paper is read live from the published Fire Rings data (data through {c.values.data_end}).</p>
       </header>
       <Markdown src={rest.join('\n')} flags={{ reunion: c.reunion }} figure={(name, arg) => renderFigure(c, name, arg)} className="card" />
