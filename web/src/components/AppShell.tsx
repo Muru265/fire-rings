@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
+import Stars from './Stars'
 
 const NAV = [
   { to: '/r/punjab', label: 'Explore', match: '/r/' },
@@ -8,6 +9,7 @@ const NAV = [
   { to: '/data', label: 'Data' },
   { to: '/ask', label: 'Ask' },
   { to: '/watch', label: 'Fire Watch' },
+  { to: '/use-cases', label: 'Use Cases' },
   { to: '/guide', label: 'Guide' },
 ]
 
@@ -30,7 +32,9 @@ export default function AppShell() {
     return () => ro.disconnect()
   }, [])
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="relative flex min-h-dvh flex-col">
+      {/* P1.6: starfield behind everything (cards stay opaque); fuller on the story-like pages, lighter on data pages */}
+      <Stars density={/^\/($|story|watch|use-cases|paper)/.test(pathname) ? 1 : 0.35} />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-surface-2 focus:px-3 focus:py-2"
@@ -68,11 +72,11 @@ export default function AppShell() {
         </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-8 sm:px-6">
+      <main id="main" className="relative z-[1] mx-auto w-full max-w-[1440px] flex-1 px-4 py-8 sm:px-6">
         <Outlet />
       </main>
 
-      <footer className="border-t border-border">
+      <footer className="relative z-[1] border-t border-border bg-bg/70">
         <div className="mx-auto max-w-[1440px] px-4 py-6 text-xs text-faint sm:px-6">
           Active-fire data: NASA FIRMS (MODIS C6.1, VIIRS 375 m S-NPP / NOAA-20 / NOAA-21). NASA Space Apps 2026 · Port Louis.
         </div>

@@ -17,7 +17,7 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); i
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   page.on('pageerror', (e) => errors.push(String(e)))
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
+  page.on('console', (m) => m.type() === 'error' && !(m.location()?.url ?? '').includes('fire-rings-apps') && !(m.location()?.url ?? '').includes('fire-rings.vercel.app') && errors.push(m.text()))
   await page.goto(`http://localhost:${PORT}/r/punjab`, { waitUntil: 'load' })
   await page.waitForSelector('svg[role="grid"] [role="gridcell"]')
 
@@ -177,6 +177,24 @@ try {
   const tr = await page.getByTestId('watch-trace').locator('li').allInnerTexts()
   check('#74 trace has no repeated identical lines', new Set(tr).size === tr.length)
   check('Fire Watch: raw-vs-harmonized proof shown', await page.getByTestId('watch-proof-headline').isVisible())
+
+  // P2.2 control room: six live windows; at least one reports its last API call via postMessage
+  await page.goto(`http://localhost:${PORT}/use-cases`, { waitUntil: 'load' })
+  await page.getByTestId('usecase-grid').waitFor({ timeout: 10000 })
+  check('use-cases: 6 windows', (await page.getByTestId('cam').count()) === 6)
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await page.locator('[data-testid="cam"][data-live="yes"]').first().waitFor({ timeout: 45000 }).catch(() => {})
+  const live = await page.locator('[data-testid="cam"][data-live="yes"]').count()
+  check(`use-cases: windows report live API calls (${live}/6)`, live >= 1)
+  await page.waitForTimeout(6000)
+  await page.screenshot({ path: resolve(out, 'e2e_use_cases.png'), fullPage: true })
+  {
+    const ph = await browser.newPage({ viewport: { width: 360, height: 800 } })
+    await ph.goto(`http://localhost:${PORT}/use-cases`, { waitUntil: 'load' })
+    await ph.getByTestId('usecase-list').waitFor({ timeout: 10000 })
+    check('use-cases 360px: card list with 6 screenshots', (await ph.locator('[data-testid="usecase-list"] img').count()) === 6)
+    await ph.close()
+  }
 
   // QA #69: on phones the globe is not hidden behind the hero text
   for (const w of [360, 430]) {

@@ -11,6 +11,7 @@ const Ask = lazy(() => import('./pages/Ask'))
 const Story = lazy(() => import('./pages/Story'))
 const Guide = lazy(() => import('./pages/Guide'))
 const Watch = lazy(() => import('./pages/Watch'))
+const UseCases = lazy(() => import('./pages/UseCases'))
 const page = (el: React.ReactNode) => <Suspense fallback={<div className="card h-[50vh] animate-pulse" />}>{el}</Suspense>
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="ask" element={page(<Ask />)} />
         <Route path="guide" element={page(<Guide />)} />
         <Route path="watch" element={page(<Watch />)} />
+        <Route path="use-cases" element={page(<UseCases />)} />
         <Route path="story" element={page(<Story />)} />
         <Route path="story/:regionId" element={page(<Story />)} />
         <Route path="*" element={<NotFound />} />
