@@ -4,6 +4,15 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 3 (11 Nov) — running log (P1 main app → P2 companion + control room)
+- **P1.1 ✅ date range** on Explore: From/To months (URL `?from=YYYY-MM&to=YYYY-MM`), summary card (total, typical = sum of monthly medians, busiest month, rank among the same months in other complete years when ≤12 months), range highlighted on rings/calendar/annual bars, CSV/PNG limited to the range, Guide entry, e2e. Black Summer Jul 2019–Mar 2020 ranks 1st of 23.
+- **P1.2 ✅ `/api/hotspots`**: FIRMS Area API (SP where processed, NRT after; MODIS + VIIRS as in the record, `satellites=all` adds NOAA-20/21), the record's filters, ≤31 days. Decision: FIRMS now allows **≤5 days per call** (API answered "Expects [1..5]"), so 31 days = 7 calls per source. Cache: in-memory per warm instance + CDN `s-maxage` (7 days for SP-only ranges, 30 min with NRT); Vercel KV/Blob is not connected (needs Muru's account) so no persistent cache. Per-IP 30 uncached/10 min, ≤300 FIRMS calls/10 min/instance, calm 503 "busy" message. Demo months are static files made from the record (Punjab Oct 2016, SE Australia Dec 2019, Madagascar Sep 2019). Parity vs record, Punjab Oct 2016: 48,666 vs 48,595 detections (0.15%). Production checked: miss → hit, 307 for demo months, CORS.
+- **P1.3 ✅ map dots** for any month at zoom ≥9 (visible 0.5° tiles, cached), demo months static. Res-8 Mauritius hexes skipped (Mauritius already shows every detection as a dot).
+- **P1.4 ✅** #72 opinion/advice rejection (briefings regenerated: no "ease strain…", no "planning agency responses"); #73 numbers in AI text formatted (years never); #74 trace lines shown once with ×N, region names on status lines, briefings in parallel, labelled fallback with reason; #75 badge "Unusually low (Nov so far, Oct)".
+- **P1.7 ✅ (Réunion pending)** CORS on `/data/v1/*` + `/api/hotspots|live|health`; `api/series`, `api/projection` (backtest), `api/power` (NASA POWER, 9 points/region), `api/index.json`; Data page lists every endpoint.
+  - ⚠ **FIRMS budget incident**: one Area-API call costs ~15 transactions. The first full Réunion download hit the 5,000/10 min key limit for a few minutes (the live layer/hotspots would have answered "busy" meanwhile). Decision: Réunion downloads only the windows around each GVP eruption (start −35 d → end +5 d), one call every 6 s (~30% of the budget).
+  - Eruption dates: **Smithsonian GVP** VOTW Holocene eruptions (volcano 233020), 30 eruption periods since 2000, each with its source link.
+
 ## Summary for Muru — Round 2 + Fire Watch (10 Nov, evening)
 
 **In one line:** all ten re-check items (#62–71) are fixed and Fire Watch is live: rules decide, AI explains. Long-term numbers are unchanged (snapshot test green). Everything is pushed to main.
