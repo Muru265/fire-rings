@@ -14,6 +14,7 @@ import { useWidth } from '../lib/useWidth'
 import { calibrationSummary } from '../lib/calibration'
 import Help from '../components/Help'
 import WatchProof from '../components/WatchProof'
+import VolcanoCard from '../components/VolcanoCard'
 import links from '../../content/links.json'
 
 const C_HARM = '#D97706'
@@ -67,6 +68,7 @@ export default function Proof() {
       <DetectionTiming />
 
       <WatchProof />
+      <VolcanoCard />
 
       <section aria-labelledby="lim-h">
         <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them<Help id="limitations" /></h2>
