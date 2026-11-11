@@ -94,3 +94,9 @@ watch:
 record:
   start: "2001-01"
   data_end: "2026-11-08"
+
+# P1.2 pre-saved hotspot months (static files; the demo never depends on NASA live). 08b_demo_hotspots.py
+demo_hotspots:
+  - {region: punjab, month: "2016-10", note: "Punjab crop-residue burning season"}
+  - {region: se_australia, month: "2019-12", note: "Black Summer"}
+  - {region: madagascar, month: "2019-09", note: "Madagascar dry-season burning"}

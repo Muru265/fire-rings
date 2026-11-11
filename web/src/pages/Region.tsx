@@ -190,7 +190,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
           {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing {first.y}–{last.y} for the box…</p>}
           {box && boxState.status === 'error' && <p className="rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn" role="status">{boxState.error}</p>}
 
-          <RangeCard doc={doc} range={range} onChange={setRange} boxed={!!boxed} />
+          <RangeCard doc={doc} range={range} onChange={setRange} boxed={!!boxed} box={box} />
 
           <section aria-labelledby="rings-h" className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

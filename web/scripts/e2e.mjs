@@ -141,6 +141,26 @@ try {
   check('range: Full record clears the URL', !page.url().includes('from='))
   await page.setViewportSize({ width: 1440, height: 900 })
 
+  // P1.2/P1.3: demo month (static file, never NASA live) — hotspot CSV from the drawer, dots on the map when zoomed in
+  await page.goto(`http://localhost:${PORT}/r/punjab?mode=longterm`, { waitUntil: 'load' })
+  await page.waitForSelector('svg[role="grid"] [role="gridcell"]')
+  await page.locator('[role="grid"] [role="gridcell"][aria-label^="Oct 2016"]').last().click()
+  await page.waitForSelector('[role="dialog"]', { timeout: 5000 })
+  const dl2 = page.waitForEvent('download', { timeout: 20000 })
+  await page.getByTestId('hotspot-download').click()
+  const f2 = await (await dl2).path()
+  const csv2 = (await import('node:fs')).readFileSync(f2, 'utf-8')
+  check('hotspots: drawer CSV for Oct 2016 (demo file) has source + filters line', csv2.startsWith('# Fire Rings hotspots · Punjab') && csv2.includes('filters:') && csv2.split(String.fromCharCode(10)).length > 1000)
+  await page.keyboard.press('Escape')
+  const mapSec = page.locator('section[aria-labelledby="map-h"]')
+  await mapSec.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(1500)
+  for (let i = 0; i < 4; i++) { await mapSec.locator('.maplibregl-ctrl-zoom-in').click(); await page.waitForTimeout(450) }
+  await page.getByText('VIIRS detection (375 m)').waitFor({ timeout: 20000 }).catch(() => {})
+  check('map: zoomed-in detection dots for an old month (Oct 2016)', await page.getByText('VIIRS detection (375 m)').isVisible())
+  await page.waitForTimeout(3500)
+  await mapSec.screenshot({ path: resolve(out, 'e2e_map_dots_oct2016.png') })
+
   // Fire Watch: run the agent → steps appear → every region gets a status (local preview has no /api → offline replay)
   await page.goto(`http://localhost:${PORT}/watch`, { waitUntil: 'load' })
   await page.getByTestId('run-agent').click()

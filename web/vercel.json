@@ -1,10 +1,58 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/health.ts": { "maxDuration": 40 },
-    "api/ask.ts": { "maxDuration": 60, "includeFiles": "public/data/v1/{meta.json,regions/*.json,dataset/punjab_timing_v1.json}" },
-    "api/live.ts": { "maxDuration": 15, "includeFiles": "public/data/v1/live/*.json" },
-    "api/watch.ts": { "maxDuration": 60, "includeFiles": "public/data/v1/{meta.json,watch.json,watch_cache.json,regions/*.json,dataset/punjab_timing_v1.json}" }
+    "api/health.ts": {
+      "maxDuration": 40
+    },
+    "api/ask.ts": {
+      "maxDuration": 60,
+      "includeFiles": "public/data/v1/{meta.json,regions/*.json,dataset/punjab_timing_v1.json}"
+    },
+    "api/live.ts": {
+      "maxDuration": 15,
+      "includeFiles": "public/data/v1/live/*.json"
+    },
+    "api/watch.ts": {
+      "maxDuration": 60,
+      "includeFiles": "public/data/v1/{meta.json,watch.json,watch_cache.json,regions/*.json,dataset/punjab_timing_v1.json}"
+    },
+    "api/hotspots.ts": {
+      "maxDuration": 60,
+      "includeFiles": "public/data/v1/{live/*.json,hotspots/demo/index.json}"
+    }
   },
-  "rewrites": [{ "source": "/((?!api/|data/|assets/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/((?!api/|data/|assets/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/data/v1/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        }
+      ]
+    },
+    {
+      "source": "/api/(hotspots|live|health)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        }
+      ]
+    }
+  ]
 }

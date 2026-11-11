@@ -5,12 +5,15 @@ import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { unitOf } from '../lib/mode'
 import Help from './Help'
+import HotspotButton from './HotspotButton'
+import { monthRange } from '../lib/hotspots'
+import type { Box } from '../lib/hotspots'
 
 const ord = (n: number) => { const s = ['th', 'st', 'nd', 'rd']; const v = n % 100; return `${n}${s[(v - 20) % 10] || s[v] || s[0]}` }
 const lab = (a: YM) => `${MONTHS[a.m - 1]} ${a.y}`
 
 /** P1.1: From / To month selector + a summary of the chosen range. Default = the full record (no filter). */
-export default function RangeCard({ doc, range, onChange, boxed }: { doc: RegionDoc; range: Range | null; onChange: (r: Range | null) => void; boxed: boolean }) {
+export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: RegionDoc; range: Range | null; onChange: (r: Range | null) => void; boxed: boolean; box?: Box | null }) {
   const first = doc.months[0], last = doc.months[doc.months.length - 1]
   const opts: YM[] = []
   for (let k = ymKey(first); k <= ymKey(last); k++) opts.push(fromKey(k))
@@ -84,6 +87,11 @@ export default function RangeCard({ doc, range, onChange, boxed }: { doc: Region
             {unit}. “Typical” = sum of each month’s {doc.baseline[0]}–{doc.baseline[1]} median{boxed ? ' for this box' : ''}.
             {s.withData < s.months ? ` ${s.months - s.withData} month(s) without data are left out of the totals.` : ''}
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border pt-3">
+            {rangeLength(range!) === 1
+              ? <HotspotButton q={{ region: doc.id, ...monthRange(range!.from.y, range!.from.m), bbox: boxed ? box : null }} />
+              : <span className="text-[11px] text-faint">Hotspot CSV (every detection): pick a single month — NASA FIRMS serves up to 31 days per download.</span>}
+          </div>
         </div>
       )}
     </section>

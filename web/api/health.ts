@@ -44,11 +44,20 @@ async function checkFirms(): Promise<string> {
   }
 }
 
-export async function GET(): Promise<Response> {
-  if (cache && Date.now() - cache.t < 5 * 60_000) return Response.json({ ...(cache.body as object), cached: true })
+const CORS = { 'access-control-allow-origin': '*' }
+let fcache: { t: number; firms: string } | null = null
+
+export async function GET(req?: Request): Promise<Response> {
+  // ?scope=data (P1.7, for outside apps): service status without touching Gemini — FIRMS key status + published data version
+  if (req && new URL(req.url).searchParams.get('scope') === 'data') {
+    if (!fcache || Date.now() - fcache.t > 5 * 60_000) fcache = { t: Date.now(), firms: await checkFirms() }
+    return Response.json({ ok: true, api: 'fire-rings', version: 'v1', firms: fcache.firms, data: '/data/v1/meta.json', checked_at: new Date(fcache.t).toISOString() },
+      { headers: { ...CORS, 'cache-control': 'public, max-age=60, s-maxage=300' } })
+  }
+  if (cache && Date.now() - cache.t < 5 * 60_000) return Response.json({ ...(cache.body as object), cached: true }, { headers: CORS })
   const [g, f] = await Promise.all([checkGemini(), checkFirms()])
   const body = { ...g, firms: f, checked_at: new Date().toISOString() }
   console.log(JSON.stringify({ fn: 'health', gemini: g.gemini, model: g.gemini_model, firms: f }))
   cache = { t: Date.now(), body }
-  return Response.json(body, { headers: { 'cache-control': 'no-store' } })
+  return Response.json(body, { headers: { ...CORS, 'cache-control': 'no-store' } })
 }

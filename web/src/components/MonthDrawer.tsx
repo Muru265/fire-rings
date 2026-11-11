@@ -14,6 +14,8 @@ import { downloadText } from '../lib/exporters'
 import { DataTable } from './ChartCard'
 import { unitOf } from '../lib/mode'
 import Help from './Help'
+import HotspotButton from './HotspotButton'
+import { monthRange } from '../lib/hotspots'
 
 type Daily = Record<string, { modis?: number[]; viirs?: number[]; off?: number[] }>
 
@@ -129,9 +131,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
                 Download this month's hotspots (CSV)
               </a>
             ) : (
-              <span className="rounded-sm border border-border px-3 py-1.5 text-xs text-faint" title="Detection-level CSVs are published for the latest months only">
-                Hotspot CSV: latest months only
-              </span>
+              <HotspotButton q={{ region: doc.id, ...monthRange(rec.y, rec.m) }} label="Download this month's hotspots (CSV)" primary />
             )}
             {series && (
               <button onClick={() => downloadText(`fire-rings_${doc.id}_${key}_daily.csv`,

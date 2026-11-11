@@ -7,7 +7,7 @@ import type { LiveFile, LiveResult } from './_lib/live.js'
 
 const TTL = 45 * 60_000
 const cache = new Map<string, { t: number; data: LiveResult }>()
-const HEADERS = { 'cache-control': 'public, max-age=300, s-maxage=2700, stale-while-revalidate=900' }
+const HEADERS = { 'cache-control': 'public, max-age=300, s-maxage=2700, stale-while-revalidate=900', 'access-control-allow-origin': '*' }
 
 async function liveFile(region: string, origin: string): Promise<LiveFile | null> {
   for (const base of [join(process.cwd(), 'public', 'data', 'v1'), join(process.cwd(), 'web', 'public', 'data', 'v1')]) {
@@ -37,8 +37,8 @@ export async function GET(req: Request): Promise<Response> {
       new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 10_000)),
     ])
     if (data.ok) cache.set(region, { t: Date.now(), data })
-    return Response.json(data, { headers: data.ok ? HEADERS : { 'cache-control': 'no-store' } })
+    return Response.json(data, { headers: data.ok ? HEADERS : { 'cache-control': 'no-store', 'access-control-allow-origin': '*' } })
   } catch (e) {
-    return Response.json(empty(`FIRMS unavailable (${(e as Error).message})`), { headers: { 'cache-control': 'no-store' } })
+    return Response.json(empty(`FIRMS unavailable (${(e as Error).message})`), { headers: { 'cache-control': 'no-store', 'access-control-allow-origin': '*' } })
   }
 }

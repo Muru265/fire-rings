@@ -1,0 +1,40 @@
+{
+ "files": [
+  {
+   "region": "punjab",
+   "month": "2016-10",
+   "start": "2016-10-01",
+   "end": "2016-10-31",
+   "csv": "punjab_2016-10.csv",
+   "json": "punjab_2016-10.json",
+   "rows": 48595,
+   "modis": 9357,
+   "viirs": 39238,
+   "note": "Punjab crop-residue burning season"
+  },
+  {
+   "region": "se_australia",
+   "month": "2019-12",
+   "start": "2019-12-01",
+   "end": "2019-12-31",
+   "csv": "se_australia_2019-12.csv",
+   "json": "se_australia_2019-12.json",
+   "rows": 240441,
+   "modis": 39556,
+   "viirs": 200885,
+   "note": "Black Summer"
+  },
+  {
+   "region": "madagascar",
+   "month": "2019-09",
+   "start": "2019-09-01",
+   "end": "2019-09-30",
+   "csv": "madagascar_2019-09.csv",
+   "json": "madagascar_2019-09.json",
+   "rows": 45667,
+   "modis": 7540,
+   "viirs": 38127,
+   "note": "Madagascar dry-season burning"
+  }
+ ]
+}

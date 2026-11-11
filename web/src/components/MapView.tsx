@@ -16,6 +16,7 @@ import { tidyBasemap } from '../lib/mapStyle'
 import Help from './Help'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
+import { loadDots, monthRange, staticUrl } from '../lib/hotspots'
 
 const STYLE = 'https://tiles.openfreemap.org/styles/dark'
 // MapLibre 6 resolves its worker next to its own module; after bundling that file doesn't exist, so hand it Vite's.
@@ -43,6 +44,7 @@ function triangleIcon(color: string, size = 18): { width: number; height: number
 
 type Pt = { lat: number; lon: number; s: 0 | 1 }
 
+/** Published static points: small regions (every month) and the latest months' hotspot CSVs. null = not published. */
 async function monthPoints(doc: RegionDoc, y: number, m: number): Promise<Pt[] | null> {
   if (doc.geo?.small && doc.geo.points_years?.includes(y)) {
     const f = await fetchJson<{ m: [number, number, number, number][][] }>(`points/${doc.id}/${y}.json`)
@@ -75,8 +77,10 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const [drawing, setDrawing] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [stats, setStats] = useState<{ cells: number; min: number; max: number } | null>(null)
-  const [pts, setPts] = useState<{ n: number; available: boolean } | null>(null)
+  const [pts, setPts] = useState<{ n: number; available: boolean; source?: 'static' | 'api'; loading?: boolean; msg?: string } | null>(null)
   const [zoom, setZoom] = useState(0)
+  // P1.3: tile (0.5° grid, clipped to the region) of the current view when zoomed in → detections from /api/hotspots
+  const [tile, setTile] = useState<Box | null>(null)
   // QA #17: live layer off by default on the map (the badge still shows the count); hexagons stay the main visual
   const [showLive, setShowLive] = useState(false)
   const [inInset, setInInset] = useState(false)
@@ -102,6 +106,13 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       if (!mp.isStyleLoaded()) setErr(String((e as unknown as { error?: Error }).error?.message ?? 'Map failed to load'))
     })
     mp.on('zoomend', () => setZoom(mp.getZoom()))
+    mp.on('moveend', () => {
+      if (mp.getZoom() < POINT_ZOOM) return
+      const b = mp.getBounds()
+      const sn = (v: number, up: boolean) => (up ? Math.ceil(v * 2) / 2 : Math.floor(v * 2) / 2)
+      const t: Box = [sn(b.getWest(), false), sn(b.getSouth(), false), sn(b.getEast(), true), sn(b.getNorth(), true)]
+      setTile((old) => (old && old.every((v, i) => v === t[i]) ? old : t))
+    })
     mp.on('load', () => {
       tidyBasemap(mp)
       setZoom(mp.getZoom())
@@ -187,18 +198,41 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
     return () => { alive = false }
   }, [ready, doc, y, m, res])
 
-  // detection points (small regions: always; large regions: latest months, drawn from zoom 9)
+  // detection points: small regions + latest months from published files; any other month from /api/hotspots when
+  // zoomed in (P1.3) — pre-saved demo months come from static files, the rest for the visible 0.5° tiles (cached)
+  const zoomedIn = zoom >= POINT_ZOOM
   useEffect(() => {
     if (!ready || !map.current) return
     let alive = true
-    monthPoints(doc, y, m).then((p) => {
-      if (!alive || !map.current) return
+    const draw = (p: Pt[] | null) => {
+      if (!map.current) return
       ;(map.current.getSource('pts') as GeoJSONSource)?.setData(p ? { type: 'FeatureCollection', features: p.map((q) => ({
         type: 'Feature' as const, properties: { s: q.s }, geometry: { type: 'Point' as const, coordinates: [q.lon, q.lat] } })) } : EMPTY)
-      setPts({ n: p?.length ?? 0, available: p != null })
-    }).catch(() => alive && setPts({ n: 0, available: false }))
+    }
+    ;(async () => {
+      const p = await monthPoints(doc, y, m).catch(() => null)
+      if (!alive) return
+      if (p) { draw(p); setPts({ n: p.length, available: true, source: 'static' }); return }
+      draw(null)
+      if (!zoomedIn) { setPts({ n: 0, available: true, source: 'api' }); return }
+      const r = doc.bbox
+      const t = tile ?? r
+      const bb: Box = [Math.max(t[0], r[0]), Math.max(t[1], r[1]), Math.min(t[2], r[2]), Math.min(t[3], r[3])]
+      if (!(bb[0] < bb[2] && bb[1] < bb[3])) { setPts({ n: 0, available: true, source: 'api' }); return }
+      const mr = monthRange(y, m)
+      const whole = await staticUrl({ region: doc.id, ...mr }, 'json')
+      setPts({ n: 0, available: true, source: whole ? 'static' : 'api', loading: true })
+      try {
+        const d = await loadDots({ region: doc.id, ...mr, bbox: whole ? null : bb })
+        if (!alive) return
+        draw(d.rows.map(([lat, lon, s]) => ({ lat, lon, s: s as 0 | 1 })))
+        setPts({ n: d.count, available: true, source: d.source })
+      } catch (e) {
+        if (alive) setPts({ n: 0, available: true, source: 'api', msg: (e as Error).message })
+      }
+    })()
     return () => { alive = false }
-  }, [ready, doc, y, m])
+  }, [ready, doc, y, m, zoomedIn, tile])
 
   // live NRT layer (provisional, separate from the record)
   useEffect(() => {
@@ -274,6 +308,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           </button>
         )}
         {drawing && <div className="absolute top-12 left-3 rounded-sm bg-accent px-2.5 py-1 text-xs font-semibold text-bg">Drag on the map to draw a box</div>}
+        {pts?.loading && <div className="absolute bottom-3 left-3 rounded-sm border border-border-strong bg-surface/90 px-2.5 py-1 text-xs text-muted backdrop-blur" data-testid="dots-loading" aria-live="polite">Loading detections from NASA FIRMS…</div>}
+        {pts?.msg && <div className="absolute inset-x-3 bottom-3 rounded-sm border border-warn/40 bg-surface/95 px-3 py-1.5 text-xs text-warn" role="status" data-testid="dots-msg">{pts.msg}</div>}
       </div>
       {/* QA #21: legend below the map, never over the fires */}
       <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-muted" data-testid="map-legend">
@@ -287,8 +323,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         )}
         {pointsVisible && (
           <span className="flex items-center gap-2">
-            <span><span style={{ color: C_MODIS }}>●</span> MODIS detection</span>
-            <span><span style={{ color: C_VIIRS }}>▲</span> VIIRS detection</span>
+            <span><span style={{ color: C_MODIS }}>●</span> MODIS detection (1 km)</span>
+            <span><span style={{ color: C_VIIRS }}>▲</span> VIIRS detection (375 m)</span>
             <span className="text-faint">({fmtInt(pts?.n ?? 0)})</span>
           </span>
         )}
@@ -325,7 +361,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         : 'Hexagons are ~36 km² on purpose: counting presence per hexagon lets old and new satellites be compared fairly. Zoom in to see individual detections.'}</p>
       {fracNote && <p className="mt-1 text-xs text-muted" data-testid="map-fraction-note">{fracNote}</p>}
       <p className="mt-1 text-xs text-faint">
-        {small ? 'Detections are shown for every month in this small region.' : pts?.available ? `Individual detections appear from zoom ${POINT_ZOOM}.` : `Individual detections are published for the latest months (${doc.hotspot_months.join(', ')}); older months show hexagons only.`}
+        {small ? 'Detections are shown for every month in this small region.' : `Zoom in (level ${POINT_ZOOM}+) to see individual detections for any month: ● MODIS 1 km, ▲ VIIRS 375 m, same filters as the record, loaded from NASA FIRMS on request${zoomedIn && pts?.source === 'api' && !pts.loading && !pts.msg ? ` (${fmtInt(pts.n)} in view tiles)` : ''}.`}
         {' '}A box recomputes the calendar from hexagons inside it, using this region's calibration. Basemap © OpenFreeMap, © OpenStreetMap contributors.
       </p>
     </section>
