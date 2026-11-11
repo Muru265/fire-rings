@@ -5,6 +5,14 @@ import type { RegionDoc } from '../lib/types'
 import { useWidth } from '../lib/useWidth'
 import ChartCard from './ChartCard'
 import { unitOf } from '../lib/mode'
+import { MONTHS } from '../lib/series'
+
+/** #83: why a year has no total, from the published month flags, e.g. "not enough satellite data (Jan 2012)" */
+function gapLabel(doc: RegionDoc, year: number): string {
+  const ms = doc.months.filter((r) => r.y === year && r.flags.includes('insufficient')).map((r) => MONTHS[r.m - 1])
+  const miss = ms.length ? ms : ((doc.annual.find((a) => a.y === year) as { missing_months?: number[] } | undefined)?.missing_months ?? []).map((m) => MONTHS[m - 1])
+  return `not enough satellite data${miss.length ? ` (${miss.join(', ')} ${year})` : ''}`
+}
 
 const H = 240
 const M = { t: 22, r: 8, b: 26, l: 44 }
@@ -29,11 +37,14 @@ function takeaway(doc: RegionDoc): string {
 export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears }: { doc: RegionDoc; selectedYear?: number; onSelectYear?: (y: number) => void; rangeYears?: [number, number] | null }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
-  const data = doc.annual.filter((a) => a.H != null)
+  // #83: the axis stays continuous — a year without a total gets an empty hatched slot, never a silent skip
+  const all = doc.annual.filter((a, i, arr) => a.H != null || (i > 0 && i < arr.length - 1))
+  const data = all.filter((a) => a.H != null)
   if (!data.length) return null
-  const x = scaleBand<number>().domain(data.map((d) => d.y)).range([M.l, w - M.r]).padding(0.22)
+  const x = scaleBand<number>().domain(all.map((d) => d.y)).range([M.l, w - M.r]).padding(0.22)
   const y = scaleLinear().domain([0, Math.max(...data.map((d) => d.hi ?? d.H ?? 0)) * 1.05]).nice(4).range([H - M.b, M.t])
   const hv = data.find((d) => d.y === hover)
+  const hvGap = hover != null && !hv && all.some((d) => d.y === hover) ? hover : null
   // x labels: every 5th year plus the last one, dropped when it would collide (needs ~34 px between label centres)
   const labelYears = new Set<number>()
   let lastX = -Infinity
@@ -51,7 +62,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
   const table = {
     caption: `Annual ${unitOf(doc)} with 90% range`,
     columns: ['Year', 'Fire-days', '90% low', '90% high', 'Complete', 'Ranked'],
-    rows: data.map((d) => [d.y, fmtInt(d.H), fmtInt(d.lo), fmtInt(d.hi), d.complete ? 'yes' : 'partial',
+    rows: all.map((d) => d.H == null ? [d.y, gapLabel(doc, d.y), null, null, 'no', 'no'] : [d.y, fmtInt(d.H), fmtInt(d.lo), fmtInt(d.hi), d.complete ? 'yes' : 'partial',
       d.rankable === false ? (d.terra_only_months ? 'no (Terra only)' : 'no') : 'yes']),
   }
   return (
@@ -62,12 +73,16 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
         <li className="flex items-center gap-1.5"><span className="h-3 w-px bg-text" />whisker = 90% range</li>
         <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] border border-[#E55C30]" />incomplete year</li>
         <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px]" style={{ background: 'repeating-linear-gradient(45deg,#E55C30 0 1.5px,transparent 1.5px 4px)' }} />Terra-only months (not ranked)</li>
+        {all.some((d) => d.H == null) && <li className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-[2px] border border-dashed border-border-strong" style={{ background: 'repeating-linear-gradient(-45deg,var(--text-faint) 0 1px,transparent 1px 4px)' }} />n/a = not enough satellite data</li>}
       </ul>
       <div ref={ref} className="relative">
         <svg width={w} height={H} role="img" aria-label="Annual totals bar chart. Use View as table for values.">
           <defs>
             <pattern id="annual-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
               <line x1="0" y1="0" x2="0" y2="5" stroke="#E55C30" strokeWidth="1.6" />
+            </pattern>
+            <pattern id="annual-gap" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--text-faint)" strokeWidth="1" />
             </pattern>
           </defs>
           {y.ticks(4).map((t) => (
@@ -77,7 +92,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
             </g>
           ))}
           {(() => {
-            const after = data.find((d) => d.y >= 2012)
+            const after = all.find((d) => d.y >= 2012)
             if (!after || data[0].y >= 2012) return null   // High detail starts in 2012: no switch to show
             const sx = x(after.y)! - (x.step() - x.bandwidth()) / 2
             return (
@@ -87,6 +102,13 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
               </g>
             )
           })()}
+          {all.filter((d) => d.H == null).map((d) => (
+            <g key={`gap-${d.y}`} onMouseEnter={() => setHover(d.y)} onMouseLeave={() => setHover(null)} data-testid="annual-gap" data-year={d.y}>
+              <title>{`${d.y}: ${gapLabel(doc, d.y)}`}</title>
+              <rect x={x(d.y)!} y={y(0) - 34} width={x.bandwidth()} height={34} fill="url(#annual-gap)" stroke="var(--border-strong)" strokeDasharray="2 2" opacity={0.9} />
+              <text x={x(d.y)! + x.bandwidth() / 2} y={y(0) - 38} textAnchor="middle" className="fill-[var(--text-faint)] font-mono text-[9px]">n/a</text>
+            </g>
+          ))}
           {data.map((d) => {
             const bx = x(d.y)!
             const bw = x.bandwidth()
@@ -110,7 +132,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears
         </svg>
       </div>
       <p className="fig-hide mt-1 min-h-[1.25rem] text-xs text-muted" aria-live="polite">
-        {hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> {unitOf(doc)}
+        {hvGap != null ? <><span className="font-semibold text-text">{hvGap}</span> · {gapLabel(doc, hvGap)}</> : hv ? <><span className="font-semibold text-text">{hv.y}{hv.complete ? '' : ' (incomplete)'}</span> · <span className="num text-text">{fmtInt(hv.H)}</span> {unitOf(doc)}
           {hv.lo != null && <> · 90% range {fmtInt(hv.lo)}–{fmtInt(hv.hi)}</>}{hv.rankable === false && hv.terra_only_months ? ' · Terra only, not ranked' : ''}</> : 'Hover a year for its values.'}
       </p>
     </ChartCard>

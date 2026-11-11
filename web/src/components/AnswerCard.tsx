@@ -59,7 +59,16 @@ function MiniVisual({ a, doc }: { a: Answer; doc: RegionDoc }) {
     return (
       <figure className="mt-3" data-testid="answer-visual">
         <div className="flex h-16 items-end gap-[2px]" role="img" aria-label={`Annual fire-days, highlighted ${hiYear.join(', ')}`}>
-          {data.map((d) => <span key={d.y} title={`${d.y}: ${fmtInt(d.H)}`} className="flex-1 rounded-t-[2px]" style={{ height: `${(100 * d.H!) / mx}%`, background: hiYear.includes(d.y) ? 'var(--accent)' : 'var(--surface-3)' }} />)}
+          {Array.from({ length: data.at(-1)!.y - data[0].y + 1 }, (_, i) => data[0].y + i).map((yr) => {
+            const d = data.find((x) => x.y === yr)
+            // #83: a year with no complete total keeps its slot (hatched), never silently skipped
+            if (!d) {
+              const miss = doc.months.filter((r) => r.y === yr && r.flags.includes('insufficient')).map((r) => r.m)
+              const why = miss.length ? `not enough satellite data (${miss.map((m) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]).join(', ')} ${yr})` : 'not ranked'
+              return <span key={yr} title={`${yr}: ${why}`} data-testid="answer-visual-gap" className="h-1/4 flex-1 rounded-t-[2px] border border-dashed border-border-strong" style={{ background: 'repeating-linear-gradient(-45deg, var(--surface-3) 0 2px, transparent 2px 5px)' }} />
+            }
+            return <span key={yr} title={`${yr}: ${fmtInt(d.H)}`} className="flex-1 rounded-t-[2px]" style={{ height: `${(100 * d.H!) / mx}%`, background: hiYear.includes(yr) ? 'var(--accent)' : 'var(--surface-3)' }} />
+          })}
         </div>
         <figcaption className="mt-1 flex justify-between text-[10px] text-faint"><span>{data[0].y}</span><span>Annual fire-days · highlighted {hiYear.join(', ')}</span><span>{data.at(-1)!.y}</span></figcaption>
       </figure>
