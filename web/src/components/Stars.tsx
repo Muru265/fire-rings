@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react'
+import { TWINKLE, twinkle } from '../lib/twinkle'
 
-/** Subtle animated starfield behind the page. Many tiny stars; ~12% twinkle (fade out/in over 3–8 s, so some switch off
- *  while others switch on); very slow drift. ≤30 fps, paused when the tab is hidden, a single static frame under
- *  prefers-reduced-motion. Fixed, behind everything, pointer-events: none. */
+/** Animated starfield behind the page. #79: twinkle is clearly visible but calm — every star now and then runs one
+ *  1.5–3 s event (a slight brighten, then a full fade out and back in); gaps are spaced so ~4% of stars twinkle at any
+ *  moment. Very slow drift. ≤30 fps, paused when the tab is hidden, a single static frame under prefers-reduced-motion.
+ *  Fixed, behind everything, pointer-events: none. */
 export default function Stars({ density = 1 }: { density?: number }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -12,7 +14,9 @@ export default function Stars({ density = 1 }: { density?: number }) {
     if (!g) return
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let w = 0, h = 0, raf = 0, last = 0
-    type S = { x: number; y: number; r: number; a: number; tw: boolean; period: number; phase: number }
+    type S = { x: number; y: number; r: number; a: number; start: number; dur: number }
+    const gap = () => TWINKLE.gapMin + Math.random() * (TWINKLE.gapMax - TWINKLE.gapMin)
+    const dur = () => TWINKLE.durMin + Math.random() * (TWINKLE.durMax - TWINKLE.durMin)
     let stars: S[] = []
     const seed = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1)
@@ -22,14 +26,17 @@ export default function Stars({ density = 1 }: { density?: number }) {
       const n = Math.round((w * h) / 6500 * density)
       stars = Array.from({ length: n }, () => ({
         x: Math.random() * w, y: Math.random() * h, r: Math.random() < 0.92 ? 0.4 + Math.random() * 0.6 : 1 + Math.random() * 0.5,
-        a: 0.25 + Math.random() * 0.45, tw: Math.random() < 0.12, period: 3000 + Math.random() * 5000, phase: Math.random() * 10000,
+        a: 0.25 + Math.random() * 0.45, start: performance.now() + Math.random() * gap(), dur: dur(),
       }))
     }
     const draw = (t: number) => {
       g.clearRect(0, 0, w, h)
       for (const s of stars) {
         let a = s.a
-        if (s.tw && !reduce) a *= 0.5 + 0.5 * Math.sin(((t + s.phase) / s.period) * Math.PI * 2)
+        if (!reduce && t >= s.start) {
+          const p = (t - s.start) / s.dur
+          if (p >= 1) { s.start = t + gap(); s.dur = dur() } else a = Math.min(1, a * twinkle(p))
+        }
         if (!reduce) { s.x += 0.004; if (s.x > w) s.x = 0 }
         g.globalAlpha = Math.max(0, a)
         g.fillStyle = s.r > 1 ? '#FFE9D6' : '#DCE6F5'
