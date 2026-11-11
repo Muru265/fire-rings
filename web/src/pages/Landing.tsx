@@ -32,7 +32,7 @@ export default function Landing() {
     <div className="-mx-4 -mt-8 sm:-mx-6">
       {/* QA #69: phones/tablets stack the text above the globe so the globe is clearly visible; large screens overlay it */}
       <section className="starfield relative overflow-hidden border-b border-border lg:h-[78vh] lg:min-h-[520px]">
-        <div className="relative z-10 max-w-[560px] px-4 pt-6 pb-3 sm:px-10 sm:pt-10 lg:pointer-events-auto lg:absolute lg:top-14 lg:left-10 lg:p-0">
+        <div className="relative z-10 max-w-[560px] px-4 pt-6 pb-3 sm:px-10 sm:pt-10 lg:pointer-events-auto lg:absolute lg:top-14 lg:left-10 lg:p-0" data-testid="hero-text">
           <p className="eyebrow">MODIS + VIIRS · NASA FIRMS · 2001–2026</p>
           <h1 className="mt-3 text-[36px] leading-[1.02] font-bold sm:text-[56px] lg:text-[64px]">25 years of fire.<br /><span className="text-muted">One honest record.</span></h1>
           <p className="mt-4 max-w-md text-base text-muted lg:mt-5">Two generations of satellites see fire differently. Fire Rings converts the new one into the old one's units, so every month since 2001 uses the same ruler — and tells you whether this month is normal.</p>
@@ -46,7 +46,7 @@ export default function Landing() {
             <Link to="/proof">How it works →</Link>
           </div>
         </div>
-        <div className="relative h-[560px] sm:h-[600px] lg:absolute lg:inset-0 lg:left-[28%] lg:h-auto" data-testid="hero-globe">
+        <div className="relative h-[560px] sm:h-[600px] lg:absolute lg:inset-0 lg:left-[620px] lg:h-auto" data-testid="hero-globe">
           <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
         </div>
         <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-bg via-bg/50 to-transparent lg:block" />

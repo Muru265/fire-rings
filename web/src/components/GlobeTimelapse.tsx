@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MlMap, Popup, setWorkerUrl } from 'maplibre-gl'
 import type { GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl'
@@ -77,6 +78,8 @@ function useGlobe(ready: boolean): Globe | null {
 
 /** Zoom at which the globe switches from res-4 blocks / small-island dots to ~36 km² res-6 hexagons (QA #65). */
 const FINE_ZOOM = 3.6
+/** #78: the home globe stays a globe / country view; deeper zoom belongs to the region page (chip at the cap). */
+const GLOBE_MAX_ZOOM = 6
 // same Inferno family as the map, started bright so the lowest values never look like holes (QA #65b, like #18)
 const RAMP = ['interpolate', ['linear'], ['get', 't'], 0, '#A52C60', 0.3, '#D24A3E', 0.55, '#F07F17', 0.8, '#FBC12E', 1, '#FCFFA4']
 
@@ -117,6 +120,9 @@ export default function GlobeTimelapse({ docs, live }: Props) {
 
   const globe = useGlobe(ready)
   const [fine, setFine] = useState(false)
+  const [near, setNear] = useState<{ id: string; name: string } | null>(null)
+  const docsRef = useRef(docs)
+  useEffect(() => { docsRef.current = docs }, [docs])
   const [gstyle, setGstyle] = useState<GlobeStyle>(storedStyle)
   const maxH = useMemo(() => Object.fromEntries(docs.map((d) => [d.id, Math.max(...d.months.map((r) => r.H ?? 0)) || 1])), [docs])
 
@@ -126,7 +132,7 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       container: el.current, style: 'https://tiles.openfreemap.org/styles/dark', center: [70, -5],
       // P1.5: zoom fitted to the map box, so the globe never runs under the playback panel
       zoom: fitZoom(el.current.clientWidth, el.current.clientHeight),
-      attributionControl: { compact: true }, interactive: true,
+      attributionControl: { compact: true }, interactive: true, maxZoom: GLOBE_MAX_ZOOM,
     })
     map.current = mp
     ;(window as unknown as { __frGlobe?: MlMap }).__frGlobe = mp // for screenshot checks (zoom tests)
@@ -184,6 +190,13 @@ export default function GlobeTimelapse({ docs, live }: Props) {
     const offHover = () => { mp.getCanvas().style.cursor = ''; pop.remove() }
     for (const id of ['hex-fill', 'hex6-fill', 'small-dot']) { mp.on('mousemove', id, onHover); mp.on('mouseleave', id, offHover) }
     mp.on('zoomend', () => setFine(mp.getZoom() >= FINE_ZOOM))
+    // #78: at the zoom cap near a hero region, offer its page instead of zooming further
+    mp.on('moveend', () => {
+      const c = mp.getCenter()
+      const hit = mp.getZoom() >= GLOBE_MAX_ZOOM - 0.25
+        ? docsRef.current.find((d) => { const [w, s, e, n] = d.bbox; return c.lng >= w - 1.5 && c.lng <= e + 1.5 && c.lat >= s - 1.5 && c.lat <= n + 1.5 }) : undefined
+      setNear(hit ? { id: hit.id, name: hit.name.split(' (')[0] } : null)
+    })
     const stop = () => { interacted.current = true }
     mp.on('mousedown', stop); mp.on('touchstart', stop); mp.on('wheel', stop)
     let raf = 0
@@ -289,7 +302,12 @@ export default function GlobeTimelapse({ docs, live }: Props) {
   const f = frames[i]
   return (
     <div className="relative flex h-full w-full flex-col">
-      <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label="Globe showing monthly fire activity in the four hero regions" />
+      <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label="Globe showing monthly fire activity in the four hero regions"
+        data-testid="globe-map" />
+      {near && (
+        <Link to={`/r/${near.id}`} className="absolute top-3 left-3 z-10 rounded-full border border-accent/60 bg-surface/90 px-3 py-1 text-xs font-semibold text-text no-underline backdrop-blur hover:bg-surface-2" data-testid="globe-explore-chip">
+          Explore {near.name} →</Link>
+      )}
         <div role="group" aria-label="Globe style" className="absolute top-3 right-3 z-10 flex rounded-sm border border-border bg-surface/85 p-0.5 text-[11px] backdrop-blur" data-testid="globe-style">
           {(['dark', 'night', 'day'] as GlobeStyle[]).map((k) => (
             <button key={k} onClick={() => setGstyle(k)} aria-pressed={gstyle === k}

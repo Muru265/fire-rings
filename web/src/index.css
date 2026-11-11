@@ -124,3 +124,6 @@ input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; ba
 
 /* #81e/#87: paper + slide figures show chart + legend only */
 .figure-bare .fig-hide, .figure-bare [role="tooltip"], .figure-bare [data-help] { display: none !important; }
+
+/* #78: soft vignette on the home globe canvas only (attribution stays crisp) — no opaque rectangle at any zoom */
+[data-testid="globe-map"] canvas { -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 74%, transparent 100%); mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 74%, transparent 100%); }
