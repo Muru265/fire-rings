@@ -17,10 +17,12 @@ interface Props {
   onActive: (c: Cell | null) => void
   onSelect: (c: Cell) => void
   label: string
+  /** P1.1: cells outside the chosen date range fade */
+  emphasis?: (y: number, m: number) => boolean
 }
 
 /** Year × month grid. Rows are years (oldest at top); last column is the year total of the shown series. */
-export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onActive, onSelect, label }: Props) {
+export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onActive, onSelect, label, emphasis }: Props) {
   const uid = useId().replace(/:/g, '')
   const { years, byKey } = grid
   const last = useMemo(() => {
@@ -81,7 +83,7 @@ export default function GridCalendar({ grid, colorOf, glyphOf, mode, active, onA
               const glyph = glyphOf?.(r)
               const provisional = r.flags.includes('provisional') || r.flags.includes('mtd')
               const isFocus = focus.y === y && focus.m === m
-              const dim = active && active.y !== y && active.m !== m
+              const dim = (active && active.y !== y && active.m !== m) || (emphasis && !emphasis(y, m))
               return (
                 <div
                   key={m}

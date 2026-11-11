@@ -26,7 +26,7 @@ function takeaway(doc: RegionDoc): string {
 }
 
 /** Annual harmonized totals with 90% bootstrap whiskers; incomplete years drawn hollow. */
-export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: RegionDoc; selectedYear?: number; onSelectYear?: (y: number) => void }) {
+export default function AnnualBars({ doc, selectedYear, onSelectYear, rangeYears }: { doc: RegionDoc; selectedYear?: number; onSelectYear?: (y: number) => void; rangeYears?: [number, number] | null }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
   const data = doc.annual.filter((a) => a.H != null)
@@ -97,7 +97,7 @@ export default function AnnualBars({ doc, selectedYear, onSelectYear }: { doc: R
                 <rect x={bx - 1} y={M.t} width={bw + 2} height={H - M.b - M.t} fill="transparent" />
                 <rect x={bx} y={y(d.H!)} width={bw} height={y(0) - y(d.H!)} rx={Math.min(3, bw / 3)}
                   fill={d.complete && d.rankable !== false ? (sel ? 'var(--accent)' : '#E55C30') : d.terra_only_months ? 'url(#annual-hatch)' : 'transparent'}
-                  stroke={d.complete && d.rankable !== false ? 'none' : '#E55C30'} strokeWidth={1.2} opacity={hover && hover !== d.y ? 0.55 : 1} />
+                  stroke={d.complete && d.rankable !== false ? 'none' : '#E55C30'} strokeWidth={1.2} opacity={rangeYears && (d.y < rangeYears[0] || d.y > rangeYears[1]) ? 0.25 : hover && hover !== d.y ? 0.55 : 1} data-inrange={rangeYears ? String(d.y >= rangeYears[0] && d.y <= rangeYears[1]) : undefined} />
                 {d.lo != null && d.hi != null && (
                   <line x1={bx + bw / 2} x2={bx + bw / 2} y1={y(d.lo)} y2={y(d.hi)} stroke="var(--text)" strokeWidth={1.2} />
                 )}

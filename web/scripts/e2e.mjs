@@ -119,6 +119,28 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 900 })
 
+  // P1.1: date range — URL keeps it, summary card, rings/calendar fade outside, works in High detail and with a box
+  await page.goto(`http://localhost:${PORT}/r/se_australia?from=2019-07&to=2020-03&mode=longterm`, { waitUntil: 'load' })
+  await page.getByTestId('range-summary').waitFor({ timeout: 15000 })
+  check('range: summary card from the URL', (await page.getByTestId('range-summary').innerText()).includes('Jul 2019 – Mar 2020'))
+  check('range: rank shown for a ≤12-month range', /\d+(st|nd|rd|th) of \d+/.test(await page.getByTestId('range-rank').innerText()))
+  const dimmed = await page.locator('[role="grid"] [role="gridcell"].opacity-35').count()
+  check(`range: calendar fades months outside the range (${dimmed})`, dimmed > 200)
+  await page.getByTestId('range-from').selectOption({ label: 'Jan 2015' })
+  await page.waitForTimeout(300)
+  check('range: picker updates the URL', page.url().includes('from=2015-01'))
+  await page.getByTestId('mode-detail').click(); await page.waitForTimeout(500)
+  check('range: survives High detail', page.url().includes('from=2015-01') && (await page.getByTestId('range-summary').isVisible()))
+  await page.getByTestId('mode-longterm').click(); await page.waitForTimeout(300)
+  const dl = page.waitForEvent('download')
+  await page.locator('section[aria-labelledby="rings-h"]').getByRole('button', { name: 'CSV', exact: true }).click()
+  const csv = await (await dl).path().then((f) => import('node:fs').then((fs) => fs.readFileSync(f, 'utf-8')))
+  const rows = csv.trim().split(/\r?\n/).slice(2)
+  check(`range: CSV limited to the range (${rows.length} rows, first ${rows[0]?.slice(0, 7)})`, rows[0]?.startsWith('2015,1,') && rows.at(-1)?.startsWith('2020,3,'))
+  await page.getByTestId('range-reset').click(); await page.waitForTimeout(200)
+  check('range: Full record clears the URL', !page.url().includes('from='))
+  await page.setViewportSize({ width: 1440, height: 900 })
+
   // Fire Watch: run the agent → steps appear → every region gets a status (local preview has no /api → offline replay)
   await page.goto(`http://localhost:${PORT}/watch`, { waitUntil: 'load' })
   await page.getByTestId('run-agent').click()

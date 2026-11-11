@@ -29,6 +29,8 @@ import LineChart from '../components/LineChart'
 import Help from '../components/Help'
 import type { Series } from '../components/LineChart'
 import type { Cell } from '../lib/useCellNav'
+import RangeCard from '../components/RangeCard'
+import { filterRange, inRange, useRange, ymStr } from '../lib/range'
 
 const MapView = lazy(() => import('../components/MapView'))
 const MonthDrawer = lazy(() => import('../components/MonthDrawer'))
@@ -77,6 +79,9 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
   const [compareYear, setCompareYear] = useState<number | null>(null)
   const live = useLive(regionDoc.id)
   const ringsRef = useRef<HTMLDivElement>(null)
+  const [range, setRange] = useRange(regionDoc.months)
+  const rangeTag = range ? `_${ymStr(range.from)}_to_${ymStr(range.to)}` : ''
+  const rangeEmph = range ? (y: number, m: number) => inRange(range, y, m) : undefined
 
   const applyBox = useCallback((b: Box | null) => {
     setBox(b)
@@ -185,6 +190,8 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
           {box && boxState.status === 'loading' && <p className="text-sm text-muted" aria-live="polite">Recomputing {first.y}–{last.y} for the box…</p>}
           {box && boxState.status === 'error' && <p className="rounded-sm border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn" role="status">{boxState.error}</p>}
 
+          <RangeCard doc={doc} range={range} onChange={setRange} boxed={!!boxed} />
+
           <section aria-labelledby="rings-h" className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 id="rings-h" className="font-display text-lg font-semibold">Fire Rings<Help id="fire-rings" /></h2>
@@ -197,18 +204,18 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
                     </button>
                   ))}
                 </div>
-                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}${detail ? '_detail' : ''}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), doc.months,
+                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}${detail ? '_detail' : ''}${rangeTag}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), filterRange(doc.months, range),
                   `view: ${detail ? 'High detail' : 'Long-term'} · fire_days_modis_eq (MODIS-equivalent) and fire_days_viirs_native (VIIRS 375 m, S-NPP-equivalent, 2012+) + raw cell-days · ratio/pct columns follow the view`, boxed ? undefined : baseDoc.months))}
-                  onPng={() => ringsRef.current && downloadPng(ringsRef.current, `fire-rings_${doc.id}.png`)} />
+                  onPng={() => ringsRef.current && downloadPng(ringsRef.current, `fire-rings_${doc.id}${rangeTag}.png`)} />
               </div>
             </div>
             <div ref={ringsRef} className="grid items-center gap-6 bg-surface lg:grid-cols-[minmax(0,1fr)_220px]">
               <FireRings grid={grid} colorOf={colorer.colorOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} drawIn
-                emphasis={compareYear ? (y) => y === compareYear || y === last.y : undefined}
+                emphasis={compareYear ? (y) => y === compareYear || y === last.y : rangeEmph}
                 centerLabel={detail ? 'High detail' : effMode === 'anomaly' ? 'vs typical' : t <= 0 ? 'Raw' : t >= 1 ? 'Harmonized' : 'Morphing'} />
               <div className="space-y-5">
                 <Legend scale={scale} unit={unit} mode={effMode} vertical baseline={regionDoc.baseline} />
-                <p className="text-[10px] text-faint">Fire Rings · {doc.name}{boxed ? ' (box)' : ''} · {detail ? 'High detail' : 'Long-term'} · {MONTHS[first.m - 1]} {first.y}–{MONTHS[last.m - 1]} {last.y} · {effMode === 'anomaly' ? `ratio to ${regionDoc.baseline[0]}–${regionDoc.baseline[1]} median` : unit} · NASA FIRMS {detail ? 'VIIRS' : 'MODIS + VIIRS'} · fire-rings.vercel.app</p>
+                <p className="text-[10px] text-faint">Fire Rings · {doc.name}{boxed ? ' (box)' : ''} · {detail ? 'High detail' : 'Long-term'} · {MONTHS[first.m - 1]} {first.y}–{MONTHS[last.m - 1]} {last.y}{range ? ` · range ${MONTHS[range.from.m - 1]} ${range.from.y}–${MONTHS[range.to.m - 1]} ${range.to.y}` : ''} · {effMode === 'anomaly' ? `ratio to ${regionDoc.baseline[0]}–${regionDoc.baseline[1]} median` : unit} · NASA FIRMS {detail ? 'VIIRS' : 'MODIS + VIIRS'} · fire-rings.vercel.app</p>
               </div>
             </div>
             <div className="mt-5 border-t border-border pt-4">
@@ -235,13 +242,13 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
             </div>
             {table
               ? <CalendarTable grid={grid} mode={viewMode} caption={`${label}, by year and month (${unit})`} />
-              : <GridCalendar grid={grid} colorOf={colorer.colorOf} glyphOf={colorer.glyphOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} />}
+              : <GridCalendar grid={grid} colorOf={colorer.colorOf} glyphOf={colorer.glyphOf} mode={viewMode} active={active} onActive={setActive} onSelect={onSelect} label={label} emphasis={rangeEmph} />}
           </section>
 
           {regionDoc.harmonized && (
             <div className="grid gap-6 2xl:grid-cols-2" data-testid="charts">
               <SeasonalityChart doc={doc} year={insightCell?.y ?? last.y} compareYear={compareYear} />
-              <AnnualBars doc={doc} selectedYear={insightCell?.y} />
+              <AnnualBars doc={doc} selectedYear={insightCell?.y} rangeYears={range ? [range.from.y, range.to.y] : null} />
             </div>
           )}
 
