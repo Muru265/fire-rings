@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { fmtInt, fmtRatio } from '../lib/format'
 import { fromKey, rangeLength, summarizeRange, ymKey } from '../lib/range'
 import type { Range, YM } from '../lib/range'
@@ -15,20 +16,34 @@ const lab = (a: YM) => `${MONTHS[a.m - 1]} ${a.y}`
 /** P1.1: From / To month selector + a summary of the chosen range. Default = the full record (no filter). */
 export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: RegionDoc; range: Range | null; onChange: (r: Range | null) => void; boxed: boolean; box?: Box | null }) {
   const first = doc.months[0], last = doc.months[doc.months.length - 1]
-  const opts: YM[] = []
-  for (let k = ymKey(first); k <= ymKey(last); k++) opts.push(fromKey(k))
+  const years: number[] = []
+  for (let y = first.y; y <= last.y; y++) years.push(y)
   const from = range?.from ?? first, to = range?.to ?? last
+  const [note, setNote] = useState<string | null>(null)
+  // #80: keep From ≤ To (swap) and inside the record (clamp), with a short note saying what happened
   const set = (f: YM, t: YM) => {
-    if (ymKey(f) > ymKey(t)) [f, t] = [t, f]
+    const notes: string[] = []
+    const clamp = (a: YM) => {
+      if (ymKey(a) < ymKey(first)) { notes.push(`the record starts ${lab(first)}`); return first }
+      if (ymKey(a) > ymKey(last)) { notes.push(`the record ends ${lab(last)}`); return last }
+      return a
+    }
+    f = clamp(f); t = clamp(t)
+    if (ymKey(f) > ymKey(t)) { [f, t] = [t, f]; notes.push('From was after To, so they were swapped') }
+    setNote(notes.length ? `${notes.join('; ')}.` : null)
     onChange(ymKey(f) === ymKey(first) && ymKey(t) === ymKey(last) ? null : { from: f, to: t })
   }
+  const cls = 'num rounded-sm border border-border-strong bg-surface-2 px-2 py-1 text-xs text-text'
   const sel = (id: string, label: string, v: YM, onPick: (x: YM) => void) => (
-    <label className="flex items-center gap-2 text-xs text-muted" htmlFor={id}>{label}
-      <select id={id} data-testid={id} value={ymKey(v)} onChange={(e) => onPick(fromKey(Number(e.target.value)))}
-        className="num rounded-sm border border-border-strong bg-surface-2 px-2 py-1 text-xs text-text">
-        {opts.map((o) => <option key={ymKey(o)} value={ymKey(o)}>{lab(o)}</option>)}
+    <fieldset className="flex items-center gap-1.5 text-xs text-muted" data-testid={id}>
+      <legend className="float-left mr-1">{label}</legend>
+      <select aria-label={`${label} month`} data-testid={`${id}-month`} value={v.m} onChange={(e) => onPick({ y: v.y, m: Number(e.target.value) })} className={cls}>
+        {MONTHS.map((mn, i) => <option key={mn} value={i + 1}>{mn}</option>)}
       </select>
-    </label>
+      <select aria-label={`${label} year`} data-testid={`${id}-year`} value={v.y} onChange={(e) => onPick({ y: Number(e.target.value), m: v.m })} className={cls}>
+        {years.map((y) => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </fieldset>
   )
   // quick picks from the data: the last 12 months, the latest season-year (Jul–Jun) and the busiest month of the record
   const presets: [string, Range][] = []
@@ -37,6 +52,13 @@ export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: R
   const ly = last.m >= 6 ? last.y : last.y - 1
   if (ymKey({ y: ly - 1, m: 7 }) >= ymKey(first)) presets.push([`Jul ${ly - 1} – Jun ${ly}`, { from: { y: ly - 1, m: 7 }, to: { y: ly, m: 6 } }])
   if (ymKey({ y: last.y - 1, m: 1 }) >= ymKey(first)) presets.push([`Year ${last.y - 1}`, { from: { y: last.y - 1, m: 1 }, to: { y: last.y - 1, m: 12 } }])
+  // #80: the region's top-ranked Jul–Jun season in the published validation (V9); named only when the app already sources the name
+  const v9 = doc.validation?.v9 as { top3_harmonized?: string[]; known_event?: { event: string; season_start: number } } | undefined
+  const top = v9?.top3_harmonized?.[0] ? Number(v9.top3_harmonized[0].slice(0, 4)) : null
+  if (top != null && ymKey({ y: top, m: 7 }) >= ymKey(first) && ymKey({ y: top + 1, m: 6 }) <= ymKey(last)) {
+    const named = v9?.known_event?.season_start === top ? `${v9.known_event.event.split(',')[0].replace(/ bushfires$/, '')}, ` : ''
+    presets.push([`Biggest season on record (${named}Jul ${top} – Jun ${top + 1})`, { from: { y: top, m: 7 }, to: { y: top + 1, m: 6 } }])
+  }
 
   const s = range ? summarizeRange(doc, range) : null
   const unit = unitOf(doc)
@@ -52,9 +74,10 @@ export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: R
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {presets.map(([l, r]) => (
-          <button key={l} onClick={() => onChange(r)} className="rounded-full border border-border px-2.5 py-0.5 text-[11px] text-muted hover:text-text">{l}</button>
+          <button key={l} onClick={() => { setNote(null); onChange(r) }} data-testid={l.startsWith('Biggest') ? 'preset-biggest' : undefined} className="rounded-full border border-border px-2.5 py-0.5 text-[11px] text-muted hover:text-text">{l}</button>
         ))}
       </div>
+      {note && <p className="mt-2 text-[11px] text-accent-2" data-testid="range-note" role="status">{note}</p>}
       {!s ? (
         <p className="mt-3 text-sm text-muted">Showing the full record, {lab(first)} – {lab(last)}. Pick a From and To month to total a season, a year or any stretch — the rings, calendar, annual bars and CSV/PNG exports follow the range.</p>
       ) : (

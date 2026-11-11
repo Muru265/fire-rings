@@ -127,9 +127,20 @@ try {
   check('range: rank shown for a ≤12-month range', /\d+(st|nd|rd|th) of \d+/.test(await page.getByTestId('range-rank').innerText()))
   const dimmed = await page.locator('[role="grid"] [role="gridcell"].opacity-35').count()
   check(`range: calendar fades months outside the range (${dimmed})`, dimmed > 200)
-  await page.getByTestId('range-from').selectOption({ label: 'Jan 2015' })
-  await page.waitForTimeout(300)
-  check('range: picker updates the URL', page.url().includes('from=2015-01'))
+  // #80: Month + Year selects (not one 311-item list); From ≤ To kept with a note; data-driven "Biggest season" preset
+  check('#80 From/To are Month (12) + Year selects', (await page.getByTestId('range-from-month').locator('option').count()) === 12 && (await page.getByTestId('range-to-year').locator('option').count()) < 40)
+  await page.getByTestId('range-from-year').selectOption('2021'); await page.waitForTimeout(300)
+  check('#80 From after To → swapped, with a short note', page.url().includes('from=2020-03') && page.url().includes('to=2021-07') && /swapped/.test(await page.getByTestId('range-note').innerText().catch(() => '')))
+  await page.getByTestId('preset-biggest').click(); await page.waitForTimeout(300)
+  const big = await page.getByTestId('preset-biggest').innerText()
+  check(`#80 "Biggest season" preset from the data (${big})`, /Black Summer/.test(big) && page.url().includes('from=2019-07') && page.url().includes('to=2020-06') && (await page.getByTestId('range-summary').innerText()).includes('Jul 2019 – Jun 2020'))
+  await page.getByTestId('range-from-month').selectOption('1'); await page.waitForTimeout(200)
+  await page.getByTestId('range-from-year').selectOption('2015'); await page.waitForTimeout(200)
+  await page.getByTestId('range-to-month').selectOption('3'); await page.waitForTimeout(300)
+  check('range: picker updates the URL + summary card', page.url().includes('from=2015-01') && page.url().includes('to=2020-03') && (await page.getByTestId('range-summary').innerText()).includes('Jan 2015 – Mar 2020'))
+  await page.getByTestId('range-from-year').focus(); await page.keyboard.press('ArrowDown'); await page.waitForTimeout(300)
+  check('#80 keyboard: ArrowDown on the year select changes the range', page.url().includes('from=2016-01'))
+  await page.getByTestId('range-from-year').selectOption('2015'); await page.waitForTimeout(300)
   await page.getByTestId('mode-detail').click(); await page.waitForTimeout(500)
   check('range: survives High detail', page.url().includes('from=2015-01') && (await page.getByTestId('range-summary').isVisible()))
   await page.getByTestId('mode-longterm').click(); await page.waitForTimeout(300)
@@ -293,12 +304,37 @@ try {
     await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 }); await pg.waitForTimeout(2500)
     const dot = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('small').filter((f) => f.properties.name === 'Mauritius').length)
     check('globe: Mauritius is a small dot at world zoom', dot >= 1)
-    await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 7.5 }) })
+    await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 6 }) })
     await pg.waitForTimeout(4000)
     const hexN = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('hex6').filter((f) => f.properties.name === 'Mauritius').length)
     check(`globe: zoomed on Mauritius shows ~36 km² hexagons (${hexN})`, hexN >= 1)
     await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_zoom.png') })
     await pg.close()
+  }
+
+  // #78: zoomed to the cap over Mauritius at 1280/1440/1920 — zoom capped, "Explore Mauritius →" chip, the map canvas never
+  // overlaps the hero text, and no opaque grey rectangle (corner pixels of the map box stay page-dark)
+  {
+    const { PNG } = await import('pngjs')
+    for (const [w, h] of [[1280, 800], [1440, 900], [1920, 1080]]) {
+      const pg = await browser.newPage({ viewport: { width: w, height: h } })
+      await pg.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
+      await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 }); await pg.waitForTimeout(2000)
+      await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 20 }) })
+      await pg.waitForTimeout(3500)
+      const z = await pg.evaluate(() => window.__frGlobe.getZoom())
+      const chip = await pg.getByTestId('globe-explore-chip').innerText().catch(() => '')
+      const [cv, tx] = await pg.evaluate(() => [document.querySelector('[data-testid="hero-globe"] canvas').getBoundingClientRect().toJSON(), document.querySelector('[data-testid="hero-text"]').getBoundingClientRect().toJSON()])
+      const overlap = !(cv.left >= tx.right || cv.right <= tx.left || cv.top >= tx.bottom || cv.bottom <= tx.top)
+      const box = await pg.getByTestId('globe-map').boundingBox()
+      const png = PNG.sync.read(await pg.screenshot({ clip: box }))
+      const patch = (x0, y0) => { let r = 0, g = 0, b = 0, n = 0; for (let y = y0; y < y0 + 12; y++) for (let x = x0; x < x0 + 12; x++) { const k = (y * png.width + x) * 4; r += png.data[k]; g += png.data[k + 1]; b += png.data[k + 2]; n++ } return [r / n, g / n, b / n].map(Math.round) }
+      const corners = [patch(2, 2), patch(png.width - 14, 2), patch(2, png.height - 14), patch(png.width - 14, png.height - 14)]
+      const greyBox = corners.some((c) => Math.max(...c) > 26)
+      check(`#78 ${w}px: zoom capped (${z.toFixed(1)}), chip "${chip.trim()}", canvas clear of hero text, no grey box (corners ${corners.map((c) => c.join('/')).join(' ')})`, z <= 6.01 && /Explore Mauritius/.test(chip) && !overlap && !greyBox)
+      if (w === 1920) await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_cap_1920.png') })
+      await pg.close()
+    }
   }
 
   // QA #69: on phones the globe is not hidden behind the hero text
