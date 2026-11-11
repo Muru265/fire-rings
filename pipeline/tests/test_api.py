@@ -60,3 +60,21 @@ def test_index_lists_endpoints():
     paths = " ".join(e["path"] for e in idx["endpoints"])
     for p in ("/api/hotspots", "/api/series/", "/api/projection/", "/api/power/", "/api/reunion.json"):
         assert p in paths
+
+
+def test_reunion_sourced_and_windowed():
+    p = WEB / "api" / "reunion.json"
+    if not p.exists():
+        pytest.skip("Réunion file not published yet")
+    r = J("api/reunion.json")
+    assert r["eruption_list"] == "sourced"
+    for e in r["eruptions"]:
+        assert e["url"].startswith("https://volcano.si.edu/") and "GVP" in e["source"] or "Global Volcanism" in e["source"]
+        assert e["start"] <= e["end"]
+        for k, v in e["sensors"].items():
+            if v and v["detected"]:
+                assert v["detections"] >= v["detection_days"] >= 1 and v["first_detection"] >= e["start"]
+    for k in ("modis", "viirs"):
+        arr = r["series"][k]["detections"]
+        assert any(x is None for x in arr), "days outside the downloaded windows must be null, not zero"
+        assert sum(1 for x in arr if x is not None) == r["series"][k]["days_downloaded"] or r["series"][k]["days_downloaded"] >= sum(1 for x in arr if x is not None)
