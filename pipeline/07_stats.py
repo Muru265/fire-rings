@@ -25,7 +25,7 @@ import numpy as np
 import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import config, path, read_json, write_json  # noqa: E402
+from lib.common import published_regions, config, path, read_json, write_json  # noqa: E402
 from lib.common import data_end as region_end  # noqa: E402
 
 
@@ -68,7 +68,7 @@ def main() -> None:
     st = cfg["stats"]
     b0, b1 = st["baseline"]
     out = path("out")
-    for region in cfg["regions"]:
+    for region in published_regions():
         data_end = region_end(region)
         h = pl.read_parquet(out / f"harmonized_{region}.parquet")
         draws = np.load(out / f"hdraws_{region}.npy")

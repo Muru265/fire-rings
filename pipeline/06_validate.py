@@ -283,6 +283,24 @@ def write_report(allres: dict) -> None:
                  f"{s['step_raw_pct']}% | {s['step_harm_pct']}% ({s['step_harm_ci'][0]} – {s['step_harm_ci'][1]}) | "
                  f"{s['step_modis_pct']}% | {s['step_p_raw']} → {s['step_p']} | {tag(s['v3_pass'])} | {s['shape_r']} | "
                  f"{s['drift_post2020_rel_pct']}% |")
+    gated = [r for r in allres if config()["regions"][r].get("gate")]
+    if gated:
+        L += ["", "## Round 5B validation gate (new regions)", "",
+              "A new region is shown in the app only if its method passes V1 (|bias| ≤ 10 %, MAPE < 20 %) AND V3",
+              "(harmonized 2012 step consistent with MODIS-only and no Pettitt jump, p > 0.05). The pooled-ratio fallback is used",
+              "only if it validates better. Regions that fail are not shown anywhere in the app.", ""]
+        for r in gated:
+            s = allres[r]["summary"]
+            ok = s["v1_pass"] and s["v3_pass"] and abs(s["loyo_bias_pct"]) <= 10
+            L.append(f"- **{r}** — {'✅ validated, shown' if ok else '❌ not validated (not shown)'}: method `{s['method']}`, "
+                     f"V1 bias {s['loyo_bias_pct']}%, MAPE {s['loyo_err_pct']}%; V3 raw step {s['step_raw_pct']}%, harmonized "
+                     f"{s['step_harm_pct']}% (90 % CI {s['step_harm_ci'][0]} – {s['step_harm_ci'][1]}), MODIS-only "
+                     f"{s['step_modis_pct']}%, Pettitt p {s['step_p_raw']} → {s['step_p']}.")
+            if not ok and not s["v3_pass"] and s["step_p"] <= 0.05:
+                L.append(f"  - Fails V3 because the harmonized annual series still has a Pettitt change point (p = {s['step_p']} ≤ 0.05; "
+                         f"change year {allres[r]['results'][s['method']]['V3']['pettitt_cp_harm']}). The harmonized step is close to "
+                         "MODIS-only, so this may be a real change in fire activity rather than a sensor seam, but the gate is applied as "
+                         "written and the region is left out.")
     L += ["", "Method choice:", ""]
     for region, d in allres.items():
         L.append(f"- **{region}**: `{d['summary']['method']}` — {d['summary']['method_reason']}")

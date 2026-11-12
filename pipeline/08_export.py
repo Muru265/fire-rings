@@ -22,7 +22,7 @@ import numpy as np
 import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import config, connect, path, read_json, sql_path, write_json  # noqa: E402
+from lib.common import published_regions, config, connect, path, read_json, sql_path, write_json  # noqa: E402
 from lib.common import data_end as region_end  # noqa: E402
 
 PROVISIONAL_AFTER = {"MODIS": dt.date(2026, 8, 31), "VIIRS": dt.date(2026, 7, 31)}  # archive ends → NRT after
@@ -351,10 +351,35 @@ def export_region(region: str, rc: dict, data_end: dt.date, web: Path) -> dict:
         "harmonized": bool(harm),
         "detail": detail,
     }
+    if rc.get("study_check"):   # Round 5B: compare with a published study (config-driven; only Tanzania so far)
+        doc["study_check"] = study_check(months, valid.get("summary") or {}, rc["study_check"])
     write_json(web / "regions" / f"{region}.json", doc, compact=True)
     return {"id": region, "name": rc["name"], "bbox": bbox, "months": len(months), "method": method, "globe": globe,
             "harmonized": bool(harm), "first": f"{months[0]['y']}-{months[0]['m']:02d}", "last": latest_key,
             "latest": stats.get("latest"), "latest_complete": stats.get("latest_complete"), "doc": doc}
+
+
+def study_check(months: list[dict], vs: dict, sc: dict) -> dict:
+    """Mean annual fire-days in two periods (harmonized H and raw MODIS-only Terra∪Aqua cell-days) + the naive raw
+    MODIS→VIIRS step at 2012 from V3. Only years where BOTH series have all 12 months are used (2012 lacks January
+    data, so it drops out); the years actually used are reported."""
+    def complete(y: int) -> bool:
+        rs = [r for r in months if r["y"] == y]
+        return len(rs) == 12 and all(r.get("H") is not None and r.get("raw_modis") is not None for r in rs)
+    def mean_annual(key: str, years: list[int]) -> float:
+        return sum(sum(r[key] for r in months if r["y"] == y) for y in years) / len(years)
+    (a0, a1), (b0, b1) = sc["periods"]
+    ya = [y for y in range(a0, a1 + 1) if complete(y)]
+    yb = [y for y in range(b0, b1 + 1) if complete(y)]
+    out = {"study": sc["study"], "periods": sc["periods"], "years_a": [ya[0], ya[-1], len(ya)], "years_b": [yb[0], yb[-1], len(yb)],
+           "dropped": sorted(set(range(a0, a1 + 1)) - set(ya) | set(range(b0, b1 + 1)) - set(yb))}
+    for key, name in (("H", "harmonized"), ("raw_modis", "modis_only")):
+        A, B = mean_annual(key, ya), mean_annual(key, yb)
+        out[name] = {"mean_a": round(A, 1), "mean_b": round(B, 1), "change_pct": round(100 * (B / A - 1), 1)}
+    out["raw_step_2012_pct"] = vs.get("step_raw_pct")
+    out["note"] = ("Areas differ: the study covers Tanzania's miombo woodlands; this record covers the whole country. "
+                   "MODIS-only after 2020 is affected by Terra/Aqua orbit drift.")
+    return out
 
 
 def write_dataset(regs: list[dict], web: Path) -> None:
@@ -408,8 +433,8 @@ def write_dataset(regs: list[dict], web: Path) -> None:
 def main() -> None:
     cfg = config()
     web = path("web")
-    data_end = max(region_end(r) for r in cfg["regions"])
-    regs = [export_region(r, rc, region_end(r), web) for r, rc in cfg["regions"].items()]
+    data_end = max(region_end(r) for r in published_regions())
+    regs = [export_region(r, rc, region_end(r), web) for r, rc in cfg["regions"].items() if r in published_regions()]
     write_dataset(regs, web)
     write_json(web / "globe.json", {"res": 4, "unit": "fire cell-days (MODIS-equivalent), res-4 parent sums",
                                     "regions": {r["id"]: r.pop("globe") for r in regs}}, compact=True)

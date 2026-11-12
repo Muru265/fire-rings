@@ -36,6 +36,35 @@ regions:
     note: Republic of Mauritius as delivered by FIRMS (includes Rodrigues, excludes Réunion)
     inset_name: Rodrigues
 
+  # Round 5B: clipped from the FIRMS WORLD archive download by pipeline/tools/clip_world.py (Natural Earth 10m v5.1.2)
+  nt_savanna:
+    name: Northern Australia savanna (NT)
+    source: nt_savanna
+    bbox: null
+    gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
+    note: Northern Territory (Natural Earth admin-1)
+  ne_india:
+    name: Northeast India
+    source: ne_india
+    bbox: null
+    gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
+    note: Assam, Meghalaya, Tripura, Mizoram, Manipur, Nagaland, Arunachal Pradesh (Natural Earth admin-1)
+  tanzania:
+    name: Tanzania
+    source: tanzania
+    bbox: null
+    gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
+    note: United Republic of Tanzania incl. Zanzibar (Natural Earth admin-0)
+    study_check:
+      study: "Tarimo B., Dick Ø.B., Gobakken T., Totland Ø. (2015) Carbon Balance and Management 10:18, doi:10.1186/s13021-015-0029-2"
+      periods: [[2003, 2012], [2016, 2025]]
+  sudan:
+    name: Sudan
+    source: sudan
+    bbox: null
+    gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
+    note: Today's Sudan border (Natural Earth admin-0) used for ALL years, so South Sudan's 2011 separation creates no artificial drop
+
 filters:
   drop_conf: [L]           # MODIS 0–29, VIIRS 'l'
   drop_types: [1, 2, 3]    # archive only; NRT has no type column (kept as NULL)
@@ -90,6 +119,10 @@ watch:
     madagascar: "fire services, land managers and conservation teams, researchers and journalists"
     se_australia: "fire services and land managers, researchers and journalists"
     mauritius: "land managers, researchers and journalists"
+    nt_savanna: "fire services and land managers, researchers and journalists"
+    ne_india: "fire services, forest departments and land managers, researchers and journalists"
+    tanzania: "fire services, land managers and conservation teams, researchers and journalists"
+    sudan: "land managers, researchers and journalists"
 
 record:
   start: "2001-01"

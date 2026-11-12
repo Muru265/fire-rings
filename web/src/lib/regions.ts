@@ -4,6 +4,9 @@ export const REGIONS = [
   { id: 'madagascar', name: 'Madagascar', country: 'Madagascar' },
   { id: 'se_australia', name: 'SE Australia', country: 'Australia' },
   { id: 'mauritius', name: 'Mauritius', country: 'Mauritius' },
+  { id: 'nt_savanna', name: 'Northern Australia savanna', country: 'Australia', area: 'the Northern Territory (state border)' },
+  { id: 'ne_india', name: 'Northeast India', country: 'India', area: '7 northeastern states (state borders)' },
+  { id: 'tanzania', name: 'Tanzania', country: 'Tanzania', area: 'the whole country (incl. Zanzibar)' },
 ] as const
 
 export type RegionId = (typeof REGIONS)[number]['id']

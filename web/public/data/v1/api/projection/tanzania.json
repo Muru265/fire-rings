@@ -1,0 +1,875 @@
+{
+ "region": "tanzania",
+ "name": "Tanzania",
+ "data_end": "2026-11-08",
+ "baseline": [
+  2003,
+  2022
+ ],
+ "unit": "fire-days (MODIS-equivalent)",
+ "checkpoints": [
+  5,
+  10,
+  15,
+  20,
+  25
+ ],
+ "method": "Leave-one-year-out over the baseline years. projection = month-so-far ÷ median same-days-so-far × median full month; typical = median full month. Error = median absolute % error vs the real full month (MdAPE). Range = projection × P10–P90 of past actual/projection. Not a weather-based forecast.",
+ "months": [
+  {
+   "m": 1,
+   "years": 19,
+   "typical": 138.0,
+   "p10": 101.4,
+   "p90": 397.4,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 19,
+     "mdape_projection": 53.3,
+     "mdape_typical": 58.0,
+     "better": "projection",
+     "range_factor": [
+      0.491,
+      2.77
+     ],
+     "typical_so_far": 22.7
+    },
+    {
+     "day": 10,
+     "n_years": 19,
+     "mdape_projection": 46.0,
+     "mdape_typical": 58.0,
+     "better": "projection",
+     "range_factor": [
+      0.545,
+      2.517
+     ],
+     "typical_so_far": 54.0
+    },
+    {
+     "day": 15,
+     "n_years": 19,
+     "mdape_projection": 47.1,
+     "mdape_typical": 58.0,
+     "better": "projection",
+     "range_factor": [
+      0.586,
+      2.384
+     ],
+     "typical_so_far": 77.0
+    },
+    {
+     "day": 20,
+     "n_years": 19,
+     "mdape_projection": 30.9,
+     "mdape_typical": 58.0,
+     "better": "projection",
+     "range_factor": [
+      0.665,
+      1.673
+     ],
+     "typical_so_far": 90.1
+    },
+    {
+     "day": 25,
+     "n_years": 19,
+     "mdape_projection": 16.7,
+     "mdape_typical": 58.0,
+     "better": "projection",
+     "range_factor": [
+      0.781,
+      1.271
+     ],
+     "typical_so_far": 116.3
+    }
+   ]
+  },
+  {
+   "m": 2,
+   "years": 20,
+   "typical": 225.2,
+   "p10": 86.8,
+   "p90": 724.7,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 42.8,
+     "mdape_typical": 59.1,
+     "better": "projection",
+     "range_factor": [
+      0.534,
+      4.74
+     ],
+     "typical_so_far": 35.5
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 24.7,
+     "mdape_typical": 59.1,
+     "better": "projection",
+     "range_factor": [
+      0.673,
+      2.275
+     ],
+     "typical_so_far": 80.5
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 23.4,
+     "mdape_typical": 59.1,
+     "better": "projection",
+     "range_factor": [
+      0.816,
+      2.12
+     ],
+     "typical_so_far": 135.2
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 10.8,
+     "mdape_typical": 59.1,
+     "better": "projection",
+     "range_factor": [
+      0.912,
+      1.619
+     ],
+     "typical_so_far": 178.7
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 6.3,
+     "mdape_typical": 59.1,
+     "better": "projection",
+     "range_factor": [
+      0.924,
+      1.142
+     ],
+     "typical_so_far": 200.7
+    }
+   ]
+  },
+  {
+   "m": 3,
+   "years": 20,
+   "typical": 192.0,
+   "p10": 55.9,
+   "p90": 425.0,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 52.6,
+     "mdape_typical": 59.2,
+     "better": "projection",
+     "range_factor": [
+      0.477,
+      2.435
+     ],
+     "typical_so_far": 37.8
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 31.2,
+     "mdape_typical": 59.2,
+     "better": "projection",
+     "range_factor": [
+      0.554,
+      1.405
+     ],
+     "typical_so_far": 71.5
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 20.3,
+     "mdape_typical": 59.2,
+     "better": "projection",
+     "range_factor": [
+      0.68,
+      1.243
+     ],
+     "typical_so_far": 107.8
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 16.5,
+     "mdape_typical": 59.2,
+     "better": "projection",
+     "range_factor": [
+      0.775,
+      1.178
+     ],
+     "typical_so_far": 138.3
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 9.8,
+     "mdape_typical": 59.2,
+     "better": "projection",
+     "range_factor": [
+      0.849,
+      1.105
+     ],
+     "typical_so_far": 164.2
+    }
+   ]
+  },
+  {
+   "m": 4,
+   "years": 20,
+   "typical": 36.0,
+   "p10": 16.6,
+   "p90": 141.8,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 60.8,
+     "mdape_typical": 52.9,
+     "better": "typical",
+     "range_factor": [
+      0.525,
+      2.622
+     ],
+     "typical_so_far": 5.4
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 31.4,
+     "mdape_typical": 52.9,
+     "better": "projection",
+     "range_factor": [
+      0.633,
+      2.247
+     ],
+     "typical_so_far": 11.4
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 29.5,
+     "mdape_typical": 52.9,
+     "better": "projection",
+     "range_factor": [
+      0.729,
+      2.015
+     ],
+     "typical_so_far": 16.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 29.8,
+     "mdape_typical": 52.9,
+     "better": "projection",
+     "range_factor": [
+      0.655,
+      1.469
+     ],
+     "typical_so_far": 18.4
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 14.0,
+     "mdape_typical": 52.9,
+     "better": "projection",
+     "range_factor": [
+      0.718,
+      1.01
+     ],
+     "typical_so_far": 25.1
+    }
+   ]
+  },
+  {
+   "m": 5,
+   "years": 20,
+   "typical": 853.8,
+   "p10": 453.8,
+   "p90": 1749.2,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 40.5,
+     "mdape_typical": 49.9,
+     "better": "projection",
+     "range_factor": [
+      0.449,
+      1.466
+     ],
+     "typical_so_far": 14.4
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 31.7,
+     "mdape_typical": 49.9,
+     "better": "projection",
+     "range_factor": [
+      0.305,
+      1.191
+     ],
+     "typical_so_far": 42.3
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 37.6,
+     "mdape_typical": 49.9,
+     "better": "projection",
+     "range_factor": [
+      0.47,
+      1.584
+     ],
+     "typical_so_far": 114.6
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 23.9,
+     "mdape_typical": 49.9,
+     "better": "projection",
+     "range_factor": [
+      0.644,
+      1.359
+     ],
+     "typical_so_far": 251.8
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 22.5,
+     "mdape_typical": 49.9,
+     "better": "projection",
+     "range_factor": [
+      0.742,
+      1.658
+     ],
+     "typical_so_far": 445.3
+    }
+   ]
+  },
+  {
+   "m": 6,
+   "years": 20,
+   "typical": 7039.9,
+   "p10": 3703.8,
+   "p90": 9683.5,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 30.2,
+     "mdape_typical": 22.6,
+     "better": "typical",
+     "range_factor": [
+      0.572,
+      1.836
+     ],
+     "typical_so_far": 568.0
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 15.9,
+     "mdape_typical": 22.6,
+     "better": "projection",
+     "range_factor": [
+      0.781,
+      1.733
+     ],
+     "typical_so_far": 1562.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 15.3,
+     "mdape_typical": 22.6,
+     "better": "projection",
+     "range_factor": [
+      0.828,
+      1.386
+     ],
+     "typical_so_far": 2679.5
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 9.8,
+     "mdape_typical": 22.6,
+     "better": "projection",
+     "range_factor": [
+      0.857,
+      1.19
+     ],
+     "typical_so_far": 3997.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 6.6,
+     "mdape_typical": 22.6,
+     "better": "projection",
+     "range_factor": [
+      0.904,
+      1.038
+     ],
+     "typical_so_far": 5197.7
+    }
+   ]
+  },
+  {
+   "m": 7,
+   "years": 20,
+   "typical": 12758.2,
+   "p10": 9545.0,
+   "p90": 16319.8,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 11.9,
+     "mdape_typical": 13.7,
+     "better": "projection",
+     "range_factor": [
+      0.776,
+      1.243
+     ],
+     "typical_so_far": 1865.3
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 10.0,
+     "mdape_typical": 13.7,
+     "better": "projection",
+     "range_factor": [
+      0.83,
+      1.217
+     ],
+     "typical_so_far": 3997.9
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 9.3,
+     "mdape_typical": 13.7,
+     "better": "projection",
+     "range_factor": [
+      0.903,
+      1.305
+     ],
+     "typical_so_far": 6409.8
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 6.2,
+     "mdape_typical": 13.7,
+     "better": "projection",
+     "range_factor": [
+      0.939,
+      1.17
+     ],
+     "typical_so_far": 8509.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.1,
+     "mdape_typical": 13.7,
+     "better": "projection",
+     "range_factor": [
+      0.958,
+      1.085
+     ],
+     "typical_so_far": 10543.7
+    }
+   ]
+  },
+  {
+   "m": 8,
+   "years": 20,
+   "typical": 10886.2,
+   "p10": 8632.2,
+   "p90": 12849.6,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 13.0,
+     "mdape_typical": 10.6,
+     "better": "typical",
+     "range_factor": [
+      0.808,
+      1.498
+     ],
+     "typical_so_far": 1759.3
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 8.9,
+     "mdape_typical": 10.6,
+     "better": "projection",
+     "range_factor": [
+      0.886,
+      1.367
+     ],
+     "typical_so_far": 3555.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 10.7,
+     "mdape_typical": 10.6,
+     "better": "typical",
+     "range_factor": [
+      0.867,
+      1.275
+     ],
+     "typical_so_far": 5251.0
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 8.8,
+     "mdape_typical": 10.6,
+     "better": "projection",
+     "range_factor": [
+      0.9,
+      1.316
+     ],
+     "typical_so_far": 7128.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 6.2,
+     "mdape_typical": 10.6,
+     "better": "projection",
+     "range_factor": [
+      0.971,
+      1.158
+     ],
+     "typical_so_far": 9093.1
+    }
+   ]
+  },
+  {
+   "m": 9,
+   "years": 20,
+   "typical": 8711.3,
+   "p10": 6361.8,
+   "p90": 11174.7,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 22.4,
+     "mdape_typical": 17.8,
+     "better": "typical",
+     "range_factor": [
+      0.687,
+      1.68
+     ],
+     "typical_so_far": 1338.6
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 12.8,
+     "mdape_typical": 17.8,
+     "better": "projection",
+     "range_factor": [
+      0.816,
+      1.328
+     ],
+     "typical_so_far": 2744.4
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 8.5,
+     "mdape_typical": 17.8,
+     "better": "projection",
+     "range_factor": [
+      0.781,
+      1.192
+     ],
+     "typical_so_far": 4198.4
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 7.7,
+     "mdape_typical": 17.8,
+     "better": "projection",
+     "range_factor": [
+      0.832,
+      1.083
+     ],
+     "typical_so_far": 5565.2
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 6.3,
+     "mdape_typical": 17.8,
+     "better": "projection",
+     "range_factor": [
+      0.876,
+      1.003
+     ],
+     "typical_so_far": 6886.2
+    }
+   ]
+  },
+  {
+   "m": 10,
+   "years": 20,
+   "typical": 6902.4,
+   "p10": 5579.3,
+   "p90": 8411.0,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 24.4,
+     "mdape_typical": 16.0,
+     "better": "typical",
+     "range_factor": [
+      0.686,
+      1.64
+     ],
+     "typical_so_far": 1096.2
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 22.9,
+     "mdape_typical": 16.0,
+     "better": "typical",
+     "range_factor": [
+      0.73,
+      1.546
+     ],
+     "typical_so_far": 2408.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 17.8,
+     "mdape_typical": 16.0,
+     "better": "typical",
+     "range_factor": [
+      0.832,
+      1.316
+     ],
+     "typical_so_far": 3738.7
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 7.5,
+     "mdape_typical": 16.0,
+     "better": "projection",
+     "range_factor": [
+      0.875,
+      1.212
+     ],
+     "typical_so_far": 4849.4
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.6,
+     "mdape_typical": 16.0,
+     "better": "projection",
+     "range_factor": [
+      0.935,
+      1.091
+     ],
+     "typical_so_far": 5928.0
+    }
+   ]
+  },
+  {
+   "m": 11,
+   "years": 20,
+   "typical": 2692.8,
+   "p10": 1490.0,
+   "p90": 3817.5,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 21.3,
+     "mdape_typical": 29.2,
+     "better": "projection",
+     "range_factor": [
+      0.756,
+      2.472
+     ],
+     "typical_so_far": 697.0
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 13.7,
+     "mdape_typical": 29.2,
+     "better": "projection",
+     "range_factor": [
+      0.865,
+      1.391
+     ],
+     "typical_so_far": 1340.7
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 5.8,
+     "mdape_typical": 29.2,
+     "better": "projection",
+     "range_factor": [
+      0.949,
+      1.172
+     ],
+     "typical_so_far": 1844.6
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 6.9,
+     "mdape_typical": 29.2,
+     "better": "projection",
+     "range_factor": [
+      0.938,
+      1.15
+     ],
+     "typical_so_far": 2242.1
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 4.3,
+     "mdape_typical": 29.2,
+     "better": "projection",
+     "range_factor": [
+      0.976,
+      1.083
+     ],
+     "typical_so_far": 2599.4
+    }
+   ]
+  },
+  {
+   "m": 12,
+   "years": 20,
+   "typical": 365.1,
+   "p10": 196.7,
+   "p90": 687.1,
+   "checkpoints": [
+    {
+     "day": 5,
+     "n_years": 20,
+     "mdape_projection": 26.8,
+     "mdape_typical": 36.5,
+     "better": "projection",
+     "range_factor": [
+      0.692,
+      2.538
+     ],
+     "typical_so_far": 108.4
+    },
+    {
+     "day": 10,
+     "n_years": 20,
+     "mdape_projection": 25.2,
+     "mdape_typical": 36.5,
+     "better": "projection",
+     "range_factor": [
+      0.797,
+      1.689
+     ],
+     "typical_so_far": 200.0
+    },
+    {
+     "day": 15,
+     "n_years": 20,
+     "mdape_projection": 16.1,
+     "mdape_typical": 36.5,
+     "better": "projection",
+     "range_factor": [
+      0.803,
+      1.33
+     ],
+     "typical_so_far": 254.1
+    },
+    {
+     "day": 20,
+     "n_years": 20,
+     "mdape_projection": 12.1,
+     "mdape_typical": 36.5,
+     "better": "projection",
+     "range_factor": [
+      0.874,
+      1.213
+     ],
+     "typical_so_far": 311.0
+    },
+    {
+     "day": 25,
+     "n_years": 20,
+     "mdape_projection": 11.1,
+     "mdape_typical": 36.5,
+     "better": "projection",
+     "range_factor": [
+      0.839,
+      1.155
+     ],
+     "typical_so_far": 327.2
+    }
+   ]
+  }
+ ],
+ "current": {
+  "y": 2026,
+  "m": 11,
+  "days": 8,
+  "so_far": 2007.3,
+  "typical_so_far": 1024.8,
+  "typical_so_far_app": 1024.7,
+  "typical": 2692.8,
+  "p10": 1490.0,
+  "p90": 3817.5,
+  "projection": 5274.6,
+  "checkpoint": 10,
+  "range": [
+   4562.5,
+   7337.0
+  ],
+  "better": "projection",
+  "reason": null,
+  "provisional": true
+ },
+ "next_month": {
+  "y": 2026,
+  "m": 12,
+  "typical": 365.1,
+  "p10": 196.7,
+  "p90": 687.1
+ }
+}

@@ -6,6 +6,7 @@ import pytest
 
 WEB = Path(__file__).resolve().parents[2] / "web" / "public" / "data" / "v1"
 OUT = Path(__file__).resolve().parents[2] / "data" / "out"
+needs_out = pytest.mark.skipif(not OUT.exists(), reason="needs data/out (local pipeline run; absent on GitHub runners)")
 REGIONS = ["punjab", "madagascar", "se_australia", "mauritius"]
 pytestmark = pytest.mark.skipif(not (WEB / "regions" / "punjab.json").exists(), reason="run the pipeline first")
 
@@ -26,6 +27,7 @@ def test_terra_only_months_flagged_and_never_ranked(region):
     assert 2001 not in d["similar_years"] and 2002 not in d["similar_years"]
 
 
+@needs_out
 @pytest.mark.parametrize("region", REGIONS)
 def test_v9_excludes_terra_only_seasons(region):
     v9 = json.loads((OUT / f"validation_{region}.json").read_text(encoding="utf-8"))["summary"]["v9"]
@@ -60,6 +62,7 @@ def test_published_return_periods_agree_with_percentiles(region):
             assert 100 / (100 - p0) - 0.05 <= m["rp"] <= 100 / (100 - min(p1, 95.3)) + 0.05, (region, m["y"], m["m"], m["pct"], m["rp"])
 
 
+@needs_out
 def test_timing_check_signal_is_punjab_specific():
     t = json.loads((OUT / "punjab_timing.json").read_text(encoding="utf-8"))
     p = t["punjab|Oct–Nov (rice residue)"]["aqua_rel_2022_2026"]

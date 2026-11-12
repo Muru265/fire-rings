@@ -8,7 +8,7 @@ import { join } from 'node:path'
 import { cacheKey, fetchHotspots, FALLBACK_AVAIL, InputError, parseQuery, toCsv, toJson } from './_lib/hotspots.js'
 import type { LiveFile, Query } from './_lib/hotspots.js'
 
-const REGIONS: Record<string, string> = { punjab: 'Punjab–Haryana', madagascar: 'Madagascar', se_australia: 'SE Australia (NSW + VIC)', mauritius: 'Mauritius (incl. Rodrigues)' }
+const REGIONS: Record<string, string> = { punjab: 'Punjab–Haryana', madagascar: 'Madagascar', se_australia: 'SE Australia (NSW + VIC)', mauritius: 'Mauritius (incl. Rodrigues)', nt_savanna: 'Northern Australia savanna (NT)', ne_india: 'Northeast India', tanzania: 'Tanzania' }
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-expose-headers': 'x-fire-rings-cache, x-fire-rings-rows' }
 const BUSY = 'NASA’s data service is busy — try again in a few minutes; hexagons still work.'
 const MAX_BYTES = 4_200_000 // Vercel function response limit is 4.5 MB

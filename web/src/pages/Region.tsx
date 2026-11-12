@@ -21,6 +21,7 @@ import { fmtCompact, fmtInt } from '../lib/format'
 import type { Box } from '../lib/hexes'
 import { headline, judgeMonth } from '../lib/headline'
 import { REGIONS, findRegion } from '../lib/regions'
+import StudyCheck from '../components/StudyCheck'
 import { MONTHS, toGrid } from '../lib/series'
 import type { CalMode, DataMode, RegionDoc } from '../lib/types'
 import { hasDetail, toDetail } from '../lib/detail'
@@ -134,8 +135,8 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
       {/* header */}
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow" title={regionDoc.area_km2 ? 'A rectangle cut from the country file (West/South/East/North edges in the map card).' : 'The whole country file from NASA FIRMS.'}>
-            {regionDoc.area_km2 ? `Area covered: ${fmtInt(regionDoc.area_km2)} km²` : 'Area covered: the whole country'} · {MONTHS[first.m - 1]} {first.y} – {MONTHS[last.m - 1]} {last.y}
+          <p className="eyebrow" title={regionDoc.area_km2 ? 'A rectangle cut from the country file (West/South/East/North edges in the map card).' : (findRegion(regionDoc.id) as { area?: string } | undefined)?.area ? 'Clipped from the NASA FIRMS world archive with Natural Earth boundaries.' : 'The whole country file from NASA FIRMS.'}>
+            {regionDoc.area_km2 ? `Area covered: ${fmtInt(regionDoc.area_km2)} km²` : `Area covered: ${(findRegion(regionDoc.id) as { area?: string } | undefined)?.area ?? 'the whole country'}`} · {MONTHS[first.m - 1]} {first.y} – {MONTHS[last.m - 1]} {last.y}
           </p>
           <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">{regionDoc.name}</h1>
           <RegionSwitcher current={regionDoc.id} />
@@ -177,6 +178,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
         </p>
       )}
       {regionDoc.harmonized && <KpiCards doc={regionDoc} />}
+      <StudyCheck doc={baseDoc} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* centre */}

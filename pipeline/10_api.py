@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import config, read_json, write_json  # noqa: E402
+from lib.common import published_regions, config, read_json, write_json  # noqa: E402
 
 CHECKPOINTS = [5, 10, 15, 20, 25]
 GUARD = 5.0
@@ -160,7 +160,7 @@ def main() -> None:
     web = Path(cfg["paths"]["web"])
     api = web / "api"
     endpoints = []
-    for rid in cfg["regions"]:
+    for rid in published_regions():
         doc = read_json(web / "regions" / f"{rid}.json")
         daily = read_json(web / "daily" / f"{rid}.json")
         write_json(api / "series" / f"{rid}.json", series_doc(doc), compact=True)
@@ -188,7 +188,7 @@ def main() -> None:
         {"path": "/api/live?region={region}", "what": "last 72 h near-real-time detections (provisional)"},
         {"path": "/api/health?scope=data", "what": "service status (no AI call)"},
     ]
-    write_json(api / "index.json", {"base": base, "regions": list(cfg["regions"]), "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
+    write_json(api / "index.json", {"base": base, "regions": published_regions(), "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
                                     "endpoints": endpoints, "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")})
 
 

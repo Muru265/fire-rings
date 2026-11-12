@@ -4,7 +4,10 @@
   "punjab",
   "madagascar",
   "se_australia",
-  "mauritius"
+  "mauritius",
+  "nt_savanna",
+  "ne_india",
+  "tanzania"
  ],
  "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
  "endpoints": [
@@ -53,5 +56,5 @@
    "what": "service status (no AI call)"
   }
  ],
- "generated": "2026-11-11T10:03Z"
+ "generated": "2026-11-12T08:57Z"
 }

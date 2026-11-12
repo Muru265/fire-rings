@@ -46,7 +46,7 @@ export default function Landing() {
             <Link to="/proof">How it works →</Link>
           </div>
         </div>
-        <div className="relative h-[560px] sm:h-[600px] lg:absolute lg:inset-0 lg:left-[620px] lg:h-auto" data-testid="hero-globe">
+        <div className="relative h-[640px] sm:h-[640px] lg:absolute lg:inset-0 lg:left-[620px] lg:h-auto" data-testid="hero-globe">
           <Suspense fallback={null}>{docs && docs.length > 0 && <GlobeTimelapse docs={docs} live={live} />}</Suspense>
         </div>
         <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-bg via-bg/50 to-transparent lg:block" />

@@ -23,7 +23,7 @@ import numpy as np
 import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.common import config, path, read_json, write_json  # noqa: E402
+from lib.common import published_regions, config, path, read_json, write_json  # noqa: E402
 from lib.common import data_end as region_end  # noqa: E402
 
 S = importlib.import_module("07_stats")
@@ -39,7 +39,7 @@ def main(regions: list[str]) -> None:
     st = cfg["stats"]
     segs = cfg["harmonized_segments"]
     out = path("out")
-    for region in regions or list(cfg["regions"]):
+    for region in regions or published_regions():
         de = region_end(region)
         cube = C.load(region)
         method = read_json(out / f"validation_{region}.json")["summary"]["method"]

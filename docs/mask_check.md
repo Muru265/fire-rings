@@ -11,66 +11,66 @@ refineries, volcanoes. Red flag: cropland or sugarcane (would mean we are maskin
 
 | # | region | reason | rows | years ≥16 d | total days | S | lat, lon | map |
 |---:|---|---|---:|---:|---:|---:|---|---|
-| 1 | se_australia | known | 8,033 | — | — | — | -34.46134, 150.8828 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46134,150.8828&zoom=17&basemap=satellite) |
-| 2 | se_australia | known | 5,884 | — | — | — | -34.45621, 150.87723 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45621,150.87723&zoom=17&basemap=satellite) |
-| 3 | se_australia | known | 5,874 | — | — | — | -34.46063, 150.88688 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46063,150.88688&zoom=17&basemap=satellite) |
-| 4 | se_australia | known | 5,764 | — | — | — | -34.45807, 150.88409 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45807,150.88409&zoom=17&basemap=satellite) |
-| 5 | se_australia | known | 5,063 | — | — | — | -34.45878, 150.88001 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45878,150.88001&zoom=17&basemap=satellite) |
-| 6 | se_australia | known | 3,818 | — | — | — | -37.83368, 144.78776 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-37.83368,144.78776&zoom=17&basemap=satellite) |
-| 7 | se_australia | known | 3,625 | — | — | — | -34.46205, 150.87872 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46205,150.87872&zoom=17&basemap=satellite) |
-| 8 | se_australia | known | 3,379 | — | — | — | -37.83053, 144.78934 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-37.83053,144.78934&zoom=17&basemap=satellite) |
-| 9 | se_australia | known | 3,139 | — | — | — | -34.45294, 150.87853 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45294,150.87853&zoom=17&basemap=satellite) |
-| 10 | se_australia | known | 3,098 | — | — | — | -34.46575, 150.89245 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46575,150.89245&zoom=17&basemap=satellite) |
-| 11 | se_australia | known | 2,722 | — | — | — | -34.4639, 150.88558 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.4639,150.88558&zoom=17&basemap=satellite) |
-| 12 | se_australia | known | 2,692 | — | — | — | -34.4555, 150.88131 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.4555,150.88131&zoom=17&basemap=satellite) |
-| 13 | se_australia | known | 2,438 | — | — | — | -34.46461, 150.8815 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46461,150.8815&zoom=17&basemap=satellite) |
-| 14 | se_australia | known | 2,095 | — | — | — | -37.83321, 144.79199 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-37.83321,144.79199&zoom=17&basemap=satellite) |
-| 15 | se_australia | known | 2,073 | — | — | — | -34.46831, 150.89523 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46831,150.89523&zoom=17&basemap=satellite) |
-| 16 | se_australia | known | 1,731 | — | — | — | -34.46902, 150.89115 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46902,150.89115&zoom=17&basemap=satellite) |
-| 17 | se_australia | known | 1,635 | — | — | — | -34.45949, 150.87594 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45949,150.87594&zoom=17&basemap=satellite) |
-| 18 | se_australia | known | 1,633 | — | — | — | -34.45365, 150.87445 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45365,150.87445&zoom=17&basemap=satellite) |
-| 19 | punjab | known | 1,498 | — | — | — | 29.12371, 75.77895 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=29.12371,75.77895&zoom=17&basemap=satellite) |
-| 20 | se_australia | known | 1,401 | — | — | — | -32.71254, 151.09214 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-32.71254,151.09214&zoom=17&basemap=satellite) |
+| 1 | nt_savanna | known | 2,668 | — | — | — | -24.00063, 131.55471 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.00063,131.55471&zoom=17&basemap=satellite) |
+| 2 | sudan | known | 2,043 | 4 | 232 | 0.06 | 11.042, 28.49738 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.042,28.49738&zoom=17&basemap=satellite) |
+| 3 | ne_india | known | 2,042 | — | — | — | 27.46972, 95.42344 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.46972,95.42344&zoom=17&basemap=satellite) |
+| 4 | sudan | known | 1,965 | — | — | — | 11.32415, 28.47032 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.32415,28.47032&zoom=17&basemap=satellite) |
+| 5 | ne_india | known | 1,929 | — | — | — | 27.60538, 95.40357 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60538,95.40357&zoom=17&basemap=satellite) |
+| 6 | sudan | known | 1,806 | — | — | — | 11.60152, 28.24156 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.60152,28.24156&zoom=17&basemap=satellite) |
+| 7 | sudan | known | 1,670 | — | — | — | 11.04462, 28.49928 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.04462,28.49928&zoom=17&basemap=satellite) |
+| 8 | sudan | known | 1,488 | 3 | 187 | 0.137 | 17.93632, 34.04499 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=17.93632,34.04499&zoom=17&basemap=satellite) |
+| 9 | ne_india | known | 1,482 | 6 | 264 | 0.165 | 27.31839, 95.2661 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.31839,95.2661&zoom=17&basemap=satellite) |
+| 10 | tanzania | known | 1,466 | — | — | — | -5.10831, 38.99526 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-5.10831,38.99526&zoom=17&basemap=satellite) |
+| 11 | tanzania | known | 1,453 | — | — | — | -6.66285, 39.16803 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-6.66285,39.16803&zoom=17&basemap=satellite) |
+| 12 | nt_savanna | known | 1,376 | — | — | — | -24.00345, 131.55308 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.00345,131.55308&zoom=17&basemap=satellite) |
+| 13 | tanzania | known | 1,330 | — | — | — | -8.94076, 33.24115 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-8.94076,33.24115&zoom=17&basemap=satellite) |
+| 14 | ne_india | known | 1,265 | — | — | — | 27.60456, 95.39999 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60456,95.39999&zoom=17&basemap=satellite) |
+| 15 | sudan | known | 1,235 | 3 | 148 | 0.086 | 11.04183, 28.5007 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.04183,28.5007&zoom=17&basemap=satellite) |
+| 16 | ne_india | known | 1,186 | — | — | — | 27.60758, 95.40095 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60758,95.40095&zoom=17&basemap=satellite) |
+| 17 | nt_savanna | known | 1,130 | — | — | — | -24.0032, 131.55639 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.0032,131.55639&zoom=17&basemap=satellite) |
+| 18 | sudan | known | 1,099 | 3 | 149 | 0.151 | 17.86948, 33.83801 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=17.86948,33.83801&zoom=17&basemap=satellite) |
+| 19 | sudan | known | 1,096 | — | — | — | 10.92409, 28.56696 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=10.92409,28.56696&zoom=17&basemap=satellite) |
+| 20 | sudan | known | 1,084 | — | — | — | 11.32134, 28.47174 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.32134,28.47174&zoom=17&basemap=satellite) |
 
 ## Top 5 per region
 
-### punjab
+### nt_savanna
 
 | reason | rows | lat, lon | map |
 |---|---:|---|---|
-| known | 1,498 | 29.12371, 75.77895 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=29.12371,75.77895&zoom=17&basemap=satellite) |
-| known | 1,117 | 29.90999, 74.95085 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=29.90999,74.95085&zoom=17&basemap=satellite) |
-| known | 1,104 | 27.66922, 76.1313 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.66922,76.1313&zoom=17&basemap=satellite) |
-| known | 1,017 | 31.24959, 76.92711 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=31.24959,76.92711&zoom=17&basemap=satellite) |
-| known | 943 | 27.66792, 76.12794 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.66792,76.12794&zoom=17&basemap=satellite) |
+| known | 2,668 | -24.00063, 131.55471 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.00063,131.55471&zoom=17&basemap=satellite) |
+| known | 1,376 | -24.00345, 131.55308 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.00345,131.55308&zoom=17&basemap=satellite) |
+| known | 1,130 | -24.0032, 131.55639 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.0032,131.55639&zoom=17&basemap=satellite) |
+| known | 726 | -24.00088, 131.5514 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-24.00088,131.5514&zoom=17&basemap=satellite) |
+| known | 600 | -19.44872, 133.85445 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.44872,133.85445&zoom=17&basemap=satellite) |
 
-### madagascar
-
-| reason | rows | lat, lon | map |
-|---|---:|---|---|
-| known | 125 | -18.19804, 49.36052 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-18.19804,49.36052&zoom=17&basemap=satellite) |
-| known | 47 | -19.45404, 44.72602 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.45404,44.72602&zoom=17&basemap=satellite) |
-| known | 39 | -19.51216, 44.6963 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.51216,44.6963&zoom=17&basemap=satellite) |
-| known | 38 | -17.0132, 44.3344 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-17.0132,44.3344&zoom=17&basemap=satellite) |
-| known | 38 | -19.49126, 44.72142 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-19.49126,44.72142&zoom=17&basemap=satellite) |
-
-### se_australia
+### ne_india
 
 | reason | rows | lat, lon | map |
 |---|---:|---|---|
-| known | 8,033 | -34.46134, 150.8828 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46134,150.8828&zoom=17&basemap=satellite) |
-| known | 5,884 | -34.45621, 150.87723 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45621,150.87723&zoom=17&basemap=satellite) |
-| known | 5,874 | -34.46063, 150.88688 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.46063,150.88688&zoom=17&basemap=satellite) |
-| known | 5,764 | -34.45807, 150.88409 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45807,150.88409&zoom=17&basemap=satellite) |
-| known | 5,063 | -34.45878, 150.88001 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-34.45878,150.88001&zoom=17&basemap=satellite) |
+| known | 2,042 | 27.46972, 95.42344 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.46972,95.42344&zoom=17&basemap=satellite) |
+| known | 1,929 | 27.60538, 95.40357 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60538,95.40357&zoom=17&basemap=satellite) |
+| known | 1,482 | 27.31839, 95.2661 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.31839,95.2661&zoom=17&basemap=satellite) |
+| known | 1,265 | 27.60456, 95.39999 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60456,95.39999&zoom=17&basemap=satellite) |
+| known | 1,186 | 27.60758, 95.40095 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=27.60758,95.40095&zoom=17&basemap=satellite) |
 
-### mauritius
+### tanzania
 
 | reason | rows | lat, lon | map |
 |---|---:|---|---|
-| known | 117 | -20.31866, 57.46674 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-20.31866,57.46674&zoom=17&basemap=satellite) |
-| known | 77 | -20.32134, 57.46875 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-20.32134,57.46875&zoom=17&basemap=satellite) |
-| known | 49 | -20.31828, 57.4702 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-20.31828,57.4702&zoom=17&basemap=satellite) |
-| known | 29 | -20.32172, 57.46529 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-20.32172,57.46529&zoom=17&basemap=satellite) |
-| known | 16 | -20.3156, 57.46818 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-20.3156,57.46818&zoom=17&basemap=satellite) |
+| known | 1,466 | -5.10831, 38.99526 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-5.10831,38.99526&zoom=17&basemap=satellite) |
+| known | 1,453 | -6.66285, 39.16803 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-6.66285,39.16803&zoom=17&basemap=satellite) |
+| known | 1,330 | -8.94076, 33.24115 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-8.94076,33.24115&zoom=17&basemap=satellite) |
+| known | 630 | -6.66274, 39.16469 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-6.66274,39.16469&zoom=17&basemap=satellite) |
+| known | 627 | -6.79446, 39.20508 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-6.79446,39.20508&zoom=17&basemap=satellite) |
+
+### sudan
+
+| reason | rows | lat, lon | map |
+|---|---:|---|---|
+| known | 2,043 | 11.042, 28.49738 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.042,28.49738&zoom=17&basemap=satellite) |
+| known | 1,965 | 11.32415, 28.47032 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.32415,28.47032&zoom=17&basemap=satellite) |
+| known | 1,806 | 11.60152, 28.24156 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.60152,28.24156&zoom=17&basemap=satellite) |
+| known | 1,670 | 11.04462, 28.49928 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.04462,28.49928&zoom=17&basemap=satellite) |
+| known | 1,488 | 17.93632, 34.04499 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=17.93632,34.04499&zoom=17&basemap=satellite) |
 

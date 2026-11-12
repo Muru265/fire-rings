@@ -13,7 +13,7 @@ const DATA = resolve(here, '../public/data/v1')
 const REAL_KEY = process.env.FIRMS_MAP_KEY ?? ''
 let failed = 0
 const check = (name: string, ok: boolean, info = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${info ? ` — ${info}` : ''}`); if (!ok) failed++ }
-const R = ['punjab', 'madagascar', 'se_australia', 'mauritius']
+const R = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania']
 const P = (s: string) => new URLSearchParams(s)
 const err = (s: string) => { try { parseQuery(P(s), R, '2026-11-11'); return null } catch (e) { return e instanceof InputError ? e.code : 'other' } }
 

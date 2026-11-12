@@ -22,7 +22,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "pipeline"))
-from lib.common import config, read_json, write_json  # noqa: E402
+from lib.common import published_regions, config, read_json, write_json  # noqa: E402
 
 CACHE = ROOT / "data" / "raw" / "power"
 API = "https://power.larc.nasa.gov/api/temporal"
@@ -62,6 +62,8 @@ def main() -> None:
     web = Path(cfg["paths"]["web"])
     today = dt.date.today()
     for rid, rc in cfg["regions"].items():
+        if rid not in (sys.argv[1:] or published_regions()):
+            continue
         pts = points(rid, web)
         print(rid, f"{len(pts)} points")
         per = collections.defaultdict(lambda: {"rain": [], "t2m": []})

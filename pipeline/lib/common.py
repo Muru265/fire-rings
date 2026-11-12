@@ -41,6 +41,24 @@ def read_json(p: Path):
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+def gate_passed(region: str) -> bool:
+    """Round-5B validation gate: a region with `gate: true` in config is published only if its chosen method passes
+    BOTH V1 (|bias| <= 10 %, MAPE < 20 %) and V3 (step consistent with MODIS-only, Pettitt p > 0.05) in 06_validate."""
+    rc = config()["regions"][region]
+    if not rc.get("gate"):
+        return True
+    f = ROOT / "data" / "out" / f"validation_{region}.json"
+    if not f.exists():
+        return False
+    s = read_json(f)["summary"]
+    return bool(s["v1_pass"] and s["v3_pass"] and abs(s["loyo_bias_pct"]) <= 10)
+
+
+def published_regions() -> list[str]:
+    """Regions shown anywhere in the app (config order). Regions that fail the gate stay out of every output."""
+    return [r for r in config()["regions"] if gate_passed(r)]
+
+
 def data_end(region: str):
     """Last day of data for a region: the global record end, extended for a region with a fresher FIRMS API pull."""
     import datetime as dt

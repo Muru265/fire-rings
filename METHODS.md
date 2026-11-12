@@ -316,6 +316,31 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
 - **Cards vs Fire Watch (#84).** Home cards compare with the usual (median) value; Fire Watch flags a month only when even
   the edge of the uncertainty range is outside P10–P90. When they differ the card says so.
 
+## 9g. Round 5B regions from the FIRMS world archive (`tools/clip_world.py`)
+
+- **Source.** The complete FIRMS WORLD archive (yearly CSVs per sensor, MODIS C6.1 2000-11 → 2026-11, VIIRS S-NPP
+  2012-01-20 → 2026-11-02, NOAA-20 2018-04 → , NOAA-21 2023-03 → ; standard + NRT; 58 zips, 662 M rows) downloaded with
+  the FIRMS archive tool. No FIRMS API calls were used for history.
+- **Clip.** Stage 1 streams every CSV straight out of its zip with pyarrow (never unzipped, never loaded whole) and keeps
+  rows inside a generous box per region. Stage 2 keeps points inside the Natural Earth 10m v5.1.2 polygon (even-odd ray
+  casting, holes respected) and writes `data/raw/{region}/{sensor}/fire_{archive|nrt}_world.csv`, the same layout as the
+  per-country downloads, so `02_unify.py` reads them unchanged. Check: the same Northeast-India polygon applied to the
+  FIRMS India country download gives 431,376 MODIS points vs 431,434 from the world clip (0.013 % difference, border pixels).
+- **Regions.** Northern Australia savanna = Northern Territory (admin-1); Northeast India = Assam, Meghalaya, Tripura,
+  Mizoram, Manipur, Nagaland, Arunachal Pradesh (admin-1); Tanzania (admin-0, incl. Zanzibar); Sudan (admin-0).
+  **Sudan uses today's border for all years**, so South Sudan's 2011 separation does not create an artificial drop.
+- **Same pipeline.** Same filters, static mask, H3 res-6 cube, coverage rule, k fitted on Jul 2012 – Dec 2019 only,
+  shrinkage, bootstrap and High detail. The world files run to 12 Nov 2026, but the record ends on the same day as the
+  other regions (`record.data_end`), and months after the last standard-processing date are provisional exactly as before.
+- **Validation gate** (`gate: true` in config, `lib.common.gate_passed`). A new region is published only if its method
+  passes V1 (MAPE < 20 %, |bias| ≤ 10 %) and V3 (harmonized 2012 step consistent with MODIS-only, Pettitt p > 0.05). The
+  pooled-ratio fallback is used only if it validates better. Results: Northern Territory, Northeast India and Tanzania
+  pass (monthly ratios); **Sudan fails V3** (harmonized Pettitt p = 0.013, change year 2009; harmonized step −14.6 % vs
+  MODIS-only −14.5 %; the pooled fallback also fails) and is not shown anywhere. Numbers: `docs/validation_report.md`.
+- **Existing regions untouched.** Steps 02–05 were run only for the new regions; steps 06+ recompute everything from
+  unchanged inputs and `test_longterm_unchanged.py` confirms the four original regions' Long-term values are identical.
+- **Tanzania study check.** See `docs/sources.md`.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

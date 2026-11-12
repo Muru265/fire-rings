@@ -2,6 +2,7 @@
 // /api, so this exercises the saved-answer fallback). Checks the answer card appears and its style badge matches (#52).
 // #85: run in both data modes; High detail answers never say "MODIS-equivalent" and do say "VIIRS"; Long-term never claims "native VIIRS".
 import { spawn, spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -11,7 +12,8 @@ const PORT = 4179
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: resolve(here, '..'), stdio: 'ignore', shell: process.platform === 'win32' })
 for (let i = 0; i < 50; i++) { try { await fetch(`http://localhost:${PORT}`); break } catch { await new Promise((r) => setTimeout(r, 200)) } }
 const CHIPS = ['Is this month unusual?', 'Worst year on record?', 'When does the season peak?', 'How reliable is this?']
-const REGIONS = ['punjab', 'madagascar', 'se_australia', 'mauritius']
+// Round 5B: every published region (meta.json), incl. Northern Australia savanna, Northeast India, Tanzania
+const REGIONS = JSON.parse(readFileSync(resolve(here, '../public/data/v1/meta.json'), 'utf-8')).regions.map((r) => r.id)
 const browser = await chromium.launch()
 let fail = 0
 let n = 0

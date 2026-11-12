@@ -154,6 +154,16 @@ function StoryPicker({ docs }: { docs: Record<string, RegionDoc> | null }) {
             </Link>
           </li>
         ))}
+        {/* Round 5B regions: validated and explorable, but no guided story written yet */}
+        {REGIONS.filter((r) => !STORIES.some((s) => s.id === r.id)).map((r) => (
+          <li key={r.id} data-testid="story-none">
+            <div className="card flex h-full items-start gap-4 opacity-80">
+              <div className="shrink-0">{docs?.[r.id] ? <MiniRings months={docs[r.id].months} label={`${r.name} mini rings`} /> : <div className="h-[72px] w-[72px] rounded-full bg-surface-3" />}</div>
+              <div><p className="eyebrow !text-[10px]">No story yet</p><span className="mt-1 block font-display text-lg font-semibold text-text">{r.name}</span>
+                <span className="mt-1 block text-sm text-muted">Validated and ready to explore — a guided story hasn’t been written yet. <Link to={`/r/${r.id}`}>Explore {r.name} →</Link></span></div>
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   )

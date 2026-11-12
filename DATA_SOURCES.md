@@ -16,6 +16,8 @@ Every data source and software library used by Fire Rings. Updated as each is ad
 | NASA Worldview | deep links (date + area + MERRA-2 layer) | "See it on NASA Worldview" in the companion smoke tracker | https://worldview.earthdata.nasa.gov | NASA open data |
 | Smithsonian Institution Global Volcanism Program — Volcanoes of the World (VOTW) | Holocene eruptions, Piton de la Fournaise (233020), 30 eruption periods since 2000 | Eruption dates for the Réunion ground-truth check (`api/reunion.json`) | WFS https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows ; page https://volcano.si.edu/volcano.cfm?vn=233020 (fetched 11 Nov 2026) | Cite: Global Volcanism Program, Smithsonian Institution, Volcanoes of the World |
 | NASA FIRMS Area API — Piton de la Fournaise box | MODIS_SP, VIIRS_SNPP_SP, windows around each GVP eruption | Réunion check | https://firms.modaps.eosdis.nasa.gov/api/area/ | as FIRMS above |
+| NASA FIRMS — WORLD archive download (MODIS C6.1, VIIRS S-NPP, NOAA-20, NOAA-21) | yearly WORLD CSVs per sensor (FIRMS Archive Download, downloaded by Muru 12 Nov 2026): 62 CSVs in 58 zips (M-C61 2000-11-01 → 2026-11-12 · SV-C2 2012-01-20 → 2026-11-02 · J1V-C2 2018-04-01 → 2026-11-12 · J2V-C2 2023-03-01 → 2026-11-12; standard + NRT), 662,068,762 rows, 12 GB zipped | Source for the Round-5B regions (Northern Territory, Northeast India, Tanzania, Sudan): streamed from the zips and clipped by `pipeline/tools/clip_world.py`; the record still ends 2026-11-08 like the other regions | https://firms.modaps.eosdis.nasa.gov/download/ | as FIRMS above |
+| Natural Earth 1:10m Cultural Vectors v5.1.2 — Admin 0 Countries, Admin 1 States/Provinces | `ne_10m_admin_0_countries`, `ne_10m_admin_1_states_provinces` (GeoJSON) | Region boundaries for the world-archive clip: Northern Territory; Assam, Meghalaya, Tripura, Mizoram, Manipur, Nagaland, Arunachal Pradesh; Tanzania; today's Sudan | https://github.com/nvkelso/natural-earth-vector/tree/v5.1.2/geojson (downloaded 12 Nov 2026) | Public domain (naturalearthdata.com) |
 
 **FIRMS acknowledgement.** We acknowledge the use of data and/or imagery from NASA's Fire Information
 for Resource Management System (FIRMS) (https://www.earthdata.nasa.gov/firms), part of NASA's Earth
@@ -28,6 +30,7 @@ DOIs: 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002, 10.5067/FIRMS/VIIRS/VJ114IMGTDL_NRT
 10.5067/FIRMS/VIIRS/VJ214IMGTDL_NRT.002.
 
 ## Scientific references
+- Tarimo, B., Dick, Ø.B., Gobakken, T., Totland, Ø. (2015). Spatial distribution of temporal dynamics in anthropogenic fires in miombo savanna woodlands of Tanzania. *Carbon Balance and Management* 10:18. doi:10.1186/s13021-015-0029-2 (CC BY 4.0) — Tanzania study check (see docs/sources.md).
 - Giglio, L., Schroeder, W., Justice, C.O. (2016). The collection 6 MODIS active fire detection algorithm and fire products. *Remote Sensing of Environment* 178, 31–41.
 - Schroeder, W., Oliva, P., Giglio, L., Csiszar, I. (2014). The New VIIRS 375 m active fire detection data product. *Remote Sensing of Environment* 143, 85–96.
 - MODIS C6/C6.1 Active Fire User Guide; VIIRS VNP14 User Guide (links in docs/FIRE_RINGS_MASTER_PLAN.md §12).

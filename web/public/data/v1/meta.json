@@ -2,7 +2,7 @@
  "version": "v1",
  "data_end": "2026-11-09",
  "citation": "Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.",
- "generated": "2026-11-10T12:00Z",
+ "generated": "2026-11-12T09:06Z",
  "regions": [
   {
    "id": "punjab",
@@ -239,6 +239,198 @@
     "value": 4.0,
     "lo": 2.3,
     "hi": 5.8,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "nt_savanna",
+   "name": "Northern Australia savanna (NT)",
+   "bbox": [
+    129.0,
+    -26.0,
+    138.0,
+    -11.03
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 1.97,
+    "median": 865.5,
+    "pct": [
+     86,
+     90
+    ],
+    "return_period": 8.3,
+    "rp_range": [
+     7.1,
+     10.0
+    ],
+    "beyond_record": false,
+    "guard": false,
+    "rank": 3,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 1708.8,
+    "lo": 1594.7,
+    "hi": 1843.8,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 1.17,
+    "median": 3456.9,
+    "pct": [
+     52,
+     52
+    ],
+    "return_period": 2.1,
+    "rp_range": [
+     2.1,
+     2.1
+    ],
+    "beyond_record": false,
+    "guard": false,
+    "rank": 14,
+    "rank_of": 25,
+    "value": 4061.3,
+    "lo": 3868.6,
+    "hi": 4218.4,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "ne_india",
+   "name": "Northeast India",
+   "bbox": [
+    89.67,
+    21.96,
+    97.34,
+    29.3
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 1.9,
+    "median": 14.7,
+    "pct": [
+     76,
+     90
+    ],
+    "return_period": 5.9,
+    "rp_range": [
+     4.2,
+     10.0
+    ],
+    "beyond_record": false,
+    "guard": false,
+    "rank": 3,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 27.9,
+    "lo": 23.2,
+    "hi": 32.9,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 2.28,
+    "median": 32.6,
+    "pct": [
+     95,
+     95
+    ],
+    "return_period": null,
+    "rp_range": null,
+    "beyond_record": true,
+    "guard": false,
+    "rank": 1,
+    "rank_of": 25,
+    "value": 74.3,
+    "lo": 63.6,
+    "hi": 85.8,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "tanzania",
+   "name": "Tanzania",
+   "bbox": [
+    29.6,
+    -11.73,
+    40.44,
+    -0.99
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 1.96,
+    "median": 1024.7,
+    "pct": [
+     90,
+     95
+    ],
+    "return_period": 13.3,
+    "rp_range": [
+     10.0,
+     20.0
+    ],
+    "beyond_record": false,
+    "guard": false,
+    "rank": 2,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 2007.3,
+    "lo": 1921.8,
+    "hi": 2094.1,
+    "provisional": true,
+    "days": 8,
+    "baseline_kind": "same days 1–8 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 1.08,
+    "median": 6902.3,
+    "pct": [
+     57,
+     67
+    ],
+    "return_period": 2.6,
+    "rp_range": [
+     2.3,
+     3.0
+    ],
+    "beyond_record": false,
+    "guard": false,
+    "rank": 11,
+    "rank_of": 25,
+    "value": 7427.4,
+    "lo": 7126.3,
+    "hi": 7669.9,
     "mtd": false,
     "provisional": true
    }

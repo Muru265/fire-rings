@@ -1,7 +1,7 @@
 // Precompute Fire Watch briefings for the current data (fallback when the live AI is busy; labelled "⚡ saved briefing").
 // Only regions the rules flag (status ≠ Normal) get a briefing; only verified answers are saved.
-// Usage: npx tsx --env-file=../.env scripts/watch_cache.ts
-import { writeFile } from 'node:fs/promises'
+// Usage: npx tsx --env-file=../.env scripts/watch_cache.ts [--only nt_savanna,ne_india,tanzania]
+import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FALLBACK_MODELS, ask } from '../api/_lib/core.js'
@@ -12,8 +12,13 @@ import { apiKey, load, sleep } from './ask_local.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const models = [...new Set(['gemini-3.5-flash-lite', ...FALLBACK_MODELS])]
 const w: WatchDoc = await load('watch.json')
-const briefings: Record<string, unknown> = {}
+// --only id,id: regenerate just these regions and keep every other saved briefing (Round 5B: new regions only)
+const onlyArg = process.argv.indexOf('--only')
+const only = onlyArg > 0 ? process.argv[onlyArg + 1].split(',') : null
+const prev = only ? JSON.parse(await readFile(resolve(here, '../public/data/v1/watch_cache.json'), 'utf-8')).briefings ?? {} : {}
+const briefings: Record<string, unknown> = Object.fromEntries(Object.entries(prev).filter(([k]) => !only!.includes(k.split('|')[0])))
 for (const [id, reg] of Object.entries(w.regions)) {
+  if (only && !only.includes(id)) continue
   const status = worst(reg.checks)
   if (status === 'Normal') { console.log(`${id}: Normal — no briefing`); continue }
   for (const voice of ['responder', 'scientist'] as const) {

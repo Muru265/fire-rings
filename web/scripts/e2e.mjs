@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const here = dirname(fileURLToPath(import.meta.url))
+const N_REGIONS = JSON.parse(readFileSync(resolve(here, '../public/data/v1/meta.json'), 'utf-8')).regions.length   // Round 5B: 7 published regions
 const out = resolve(here, '../../docs/screens')
 const PORT = 4179
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: resolve(here, '..'), stdio: 'ignore', shell: process.platform === 'win32' })
@@ -184,9 +185,9 @@ try {
   await page.getByTestId('watch-trace').getByText('Done.').waitFor({ timeout: 20000 }).catch(() => {})
   const traceTxt = await page.getByTestId('watch-trace').innerText()
   const nStatus = (traceTxt.match(/Status: /g) ?? []).length
-  check(`Fire Watch: agent steps appear (${nStatus} region statuses in the trace)`, nStatus === 4 && /Checking Punjab/.test(traceTxt))
+  check(`Fire Watch: agent steps appear (${nStatus} region statuses in the trace)`, nStatus === N_REGIONS && /Checking Punjab/.test(traceTxt))
   const statuses = await page.getByTestId('watch-card').evaluateAll((els) => els.map((e) => e.getAttribute('data-status')))
-  check('Fire Watch: every region card has a status', statuses.length === 4 && statuses.every((s) => ['Normal', 'Watch', 'Alert', 'Unusually low'].includes(s)))
+  check('Fire Watch: every region card has a status', statuses.length === N_REGIONS && statuses.every((s) => ['Normal', 'Watch', 'Alert', 'Unusually low'].includes(s)))
   const flaggedNoBrief = await page.locator('[data-testid="watch-card"]:not([data-status="Normal"])').evaluateAll((els) => els.filter((e) => !e.querySelector('[data-testid="watch-briefing"]')).length)
   check('Fire Watch: every flagged region shows a briefing', flaggedNoBrief === 0)
   const trig = await page.locator('[data-testid="watch-card"][data-region="punjab"] [data-testid="status-trigger"]').innerText().catch(() => '')
@@ -340,7 +341,7 @@ try {
       const should = (normal && !usual) || (!normal && /About usual/.test(c.level))
       return should ? !(c.help && (normal ? /within normal range \(rule not triggered\)/.test(c.note) : /rule triggered/.test(c.note))) : !!c.note
     })
-    check(`#84 home cards: Fire Watch note exactly where the card label and Fire Watch differ (${cards.filter((c) => c.note).length} of ${cards.length})`, cards.length === 4 && bad.length === 0)
+    check(`#84 home cards: Fire Watch note exactly where the card label and Fire Watch differ (${cards.filter((c) => c.note).length} of ${cards.length})`, cards.length === N_REGIONS && bad.length === 0)
   }
 
   // Final check: Mauritius on the globe — a small dot at world zoom, ~36 km² hexagons when zoomed in

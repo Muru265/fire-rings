@@ -26,85 +26,85 @@
    2022
   ],
   "totals": {
-   "raw_alerts": 99,
-   "harmonized_alerts": 46,
-   "raw_only_alerts": 53,
-   "both": 46,
+   "raw_alerts": 183,
+   "harmonized_alerts": 79,
+   "raw_only_alerts": 104,
+   "both": 79,
    "harmonized_only_alerts": 0,
-   "raw_lows": 5,
-   "harmonized_lows": 33,
-   "lows_missed_by_raw": 28
+   "raw_lows": 16,
+   "harmonized_lows": 80,
+   "lows_missed_by_raw": 64
   },
   "per_year": {
    "2012": {
-    "raw": 3,
-    "harmonized": 2,
-    "raw_only": 1
+    "raw": 15,
+    "harmonized": 9,
+    "raw_only": 6
    },
    "2013": {
-    "raw": 8,
-    "harmonized": 1,
-    "raw_only": 7
+    "raw": 16,
+    "harmonized": 2,
+    "raw_only": 14
    },
    "2014": {
-    "raw": 4,
-    "harmonized": 1,
-    "raw_only": 3
+    "raw": 12,
+    "harmonized": 3,
+    "raw_only": 9
    },
    "2015": {
-    "raw": 2,
-    "harmonized": 1,
-    "raw_only": 1
+    "raw": 12,
+    "harmonized": 4,
+    "raw_only": 8
    },
    "2016": {
-    "raw": 11,
-    "harmonized": 5,
-    "raw_only": 6
+    "raw": 15,
+    "harmonized": 6,
+    "raw_only": 9
    },
    "2017": {
-    "raw": 11,
-    "harmonized": 5,
-    "raw_only": 6
+    "raw": 15,
+    "harmonized": 6,
+    "raw_only": 9
    },
    "2018": {
-    "raw": 9,
-    "harmonized": 2,
+    "raw": 11,
+    "harmonized": 4,
     "raw_only": 7
    },
    "2019": {
-    "raw": 10,
-    "harmonized": 8,
-    "raw_only": 2
+    "raw": 15,
+    "harmonized": 9,
+    "raw_only": 6
    },
    "2020": {
-    "raw": 13,
+    "raw": 16,
     "harmonized": 5,
-    "raw_only": 8
+    "raw_only": 11
    },
    "2021": {
+    "raw": 13,
+    "harmonized": 8,
+    "raw_only": 5
+   },
+   "2022": {
+    "raw": 13,
+    "harmonized": 6,
+    "raw_only": 7
+   },
+   "2023": {
+    "raw": 11,
+    "harmonized": 5,
+    "raw_only": 6
+   },
+   "2024": {
+    "raw": 11,
+    "harmonized": 7,
+    "raw_only": 4
+   },
+   "2025": {
     "raw": 8,
     "harmonized": 5,
     "raw_only": 3
-   },
-   "2022": {
-    "raw": 6,
-    "harmonized": 2,
-    "raw_only": 4
-   },
-   "2023": {
-    "raw": 3,
-    "harmonized": 2,
-    "raw_only": 1
-   },
-   "2024": {
-    "raw": 8,
-    "harmonized": 6,
-    "raw_only": 2
-   },
-   "2025": {
-    "raw": 3,
-    "harmonized": 1,
-    "raw_only": 2
    }
   },
   "method": "Same percentile rules on raw (MODIS to 2011, unconverted VIIRS after) and harmonized monthly fire-days, each vs its own 2003–2022 same-month baseline; point percentile; low-activity guard on both."
@@ -795,6 +795,528 @@
      "2022-11",
      "2024-09",
      "2024-11"
+    ]
+   }
+  },
+  "nt_savanna": {
+   "name": "Northern Australia savanna (NT)",
+   "status": "Normal",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 1708.8,
+     "lo": 1594.7,
+     "hi": 1843.8,
+     "median": 865.5,
+     "ratio": 1.97,
+     "pct": [
+      86,
+      90
+     ],
+     "return_period": 8.3,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 4061.3,
+     "lo": 3868.6,
+     "hi": 4218.4,
+     "median": 3456.9,
+     "ratio": 1.17,
+     "pct": [
+      52,
+      52
+     ],
+     "return_period": 2.1,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services and land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 27920,
+    "expected_72h": 5583.9,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 26,
+    "harmonized_alerts": 17,
+    "raw_only_alerts": 9,
+    "both": 17,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 7,
+    "harmonized_lows": 11,
+    "lows_missed_by_raw": 4,
+    "per_year": {
+     "2012": {
+      "raw": 5,
+      "harmonized": 3,
+      "raw_only": 2
+     },
+     "2013": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2014": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2015": {
+      "raw": 4,
+      "harmonized": 2,
+      "raw_only": 2
+     },
+     "2016": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2017": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 2,
+      "harmonized": 2,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2020": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2021": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2022": {
+      "raw": 2,
+      "harmonized": 2,
+      "raw_only": 0
+     },
+     "2023": {
+      "raw": 4,
+      "harmonized": 2,
+      "raw_only": 2
+     },
+     "2024": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2025": {
+      "raw": 2,
+      "harmonized": 2,
+      "raw_only": 0
+     }
+    },
+    "raw_only_months": [
+     "2012-09",
+     "2012-10",
+     "2015-05",
+     "2015-11",
+     "2016-07",
+     "2017-06",
+     "2019-12",
+     "2023-05",
+     "2023-11"
+    ]
+   }
+  },
+  "ne_india": {
+   "name": "Northeast India",
+   "status": "Alert",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 27.9,
+     "lo": 23.2,
+     "hi": 32.9,
+     "median": 14.7,
+     "ratio": 1.9,
+     "pct": [
+      76,
+      90
+     ],
+     "return_period": 5.9,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 74.3,
+     "lo": 63.6,
+     "hi": 85.8,
+     "median": 32.6,
+     "ratio": 2.28,
+     "pct": [
+      95,
+      95
+     ],
+     "return_period": null,
+     "beyond_record": true,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Alert",
+     "rule": "above_every_baseline_year",
+     "rule_text": "above every year in the 2003–2022 baseline (percentile ≥ 95)"
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services, forest departments and land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 438,
+    "expected_72h": 87.7,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 30,
+    "harmonized_alerts": 10,
+    "raw_only_alerts": 20,
+    "both": 10,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 1,
+    "harmonized_lows": 15,
+    "lows_missed_by_raw": 14,
+    "per_year": {
+     "2012": {
+      "raw": 3,
+      "harmonized": 3,
+      "raw_only": 0
+     },
+     "2013": {
+      "raw": 5,
+      "harmonized": 0,
+      "raw_only": 5
+     },
+     "2014": {
+      "raw": 5,
+      "harmonized": 1,
+      "raw_only": 4
+     },
+     "2015": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2016": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2017": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2020": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2021": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2022": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2023": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2024": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2025": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     }
+    },
+    "raw_only_months": [
+     "2013-02",
+     "2013-04",
+     "2013-06",
+     "2013-09",
+     "2013-11",
+     "2014-06",
+     "2014-10",
+     "2014-11",
+     "2014-12",
+     "2015-03",
+     "2015-07",
+     "2016-12",
+     "2017-01",
+     "2019-01",
+     "2021-03",
+     "2021-10",
+     "2022-07",
+     "2023-04",
+     "2023-05",
+     "2024-05"
+    ]
+   }
+  },
+  "tanzania": {
+   "name": "Tanzania",
+   "status": "Watch",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 8,
+     "value": 2007.3,
+     "lo": 1921.8,
+     "hi": 2094.1,
+     "median": 1024.7,
+     "ratio": 1.96,
+     "pct": [
+      90,
+      95
+     ],
+     "return_period": 13.3,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Watch",
+     "rule": "far_above_normal",
+     "rule_text": "far above normal: above the 90th percentile (P90) even at the low end of our uncertainty"
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 7427.4,
+     "lo": 7126.3,
+     "hi": 7669.9,
+     "median": 6902.3,
+     "ratio": 1.08,
+     "pct": [
+      57,
+      67
+     ],
+     "return_period": 2.6,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services, land managers and conservation teams, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 28304,
+    "expected_72h": 5660.9,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 28,
+    "harmonized_alerts": 6,
+    "raw_only_alerts": 22,
+    "both": 6,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 3,
+    "harmonized_lows": 21,
+    "lows_missed_by_raw": 18,
+    "per_year": {
+     "2012": {
+      "raw": 4,
+      "harmonized": 1,
+      "raw_only": 3
+     },
+     "2013": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2014": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2015": {
+      "raw": 4,
+      "harmonized": 1,
+      "raw_only": 3
+     },
+     "2016": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2017": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2020": {
+      "raw": 3,
+      "harmonized": 0,
+      "raw_only": 3
+     },
+     "2021": {
+      "raw": 2,
+      "harmonized": 2,
+      "raw_only": 0
+     },
+     "2022": {
+      "raw": 3,
+      "harmonized": 1,
+      "raw_only": 2
+     },
+     "2023": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2024": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2025": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     }
+    },
+    "raw_only_months": [
+     "2012-04",
+     "2012-05",
+     "2012-07",
+     "2013-06",
+     "2013-07",
+     "2014-01",
+     "2014-05",
+     "2015-02",
+     "2015-06",
+     "2015-09",
+     "2016-08",
+     "2017-01",
+     "2019-03",
+     "2019-04",
+     "2020-08",
+     "2020-09",
+     "2020-10",
+     "2022-11",
+     "2022-12",
+     "2023-10",
+     "2024-09",
+     "2025-09"
     ]
    }
   }
