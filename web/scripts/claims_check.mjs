@@ -256,6 +256,57 @@ try {
     if (id === 'punjab') check('/proof', 'Punjab Oct–Nov top 3', cards, res.V9.octnov_top3_harmonized.join(' · '))
     if (id !== 'se_australia' && id !== 'punjab') check('/proof', `${id} top seasons`, cards, res.V9.top3_harmonized.slice(0, 2).join(' · '))
   }
+  { // Round 5B: Tanzania study check (Proof tab + Explore) — every number from regions/tanzania.json study_check
+    const sc = meta.regions.some((r) => r.id === 'tanzania') ? J('regions/tanzania.json').study_check : null
+    if (sc) {
+      const pc = (v) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v) >= 10 ? Math.round(Math.abs(v)) : Math.abs(v).toFixed(1)}%`
+      for (const P of ['/proof?region=tanzania', '/r/tanzania']) {
+        await page.goto(base + P, { waitUntil: 'load' }); await page.waitForSelector('[data-testid="study-check"]'); await page.waitForTimeout(300)
+        const card = await page.locator('[data-testid="study-check"]').innerText()
+        check(P, 'study check harmonized change', card, pc(sc.harmonized.change_pct))
+        check(P, 'study check MODIS-only change', card, pc(sc.modis_only.change_pct))
+        check(P, 'study check raw step', card, pc(sc.raw_step_2012_pct))
+        check(P, 'study check years', card, `${sc.years_a[0]}–${sc.years_a[1]} vs ${sc.years_b[0]}–${sc.years_b[1]}`)
+        check(P, 'study check says areas differ', card, 'The areas differ')
+      }
+      await page.goto(base + '/proof', { waitUntil: 'load' }); await page.waitForTimeout(800)
+    }
+  }
+  { // Round 5B: Proof "Prediction model, tested" — every number from api/model_card.json, same rounding as the app
+    let mc = null; try { mc = J('api/model_card.json') } catch { /* model not published */ }
+    if (mc) {
+      const P = mc.evaluation.pooled, ab = mc.ablation, pc = (v) => `${Math.round(v)}%`, f2 = (v) => v.toFixed(2)
+      const sg = (v, d) => `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v).toFixed(d)}`
+      await page.goto(base + '/proof#model', { waitUntil: 'load' }); await page.waitForSelector('[data-testid="model-card"]'); await page.waitForTimeout(400)
+      const card = await page.locator('[data-testid="model-card"]').innerText()
+      const plain = await page.locator('[data-testid="model-plain"]').innerText()
+      check('/proof', 'model top-10% capture (plain sentence)', plain, pc(P.model.capture10))
+      check('/proof', 'climatology top-10% capture (plain sentence)', plain, pc(P.climatology.capture10))
+      check('/proof', 'model gate wording', plain, mc.gate.passed ? 'Watching the top 10% of hexagons' : 'Does not beat the seasonal baseline yet')
+      check('/proof', 'model PR-AUC', card, f2(P.model.pr_auc)); check('/proof', 'climatology PR-AUC', card, `usual season ${f2(P.climatology.pr_auc)}`)
+      check('/proof', 'model ROC-AUC', card, f2(P.model.roc_auc)); check('/proof', 'model F1', card, f2(P.model.f1))
+      check('/proof', 'persistence capture', card, `last month’s fire ${pc(P.persistence.capture10)}`)
+      const abl = await page.locator('[data-testid="model-ablation"]').innerText()
+      check('/proof', 'ablation raw PR-AUC', abl, f2(ab.raw.pr_auc)); check('/proof', 'ablation raw capture', abl, pc(ab.raw.capture10))
+      check('/proof', 'ablation difference PR-AUC', abl, `${sg(ab.difference_harmonized_minus_raw.pr_auc, 2)} PR-AUC`)
+      check('/proof', 'ablation difference capture', abl, `${sg(ab.difference_harmonized_minus_raw.capture10, 1)} percentage points`)
+      const lo = Object.values(mc.leave_one_region_out).filter((x) => x.model && x.climatology)
+      check('/proof', 'LORO wins', await page.locator('[data-testid="model-loro"]').innerText(), `in ${lo.filter((x) => x.model.pr_auc > x.climatology.pr_auc).length} of ${lo.length} held-out regions`)
+      check('/proof', 'model version', await page.locator('[data-testid="model-version"]').innerText(), `version ${mc.version}`)
+      const hist = J('api/model_history.json').runs.at(-1)
+      check('/proof', 'model history last decision', await page.locator('[data-testid="model-history"]').innerText(), hist.decision)
+      // Explore: the layer toggle exists exactly when a likelihood file exists, default OFF, labelled with the scored month
+      const lk = (() => { try { return J('api/likelihood/tanzania.json') } catch { return null } })()
+      await page.goto(base + '/r/tanzania', { waitUntil: 'load' }); await page.waitForSelector('[data-testid="map-legend"]'); await page.waitForTimeout(1500)
+      const tog = page.locator('[data-testid="lik-toggle"]')
+      if (lk) {
+        const FULLM = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        check('/r/tanzania', 'likelihood toggle month', await tog.innerText(), `${FULLM[+lk.target_month.slice(5, 7) - 1]} ${lk.target_month.slice(0, 4)}`)
+        check('/r/tanzania', 'likelihood layer default OFF', String(await tog.locator('input').isChecked()), 'false')
+      } else check('/r/tanzania', 'no likelihood toggle without a published model', String(await tog.count()), '0')
+      await page.goto(base + '/proof', { waitUntil: 'load' }); await page.waitForTimeout(800)
+    }
+  }
   const t = J('dataset/punjab_timing_v1.json').checks['punjab|Oct–Nov (rice residue)']
   const tc = await page.locator('section[aria-labelledby="timing-h"]').innerText()
   check('/proof', 'timing Aqua÷S-NPP', tc, `×${t.aqua_rel_2022_2026.toFixed(1)}`)

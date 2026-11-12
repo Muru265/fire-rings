@@ -1,6 +1,6 @@
 # Fire Rings: one consistent 25-year record of satellite fire detections from MODIS and VIIRS
 
-> **Abstract.** Two generations of NASA satellites detect active fires differently: MODIS (Terra 2000→, Aqua 2002→, ~1 km pixels) and VIIRS (S-NPP 2012→, NOAA-20 2018→, NOAA-21 2023→, 375 m pixels). VIIRS sees many more small fires, so a naive record shows a jump in 2012 that is the satellite changing, not the fire. Fire Rings counts **fire-days** (an H3 resolution-6 hexagon of ~36 km² with at least one detection on one local solar day), converts VIIRS down to MODIS-equivalent with ratios fitted only on July 2012 – December 2019, and publishes one monthly record per region from 2001 to {{data_end}} with uncertainty, validation and an open API. Out of sample, the annual error is {{punjab.v1}}% in Punjab–Haryana, {{madagascar.v1}}% in Madagascar and {{se_australia.v1}}% in SE Australia; the 2012 jump in the raw series ({{punjab.step_raw}}% in Punjab) shrinks to {{punjab.step_harm}}% after harmonization, close to the MODIS-only change ({{punjab.step_modis}}%). The record feeds an explorer, a rule-based monitoring agent (Fire Watch), a grounded AI analyst and six example apps built by calling the API only.
+> **Abstract.** Two generations of NASA satellites detect active fires differently: MODIS (Terra 2000→, Aqua 2002→, ~1 km pixels) and VIIRS (S-NPP 2012→, NOAA-20 2018→, NOAA-21 2023→, 375 m pixels). VIIRS sees many more small fires, so a naive record shows a jump in 2012 that is the satellite changing, not the fire. Fire Rings counts **fire-days** (an H3 resolution-6 hexagon of ~36 km² with at least one detection on one local solar day), converts VIIRS down to MODIS-equivalent with ratios fitted only on July 2012 – December 2019, and publishes one monthly record per region from 2001 to {{data_end}} with uncertainty, validation and an open API. Out of sample, the annual error is {{punjab.v1}}% in Punjab–Haryana, {{madagascar.v1}}% in Madagascar and {{se_australia.v1}}% in SE Australia; the 2012 jump in the raw series ({{punjab.step_raw}}% in Punjab) shrinks to {{punjab.step_harm}}% after harmonization, close to the MODIS-only change ({{punjab.step_modis}}%). The record covers {{n_regions}} validated regions and feeds an explorer, a rule-based monitoring agent (Fire Watch), a grounded AI analyst, six example apps built by calling the API only, and a tested next-month model: watching its top 10% of hexagons would have caught {{model.cap10}}% of next month's fire hexagons on unseen years (usual season: {{model.clim_cap10}}%).
 
 ## 1. Problem
 
@@ -18,7 +18,7 @@ All detections come from NASA FIRMS ([firms.modaps.eosdis.nasa.gov](https://firm
 | NOAA-20 VIIRS | VJ114IMG, 375 m | Nov 2026 → (bridged by k′) |
 | NOAA-21 VIIRS | VJ214IMG, 375 m | cross-check |
 
-Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-season burning), SE Australia (NSW + Victoria, bushfires) and Mauritius (an honest low-fire case). In total {{rows_read}} detections were read and {{rows_kept}} kept after the filters below.
+{{n_regions}} regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-season burning), SE Australia (NSW + Victoria, bushfires), Mauritius (an honest low-fire case), and three regions cut from the FIRMS world archive with Natural Earth borders — Northern Australia savanna (Northern Territory), Northeast India (seven states) and Tanzania. Each new region had to pass V1 and V3 below before being shown; Sudan (today's border for all years) was tried and failed V3, so it is not shown. In total {{rows_read}} detections were read and {{rows_kept}} kept after the filters below.
 
 ## 3. Method
 
@@ -48,6 +48,10 @@ Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-se
 | Madagascar | {{madagascar.step_raw}}% | {{madagascar.step_harm}}% | {{madagascar.step_modis}}% |
 | SE Australia | {{se_australia.step_raw}}% | {{se_australia.step_harm}}% | {{se_australia.step_modis}}% |
 
+**New regions.** Out-of-sample annual error {{nt_savanna.v1}}% (Northern Australia savanna), {{ne_india.v1}}% (Northeast India) and {{tanzania.v1}}% (Tanzania); 2012 steps raw → harmonized: {{nt_savanna.step_raw}}% → {{nt_savanna.step_harm}}%, {{ne_india.step_raw}}% → {{ne_india.step_harm}}%, {{tanzania.step_raw}}% → {{tanzania.step_harm}}% (MODIS alone {{nt_savanna.step_modis}}%, {{ne_india.step_modis}}%, {{tanzania.step_modis}}%).
+
+**A published study.** Tarimo et al. (2015) reported declining fire in Tanzania's miombo woodlands (MODIS, 2001–2013). For the whole country our harmonized record changes by {{tz.harm}} ({{tz.years}}, mean fire-days per year), MODIS alone by {{tz.modis}}, while a naive raw join would show {{tz.raw}} at 2012. The areas differ, so this is a consistency check, not a replication.
+
 **Seasonal shape.** Predicted months follow the observed MODIS seasonal pattern with r = {{punjab.shape_r}} (Punjab), {{madagascar.shape_r}} (Madagascar) and {{se_australia.shape_r}} (SE Australia). SE Australia uses {{se_australia.method}} because monthly ratios narrowly failed the step test.
 
 **A sourced season.** The 2019–20 Black Summer, documented by the [Royal Commission into National Natural Disaster Arrangements]({{bs.source_url}}), ranks **#{{bs.rank}} of {{bs.n}}** seasons in the harmonized SE Australia record.
@@ -62,6 +66,16 @@ Four regions: Punjab–Haryana (India, crop-residue burning), Madagascar (dry-se
 
 ?reunion **Ground truth: Piton de la Fournaise.** Against the Smithsonian Global Volcanism Program's eruption list ({{reunion.n}} eruption periods since 2000), MODIS detected {{reunion.modis_detected}} of {{reunion.modis_n}} eruptions in its downloaded windows and VIIRS {{reunion.viirs_detected}} of {{reunion.viirs_n}}, with {{reunion.lag_text}}. Heat in the 30 days before an eruption (outside other eruptions): MODIS {{reunion.pre_modis}}, VIIRS {{reunion.pre_viirs}} eruptions — reported as found, not as a warning signal.
 ?!reunion **Ground truth: Piton de la Fournaise.** The volcano check is being built from the Smithsonian Global Volcanism Program's eruption list; results will appear here when the data are published.
+
+### 4.1 Prediction model: where fire is more likely next month
+
+**Design.** Unit: H3 resolution-6 hexagon × month, all {{n_regions}} regions in one model (region is a feature). Target: at least one VIIRS fire-day in month m+1 (target years 2013–2025, one sensor family). Features known at the end of month m: the hexagon's harmonized MODIS-equivalent history for the same calendar month since 2001 (share of years with fire, mean fire-days), its activity in months m, m−1 and m−2, ring-1 and ring-2 neighbours, the month, the region and NASA POWER rain and temperature anomalies. Logistic regression and gradient boosting were compared on training years only; {{model.chosen}} was chosen.
+
+**Testing without leakage.** Rolling origin: each year 2018–2025 is predicted by a model trained only on earlier years. Watching the top 10% of hexagons would have caught **{{model.cap10}}%** of next month's fire hexagons (90% range {{model.cap10_ci}}), against {{model.clim_cap10}}% for the usual season (climatology) and {{model.pers_cap10}}% for last month's fire (persistence). PR-AUC {{model.pr_auc}} (climatology {{model.clim_pr_auc}}, persistence {{model.pers_pr_auc}}), ROC-AUC {{model.roc_auc}}, F1 {{model.f1}} at a threshold chosen on training data. Leave-one-region-out: the model beat climatology in {{model.loro_wins}} of {{model.loro_n}} held-out regions.
+
+**Does harmonization help?** The same model fed raw history (MODIS before 2012, unconverted VIIRS after) scores PR-AUC {{model.raw_pr_auc}} and top-10% capture {{model.raw_cap10}}%: a difference of {{model.abl_pr}} PR-AUC and {{model.abl_cap}} percentage points for harmonized history.
+
+**Automatic retraining.** On the 2nd of each month a GitHub Actions job fetches the newest NOAA-20 near-real-time detections, adds them with the frozen ratios, retrains a challenger and publishes it only if it beats both the current model and climatology on PR-AUC and top-10% capture; every run is logged. Limitations: it ranks likelihood, not size, timing or cause; it is a planning aid, not a warning service.
 
 ## 5. Applications
 
@@ -87,6 +101,7 @@ The harmonized monthly record, calibration ratios and validation results are pub
 - Giglio, L., Schroeder, W., Justice, C.O. (2016). The collection 6 MODIS active fire detection algorithm and fire products. *Remote Sensing of Environment* 178, 31–41. [doi:10.1016/j.rse.2016.02.054](https://doi.org/10.1016/j.rse.2016.02.054)
 - Schroeder, W., Oliva, P., Giglio, L., Csiszar, I. (2014). The New VIIRS 375 m active fire detection data product. *Remote Sensing of Environment* 143, 85–96. [doi:10.1016/j.rse.2013.12.008](https://doi.org/10.1016/j.rse.2013.12.008)
 - NASA FIRMS. MODIS Collection 6.1 Active Fire Detections (MCD14ML), [doi:10.5067/FIRMS/MODIS/MCD14ML](https://doi.org/10.5067/FIRMS/MODIS/MCD14ML); VIIRS 375 m Active Fire (VNP14IMGT), [doi:10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002](https://doi.org/10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002).
+- Tarimo, B., Dick, Ø.B., Gobakken, T., Totland, Ø. (2015). Spatial distribution of temporal dynamics in anthropogenic fires in miombo savanna woodlands of Tanzania. *Carbon Balance and Management* 10:18. [doi:10.1186/s13021-015-0029-2](https://doi.org/10.1186/s13021-015-0029-2)
 - Uber Technologies. H3: a hexagonal hierarchical geospatial indexing system. [h3geo.org](https://h3geo.org/)
 - NASA POWER (Prediction Of Worldwide Energy Resources). [power.larc.nasa.gov](https://power.larc.nasa.gov/)
 - NASA Global Imagery Browse Services (GIBS), [API documentation](https://nasa-gibs.github.io/gibs-api-docs/); NASA Worldview, [worldview.earthdata.nasa.gov](https://worldview.earthdata.nasa.gov/)

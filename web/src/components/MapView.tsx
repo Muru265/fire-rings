@@ -17,6 +17,12 @@ import Help from './Help'
 import { MONTHS } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
 import { loadDots, monthRange, staticUrl } from '../lib/hotspots'
+import { interpolateViridis } from 'd3-scale-chromatic'
+
+// Round 5B prediction layer: per-region deciles 1–10 of next month's likelihood (api/likelihood/{id}.json, 11_model.py)
+interface LikDoc { region: string; target_month: string; features_through: string; cells: [string, number, number, number][] }
+const LIK_COLORS = Array.from({ length: 10 }, (_, i) => interpolateViridis(0.08 + (0.9 * i) / 9))
+const monthLabel = (k: string) => `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+k.slice(5, 7) - 1]} ${k.slice(0, 4)}`
 
 const STYLE = 'https://tiles.openfreemap.org/styles/dark'
 // MapLibre 6 resolves its worker next to its own module; after bundling that file doesn't exist, so hand it Vite's.
@@ -83,6 +89,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const [tile, setTile] = useState<Box | null>(null)
   // QA #17: live layer off by default on the map (the badge still shows the count); hexagons stay the main visual
   const [showLive, setShowLive] = useState(false)
+  const [lik, setLik] = useState<LikDoc | null>(null)
+  const [showLik, setShowLik] = useState(false)   // default OFF
   const [inInset, setInInset] = useState(false)
   const view = (doc.geo?.view_bbox ?? doc.bbox) as [number, number, number, number]
   const small = !!doc.geo?.small
@@ -124,6 +132,8 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       // softer hexagons so place names stay readable
       mp.addLayer({ id: 'hex', type: 'fill', source: 'hex', paint: { 'fill-color': ['get', 'c'], 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.8, 9, 0.5, 12, 0.3] } })
       mp.addLayer({ id: 'hex-line', type: 'line', source: 'hex', paint: { 'line-color': ['get', 'c'], 'line-width': 0.9, 'line-opacity': 0.9 } })
+      mp.addSource('lik', { type: 'geojson', data: EMPTY })
+      mp.addLayer({ id: 'lik', type: 'fill', source: 'lik', paint: { 'fill-color': ['get', 'c'], 'fill-opacity': 0.75 } })
       mp.addSource('pts', { type: 'geojson', data: EMPTY })
       const pz = small ? 0 : POINT_ZOOM
       mp.addLayer({ id: 'pts-modis', type: 'circle', source: 'pts', minzoom: pz, filter: ['==', ['get', 's'], 0],
@@ -234,6 +244,23 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
     return () => { alive = false }
   }, [ready, doc, y, m, zoomedIn, tile])
 
+  // next-month likelihood layer (only if the model passed its publish gate — otherwise the file does not exist)
+  useEffect(() => {
+    let alive = true
+    setLik(null); setShowLik(false)
+    fetchJson<LikDoc>(`api/likelihood/${doc.id}.json`).then((d) => alive && setLik(d)).catch(() => {})
+    return () => { alive = false }
+  }, [doc.id])
+  useEffect(() => {
+    if (!ready || !map.current) return
+    const mp = map.current
+    const on = showLik && !!lik
+    const feats = on ? lik!.cells.map(([id, , dec]) => ({ type: 'Feature' as const, properties: { c: LIK_COLORS[dec - 1] },
+      geometry: { type: 'Polygon' as const, coordinates: [cellToBoundary(id, true)] } })) : []
+    ;(mp.getSource('lik') as GeoJSONSource)?.setData({ type: 'FeatureCollection', features: feats })
+    for (const l of ['hex', 'hex-line']) if (mp.getLayer(l)) mp.setLayoutProperty(l, 'visibility', on ? 'none' : 'visible')
+  }, [ready, lik, showLik])
+
   // live NRT layer (provisional, separate from the record)
   useEffect(() => {
     if (!ready || !map.current) return
@@ -313,7 +340,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       </div>
       {/* QA #21: legend below the map, never over the fires */}
       <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-muted" data-testid="map-legend">
-        {stats && stats.cells > 0 && (
+        {stats && stats.cells > 0 && !(lik && showLik) && (
           <span className="flex items-center gap-1.5">
             <span>{doc.mode === 'detail' ? 'VIIRS native' : 'MODIS-equivalent'} fire-days per {res === 7 ? '~5 km²' : '~36 km²'} hexagon, {MONTHS[m - 1]} {y}:</span>
             <span className="num text-faint">{stats.min < 10 ? stats.min.toFixed(1) : fmtCompact(stats.min)}</span>
@@ -329,6 +356,14 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
           </span>
         )}
         {live?.ok && showLive && <span><span style={{ color: C_LIVE }}>●</span> live 72 h — raw, provisional, not in the record</span>}
+        {lik && showLik && (
+          <span className="flex items-center gap-1.5" data-testid="lik-legend">
+            <span>Likelihood of fire in {monthLabel(lik.target_month)}, decile within {doc.name.split(' (')[0]}:</span>
+            <span className="text-faint">lower</span>
+            <span className="inline-flex">{LIK_COLORS.map((c, i) => <span key={c} className="h-2.5 w-3" style={{ background: c }} title={`decile ${i + 1}`} />)}</span>
+            <span className="text-faint">higher</span>
+          </span>
+        )}
         {clipped && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t border-dashed border-[#93A1B3]" />data area (clip box)</span>}
         {box && <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-4 border-t-2 border-[#5AC8FA]" />your box</span>}
       </div>
@@ -347,6 +382,12 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         <button onClick={apply} className="rounded-sm bg-accent px-3 py-1.5 font-semibold text-bg hover:brightness-110">Apply box</button>
         {box && <button onClick={() => { onBox(null); setNote(null); setInputs(view.map((v) => v.toFixed(2))) }}
           className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">Clear</button>}
+        {lik && (
+          <label className="flex items-center gap-1.5 text-muted" data-testid="lik-toggle">
+            <input type="checkbox" checked={showLik} onChange={(e) => setShowLik(e.target.checked)} className="accent-[var(--accent-2)]" />
+            Next month: where fire is more likely ({monthLabel(lik.target_month)})<Help id="likelihood-layer" />
+          </label>
+        )}
         {live?.ok && (
           <label className="ml-auto flex items-center gap-1.5 text-muted">
             <input type="checkbox" checked={showLive} onChange={(e) => setShowLive(e.target.checked)} className="accent-[var(--accent-2)]" />
@@ -355,6 +396,12 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         )}
       </div>
       {note && <p className="mt-2 rounded-sm border border-warn/40 bg-warn/10 px-3 py-1.5 text-xs text-warn" role="status">{note}</p>}
+      {lik && showLik && (
+        <p className="mt-2 rounded-sm border border-accent-2/40 bg-accent-2/10 px-3 py-1.5 text-xs text-text" role="note" data-testid="lik-caveat">
+          Planning aid from 25 years of harmonized history — not a forecast of individual fires. Colours rank hexagons within {doc.name.split(' (')[0]} by how likely at least one
+          satellite fire detection is in {monthLabel(lik.target_month)} (features through {monthLabel(lik.features_through)}). Satellites detect heat, not causes. <a href="/proof#model">How it was tested →</a>
+        </p>
+      )}
       {/* QA #63: the footer follows the mode */}
       <p className="mt-2 text-xs text-muted" data-testid="map-footer">{res === 7
         ? 'High detail: hexagons are ~5 km², so the new satellite’s 375 m view shows field-scale fires. Values are native VIIRS fire-days, not comparable with years before 2012. Zoom in to see individual detections.'

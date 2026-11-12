@@ -1,7 +1,8 @@
 """Run the whole Fire Rings pipeline from raw CSVs to web/public/data/v1/.
 
 Usage: python pipeline/run_all.py [--from STEP] [--skip-tests]
-Steps: 02_unify 03_mask report 04_cube 05_calibrate 06_validate 07_stats 07b_detail 08_export 08b_demo_hotspots 09_watch 10_api  (network tools, run by hand: tools/fetch_power.py, tools/fetch_reunion.py + tools/reunion_series.py)
+Steps: 02_unify 03_mask report 04_cube 05_calibrate 06_validate 07_stats 07b_detail 08_export 08b_demo_hotspots 09_watch 10_api 11_model
+(world-archive regions: python pipeline/tools/clip_world.py bbox && ... clip, before 02_unify; monthly job: pipeline/retrain.py)  (network tools, run by hand: tools/fetch_power.py, tools/fetch_reunion.py + tools/reunion_series.py)
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ STEPS = [
     ("08b_demo_hotspots", [PIPE / "08b_demo_hotspots.py"]),
     ("09_watch", [PIPE / "09_watch.py"]),
     ("10_api", [PIPE / "10_api.py"]),
+    ("11_model", [PIPE / "11_model.py"]),   # Round 5B prediction model (deterministic; ~10 min)
 ]
 
 

@@ -80,6 +80,17 @@ Lint is clean, the hotspot and format tests pass, and no preview servers are lef
 7. https://fire-rings.vercel.app/: switch to **Day**; oceans should be blue.
 8. https://fire-rings.vercel.app/r/se_australia: the "2019–20 season (Black Summer)" preset.
 
+## Round 5B (12 Nov, final build) — running log
+- started 12:44 MUT. World archive: 58 zips / 62 CSVs / 662,068,762 rows in DATA/world (gitignored, check-ignore OK); streamed from the zips (pyarrow) — no unzip, no FIRMS API for history.
+- Part D done: #93 stars (1.5–3 px white, halos, ~9% twinkle 0.8–2 s, some full fades), #94 Guide sidebar (collapsible remembered sections, one line per item + tooltip, scroll-spy kept in view, thin scrollbar, phone "Contents ▾").
+- Part A: Natural Earth 10m v5.1.2 admin-0/admin-1 used as the boundary source (QA_ISSUES named it; data/raw/boundaries was empty). Clip check vs FIRMS India file: 431,376 vs 431,434 (0.013%).
+  Gate: nt_savanna ✅ (V1 3.5%, bias 0.4%; V3 +75% → −1.7%, MODIS −0.9%, p 1.0) · ne_india ✅ (5.6%, −2.2%; +113% → −17.9%, MODIS −16.9%, p 0.088) · tanzania ✅ (1.8%, 0.1%; +183% → −17.3%, MODIS −17.1%, p 0.069) · **sudan ❌ not shown** (V1 2.8% passes, but V3 Pettitt p 0.013 < 0.05, change year 2009; pooled also fails).
+  Decision: Sudan's gate applied as written (the remaining change point is in 2009, before the seam, so likely real, but no goalpost moving).
+  Existing 4 regions: steps 02–05 not re-run for them; snapshot test green; hexes7/region JSON for them restored byte-identical (only order/`updated` stamp differed).
+- Tanzania study check: harmonized −20.9% (2003–2011 vs 2016–2025; 2012 dropped, no Jan 2012 data), MODIS-only −21.6%, raw join +182.9% at 2012.
+- Decision: Fire Watch backtest totals now cover 7 regions (raw 183 / raw-only 104 / harmonized 79), shown wherever the totals appear (slides, paper, Watch).
+- Part B: model = sklearn HistGradientBoosting (chosen vs logistic regression on 2017 validation only); 16.4M cell-months; training subsample 1.5M rows per fit (seeded).
+
 ## Round 5A (12 Nov, looks: #89–#92) — running log
 - started; order: #91, #89 (main), #90 (companion redesign), #92 (control room + slides refresh).
 - #91 done: preset reads "Biggest season on record: 2019–20 season (Black Summer)" + small "Jul 2019 – Jun 2020".

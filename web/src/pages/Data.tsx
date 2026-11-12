@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useJson, useMeta } from '../lib/api'
 import { fmtInt, pctDiff2sig } from '../lib/format'
 import Help from '../components/Help'
+import { ModelHistory } from '../components/ModelCard'
 import links from '../../content/links.json'
 
 const REPO = 'https://github.com/Muru265/fire-rings'
@@ -26,13 +27,16 @@ const API: [string, string, string][] = [
   ['GET /data/v1/daily/{id}.json', '{"YYYY-MM": {"modis": [...], "viirs": [...]}} daily raw cell-days', '/data/v1/daily/mauritius.json'],
   ['GET /data/v1/hexes/{id}/{year}.json', 'per-month [cellIndex, cell-days, …]; cell ids in hexes/{id}/cells.json (H3 res 6)', '/data/v1/hexes/punjab/2016.json'],
   ['GET /data/v1/watch.json', 'Fire Watch statuses, rules and the raw-vs-harmonized alert backtest', '/data/v1/watch.json'],
+  ['GET /data/v1/api/likelihood/{id}.json', 'next month: where fire is more likely — per H3 res-6 cell [cell, score 0–1, decile 1–10, climatology score]; planning aid, not a forecast of individual fires (present only if the model passed its publish gate)', '/data/v1/api/likelihood/tanzania.json'],
+  ['GET /data/v1/api/model_card.json', 'the prediction model: target, features, training years, regions, rolling-origin + leave-one-region-out metrics, harmonized-vs-raw ablation, limitations, version, trained_at', '/data/v1/api/model_card.json'],
+  ['GET /data/v1/api/model_history.json', 'every automatic retraining run: date, data end, current model vs challenger vs usual-season metrics, decision', '/data/v1/api/model_history.json'],
   ['GET /api/hotspots?region=&start=&end=', 'filtered NASA FIRMS detections for ≤31 days (CSV or JSON), see below', '/api/hotspots?region=punjab&start=2016-10-01&end=2016-10-31'],
   ['GET /api/live?region={id}', 'last 72 h near-real-time detections (provisional, not in the record)', '/api/live?region=punjab'],
   ['GET /api/health?scope=data', 'service status (FIRMS key state, data version) — no AI call', '/api/health?scope=data'],
 ]
 
 const DICT: [string, string, string][] = [
-  ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius'],
+  ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania'],
   ['year, month', '—', 'Calendar month (local solar day = UTC + longitude/15 h)'],
   ['H', 'fire cell-days (MODIS-equivalent)', 'Harmonized monthly value. One fire cell-day = one H3 resolution-6 hexagon (~36 km²) with ≥1 kept detection on one solar day'],
   ['V_native, V_lo, V_hi', 'fire cell-days (VIIRS native)', 'High detail (2012+): VIIRS 375 m fire cell-days as seen, S-NPP-equivalent (NOAA-20 × k′ after S-NPP data delivery ceased on 2 Nov 2026), not converted to MODIS units. V_lo/V_hi = 5th/95th percentile of Poisson counting noise. H = k × V on these months'],
@@ -153,6 +157,7 @@ export default function Data() {
         <pre className="num mt-3 overflow-x-auto rounded-sm border border-border bg-surface-2 p-4 text-xs text-text"><code>{`curl -s "${SITE}/api/hotspots?region=punjab&start=2020-11-01&end=2020-11-05" -o punjab.csv
 curl -s ${SITE}/data/v1/api/projection/punjab.json | jq '.current'
 curl -s ${SITE}/data/v1/regions/madagascar.json | jq '.latest | {y, m, value, ratio, pct}'`}</code></pre>
+        <div className="mt-6"><ModelHistory compact /></div>
       </section>
 
       <section aria-labelledby="cite-h" className="max-w-4xl">

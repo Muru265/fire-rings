@@ -1,0 +1,22 @@
+{
+ "runs": [
+  {
+   "date": "2026-11-12T09:35Z",
+   "data_end": "2026-11-09",
+   "trigger": "pipeline (11_model.py)",
+   "version": 1,
+   "champion": null,
+   "challenger": {
+    "recipe": "hgb_small",
+    "pr_auc": 0.7271,
+    "capture10": 30.5
+   },
+   "climatology": {
+    "pr_auc": 0.5899,
+    "capture10": 27.2
+   },
+   "decision": "published (first model)"
+  }
+ ],
+ "note": "Automatic monthly retraining (GitHub Actions, 2nd of each month): a challenger is published only if it beats BOTH the current model and the seasonal baseline on rolling-origin PR-AUC and top-10% capture."
+}

@@ -1,0 +1,516 @@
+{
+ "name": "Fire Rings — fire likelihood next month (per H3 res-6 hexagon)",
+ "version": 1,
+ "trained_at": "2026-11-12T09:35Z",
+ "data_end": "2026-11-09",
+ "next_month": [
+  "2026-11"
+ ],
+ "features_through": "2026-10",
+ "what_it_is": "Where fire is more likely next month, from 25 years of harmonized history. A planning aid — not a forecast of individual fires, damage or causes.",
+ "unit": "H3 res-6 cell (~36 km²) × month, all validated regions together (region is a feature)",
+ "target": "the cell has ≥ 1 VIIRS fire-day (High detail record: S-NPP; NOAA-20 after S-NPP data ended) in month m+1",
+ "training_years": [
+  2013,
+  2025
+ ],
+ "regions": [
+  "punjab",
+  "madagascar",
+  "se_australia",
+  "mauritius",
+  "nt_savanna",
+  "ne_india",
+  "tanzania"
+ ],
+ "rows": 16366896,
+ "positive_rate": 0.1309,
+ "max_training_rows_per_fit": 1500000,
+ "features": {
+  "clim_frac": "share of years 2001 → year before the target with ≥ 1 MODIS-equivalent fire-day in this cell, same calendar month (harmonized)",
+  "clim_mean": "mean MODIS-equivalent fire-days in this cell, same calendar month, same years",
+  "h_m, h_m1, h_m2": "MODIS-equivalent fire-days in this cell in months m, m−1, m−2",
+  "ring1_last, ring2_last": "mean MODIS-equivalent fire-days of the ring-1 (6) and ring-2 (12) neighbours in month m",
+  "ring1_clim, ring2_clim": "neighbours' clim_frac",
+  "rain_anom, t2m_anom": "NASA POWER region rain and 2 m temperature in month m minus the same calendar month's median in all earlier years",
+  "month": "target calendar month (categorical)",
+  "region": "region (categorical)"
+ },
+ "harmonization": "cell value = raw primary-stream fire-days × frozen published ratio (q·Terra | MODIS | k·S-NPP | k·k′·NOAA-20)",
+ "model_selection": {
+  "rule": "logistic regression vs gradient boosting (sklearn HistGradientBoosting); chosen by validation PR-AUC on training years only (train targets 2013–2016, validate 2017)",
+  "validation_pr_auc": {
+   "logit": 0.6785,
+   "hgb": 0.7118,
+   "hgb_small": 0.7128
+  },
+  "chosen": "hgb_small",
+  "recipe": {
+   "kind": "hgb",
+   "lr": 0.05,
+   "leaves": 31,
+   "iters": 400
+  }
+ },
+ "baselines": {
+  "climatology": "b1: the cell's harmonized share of past years with fire in that calendar month",
+  "persistence": "b2: fire in the cell in month m"
+ },
+ "evaluation": {
+  "primary": "rolling origin: for each test year 2018–2025 train only on earlier target years, predict that year",
+  "secondary": "leave-one-region-out: train on the other regions, test on the held-out one (2018–2025), region feature removed",
+  "threshold": "precision/recall/F1 at the threshold that maximised F1 on each fold's training data (never test data)",
+  "capture": "rank the cells of each region and month by score; share of next month's fire cells inside the top 10 % (20 %)",
+  "intervals": {
+   "model": {
+    "pr_auc": [
+     0.7167,
+     0.7418
+    ],
+    "roc_auc": [
+     0.9142,
+     0.9284
+    ],
+    "capture10": [
+     29.7,
+     31.2
+    ],
+    "capture20": [
+     48.8,
+     50.9
+    ]
+   },
+   "b1": {
+    "pr_auc": [
+     0.581,
+     0.5975
+    ],
+    "roc_auc": [
+     0.8351,
+     0.8409
+    ],
+    "capture10": [
+     26.7,
+     27.9
+    ],
+    "capture20": [
+     43.9,
+     45.4
+    ]
+   },
+   "b2": {
+    "pr_auc": [
+     0.3147,
+     0.3384
+    ],
+    "roc_auc": [
+     0.7127,
+     0.7286
+    ],
+    "capture10": [
+     19.5,
+     20.3
+    ],
+    "capture20": [
+     33.1,
+     34.2
+    ]
+   },
+   "model_minus": {
+    "b1": {
+     "pr_auc": [
+      0.1287,
+      0.1511
+     ],
+     "capture10": [
+      3.0,
+      3.5
+     ]
+    },
+    "b2": {
+     "pr_auc": [
+      0.3988,
+      0.4075
+     ],
+     "capture10": [
+      10.2,
+      11.0
+     ]
+    }
+   }
+  },
+  "pooled": {
+   "model": {
+    "n": 10071936,
+    "positives": 1301369,
+    "roc_auc": 0.9214,
+    "pr_auc": 0.7271,
+    "brier": 0.0604,
+    "capture10": 30.5,
+    "capture20": 49.7,
+    "precision": 0.66,
+    "recall": 0.676,
+    "f1": 0.668,
+    "thresholds": {
+     "2018": 0.349,
+     "2019": 0.3472,
+     "2020": 0.3346,
+     "2021": 0.3544,
+     "2022": 0.3537,
+     "2023": 0.3511,
+     "2024": 0.3493,
+     "2025": 0.3356
+    }
+   },
+   "climatology": {
+    "n": 10071936,
+    "positives": 1301369,
+    "roc_auc": 0.8375,
+    "pr_auc": 0.5899,
+    "brier": 0.0846,
+    "capture10": 27.2,
+    "capture20": 44.6,
+    "precision": 0.873,
+    "recall": 0.194,
+    "f1": 0.318
+   },
+   "persistence": {
+    "n": 10071936,
+    "positives": 1301369,
+    "roc_auc": 0.7202,
+    "pr_auc": 0.3258,
+    "brier": 0.1259,
+    "capture10": 19.9,
+    "capture20": 33.7,
+    "precision": 0.513,
+    "recall": 0.513,
+    "f1": 0.513
+   }
+  },
+  "per_region": {
+   "punjab": {
+    "model": {
+     "positives": 70722,
+     "roc_auc": 0.9228,
+     "pr_auc": 0.7798,
+     "capture10": 28.2,
+     "capture20": 49.0
+    },
+    "climatology": {
+     "positives": 70722,
+     "roc_auc": 0.8365,
+     "pr_auc": 0.6613,
+     "capture10": 24.6,
+     "capture20": 43.2
+    },
+    "persistence": {
+     "positives": 70722,
+     "roc_auc": 0.6175,
+     "pr_auc": 0.2476,
+     "capture10": 17.7,
+     "capture20": 30.5
+    }
+   },
+   "madagascar": {
+    "model": {
+     "positives": 474811,
+     "roc_auc": 0.908,
+     "pr_auc": 0.8216,
+     "capture10": 23.2,
+     "capture20": 42.1
+    },
+    "climatology": {
+     "positives": 474811,
+     "roc_auc": 0.8516,
+     "pr_auc": 0.7466,
+     "capture10": 21.8,
+     "capture20": 39.2
+    },
+    "persistence": {
+     "positives": 474811,
+     "roc_auc": 0.7341,
+     "pr_auc": 0.5116,
+     "capture10": 16.6,
+     "capture20": 31.9
+    }
+   },
+   "se_australia": {
+    "model": {
+     "positives": 103508,
+     "roc_auc": 0.8085,
+     "pr_auc": 0.277,
+     "capture10": 38.3,
+     "capture20": 55.6
+    },
+    "climatology": {
+     "positives": 103508,
+     "roc_auc": 0.6733,
+     "pr_auc": 0.1742,
+     "capture10": 27.7,
+     "capture20": 42.5
+    },
+    "persistence": {
+     "positives": 103508,
+     "roc_auc": 0.6025,
+     "pr_auc": 0.1004,
+     "capture10": 26.1,
+     "capture20": 35.6
+    }
+   },
+   "mauritius": {
+    "model": {
+     "positives": 566,
+     "roc_auc": 0.8283,
+     "pr_auc": 0.3865,
+     "capture10": 27.0,
+     "capture20": 43.5
+    },
+    "climatology": {
+     "positives": 566,
+     "roc_auc": 0.695,
+     "pr_auc": 0.2628,
+     "capture10": 20.7,
+     "capture20": 35.0
+    },
+    "persistence": {
+     "positives": 566,
+     "roc_auc": 0.6261,
+     "pr_auc": 0.1717,
+     "capture10": 18.2,
+     "capture20": 33.9
+    }
+   },
+   "nt_savanna": {
+    "model": {
+     "positives": 172307,
+     "roc_auc": 0.8613,
+     "pr_auc": 0.4012,
+     "capture10": 51.4,
+     "capture20": 69.9
+    },
+    "climatology": {
+     "positives": 172307,
+     "roc_auc": 0.8078,
+     "pr_auc": 0.3445,
+     "capture10": 47.0,
+     "capture20": 63.3
+    },
+    "persistence": {
+     "positives": 172307,
+     "roc_auc": 0.6171,
+     "pr_auc": 0.1088,
+     "capture10": 29.9,
+     "capture20": 37.7
+    }
+   },
+   "ne_india": {
+    "model": {
+     "positives": 62389,
+     "roc_auc": 0.938,
+     "pr_auc": 0.7365,
+     "capture10": 31.3,
+     "capture20": 51.1
+    },
+    "climatology": {
+     "positives": 62389,
+     "roc_auc": 0.8732,
+     "pr_auc": 0.6732,
+     "capture10": 28.4,
+     "capture20": 46.5
+    },
+    "persistence": {
+     "positives": 62389,
+     "roc_auc": 0.6682,
+     "pr_auc": 0.2352,
+     "capture10": 18.8,
+     "capture20": 32.1
+    }
+   },
+   "tanzania": {
+    "model": {
+     "positives": 417066,
+     "roc_auc": 0.9297,
+     "pr_auc": 0.7915,
+     "capture10": 28.4,
+     "capture20": 48.6
+    },
+    "climatology": {
+     "positives": 417066,
+     "roc_auc": 0.8547,
+     "pr_auc": 0.6688,
+     "capture10": 25.5,
+     "capture20": 43.5
+    },
+    "persistence": {
+     "positives": 417066,
+     "roc_auc": 0.7386,
+     "pr_auc": 0.4256,
+     "capture10": 18.5,
+     "capture20": 34.2
+    }
+   }
+  },
+  "per_year": {
+   "2018": {
+    "model": 30.3,
+    "climatology": 26.9
+   },
+   "2019": {
+    "model": 32.2,
+    "climatology": 28.3
+   },
+   "2020": {
+    "model": 28.7,
+    "climatology": 25.6
+   },
+   "2021": {
+    "model": 30.5,
+    "climatology": 27.6
+   },
+   "2022": {
+    "model": 32.5,
+    "climatology": 29.0
+   },
+   "2023": {
+    "model": 29.5,
+    "climatology": 26.8
+   },
+   "2024": {
+    "model": 29.3,
+    "climatology": 26.6
+   },
+   "2025": {
+    "model": 31.0,
+    "climatology": 27.4
+   }
+  }
+ },
+ "leave_one_region_out": {
+  "punjab": {
+   "model": {
+    "roc_auc": 0.9127,
+    "pr_auc": 0.7527,
+    "capture10": 27.5
+   },
+   "climatology": {
+    "roc_auc": 0.8365,
+    "pr_auc": 0.6613,
+    "capture10": 24.6
+   }
+  },
+  "madagascar": {
+   "model": {
+    "roc_auc": 0.8992,
+    "pr_auc": 0.8006,
+    "capture10": 22.8
+   },
+   "climatology": {
+    "roc_auc": 0.8516,
+    "pr_auc": 0.7466,
+    "capture10": 21.8
+   }
+  },
+  "se_australia": {
+   "model": {
+    "roc_auc": 0.794,
+    "pr_auc": 0.2292,
+    "capture10": 36.1
+   },
+   "climatology": {
+    "roc_auc": 0.6733,
+    "pr_auc": 0.1742,
+    "capture10": 27.7
+   }
+  },
+  "mauritius": {
+   "model": {
+    "roc_auc": 0.8276,
+    "pr_auc": 0.4085,
+    "capture10": 27.4
+   },
+   "climatology": {
+    "roc_auc": 0.695,
+    "pr_auc": 0.2628,
+    "capture10": 20.7
+   }
+  },
+  "nt_savanna": {
+   "model": {
+    "roc_auc": 0.8594,
+    "pr_auc": 0.3638,
+    "capture10": 49.6
+   },
+   "climatology": {
+    "roc_auc": 0.8078,
+    "pr_auc": 0.3445,
+    "capture10": 47.0
+   }
+  },
+  "ne_india": {
+   "model": {
+    "roc_auc": 0.9265,
+    "pr_auc": 0.705,
+    "capture10": 30.7
+   },
+   "climatology": {
+    "roc_auc": 0.8732,
+    "pr_auc": 0.6732,
+    "capture10": 28.4
+   }
+  },
+  "tanzania": {
+   "model": {
+    "roc_auc": 0.923,
+    "pr_auc": 0.7618,
+    "capture10": 28.0
+   },
+   "climatology": {
+    "roc_auc": 0.8547,
+    "pr_auc": 0.6688,
+    "capture10": 25.5
+   }
+  }
+ },
+ "ablation": {
+  "what": "same model, same folds, history features from RAW counts (MODIS ≤ 2011 mixed with unconverted VIIRS ≥ 2012) instead of harmonized",
+  "harmonized": {
+   "pr_auc": 0.7271,
+   "roc_auc": 0.9214,
+   "capture10": 30.5,
+   "capture20": 49.7
+  },
+  "raw": {
+   "pr_auc": 0.735,
+   "roc_auc": 0.9245,
+   "capture10": 30.9,
+   "capture20": 50.3
+  },
+  "difference_harmonized_minus_raw": {
+   "pr_auc": -0.0079,
+   "roc_auc": -0.0031,
+   "capture10": -0.4,
+   "capture20": -0.6
+  }
+ },
+ "gate": {
+  "passed": true,
+  "rule": "publish only if the model beats climatology (b1) on pooled rolling-origin PR-AUC AND top-10% capture",
+  "model_pr_auc": 0.7271,
+  "climatology_pr_auc": 0.5899,
+  "model_capture10": 30.5,
+  "climatology_capture10": 27.2
+ },
+ "final_threshold": 0.333,
+ "limitations": [
+  "Says where fire is more likely, not when, how big, or why; satellites detect heat, not causes.",
+  "A planning aid, not an emergency or early-warning service.",
+  "Target is ≥ 1 VIIRS fire-day: small fires count the same as large ones.",
+  "Cells are the hexagons with at least one detection in the record; never-burning land is not scored.",
+  "Recent months are provisional (near-real-time data); NOAA-20 replaces S-NPP after Oct 2026.",
+  "Punjab Oct–Nov: satellites pass at ~13:30 while burning has reportedly shifted later, so fire there may be undercounted.",
+  "Trained on 7 regions; other places need their own validation first."
+ ],
+ "licence": "CC BY 4.0 (outputs) · code MIT",
+ "code": "pipeline/11_model.py, pipeline/lib/model_data.py",
+ "train_end": "2025-12"
+}

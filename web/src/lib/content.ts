@@ -7,7 +7,7 @@ import { provisionalSpan } from './provisional'
 import type { RegionDoc } from './types'
 import type { WatchDoc } from '../../api/_lib/watch'
 
-export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius'] as const
+export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania'] as const
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ContentData { values: Record<string, string>; docs: Record<string, RegionDoc>; watch: WatchDoc | null; reunion: boolean; val: Record<string, any> | null }
 
@@ -77,6 +77,35 @@ export async function loadContent(): Promise<ContentData> {
     const cells = rows.filter((x) => x[0] >= 2003 && x[0] <= 2025).map((x) => ({ y: x[0], harm: x[2] != null && x[2] > tH[x[1] - 1], raw: x[5] != null && x[5] > tR[x[1] - 1] }))
     set('ins.p', String(P)); set('ins.harm', String(cells.filter((c) => c.harm).length)); set('ins.raw', String(cells.filter((c) => c.raw).length))
     set('ins.raw_only', String(cells.filter((c) => c.raw && !c.harm && c.y >= 2012).length))
+  }
+  // Round 5B: prediction model (api/model_card.json) + model history + Tanzania study check (regions/tanzania.json)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mc = await fetchJson<any>('api/model_card.json').catch(() => null)
+  if (mc) {
+    const P = mc.evaluation.pooled, ab = mc.ablation, I = mc.evaluation.intervals
+    const pc = (x: number) => String(Math.round(x)), f2 = (x: number) => x.toFixed(2)
+    set('model.cap10', pc(P.model.capture10)); set('model.cap20', pc(P.model.capture20))
+    set('model.clim_cap10', pc(P.climatology.capture10)); set('model.pers_cap10', pc(P.persistence.capture10))
+    set('model.pr_auc', f2(P.model.pr_auc)); set('model.clim_pr_auc', f2(P.climatology.pr_auc)); set('model.pers_pr_auc', f2(P.persistence.pr_auc))
+    set('model.roc_auc', f2(P.model.roc_auc)); set('model.clim_roc_auc', f2(P.climatology.roc_auc))
+    set('model.f1', P.model.f1 != null ? f2(P.model.f1) : undefined)
+    set('model.precision', P.model.precision != null ? f2(P.model.precision) : undefined); set('model.recall', P.model.recall != null ? f2(P.model.recall) : undefined)
+    set('model.cap10_ci', I?.model?.capture10 ? `${pc(I.model.capture10[0])}–${pc(I.model.capture10[1])}` : undefined)
+    set('model.raw_pr_auc', f2(ab.raw.pr_auc)); set('model.raw_cap10', pc(ab.raw.capture10))
+    const d = ab.difference_harmonized_minus_raw
+    const sg = (x: number, dd: number) => `${x > 0 ? '+' : x < 0 ? '−' : '±'}${Math.abs(x).toFixed(dd)}`
+    set('model.abl_pr', sg(d.pr_auc, 2)); set('model.abl_cap', sg(d.capture10, 1))
+    set('model.gate', mc.gate.passed ? 'passed' : 'not passed')
+    set('model.version', String(mc.version)); set('model.trained', new Date(mc.trained_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }))
+    set('model.chosen', mc.model_selection.chosen.startsWith('hgb') ? 'gradient boosting' : 'logistic regression')
+    const lo = Object.values(mc.leave_one_region_out as Record<string, { model?: { pr_auc: number }; climatology?: { pr_auc: number } }>).filter((x) => x.model && x.climatology)
+    set('model.loro_wins', String(lo.filter((x) => x.model!.pr_auc > x.climatology!.pr_auc).length)); set('model.loro_n', String(lo.length))
+  }
+  const sc = (byId.tanzania as RegionDoc & { study_check?: { harmonized: { change_pct: number }; modis_only: { change_pct: number }; raw_step_2012_pct: number; years_a: number[]; years_b: number[] } } | undefined)?.study_check
+  if (sc) {
+    const sp = (x: number) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x) >= 10 ? Math.round(Math.abs(x)) : Math.abs(x).toFixed(1)}%`
+    set('tz.harm', sp(sc.harmonized.change_pct)); set('tz.modis', sp(sc.modis_only.change_pct)); set('tz.raw', sp(sc.raw_step_2012_pct))
+    set('tz.years', `${sc.years_a[0]}–${sc.years_a[1]} vs ${sc.years_b[0]}–${sc.years_b[1]}`)
   }
   const val = await fetchJson<{ regions: Record<string, unknown> }>('dataset/validation_v1.json').then((x) => x.regions).catch(() => null)
   const reu = await fetchJson<ReunionFile>('api/reunion.json').catch(() => null)

@@ -16,6 +16,8 @@ import { calibrationSummary, kRangeText } from '../lib/calibration'
 import Help from '../components/Help'
 import WatchProof from '../components/WatchProof'
 import VolcanoCard from '../components/VolcanoCard'
+import StudyCheck from '../components/StudyCheck'
+import ModelCard from '../components/ModelCard'
 import links from '../../content/links.json'
 
 const C_HARM = '#D97706'
@@ -31,7 +33,7 @@ interface ValDoc { regions: Record<string, { summary: RegionDoc['validation']; r
 
 export default function Proof() {
   const val = useJson<ValDoc>('dataset/validation_v1.json')
-  const [rid, setRid] = useState<string>('punjab')
+  const [rid, setRid] = useState<string>(() => { const q = new URLSearchParams(window.location.search).get('region'); return REGIONS.some((r) => r.id === q) ? q! : 'punjab' })
   const doc = useRegion(rid)
 
   return (
@@ -67,6 +69,8 @@ export default function Proof() {
       {val.status === 'ready' && <ProofBody val={val.data} rid={rid} doc={doc.status === 'ready' ? doc.data : null} />}
 
       <DetectionTiming />
+
+      <ModelCard />
 
       <WatchProof />
       <VolcanoCard />
@@ -125,6 +129,7 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
         Method used: <strong className="text-text">{s.method === 'pooled' ? 'single region-wide ratio (fallback 1)' : 'monthly ratios with shrinkage'}</strong> — {s.method_reason}.
         {low && ' Low-activity region: targets are reported but not judged; the app applies the "too little fire to judge" guard.'}
       </p>
+      {doc && <StudyCheck doc={doc} />}
 
       <BeforeAfter v3={res.V3} doc={doc} />
       <Drift v4={res.V4} />
