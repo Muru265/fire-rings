@@ -4,6 +4,79 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Summary for Muru — Round 5B (final build)
+
+**In one line:** three new regions are live (Northern Australia savanna, Northeast India, Tanzania). Sudan failed the test and is not shown. A tested "where fire is more likely next month" model is live and beats the usual-season baseline. Automatic monthly retraining is built and tested locally; it needs one secret from you. Both sites serve the new build. The four original regions' Long-term numbers are unchanged (snapshot test green).
+
+**New regions** (cut from the NASA FIRMS world archive you downloaded; Natural Earth borders; same pipeline and the same tests)
+| Region | V1 error (bias) | 2012 step raw → fixed (MODIS alone) | Pettitt p after | Shown? |
+|---|---|---|---|---|
+| Northern Australia savanna (NT) | 3.5 % (0.4 %) | +75 % → −1.7 % (−0.9 %) | 1.0 | ✅ yes |
+| Northeast India (7 states) | 5.6 % (−2.2 %) | +113 % → −17.9 % (−16.9 %) | 0.088 | ✅ yes |
+| Tanzania | 1.8 % (0.1 %) | +183 % → −17.3 % (−17.1 %) | 0.069 | ✅ yes |
+| Sudan (today's border, all years) | 2.8 % (−0.1 %) | +123 % → −14.6 % (−14.5 %) | **0.013** | ❌ no — fails V3 |
+- Sudan: the jump test still finds a change point (in 2009, before the satellite switch), so it fails the rule as written. The pooled fallback also fails. It is listed as "not validated" in docs/validation_report.md and appears nowhere in the app.
+- The world clip was checked against your FIRMS India country file: 431,376 vs 431,434 MODIS points for Northeast India (0.013 % apart, border pixels).
+
+**Tanzania study check** (Tarimo et al. 2015, miombo woodlands, reported declining fire): our whole-country harmonized record shows **−21 %** (2003–2011 vs 2016–2025; 2012 is left out because January 2012 has no data). MODIS alone shows **−22 %**. A raw join would show **+183 %** at 2012. Same direction as the study; the card says the areas differ.
+
+**Prediction model: gate PASSED → the layer is live** (tested on unseen years 2018–2025, 7 regions, 16.4 M hexagon-months)
+- Watching the top 10 % of hexagons would have caught **30.5 %** of next month's fire hexagons (90 % range 29.7–31.2), vs **27.2 %** for the usual season and 19.9 % for "fire last month".
+- PR-AUC **0.73** (usual season 0.59) · ROC-AUC **0.92** (0.84) · F1 **0.67** (precision 0.66, recall 0.68; threshold set on training years).
+- Leave-one-region-out: beats the usual season in **7 of 7** held-out regions. It also beats it in every region in the main test.
+- **Harmonized vs raw history (the headline ablation):** raw history is slightly *better* for this task: −0.008 PR-AUC and −0.4 points of capture for harmonized. I report it as it is. The model ranks hexagons inside one region and month, where a fixed exchange rate changes little, so harmonization matters for the record (comparing years), not for this ranking.
+- Model: gradient boosting (sklearn), chosen over logistic regression using 2017 only (before any test year). Next month scored: November 2026.
+
+**Automatic retraining:** built and tested locally (dry run: champion 0.763 vs challenger 0.760 on Aug–Oct 2026 → "kept current model"). One real FIRMS test: Punjab 1–8 Nov matches the record.
+- **Muru to do (2 minutes):**
+  1. https://github.com/Muru265/fire-rings → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**. Name it `FIRMS_MAP_KEY` and paste your FIRMS map key as the value.
+  2. GitHub → **Actions** → **Monthly model retrain** → **Run workflow**. Tick "Dry run" for a safe first test, then run it once more without ticking.
+  3. It then runs by itself on the 2nd of every month and commits as Muru265, so Vercel deploys. If anything fails, nothing is committed.
+- FIRMS API calls used this round: **5** of the 150 allowed (all for testing the retrain fetch). A monthly run uses about 49 calls.
+
+**What changed on screen**
+- Brighter stars (main site + dark companion apps).
+- The Guide sidebar has clear collapsible sections, one line per item and a "you are here" highlight; on phones it becomes a "Contents ▾" menu.
+- 7 regions everywhere: switcher, home cards and globe, Proof tabs, Fire Watch, Ask, Data, story picker ("no story yet"), companion pickers.
+- Tanzania "Study check" card (Explore + Proof).
+- Explore map: "Next month: where fire is more likely (November 2026)", off by default.
+- Proof: a "Prediction model, tested" card + Model history.
+- Data page: 3 new open API rows + Model history.
+- Guide: 5 new entries.
+- Slides (still 7) and paper updated, every number live; PDFs regenerated.
+
+**Existing-region numbers:** Long-term values unchanged (snapshot test green; their region files are byte-identical).
+- Display only: the Fire Watch backtest totals now cover 7 regions (raw 183 alerts, 104 raw-only, harmonized 79), so slides, paper and Fire Watch show the new totals.
+
+**Tests, before → after**
+| Test | Round 5A | Round 5B |
+|---|---|---|
+| pytest | 92 | 96 |
+| Main e2e | 70 | 70 |
+| claims_check | 203 | 347 |
+| guide_check | 22 | 22 |
+| ask_e2e | 64/64 | 107/112 (all 64 original pass; 5 new-region answers missing, see below) |
+| Companion e2e | 87 | 87 |
+Lint clean; format, hotspot and twinkle tests pass; slides PDF = 7 pages with figure-fit checks.
+
+**Decisions to review**
+- Sudan excluded by the rule as written (its remaining change point is in 2009, so it may be a real change, but I did not move the goalposts).
+- Boundaries: Natural Earth 10m v5.1.2. QA_ISSUES named it, and data/raw/boundaries was empty.
+- Model training uses a 1.5 M-row seeded subsample per fit (speed); the scores cover all test rows.
+- Retraining compares champion vs challenger on the newest months that *neither* model trained on, and also requires the challenger to beat the usual season in the backtest.
+- Persistence ties and climatology ties are broken by a seeded random order when computing capture.
+- **Ask, 5 saved answers missing:** "How reliable is this?" for Northeast India (4) and Northern Australia savanna (Scientist, Long-term). Gemini kept refusing (429 quota exceeded) or failed the number check. On the site, the live AI answers these when it has quota; otherwise the page says "The live AI is busy right now" — never a made-up answer. To fill them later: in `web/`, run `npx tsx --env-file=../.env scripts/ask_cache.ts --mode both --only "nt_savanna|How reliable is this?|scientist,ne_india|How reliable is this?"`, then commit `web/public/data/v1/ask_cache.json`.
+
+**What to check first**
+1. https://fire-rings.vercel.app/r/tanzania — tick "Next month: where fire is more likely" under the map; see the Study check card.
+2. https://fire-rings.vercel.app/proof#model — the model card and Model history.
+3. https://fire-rings.vercel.app/proof?region=tanzania — the new region's validation + study check.
+4. https://fire-rings.vercel.app/ — brighter stars; 7 region cards; globe glow on Tanzania, NE India and NT.
+5. https://fire-rings.vercel.app/guide — the new sidebar (also on your phone).
+6. https://fire-rings.vercel.app/slides — slides 1, 3, 5, 6 and 7.
+7. https://github.com/Muru265/fire-rings/actions → "Monthly model retrain" (after adding the secret).
+8. https://fire-rings-apps.vercel.app/expect — pick Tanzania or Northeast India.
+
 ## Summary for Muru — Round 5A (looks, 12 Nov)
 
 **Deploys unblocked: commit author set to Muru265 (repos private)** — 13 Nov: both productions now serve the Round 5A builds; control-room fallback shots, slide-6 montage and PDFs re-shot from production.
@@ -89,6 +162,10 @@ Lint is clean, the hotspot and format tests pass, and no preview servers are lef
   Existing 4 regions: steps 02–05 not re-run for them; snapshot test green; hexes7/region JSON for them restored byte-identical (only order/`updated` stamp differed).
 - Tanzania study check: harmonized −20.9% (2003–2011 vs 2016–2025; 2012 dropped, no Jan 2012 data), MODIS-only −21.6%, raw join +182.9% at 2012.
 - Decision: Fire Watch backtest totals now cover 7 regions (raw 183 / raw-only 104 / harmonized 79), shown wherever the totals appear (slides, paper, Watch).
+- Part B done: gate passed (PR-AUC 0.727 vs 0.590; top-10% 30.5% vs 27.2%); ablation harmonized−raw −0.008 PR-AUC (reported as found).
+- Part E done: retrain.py + workflow; dry run kept the champion (0.7625 vs 0.7596 on Aug–Oct 2026). FIRMS area API limit is 5 days/call (found by testing; 3 rejected calls). 5 FIRMS calls total this round.
+- Part C done: slides (7) + paper §4.1 + README/METHODS 9g–9i/DATA_SOURCES/sources.md; PDFs regenerated.
+- Pushes this round: main 2, companion 1.
 - Part B: model = sklearn HistGradientBoosting (chosen vs logistic regression on 2017 validation only); 16.4M cell-months; training subsample 1.5M rows per fit (seeded).
 
 ## Round 5A (12 Nov, looks: #89–#92) — running log
