@@ -341,6 +341,62 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   unchanged inputs and `test_longterm_unchanged.py` confirms the four original regions' Long-term values are identical.
 - **Tanzania study check.** See `docs/sources.md`.
 
+## 9h. Prediction model: fire likelihood next month (`11_model.py`, `lib/model_data.py`)
+
+- **Unit and data.** H3 res-6 cell × month for all validated regions together (region is a feature): 16,366,896 cell-months,
+  built only from committed files (`hexes/{id}/*.json` primary-stream fire-days, published k / q / k′, NASA POWER), so the
+  monthly job can rebuild them. Cell universe = hexagons with at least one detection in the record.
+- **Target.** At least one VIIRS fire-day in month m+1 (High detail: S-NPP; NOAA-20 after S-NPP data ended). Target years 2013–2025.
+- **Features (known at the end of month m).** Harmonized MODIS-equivalent history of the same calendar month, 2001 to the year
+  before the target: share of years with at least one MODIS-equivalent fire-day and mean fire-days; the cell's value in m, m−1, m−2;
+  mean of ring-1 / ring-2 neighbours in m and their climatology; target month; region; NASA POWER rain and 2 m temperature
+  in month m minus the median of that calendar month in all EARLIER years (no future information). Months flagged
+  "insufficient" are missing values.
+- **Models.** Logistic regression (log1p + standardised, one-hot month/region) and sklearn HistGradientBoosting (two
+  settings), chosen once by PR-AUC on training years only (train targets 2013–2016, validate 2017, before the first test
+  year): `hgb_small` (validation PR-AUC {'logit': 0.6785, 'hgb': 0.7118, 'hgb_small': 0.7128}). Training rows are
+  subsampled to 1.5 M per fit with a fixed seed; output is deterministic (seed 20261114, tested).
+- **Baselines.** b1 climatology = the cell's harmonized share of past years with fire in that calendar month; b2 persistence
+  = fire in the cell in month m.
+- **Evaluation (test data only).** Primary rolling origin: for each test year 2018–2025, train on target years before it
+  (asserted in code and tested). Secondary leave-one-region-out (2018–2025, region feature removed). Metrics: ROC-AUC, PR-AUC,
+  precision/recall/F1 at the F1-maximising threshold of each fold's TRAINING data, Brier, and capture = share of next month's
+  fire cells inside the top 10 % (20 %) of cells ranked within each region and month (seeded random tie-break). 90 %
+  intervals: test years resampled with replacement (300 times; AUCs on a fixed 4 % row sample per year).
+- **Results (pooled rolling origin).** Model PR-AUC 0.7271 (90 % [0.7167, 0.7418]), ROC-AUC 0.9214,
+  F1 0.668, top-10 % capture 30.5 % ([29.7, 31.2]), top-20 % 49.7 %.
+  Climatology: PR-AUC 0.5899, capture 27.2 %. Persistence: PR-AUC 0.3258,
+  capture 19.9 %. Model minus climatology (90 %): PR-AUC [0.1287, 0.1511],
+  capture [3.0, 3.5] points. The model beats climatology in every region and in 7 of 7
+  leave-one-region-out tests. Capture is bounded: when more than 10 % of a region's cells burn in a month, the top 10 %
+  cannot hold them all.
+- **Harmonization ablation (headline, reported as found).** Same model and folds with RAW history (MODIS up to 2011 mixed with
+  unconverted VIIRS): PR-AUC 0.735, capture 30.9 %. Harmonized minus raw: -0.0079 PR-AUC,
+  -0.4 points. Harmonization does NOT improve this ranking task: cells are ranked within one region and month,
+  where a fixed exchange rate changes little, and raw VIIRS counts keep small-fire detail. Harmonization matters for
+  comparing amounts across years (the record).
+- **Publish gate.** Likelihood maps are published only if the model beats b1 on pooled rolling-origin PR-AUC AND top-10 %
+  capture: **passed**. Outputs: `api/likelihood/{id}.json` (next month = the month
+  after the last full month: 2026-11), `api/model_card.json`, `api/model_history.json`.
+- **Limitations.** Ranks the likelihood of at least one detection, not size, timing, damage or cause; a planning aid, not a
+  warning service; the Punjab Oct–Nov overpass-timing caveat applies; 7 regions only.
+
+## 9i. Automatic monthly retraining (`retrain.py`, `.github/workflows/retrain.yml`)
+
+- Runs on the 2nd of each month (03:17 UTC) and on demand. Uses committed files + small FIRMS API calls (FIRMS_MAP_KEY
+  GitHub secret, never echoed): VIIRS_NOAA20_NRT, 5-day chunks (the API's limit), month ±1 day for solar dates, about 49 calls
+  per run, hard budget 110, cached and resume-safe.
+- Same filters as the record (low confidence dropped; known-static H3 res-9 cells and region footprint from `live/{id}.json`).
+  Fire-days per res-6 cell go to `pipeline/assets/model/recent/{id}.json`; the model reads them with the FROZEN published
+  ratios. The Long-term record files are never touched (checksummed in the workflow; only model files may change).
+- Champion = the published model; challenger = same features, recipe chosen on training years only. Head-to-head on the
+  newest complete target months that NEITHER model trained on (up to 3), plus the challenger's rolling-origin backtest.
+  The challenger is published only if it beats BOTH the champion and climatology on PR-AUC and top-10 % capture and passes
+  the climatology gate; otherwise the champion stays and scores the new month. Every run is appended to `model_history.json`.
+- Then pytest and claims_check; commit as Muru265 and push (Vercel deploys). Any failure: no commit. This is automatic
+  retraining with a fixed test, not reinforcement learning. Local test: `python pipeline/retrain.py --dry-run`
+  (12 Nov: holdout Aug–Oct 2026, champion PR-AUC 0.7625 vs challenger 0.7596, so the current model was kept).
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

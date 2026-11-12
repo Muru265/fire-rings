@@ -187,6 +187,9 @@ def main() -> None:
          "what": "filtered NASA FIRMS detections for ≤31 days (server-side, cached)"},
         {"path": "/api/live?region={region}", "what": "last 72 h near-real-time detections (provisional)"},
         {"path": "/api/health?scope=data", "what": "service status (no AI call)"},
+        {"path": "/data/v1/api/likelihood/{region}.json", "what": "next month: where fire is more likely, per H3 res-6 cell [cell, score 0-1, decile 1-10, climatology]; planning aid, not a forecast of individual fires (only if the model passed its publish gate)"},
+        {"path": "/data/v1/api/model_card.json", "what": "prediction model card: target, features, training years, metrics, ablation, limitations, version"},
+        {"path": "/data/v1/api/model_history.json", "what": "automatic monthly retraining runs and decisions"},
     ]
     write_json(api / "index.json", {"base": base, "regions": published_regions(), "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
                                     "endpoints": endpoints, "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")})

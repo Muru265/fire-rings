@@ -54,7 +54,19 @@
   {
    "path": "/api/health?scope=data",
    "what": "service status (no AI call)"
+  },
+  {
+   "path": "/data/v1/api/likelihood/{region}.json",
+   "what": "next month: where fire is more likely, per H3 res-6 cell [cell, score 0-1, decile 1-10, climatology]; planning aid, not a forecast of individual fires (only if the model passed its publish gate)"
+  },
+  {
+   "path": "/data/v1/api/model_card.json",
+   "what": "prediction model card: target, features, training years, metrics, ablation, limitations, version"
+  },
+  {
+   "path": "/data/v1/api/model_history.json",
+   "what": "automatic monthly retraining runs and decisions"
   }
  ],
- "generated": "2026-11-12T08:57Z"
+ "generated": "2026-11-12T09:49Z"
 }

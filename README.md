@@ -54,9 +54,9 @@ the same ruler. It then answers one question for responders and land managers: *
   annotated real charts, a glossary and typo-tolerant search. Every chart title on the site has an ⓘ linking to its entry.
 - **Globe time-lapse** with real fire hexagons (Dark / Night lights / Day; zoom 0–3 of the NASA GIBS layers are served
   from `web/public/tiles`, fetched once by `web/scripts/fetch_gibs_tiles.mjs`; zoom capped at a country view with an
-  "Explore {region} →" chip), **stories** for all four regions (`/story`) and a **60-day NRT pull** of NOAA-20/21 for Punjab.
+  "Explore {region} →" chip), **stories** for the four original regions (`/story`; new regions show "no story yet") and a **60-day NRT pull** of NOAA-20/21 for Punjab.
 - **QA**: `docs/QA_WALKTHROUGH.md` (click-by-click test script with the expected value and JSON path for every element)
-  and `npm run test:e2e` (keyboard/drawer/box/mode checks, a claims check comparing 200+ on-screen numbers with the published
+  and `npm run test:e2e` (keyboard/drawer/box/mode checks, a claims check comparing 340+ on-screen numbers with the published
   JSON, every Ask chip × region × style × data mode through the saved-answer fallback, and the Guide/ⓘ coverage check).
   `docs/ask_quality.md`: 60 questions with expected numbers read from the JSON (60/60 on the last run).
 
@@ -72,6 +72,13 @@ the same ruler. It then answers one question for responders and land managers: *
 | Madagascar | monthly ratios | 2.8 % | +294 % → +2.9 % (+3.0 %) | pass |
 | SE Australia | single ratio (fallback, validated better) | 9.2 % | +168 % → +9.2 % (+10.2 %) | pass; Black Summer 2019–20 ranks #1 |
 | Mauritius | monthly ratios | 24.4 % | +405 % → +11.1 % (+5.9 %) | low-activity: reported, not judged |
+| Northern Australia savanna (NT) | monthly ratios | 3.5 % | +75 % → −1.7 % (−0.9 %) | pass (Round 5B, world archive) |
+| Northeast India (7 states) | monthly ratios | 5.6 % | +113 % → −17.9 % (−16.9 %) | pass (Round 5B) |
+| Tanzania | monthly ratios | 1.8 % | +183 % → −17.3 % (−17.1 %) | pass (Round 5B); study check vs Tarimo et al. 2015 |
+| Sudan (today's border) | monthly ratios | 2.8 % | +123 % → −14.6 % (−14.5 %) | **not validated** (Pettitt p 0.013) — not shown |
+
+**Prediction model** (next month, per hexagon, tested 2018–2025 on unseen years): top-10 % capture 30.5 % vs 27.2 % for the
+usual season; PR-AUC 0.73 vs 0.59; harmonized vs raw history −0.008 PR-AUC (harmonization does not help this ranking task).
 
 Calibration uses **July 2012 – December 2019 only**: MODIS orbits drift after 2020 (Terra) and Dec 2021 (Aqua).
 
@@ -107,6 +114,20 @@ npm run build && npm run test:e2e      # Playwright checks (starts vite preview 
 npm run screens                        # screenshots of every page at 1440 px and 360 px → docs/screens/
 # AI: GEMINI_API_KEY (+ optional GEMINI_MODEL) as Vercel env vars; scripts/ask_cache.ts precomputes offline answers
 ```
+
+## Prediction model and monthly retraining
+
+`python pipeline/11_model.py` trains and tests the "fire likelihood next month" model (rolling origin 2018–2025,
+leave-one-region-out, harmonized-vs-raw ablation, publish gate vs climatology) and writes `api/likelihood/{region}.json`,
+`api/model_card.json` and `api/model_history.json`. Details: METHODS.md §9h–9i.
+
+Automatic retraining runs on GitHub Actions (`.github/workflows/retrain.yml`) on the 2nd of every month. To run it by hand:
+GitHub → **Actions** → **Monthly model retrain** → **Run workflow** (tick "Dry run" to test without FIRMS calls or a commit).
+It needs the repository secret `FIRMS_MAP_KEY` (Settings → Secrets and variables → Actions → New repository secret).
+Locally: `python pipeline/retrain.py --dry-run` (no network, no writes) or `--dry-run --plan-only --today 2026-12-02`.
+
+New regions from the FIRMS world archive: `python pipeline/tools/clip_world.py bbox`, then `clip` (Natural Earth borders),
+then the normal pipeline; a region is shown only if it passes V1 and V3 (`gate: true` in `pipeline/config.yaml`).
 
 ## Repository
 

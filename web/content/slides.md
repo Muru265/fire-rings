@@ -73,7 +73,10 @@ Note: Is it right? Every year from 2012 to 2019 is held out and predicted: singl
 | “historical patterns, unusual conditions, critical periods” | seasonality, “Is this normal?” gauge, “What to expect” |
 | “within a selected area of interest” | draw a box on the map (+ date range) |
 
-**Built for:** a fire service — watch the top 10% of hexagons, catch **{{model.cap10}}%** of next month’s fire hexagons · an air-quality officer — Punjab Oct–Nov carries the satellite-timing caveat (×{{timing.aqua_rel}}) · an insurer — raw data alone would trigger **{{ins.raw_only}}** payouts from the satellite switch.
+**Built for:**
+- **Fire service** — watch the top 10% of hexagons → **{{model.cap10}}%** of next month’s fire hexagons.
+- **Air-quality officer** — Punjab Oct–Nov carries the satellite-timing caveat (×{{timing.aqua_rel}}).
+- **Insurer** — raw data alone would trigger **{{ins.raw_only}}** payouts from the satellite switch.
 
 Note: Relevance, line by line against the challenge text. A web application: yes. A harmonized burning-activity calendar: the rings and calendar. Early warning: Fire Watch, where fixed rules decide and the AI only explains. Plain language for responders, scientists and land managers. History, unusual conditions and critical periods. And any area you draw on the map. Who it is built for: a fire service planning next month, which would have caught {{model.cap10}} percent of next month's fire hexagons by watching the top ten percent; an air-quality officer, who sees Punjab's timing caveat; and an insurer, who sees that raw data would have paid out {{ins.raw_only}} times for the satellite switch alone.
 
