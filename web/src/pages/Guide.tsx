@@ -10,6 +10,7 @@ import { fetchJson } from '../lib/api'
 import { makeColorer } from '../lib/colors'
 import { fmtInt, fmtRatio } from '../lib/format'
 import { ENTRIES, GROUPS, SECTIONS, TERMS, search } from '../lib/glossary'
+import GuideToc from '../components/GuideToc'
 import type { Entry, Group, Hit } from '../lib/glossary'
 import { headline, judgeMonth } from '../lib/headline'
 import { plainLevel } from '../lib/plain'
@@ -192,7 +193,6 @@ export default function Guide() {
   const [open, setOpen] = useState(false)
   const [sel, setSel] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
-  const [toc, setToc] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const loc = useLocation()
   const navigate = useNavigate()
@@ -275,17 +275,15 @@ export default function Guide() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-        {/* table of contents */}
-        <nav aria-label="Guide contents" className="lg:sticky lg:top-[calc(var(--header-h,56px)+4.5rem)] lg:max-h-[calc(100vh-9rem)] lg:self-start lg:overflow-auto">
-          <button onClick={() => setToc((v) => !v)} aria-expanded={toc} className="mb-2 rounded-sm border border-border-strong px-3 py-1.5 text-xs text-text lg:hidden">{toc ? 'Hide contents' : 'Show contents'}</button>
-          <div className={`${toc ? 'block' : 'hidden'} space-y-3 text-xs lg:block`}>
-            <div><p className="eyebrow !text-[10px]">Basics</p><ul className="mt-1 space-y-0.5">{SECTIONS.map((s) => <li key={s.id}><a href={`#${s.id}`} className="text-muted no-underline hover:text-text">{s.title}</a></li>)}</ul></div>
-            {groups.map((g) => (
-              <div key={g}><p className="eyebrow !text-[10px]">{g}</p><ul className="mt-1 space-y-0.5">{byGroup(g).map((e) => <li key={e.id}><a href={`#${e.id}`} className="text-muted no-underline hover:text-text">{e.title}</a></li>)}</ul></div>
-            ))}
-            <div><p className="eyebrow !text-[10px]">Glossary</p><a href="#glossary" className="text-muted no-underline hover:text-text">All terms ({TERMS.length})</a></div>
-          </div>
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        {/* table of contents (#94) */}
+        <nav aria-label="Guide contents">
+          <GuideToc onGo={go} groups={[
+            { name: 'Basics', items: SECTIONS.filter((x) => ['problem', 'fix', 'two-views'].includes(x.id)) },
+            ...groups.map((g) => ({ name: g, items: byGroup(g).map((e) => ({ id: e.id, title: e.title })) })),
+            { name: 'Good to know', items: SECTIONS.filter((x) => !['problem', 'fix', 'two-views'].includes(x.id)) },
+            { name: 'Glossary', items: [{ id: 'glossary', title: `All terms (${TERMS.length})` }] },
+          ]} />
         </nav>
 
         <div className="min-w-0 space-y-6">

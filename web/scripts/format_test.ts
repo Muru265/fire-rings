@@ -2,7 +2,7 @@
 // Usage: npx tsx scripts/format_test.ts   (npm run test:format)
 import assert from 'node:assert/strict'
 import { fmt1, fmtCompact, fmtInt, fmtRatio, noNegZero, pctDiff2sig } from '../src/lib/format'
-import { TWINKLE, twinkle, twinkleShare } from '../src/lib/twinkle'
+import { STAR, TWINKLE, twinkle, twinkleShare } from '../src/lib/twinkle'
 
 const cases: [string, () => void][] = [
   ['noNegZero turns -0 and tiny negatives into 0', () => {
@@ -22,12 +22,20 @@ const cases: [string, () => void][] = [
     assert.equal(pctDiff2sig(110, 100), '10'); assert.equal(pctDiff2sig(1123, 1000), '12'); assert.equal(pctDiff2sig(100, 100), '0')
     assert.equal(pctDiff2sig(1, 0), '—')
   }],
-  ['#79 twinkle: 1.5–3 s events, a few % of stars at a time, full fade out, brighter peak', () => {
-    assert.equal(TWINKLE.durMin, 1500); assert.equal(TWINKLE.durMax, 3000)
-    const share = twinkleShare(); assert.ok(share >= 0.02 && share <= 0.06, `share ${share}`)
-    const ps = Array.from({ length: 1001 }, (_, i) => twinkle(i / 1000))
-    assert.ok(Math.abs(ps[0] - 1) < 1e-9 && Math.abs(ps[1000] - 1) < 1e-9, 'starts and ends at full brightness')
-    assert.ok(Math.min(...ps) < 1e-6, 'fades fully out'); assert.ok(Math.max(...ps) > 1.35 && Math.max(...ps) <= 1.4 + 1e-9, 'slightly brighter peak')
+  ['#93 twinkle: 0.8–2 s events, ~8–10% of stars at a time, peak pure 1.0, some fade fully out', () => {
+    assert.equal(TWINKLE.durMin, 800); assert.equal(TWINKLE.durMax, 2000)
+    const share = twinkleShare(); assert.ok(share >= 0.08 && share <= 0.10, `share ${share}`)
+    for (const base of [STAR.aMin, STAR.aMax]) {
+      const full = Array.from({ length: 1001 }, (_, i) => twinkle(i / 1000, base, true))
+      const soft = Array.from({ length: 1001 }, (_, i) => twinkle(i / 1000, base, false))
+      assert.ok(Math.abs(full[0] - base) < 1e-9 && Math.abs(full[1000] - base) < 1e-9, 'starts and ends at the base alpha')
+      assert.ok(Math.abs(Math.max(...full) - 1) < 1e-3, 'peaks at pure 1.0'); assert.ok(Math.min(...full) < 1e-6, 'full fade reaches 0')
+      assert.ok(Math.min(...soft) > 0.1, 'soft dip stays visible'); assert.ok(Math.max(...full) <= 1 + 1e-9)
+    }
+  }],
+  ['#93 star look: 1.5–3 px, base opacity 0.6–0.85, ~5% bright', () => {
+    assert.equal(STAR.dMin, 1.5); assert.equal(STAR.dMax, 2); assert.equal(STAR.dBright, 3)
+    assert.equal(STAR.aMin, 0.6); assert.equal(STAR.aMax, 0.85); assert.equal(STAR.brightShare, 0.05)
   }],
 ]
 let failed = 0

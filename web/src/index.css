@@ -127,3 +127,10 @@ input.seam::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; ba
 
 /* #78: soft vignette on the home globe canvas only (attribution stays crisp) — no opaque rectangle at any zoom */
 [data-testid="globe-map"] canvas { -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 74%, transparent 100%); mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 74%, transparent 100%); }
+
+/* #94 thin, subtle scrollbar (Guide contents) */
+.thin-scroll{scrollbar-width:thin;scrollbar-color:var(--color-border-strong,#2A3442) transparent}
+.thin-scroll::-webkit-scrollbar{width:6px}
+.thin-scroll::-webkit-scrollbar-track{background:transparent}
+.thin-scroll::-webkit-scrollbar-thumb{background:#2A3442;border-radius:3px}
+.thin-scroll::-webkit-scrollbar-thumb:hover{background:#3A475A}
