@@ -16,6 +16,7 @@ the MODIS-only step (inside the harmonized 90 % bootstrap interval) and Pettitt 
 | ne_india | monthly | -2.2% | 5.6% | ✅ pass | 112.8% | -17.9% (-20.1 – -15.5) | -16.9% | 0.0051 → 0.0884 | ✅ pass | 0.996 | 2.4% |
 | tanzania | monthly | 0.1% | 1.8% | ✅ pass | 182.9% | -17.3% (-18.5 – -16.4) | -17.1% | 0.0051 → 0.0692 | ✅ pass | 0.998 | -5.2% |
 | sudan | monthly | -0.1% | 2.8% | ✅ pass | 122.8% | -14.6% (-16.2 – -13.1) | -14.5% | 0.0051 → 0.0132 | ❌ fail | 0.998 | -5.8% |
+| mato_grosso | monthly | -0.1% | 3.7% | ✅ pass | 4.2% | -41.7% (-43.1 – -40.0) | -42.0% | 0.2144 → 0.0413 | ❌ fail | 0.994 | 6.5% |
 
 ## Round 5B validation gate (new regions)
 
@@ -28,6 +29,8 @@ only if it validates better. Regions that fail are not shown anywhere in the app
 - **tanzania** — ✅ validated, shown: method `monthly`, V1 bias 0.1%, MAPE 1.8%; V3 raw step 182.9%, harmonized -17.3% (90 % CI -18.5 – -16.4), MODIS-only -17.1%, Pettitt p 0.0051 → 0.0692.
 - **sudan** — ❌ not validated (not shown): method `monthly`, V1 bias -0.1%, MAPE 2.8%; V3 raw step 122.8%, harmonized -14.6% (90 % CI -16.2 – -13.1), MODIS-only -14.5%, Pettitt p 0.0051 → 0.0132.
   - Fails V3 because the harmonized annual series still has a Pettitt change point (p = 0.0132 ≤ 0.05; change year 2009). The harmonized step is close to MODIS-only, so this may be a real change in fire activity rather than a sensor seam, but the gate is applied as written and the region is left out.
+- **mato_grosso** — ❌ not validated (not shown): method `monthly`, V1 bias -0.1%, MAPE 3.7%; V3 raw step 4.2%, harmonized -41.7% (90 % CI -43.1 – -40.0), MODIS-only -42.0%, Pettitt p 0.2144 → 0.0413.
+  - Fails V3 because the harmonized annual series still has a Pettitt change point (p = 0.0413 ≤ 0.05; change year 2007). The harmonized step is close to MODIS-only, so this may be a real change in fire activity rather than a sensor seam, but the gate is applied as written and the region is left out.
 
 Method choice:
 
@@ -39,6 +42,7 @@ Method choice:
 - **ne_india**: `monthly` — primary method passes V1 and V3
 - **tanzania**: `monthly` — primary method passes V1 and V3
 - **sudan**: `monthly` — primary failed (V3) but fallback 1 does not validate better — kept primary
+- **mato_grosso**: `monthly` — primary failed (V3) but fallback 1 does not validate better — kept primary
 
 ## V9 famous seasons
 
@@ -50,6 +54,7 @@ Method choice:
 - ne_india: top-3 Jul–Jun seasons harmonized ['2008–09', '2005–06', '2009–10'], raw ['2013–14', '2012–13', '2020–21'] · status: **info**
 - tanzania: top-3 Jul–Jun seasons harmonized ['2003–04', '2002–03', '2009–10'], raw ['2016–17', '2012–13', '2021–22'] · status: **info**
 - sudan: top-3 Jul–Jun seasons harmonized ['2024–25', '2025–26', '2007–08'], raw ['2024–25', '2025–26', '2023–24'] · status: **info**
+- mato_grosso: top-3 Jul–Jun seasons harmonized ['2004–05', '2002–03', '2003–04'], raw ['2004–05', '2020–21', '2002–03'] · status: **info**
 
 V9 is only scored against events documented with a source:
 
@@ -70,6 +75,7 @@ leave-one-year-out); because they hold almost no fire, they barely affect any to
 - ne_india: Jul k=0.31 (unshrunk 0.30; MODIS 46 vs S-NPP 156 fire-days); Aug k=0.62 (unshrunk 0.69; MODIS 90 vs S-NPP 130 fire-days); Sep k=0.53 (unshrunk 0.57; MODIS 68 vs S-NPP 119 fire-days)
 - tanzania: none
 - sudan: none
+- mato_grosso: none
 
 Punjab August (k ≈ 1.2, above 1 = MODIS saw more than VIIRS): only 4–23 fire-days a year per sensor in the
 monsoon month (126 MODIS vs 92 S-NPP cell-days over 2012–2019); the MODIS detections are scattered single
@@ -98,6 +104,8 @@ not change any season, rank or validation result.
 | tanzania | pooled | 300 | 0.2% | 2.3% | 5.3% | -17.5% | 0.0884 | pass | 0.964 |
 | sudan | monthly | 10 | -0.1% | 2.8% | 5.5% | -14.6% | 0.0132 | fail | 0.998 |
 | sudan | pooled | 10 | -0.1% | 4.0% | 9.9% | -14.2% | 0.0132 | fail | 0.996 |
+| mato_grosso | monthly | 100 | -0.1% | 3.7% | 10.5% | -41.7% | 0.0413 | fail | 0.994 |
+| mato_grosso | pooled | 100 | 0.5% | 5.9% | 11.7% | -42.2% | 0.0315 | fail | 0.976 |
 
 ## V1 per-year LOYO errors (method used)
 
@@ -109,25 +117,26 @@ not change any season, rank or validation result.
 - ne_india: 2012 -15.3% · 2013 -1.3% · 2014 8.1% · 2015 4.5% · 2016 -2.1% · 2017 -5.2% · 2018 -7.2% · 2019 1.2%
 - tanzania: 2012 -1.8% · 2013 -1.1% · 2014 0.7% · 2015 -1.4% · 2016 -2.1% · 2017 -0.1% · 2018 0.2% · 2019 6.6%
 - sudan: 2012 -3.6% · 2013 -4.8% · 2014 -1.0% · 2015 2.6% · 2016 -1.8% · 2017 -0.3% · 2018 3.0% · 2019 5.5%
+- mato_grosso: 2012 -0.4% · 2013 5.4% · 2014 3.2% · 2015 -0.4% · 2016 5.0% · 2017 -4.2% · 2018 0.8% · 2019 -10.5%
 
 ## V4 drift (MODIS ÷ S-NPP cell-days, relative to the 2013–2019 mean)
 
-| year | punjab | madagascar | se_australia | mauritius | nt_savanna | ne_india | tanzania | sudan |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2012 | 10.9% | 4.1% | 4.8% | -10.9% | 9.4% | 11.1% | 4.5% | 6.5% |
-| 2013 | 7.3% | 1.2% | -2.8% | 11.4% | -3.9% | 0.4% | 3.6% | 3.3% |
-| 2014 | -1.3% | -1.6% | -9.9% | -2.0% | 2.4% | -6.6% | -1.3% | 2.7% |
-| 2015 | -6.5% | 2.6% | -8.8% | 7.8% | 4.2% | -0.7% | 2.7% | -2.9% |
-| 2016 | 4.6% | 3.0% | -3.4% | -41.2% | -5.5% | 1.4% | 1.2% | 3.0% |
-| 2017 | -7.2% | -1.6% | 0.7% | 14.0% | 3.7% | -1.7% | 0.4% | -0.1% |
-| 2018 | 1.0% | -1.3% | -1.6% | -17.8% | 0.7% | 8.3% | -4.2% | -2.0% |
-| 2019 | 2.1% | -2.3% | 25.9% | 27.9% | -1.7% | -1.0% | -2.5% | -3.9% |
-| 2020 | 3.9% | -0.4% | -3.7% | -15.9% | -11.2% | 2.8% | -5.5% | -2.1% |
-| 2021 | 4.7% | -8.0% | 3.3% | -50.5% | -3.8% | 7.0% | -7.0% | -6.7% |
-| 2022 | -4.7% | -1.4% | -11.4% | 16.8% | -5.3% | 11.1% | -8.1% | -7.8% |
-| 2023 | -10.9% | -6.2% | 5.3% | -12.6% | 10.0% | -8.5% | -9.5% | -7.3% |
-| 2024 | -9.8% | -1.6% | -4.5% | -12.1% | -1.3% | 1.4% | 0.5% | -4.0% |
-| 2025 | -3.7% | -10.9% | -6.3% | -42.0% | -1.1% | 0.5% | -1.9% | -6.8% |
+| year | punjab | madagascar | se_australia | mauritius | nt_savanna | ne_india | tanzania | sudan | mato_grosso |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2012 | 10.9% | 4.1% | 4.8% | -10.9% | 9.4% | 11.1% | 4.5% | 6.5% | -5.6% |
+| 2013 | 7.3% | 1.2% | -2.8% | 11.4% | -3.9% | 0.4% | 3.6% | 3.3% | -4.6% |
+| 2014 | -1.3% | -1.6% | -9.9% | -2.0% | 2.4% | -6.6% | -1.3% | 2.7% | -7.4% |
+| 2015 | -6.5% | 2.6% | -8.8% | 7.8% | 4.2% | -0.7% | 2.7% | -2.9% | -3.6% |
+| 2016 | 4.6% | 3.0% | -3.4% | -41.2% | -5.5% | 1.4% | 1.2% | 3.0% | 3.5% |
+| 2017 | -7.2% | -1.6% | 0.7% | 14.0% | 3.7% | -1.7% | 0.4% | -0.1% | 0.9% |
+| 2018 | 1.0% | -1.3% | -1.6% | -17.8% | 0.7% | 8.3% | -4.2% | -2.0% | 1.2% |
+| 2019 | 2.1% | -2.3% | 25.9% | 27.9% | -1.7% | -1.0% | -2.5% | -3.9% | 10.0% |
+| 2020 | 3.9% | -0.4% | -3.7% | -15.9% | -11.2% | 2.8% | -5.5% | -2.1% | 10.4% |
+| 2021 | 4.7% | -8.0% | 3.3% | -50.5% | -3.8% | 7.0% | -7.0% | -6.7% | 6.5% |
+| 2022 | -4.7% | -1.4% | -11.4% | 16.8% | -5.3% | 11.1% | -8.1% | -7.8% | -0.9% |
+| 2023 | -10.9% | -6.2% | 5.3% | -12.6% | 10.0% | -8.5% | -9.5% | -7.3% | 12.5% |
+| 2024 | -9.8% | -1.6% | -4.5% | -12.1% | -1.3% | 1.4% | 0.5% | -4.0% | 11.7% |
+| 2025 | -3.7% | -10.9% | -6.3% | -42.0% | -1.1% | 0.5% | -1.9% | -6.8% | -1.3% |
 
 Notes:
 - V3 uses leave-one-year-out ratios for 2012–2019, so the harmonized years are out of sample.

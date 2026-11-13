@@ -74,3 +74,27 @@ refineries, volcanoes. Red flag: cropland or sugarcane (would mean we are maskin
 | known | 1,670 | 11.04462, 28.49928 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=11.04462,28.49928&zoom=17&basemap=satellite) |
 | known | 1,488 | 17.93632, 34.04499 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=17.93632,34.04499&zoom=17&basemap=satellite) |
 
+## Round 7 — Mato Grosso, Brazil (`03_mask.py mato_grosso`; not published: fails the V3 gate)
+
+| # | region | reason | rows | years ≥16 d | total days | S | lat, lon | map |
+|---:|---|---|---:|---:|---:|---:|---|---|
+| 1 | mato_grosso | known | 280 | — | — | — | -9.92026, -59.90991 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92026,-59.90991&zoom=17&basemap=satellite) |
+| 2 | mato_grosso | known | 203 | — | — | — | -9.92978, -59.93498 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92978,-59.93498&zoom=17&basemap=satellite) |
+| 3 | mato_grosso | known | 172 | — | — | — | -9.92716, -59.90473 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92716,-59.90473&zoom=17&basemap=satellite) |
+| 4 | mato_grosso | known | 169 | — | — | — | -9.92795, -59.93764 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92795,-59.93764&zoom=17&basemap=satellite) |
+| 5 | mato_grosso | known | 145 | — | — | — | -9.92653, -59.93484 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92653,-59.93484&zoom=17&basemap=satellite) |
+| 6 | mato_grosso | known | 143 | — | — | — | -9.93242, -59.9214 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.93242,-59.9214&zoom=17&basemap=satellite) |
+| 7 | mato_grosso | known | 142 | — | — | — | -9.92391, -59.90459 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92391,-59.90459&zoom=17&basemap=satellite) |
+| 8 | mato_grosso | known | 141 | — | — | — | -9.92574, -59.90193 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92574,-59.90193&zoom=17&basemap=satellite) |
+| 9 | mato_grosso | known | 129 | — | — | — | -9.92471, -59.9375 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92471,-59.9375&zoom=17&basemap=satellite) |
+| 10 | mato_grosso | known | 129 | — | — | — | -9.91884, -59.90711 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.91884,-59.90711&zoom=17&basemap=satellite) |
+| 11 | mato_grosso | known | 127 | — | — | — | -9.26038, -60.31552 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.26038,-60.31552&zoom=17&basemap=satellite) |
+| 12 | mato_grosso | known | 121 | — | — | — | -11.8758, -55.44979 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-11.8758,-55.44979&zoom=17&basemap=satellite) |
+| 13 | mato_grosso | known | 120 | — | — | — | -9.92168, -59.91271 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92168,-59.91271&zoom=17&basemap=satellite) |
+| 14 | mato_grosso | known | 117 | — | — | — | -9.9312, -59.93778 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.9312,-59.93778&zoom=17&basemap=satellite) |
+| 15 | mato_grosso | known | 117 | — | — | — | -9.92208, -59.90725 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.92208,-59.90725&zoom=17&basemap=satellite) |
+| 16 | mato_grosso | known | 114 | — | — | — | -9.91701, -59.90977 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.91701,-59.90977&zoom=17&basemap=satellite) |
+| 17 | mato_grosso | known | 109 | — | — | — | -9.25857, -60.31816 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.25857,-60.31816&zoom=17&basemap=satellite) |
+| 18 | mato_grosso | known | 108 | — | — | — | -9.26181, -60.3183 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.26181,-60.3183&zoom=17&basemap=satellite) |
+| 19 | mato_grosso | known | 108 | — | — | — | -9.9235, -59.91005 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.9235,-59.91005&zoom=17&basemap=satellite) |
+| 20 | mato_grosso | known | 103 | — | — | — | -9.91843, -59.91257 | [satellite](https://www.google.com/maps/@?api=1&map_action=map&center=-9.91843,-59.91257&zoom=17&basemap=satellite) |

@@ -5,7 +5,7 @@ Stage 1 (`bbox`):  stream every CSV straight out of its zip with pyarrow (never 
 Stage 2 (`clip`):  exact point-in-polygon against the region's Natural Earth boundary (data/raw/boundaries/*.geojson),
                    merge per sensor → data/raw/{region}/{sensor}/fire_archive_world.csv + fire_nrt_world.csv
                    (same layout as the per-country FIRMS downloads, so 02_unify reads them unchanged).
-Usage: python pipeline/tools/clip_world.py bbox|clip|inventory
+Usage: python pipeline/tools/clip_world.py bbox [region…]|clip [region…]|inventory
 """
 from __future__ import annotations
 
@@ -35,6 +35,8 @@ BOXES = {
     "ne_india": (89.5, 21.8, 97.6, 29.6),
     "tanzania": (29.2, -11.9, 40.7, -0.8),
     "sudan": (21.6, 8.4, 38.9, 23.3),
+    # Round 7: Mato Grosso state (Natural Earth extent 61.61–50.24°W, 18.03–7.34°S) padded by ~0.2°
+    "mato_grosso": (-61.8, -18.2, -50.0, -7.1),
 }
 # Natural Earth selectors: (file, property, value list)
 SHAPES = {
@@ -44,7 +46,13 @@ SHAPES = {
                  "adm0_a3", "IND"),
     "tanzania": ("ne_10m_admin_0_countries.geojson", "ADM0_A3", ["TZA"], None, None),
     "sudan": ("ne_10m_admin_0_countries.geojson", "ADM0_A3", ["SDN"], None, None),
+    "mato_grosso": ("ne_10m_admin_1_states_provinces.geojson", "name", ["Mato Grosso"], "adm0_a3", "BRA"),
 }
+
+
+# regions the bbox stage scans for: all, or those named after "bbox" on the command line (inherited by Pool workers)
+ACTIVE = [a for a in sys.argv[2:] if a in BOXES] if len(sys.argv) > 2 and sys.argv[1] == "bbox" else None
+ACTIVE = ACTIVE or list(BOXES)
 
 
 def members() -> list[tuple[str, str]]:
@@ -62,7 +70,7 @@ def bbox_one(job: tuple[str, str]) -> dict:
     prod, code, fid = m.group(1), m.group(2), m.group(3)
     sensor = CODES[code]
     writers: dict[str, pcsv.CSVWriter] = {}
-    counts = {r: 0 for r in BOXES}
+    counts = {r: 0 for r in ACTIVE}
     total = 0
     with zipfile.ZipFile(zpath) as z, z.open(name) as fh:
         header = fh.readline().decode().strip().split(",")
@@ -73,7 +81,7 @@ def bbox_one(job: tuple[str, str]) -> dict:
             total += batch.num_rows
             lat = pc.cast(batch.column("latitude"), pa.float64())
             lon = pc.cast(batch.column("longitude"), pa.float64())
-            for r, (w, s, e, n) in BOXES.items():
+            for r, (w, s, e, n) in ((r, BOXES[r]) for r in ACTIVE):
                 mask = pc.and_(pc.and_(pc.greater_equal(lon, w), pc.less_equal(lon, e)),
                                pc.and_(pc.greater_equal(lat, s), pc.less_equal(lat, n)))
                 sub = batch.filter(mask)
@@ -92,13 +100,14 @@ def bbox_one(job: tuple[str, str]) -> dict:
 
 def stage_bbox() -> None:
     jobs = members()
+    print(f"bbox stage for {ACTIVE}", flush=True)
     jobs.sort(key=lambda j: -zipfile.ZipFile(j[0]).getinfo(j[1]).file_size)   # biggest first
     log = []
     with Pool(7) as pool:
         for res in pool.imap_unordered(bbox_one, jobs):
             print(json.dumps(res), flush=True)
             log.append(res)
-    (BBOX_DIR / "_bbox_log.json").write_text(json.dumps(log, indent=1))
+    (BBOX_DIR / f"_bbox_log{'_' + '_'.join(ACTIVE) if ACTIVE != list(BOXES) else ''}.json").write_text(json.dumps(log, indent=1))
 
 
 # ---------------------------------------------------------------- stage 2: exact polygon clip
@@ -182,7 +191,7 @@ def stage_clip(regions: list[str]) -> None:
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "inventory"
     if cmd == "bbox":
-        stage_bbox()
+        stage_bbox()   # optional region ids after "bbox" restrict the scan (Round 7: bbox mato_grosso)
     elif cmd == "clip":
         stage_clip(sys.argv[2:] or list(BOXES))
     else:

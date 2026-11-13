@@ -64,6 +64,16 @@ regions:
     bbox: null
     gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
     note: Today's Sudan border (Natural Earth admin-0) used for ALL years, so South Sudan's 2011 separation creates no artificial drop
+  # Round 7: first Americas region. Cut from the FIRMS WORLD archive like Round 5B: rows inside the box
+  # world_box [W, S, E, N] (Natural Earth extent 61.61–50.24°W, 18.03–7.34°S padded by ~0.2°; tools/clip_world.py BOXES),
+  # then clipped exactly to the Mato Grosso state polygon (Natural Earth 10m admin-1, adm0_a3 BRA).
+  mato_grosso:
+    name: Mato Grosso, Brazil
+    source: mato_grosso
+    bbox: null
+    world_box: [-61.8, -18.2, -50.0, -7.1]
+    gate: true          # shown only if V1 and V3 pass (lib.common.gate_passed)
+    note: Mato Grosso state, Brazil (Natural Earth admin-1); box above used only to pre-select rows from the world archive
 
 filters:
   drop_conf: [L]           # MODIS 0–29, VIIRS 'l'
@@ -126,6 +136,7 @@ watch:
     ne_india: "fire services, forest departments and land managers, researchers and journalists"
     tanzania: "fire services, land managers and conservation teams, researchers and journalists"
     sudan: "land managers, researchers and journalists"
+    mato_grosso: "fire services, environmental agencies and land managers, researchers and journalists"
 
 record:
   start: "2001-01"
