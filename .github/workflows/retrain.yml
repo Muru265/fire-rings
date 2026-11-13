@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: retrain
+  group: data-updates          # shared with daily.yml: daily and monthly never run at the same time
   cancel-in-progress: false
 
 jobs:

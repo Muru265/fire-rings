@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import Freshness from '../components/Freshness'
 import { Link } from 'react-router-dom'
 import { checkSteps, liveCheck, pctWords, triggerLabel, worst } from '../../api/_lib/watch'
 import type { Briefing, Check, Status, WatchDoc } from '../../api/_lib/watch'
@@ -189,7 +190,7 @@ export default function Watch() {
         <p className="eyebrow">Agentic monitoring</p>
         <h1 className="mt-2 text-[28px] leading-tight font-bold sm:text-[40px]">Fire Watch<Help id="fire-watch" /></h1>
         <p className="mt-2 text-base text-muted">A monitoring agent checks every region against fixed, published rules; a briefing agent explains flagged regions in plain words using only verified numbers. <strong className="text-text">Rules decide, AI explains.</strong></p>
-        <p className="mt-2 rounded-sm border border-border bg-surface-2 px-3 py-2 text-xs text-muted">Situational awareness for planning — <strong className="text-text">not an emergency alert service</strong>. No forecasts. Data through {doc.data_end}.</p>
+        <p className="mt-2 rounded-sm border border-border bg-surface-2 px-3 py-2 text-xs text-muted">Situational awareness for planning — <strong className="text-text">not an emergency alert service</strong>. No forecasts. Data through {doc.data_end} · <Freshness />.</p>
       </header>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">

@@ -96,6 +96,9 @@ harmonized_segments:      # inclusive month ranges
   - {from: "2012-01", to: "2026-10", src: V}    # k · S-NPP
   - {from: "2026-11", to: null,      src: V2}   # k · k' · NOAA-20
 
+daily:                    # pipeline/daily.py (GitHub Actions, once a day): owns these months only
+  first_month: "2026-11"  # months before this are the fixed Long-term record (snapshot test); never written daily
+
 stats:
   baseline: [2003, 2022]
   guard_median_lt: 5

@@ -1,6 +1,7 @@
 // Precompute Fire Watch briefings for the current data (fallback when the live AI is busy; labelled "⚡ saved briefing").
 // Only regions the rules flag (status ≠ Normal) get a briefing; only verified answers are saved.
 // Usage: npx tsx --env-file=../.env scripts/watch_cache.ts [--only nt_savanna,ne_india,tanzania]
+// Daily job (.github/workflows/daily.yml): --only <regions whose Fire Watch status changed>; GEMINI_API_KEY from the env.
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,6 +36,8 @@ for (const [id, reg] of Object.entries(w.regions)) {
         saved = true
       } catch (e) { console.log(`${id}|${voice}: ${(e as Error).message.slice(0, 80)}`); await sleep(4000) }
     }
+    // Gemini failed or every answer was rejected → keep the previous saved briefing (never an empty or made-up one)
+    if (!saved && prev[`${id}|${voice}`]) { briefings[`${id}|${voice}`] = prev[`${id}|${voice}`]; console.log(`${id}|${voice}: kept previous saved briefing`) }
     await sleep(1500)
   }
 }

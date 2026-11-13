@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import links from '../../content/links.json'
 import MiniRings from '../components/MiniRings'
 import Help from '../components/Help'
+import Freshness from '../components/Freshness'
 import SensorTimeline from '../components/SensorTimeline'
 import { fetchJson, useMeta } from '../lib/api'
 import { headline, judgeMonth } from '../lib/headline'
@@ -110,7 +111,7 @@ export default function Landing() {
         </section>
 
         {meta.status === 'ready' && (
-          <p className="num text-xs text-faint">Data through {meta.data.data_end} · {meta.data.regions.length} regions · harmonized record {meta.data.version} · <Link to="/data">open data</Link></p>
+          <p className="num text-xs text-faint">Data through {meta.data.data_end} · <Freshness /> · {meta.data.regions.length} regions · harmonized record {meta.data.version} · <Link to="/data">open data</Link></p>
         )}
       </div>
     </div>

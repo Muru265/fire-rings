@@ -1,7 +1,7 @@
 {
  "region": "nt_savanna",
  "name": "Northern Australia savanna (NT)",
- "data_end": "2026-11-08",
+ "data_end": "2026-11-12",
  "baseline": [
   2003,
   2022
@@ -848,18 +848,18 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 8,
-  "so_far": 1708.8,
-  "typical_so_far": 865.5,
-  "typical_so_far_app": 865.5,
+  "days": 12,
+  "so_far": 1710.5,
+  "typical_so_far": 1492.8,
+  "typical_so_far_app": 1492.8,
   "typical": 2466.7,
   "p10": 1340.3,
   "p90": 4884.5,
-  "projection": 4870.1,
+  "projection": 2826.5,
   "checkpoint": 10,
   "range": [
-   3603.9,
-   8707.8
+   2091.6,
+   5053.8
   ],
   "better": "projection",
   "reason": null,

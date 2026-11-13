@@ -188,6 +188,9 @@ export interface MetaDoc {
   version: string
   data_end: string
   generated: string
+  /** Round 6: time of the last daily update (pipeline/daily.py), ISO UTC */
+  last_update?: string
+  update_cadence?: string
   citation: string
   regions: {
     id: string

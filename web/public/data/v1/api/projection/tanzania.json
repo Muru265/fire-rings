@@ -1,7 +1,7 @@
 {
  "region": "tanzania",
  "name": "Tanzania",
- "data_end": "2026-11-08",
+ "data_end": "2026-11-12",
  "baseline": [
   2003,
   2022
@@ -848,18 +848,18 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 8,
-  "so_far": 2007.3,
-  "typical_so_far": 1024.8,
-  "typical_so_far_app": 1024.7,
+  "days": 12,
+  "so_far": 2057.6,
+  "typical_so_far": 1505.9,
+  "typical_so_far_app": 1505.7,
   "typical": 2692.8,
   "p10": 1490.0,
   "p90": 3817.5,
-  "projection": 5274.6,
+  "projection": 3679.3,
   "checkpoint": 10,
   "range": [
-   4562.5,
-   7337.0
+   3182.6,
+   5117.8
   ],
   "better": "projection",
   "reason": null,
