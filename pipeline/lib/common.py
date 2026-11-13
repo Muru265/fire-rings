@@ -43,7 +43,8 @@ def read_json(p: Path):
 
 def gate_passed(region: str) -> bool:
     """Round-5B validation gate: a region with `gate: true` in config is published only if its chosen method passes
-    BOTH V1 (|bias| <= 10 %, MAPE < 20 %) and V3 (step consistent with MODIS-only, Pettitt p > 0.05) in 06_validate."""
+    BOTH V1 (|bias| <= 10 %, MAPE < 20 %) and V3 in 06_validate. V3 = gate v1.2 since 13 Nov 2026 (lib.calib.v3_gate): step
+    consistent with MODIS-only AND (no harmonized Pettitt break, or a break outside 2011–2013 that MODIS alone also shows)."""
     rc = config()["regions"][region]
     if not rc.get("gate"):
         return True

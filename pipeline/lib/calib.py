@@ -91,3 +91,22 @@ def pettitt(x: np.ndarray) -> tuple[int, float, float]:
     K = float(np.abs(U).max())
     p = float(min(1.0, 2 * np.exp(-6 * K ** 2 / (n ** 3 + n ** 2))))
     return t, K, p
+
+
+# ---- V3 gate (Round 8: v1.2, adopted 13 Nov 2026 after a read-only check on all 9 regions) -----------------------
+SEAM_YEARS = (2011, 2013)     # a break here could be the MODIS→VIIRS seam (VIIRS from Jan 2012)
+CP_WINDOW = 1                 # MODIS-only break must be in the same year ±1
+
+
+def v3_gate(step_ok: bool, p_harm: float, cp_harm: int, p_modis: float, cp_modis: int, version: str = "v1.2") -> bool:
+    """V3 pass/fail. v1.1: step consistent with MODIS-only AND no harmonized Pettitt break (p > 0.05).
+    v1.2: step consistent AND (no harmonized break, OR the break is outside 2011–2013 and MODIS alone shows a significant
+    break in the same year ±1). Caveat: before 2012 the harmonized series IS MODIS, so the second branch is not an
+    independent test of pre-2012 breaks; the seam is guarded by the step test plus "no break at 2011–2013"."""
+    if version == "v1.1":
+        return bool(step_ok and p_harm > 0.05)
+    if version != "v1.2":
+        raise ValueError(version)
+    real_history = (p_modis <= 0.05 and abs(cp_harm - cp_modis) <= CP_WINDOW
+                    and not (SEAM_YEARS[0] <= cp_harm <= SEAM_YEARS[1]))
+    return bool(step_ok and (p_harm > 0.05 or real_history))
