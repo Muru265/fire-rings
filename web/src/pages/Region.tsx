@@ -31,6 +31,9 @@ import Help from '../components/Help'
 import type { Series } from '../components/LineChart'
 import type { Cell } from '../lib/useCellNav'
 import RangeCard from '../components/RangeCard'
+import HotspotButton from '../components/HotspotButton'
+import { monthRange } from '../lib/hotspots'
+import type { HotQuery } from '../lib/hotspots'
 import { filterRange, inRange, useRange, ymStr } from '../lib/range'
 
 const MapView = lazy(() => import('../components/MapView'))
@@ -128,6 +131,14 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
   const selRec = selected ? doc.months.find((r) => r.y === selected.y && r.m === selected.m) : undefined
   const first = doc.months[0]
   const last = doc.months[doc.months.length - 1]
+  // Round 8: "Download hotspots (CSV)" — raw FIRMS detections for the selected range (or the latest month) and the current box
+  const hotQuery: HotQuery = (() => {
+    const lastDay = regionDoc.data_end
+    const fromYM = range?.from ?? last, toYM = range?.to ?? last
+    const start = monthRange(fromYM.y, fromYM.m).start
+    const end = monthRange(toYM.y, toYM.m).end
+    return { region: regionDoc.id, start, end: end > lastDay ? lastDay : end, bbox: boxed ? box : null }
+  })()
   const v = regionDoc.validation
 
   return (
@@ -206,7 +217,7 @@ function RegionView({ doc: baseDoc }: { doc: RegionDoc }) {
                     </button>
                   ))}
                 </div>
-                <ExportMenu onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}${detail ? '_detail' : ''}${rangeTag}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), filterRange(doc.months, range),
+                <ExportMenu hot={hotQuery} onCsv={() => downloadText(`fire-rings_${doc.id}${boxed ? '_box' : ''}${detail ? '_detail' : ''}${rangeTag}.csv`, calendarCsv(doc.name + (boxed ? ` box ${box!.join(',')}` : ''), filterRange(doc.months, range),
                   `view: ${detail ? 'High detail' : 'Long-term'} · fire_days_modis_eq (MODIS-equivalent) and fire_days_viirs_native (VIIRS 375 m, S-NPP-equivalent, 2012+) + raw cell-days · ratio/pct columns follow the view`, boxed ? undefined : baseDoc.months))}
                   onPng={() => ringsRef.current && downloadPng(ringsRef.current, `fire-rings_${doc.id}${rangeTag}.png`)} />
               </div>
@@ -416,11 +427,13 @@ function CalibrationText({ doc }: { doc: RegionDoc }) {
   return <>{calibrationSummary(doc)}</>
 }
 
-function ExportMenu({ onCsv, onPng }: { onCsv: () => void; onPng: () => void }) {
+function ExportMenu({ onCsv, onPng, hot }: { onCsv: () => void; onPng: () => void; hot: HotQuery }) {
   const [busy, setBusy] = useState(false)
   return (
-    <div className="flex items-center gap-1 text-xs" role="group" aria-label="Export"><Help id="export" label="CSV and PNG export" />
-      <button onClick={onCsv} className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">CSV</button>
+    <div className="flex flex-wrap items-start gap-1 text-xs" role="group" aria-label="Export"><Help id="export" label="CSV and PNG export" />
+      <button onClick={onCsv} data-testid="firedays-csv" title="The harmonized record (MODIS-equivalent fire-days per month) for the selected range — the numbers on this page"
+        className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2">Fire-days CSV (harmonized)</button>
+      <HotspotButton q={hot} />
       <button disabled={busy} onClick={async () => { setBusy(true); try { await onPng() } finally { setBusy(false) } }}
         className="rounded-sm border border-border-strong px-3 py-1.5 text-text hover:bg-surface-2 disabled:opacity-50">{busy ? '…' : 'PNG'}</button>
     </div>

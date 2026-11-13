@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { FALLBACK_AVAIL, InputError, fetchHotspots, filterRows, parseQuery, planCalls } from '../api/_lib/hotspots.js'
+import { DOWNLOAD_COLS, FALLBACK_AVAIL, InputError, chunkRange, fetchHotspots, filterRows, parseQuery, planCalls, toDownloadCsv } from '../api/_lib/hotspots.js'
 import type { Dropped, LiveFile, Row } from '../api/_lib/hotspots.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -13,7 +13,7 @@ const DATA = resolve(here, '../public/data/v1')
 const REAL_KEY = process.env.FIRMS_MAP_KEY ?? ''
 let failed = 0
 const check = (name: string, ok: boolean, info = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${info ? ` — ${info}` : ''}`); if (!ok) failed++ }
-const R = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania']
+const R = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania', 'sudan', 'mato_grosso']
 const P = (s: string) => new URLSearchParams(s)
 const err = (s: string) => { try { parseQuery(P(s), R, '2026-11-11'); return null } catch (e) { return e instanceof InputError ? e.code : 'other' } }
 
@@ -98,6 +98,31 @@ check('400 with a plain message on bad input', r4.status === 400 && (await r4.js
 globalThis.fetch = realFetch
 
 // ---- parity with the record (online) ---------------------------------------------------------------------------------
+// ---- Round 8: "Download hotspots (CSV)" (layout=download) ---------------------------------------------------------
+{
+  check('download: 62 days allowed', err('region=punjab&start=2016-10-01&end=2016-12-01&layout=download') === null)
+  check('download: 63 days refused with a plain message', err('region=punjab&start=2016-10-01&end=2016-12-02&layout=download') === 'range_too_long')
+  check('download: CSV only', err('region=punjab&start=2016-10-01&layout=download&format=json') === 'bad_format')
+  check('compact layout still capped at 31 days', err('region=punjab&start=2016-10-01&end=2016-11-01') === 'range_too_long')
+  const ch = chunkRange('2016-10-01', '2016-12-01')
+  check('download: 62 days → chunks of ≤31 days covering every day', ch.length === 2 && ch[0][0] === '2016-10-01' && ch[0][1] === '2016-10-31' && ch[1][0] === '2016-11-01' && ch[1][1] === '2016-12-01', JSON.stringify(ch))
+  const q = parseQuery(P('region=punjab&start=2016-10-01&end=2016-10-02&layout=download'), R, '2026-11-11')
+  const res = { ok: true, query: q, fetched_at: '2026-11-13T10:00:00.000Z', sources: { VIIRS_SNPP_SP: { calls: 1, rows: 2, kept: 2 } }, filters: ['f1'],
+    dropped: { low_conf: 0, type: 0, static: 0, outside_footprint: 0, outside_box: 0, outside_dates: 0, unknown_satellite: 0 },
+    rows: [[28.74194, 77.15542, '2016-09-30T20:39Z', '2016-10-01', 'SNPP', 'N', 2.3, 'N', 'SP'], [30.1, 75.5, '2016-10-02T08:00Z', '2016-10-02', 'AQUA', 'H', 10.5, 'D', 'SP']] as Row[] }
+  const full = toDownloadCsv(res, 'Punjab–Haryana', { requested: [q.start, q.end], covered: [q.start, q.end], truncated: null })
+  const L = full.body.trim().split('\n')
+  check('download CSV: source line says raw FIRMS, not harmonized, request + retrieval time', L[0].startsWith('# Source: NASA FIRMS (MODIS C6.1 / VIIRS 375 m), raw detections — not harmonized; for the harmonized record use the fire-days CSV')
+    && L[0].includes('request: Punjab–Haryana, 2016-10-01 to 2016-10-02') && L[0].includes('retrieved 2026-11-13T10:00:00.000Z') && L[0].includes('complete for 2016-10-01 to 2016-10-02'))
+  check('download CSV: columns', L[1] === DOWNLOAD_COLS && DOWNLOAD_COLS === 'latitude,longitude,acq_date,acq_time_utc,local_solar_time,satellite,instrument,confidence,frp_mw,daynight,h3_r6')
+  check('download CSV: UTC time, local solar time across midnight, names, H3 res-6', L[2] === '28.74194,77.15542,2016-09-30,20:39,2016-10-01 01:47,Suomi NPP,VIIRS,N,2.3,N,863da18cfffffff', L[2])
+  check('download CSV: Aqua row', L[3].includes(',Aqua,MODIS,H,10.5,D,'), L[3])
+  const cut = toDownloadCsv(res, 'Punjab–Haryana', { requested: [q.start, q.end], covered: [q.start, q.end], truncated: null }, L[2].length + 2)
+  check('download CSV: size limit → TRUNCATED stated in the first line, never silent', cut.truncated !== null && cut.rows === 1 && cut.body.split('\n')[0].includes('TRUNCATED'))
+  const t2 = toDownloadCsv(res, null, { requested: ['2016-10-01', '2016-11-30'], covered: ['2016-10-01', '2016-10-31'], truncated: 'NASA FIRMS was busy for 2016-11-01 to 2016-11-30' })
+  check('download CSV: partial chunk failure → TRUNCATED with the missing dates', t2.body.startsWith('# Source') && t2.body.split('\n')[0].includes('TRUNCATED — NASA FIRMS was busy for 2016-11-01 to 2016-11-30'))
+}
+
 if (process.argv.includes('--parity')) {
   const key = REAL_KEY
   if (!key) { console.log('SKIP  parity: FIRMS_MAP_KEY not set'); }

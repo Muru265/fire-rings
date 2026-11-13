@@ -10,10 +10,13 @@ import { latLngToCell } from 'h3-js'
 
 export interface LiveFile { region: string; bbox: [number, number, number, number]; footprint_res: number; footprint: string[]; static_r9: string[] }
 export type Satellites = 'record' | 'all'
-export interface Query { region: string | null; bbox: [number, number, number, number] | null; start: string; end: string; satellites: Satellites; format: 'csv' | 'json' }
+export interface Query { region: string | null; bbox: [number, number, number, number] | null; start: string; end: string; satellites: Satellites; format: 'csv' | 'json'; layout?: 'compact' | 'download' }
 export type Row = [number, number, string, string, string, string, number | null, string, string] // lat, lon, t_utc, solar_date, stream, conf, frp, daynight, product
 
 export const MAX_DAYS = 31
+// Round 8: the Explore "Download hotspots (CSV)" button (layout=download) may ask for up to this many days; the server
+// splits it into ≤ MAX_DAYS chunks. Longer ranges are refused with a plain message (never silently truncated).
+export const DOWNLOAD_MAX_DAYS = 62
 // FIRMS Area API day_range limit (checked 11 Nov 2026: "Invalid day range. Expects [1..5]")
 export const CALL_DAYS = 5
 export const MAX_BOX_SIDE = 12
@@ -60,15 +63,18 @@ export function parseQuery(p: URLSearchParams, regions: string[], today = isoDay
   if (start < RECORD_START) throw new InputError('bad_date', `FIRMS MODIS data start on ${RECORD_START}.`)
   if (end > today) throw new InputError('bad_date', 'end is in the future.')
   const days = (dayT(end) - dayT(start)) / DAY + 1
-  if (days > MAX_DAYS) throw new InputError('range_too_long', `At most ${MAX_DAYS} days per request (NASA FIRMS limits). Split longer periods.`)
+  const layout = p.get('layout') === 'download' ? 'download' : 'compact'
+  const maxDays = layout === 'download' ? DOWNLOAD_MAX_DAYS : MAX_DAYS
+  if (days > maxDays) throw new InputError('range_too_long', `At most ${maxDays} days per request (NASA FIRMS limits). Choose a shorter range.`)
   const sat = p.get('satellites') ?? 'record'
   if (sat !== 'record' && sat !== 'all') throw new InputError('bad_satellites', 'satellites must be "record" or "all".')
   const fmt = p.get('format') ?? 'csv'
   if (fmt !== 'csv' && fmt !== 'json') throw new InputError('bad_format', 'format must be csv or json.')
-  return { region, bbox, start, end, satellites: sat, format: fmt }
+  if (layout === 'download' && fmt !== 'csv') throw new InputError('bad_format', 'layout=download is CSV only.')
+  return { region, bbox, start, end, satellites: sat, format: fmt, layout }
 }
 
-export const cacheKey = (q: Query) => [q.region ?? '-', q.bbox?.join(',') ?? '-', q.start, q.end, q.satellites, q.format].join('|')
+export const cacheKey = (q: Query) => [q.region ?? '-', q.bbox?.join(',') ?? '-', q.start, q.end, q.satellites, q.format, q.layout ?? 'compact'].join('|')
 
 /** Which FIRMS source to use per UTC day, then ≤5-day calls (FIRMS day_range limit). */
 export function planCalls(q: Query, avail: Record<string, [string, string]>): { source: string; date: string; days: number }[] {
@@ -226,4 +232,49 @@ export function toJson(r: Result) {
     fields: ['lat', 'lon', 'sensor(0=MODIS,1=VIIRS)', 'solar_day'],
     rows: r.rows.map((x) => [Math.round(x[0] * 1e4) / 1e4, Math.round(x[1] * 1e4) / 1e4, x[4] === 'TERRA' || x[4] === 'AQUA' ? 0 : 1, Number(x[3].slice(8, 10))]),
   }
+}
+
+
+// ---- Round 8: "Download hotspots (CSV)" — readable columns, chunked ranges, explicit truncation ------------------
+/** Split [start, end] into consecutive pieces of at most MAX_DAYS days. */
+export function chunkRange(start: string, end: string, size = MAX_DAYS): [string, string][] {
+  const out: [string, string][] = []
+  for (let t = dayT(start); t <= dayT(end); t += size * DAY) out.push([isoDay(t), isoDay(Math.min(dayT(end), t + (size - 1) * DAY))])
+  return out
+}
+
+const SAT_NAME: Record<string, [string, string]> = { TERRA: ['Terra', 'MODIS'], AQUA: ['Aqua', 'MODIS'], SNPP: ['Suomi NPP', 'VIIRS'], N20: ['NOAA-20', 'VIIRS'], N21: ['NOAA-21', 'VIIRS'] }
+const NL = String.fromCharCode(10)
+export const DOWNLOAD_COLS ='latitude,longitude,acq_date,acq_time_utc,local_solar_time,satellite,instrument,confidence,frp_mw,daynight,h3_r6'
+const hhmm = (ms: number) => new Date(ms).toISOString().slice(11, 16)
+
+export interface Coverage { requested: [string, string]; covered: [string, string] | null; truncated: string | null }
+
+/** Download CSV: one comment line (source, request, retrieval, coverage/truncation), header, one row per detection. */
+export function toDownloadCsv(r: Result, regionName: string | null, cov: Coverage, maxBytes = Infinity): { body: string; rows: number; truncated: string | null } {
+  const q = r.query
+  let truncated = cov.truncated
+  const lines: string[] = []
+  let bytes = 0
+  for (const x of r.rows) {
+    const [lat, lon, tUtc, solarDay, stream, conf, frp, dn] = x
+    const t = Date.parse(tUtc)
+    const solar = t + (lon / 15) * 3_600_000
+    const [sat, inst] = SAT_NAME[stream] ?? [stream, '']
+    const line = [lat, lon, tUtc.slice(0, 10), hhmm(t), `${solarDay} ${hhmm(solar)}`, sat, inst, conf, frp ?? '', dn, latLngToCell(lat, lon, 6)].join(',')
+    if (bytes + line.length + 1 > maxBytes) {
+      truncated = `size limit reached after ${lines.length.toLocaleString('en-GB')} detections (up to ${lines.length ? r.rows[lines.length - 1][3] : q.start}); choose a shorter range or a smaller box for the rest`
+      break
+    }
+    lines.push(line)
+    bytes += line.length + 1
+  }
+  const src = Object.entries(r.sources).map(([k, v]) => `${k} ${v.calls} call${v.calls > 1 ? 's' : ''}`).join(', ') || 'none'
+  const head = `# Source: NASA FIRMS (MODIS C6.1 / VIIRS 375 m), raw detections — not harmonized; for the harmonized record use the fire-days CSV`
+    + ` · request: ${regionName ?? 'custom box'}${q.bbox ? `, box ${q.bbox.join(',')}` : ''}, ${cov.requested[0]} to ${cov.requested[1]} (solar dates), satellites ${q.satellites}`
+    + ` · retrieved ${r.fetched_at} via NASA FIRMS Area API (${src})`
+    + ` · ${truncated ? `TRUNCATED — ${truncated}` : `complete for ${cov.requested[0]} to ${cov.requested[1]}`}`
+    + ` · filters: ${r.filters.join('; ')} · confidence: N nominal, H high (low dropped) · times: acq_time_utc in UTC, local_solar_time = UTC + longitude/15 h`
+    + ` · Data: NASA FIRMS (doi:10.5067/FIRMS/MODIS/MCD14ML, 10.5067/FIRMS/VIIRS/VNP14IMGT_NRT.002) via Fire Rings (fire-rings.vercel.app)`
+  return { body: [head, DOWNLOAD_COLS, ...lines].join(NL) + NL, rows: lines.length, truncated }
 }

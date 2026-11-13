@@ -113,9 +113,9 @@ export default function RangeCard({ doc, range, onChange, boxed, box }: { doc: R
             {s.withData < s.months ? ` ${s.months - s.withData} month(s) without data are left out of the totals.` : ''}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border pt-3">
-            {rangeLength(range!) === 1
-              ? <HotspotButton q={{ region: doc.id, ...monthRange(range!.from.y, range!.from.m), bbox: boxed ? box : null }} />
-              : <span className="text-[11px] text-faint">Hotspot CSV (every detection): pick a single month — NASA FIRMS serves up to 31 days per download.</span>}
+            <HotspotButton q={{ region: doc.id, start: monthRange(range!.from.y, range!.from.m).start,
+              end: (() => { const e = monthRange(range!.to.y, range!.to.m).end; return e > doc.data_end ? doc.data_end : e })(), bbox: boxed ? box : null }} />
+            <span className="text-[11px] text-faint">Hotspots = raw NASA FIRMS detections (not harmonized). The fire-days above are the harmonized record (“Fire-days CSV (harmonized)” under Export).</span>
           </div>
         </div>
       )}

@@ -18,6 +18,9 @@ from lib.common import config, connect, path, sql_path, write_json  # noqa: E402
 CITATION = ("Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. "
             "Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.")
 COLS = "lat,lon,t_utc,solar_date,stream,conf,frp_mw,daynight,product"
+# Round 8: same layout as GET /api/hotspots?layout=download (the Explore "Download hotspots (CSV)" button)
+DL_COLS = "latitude,longitude,acq_date,acq_time_utc,local_solar_time,satellite,instrument,confidence,frp_mw,daynight,h3_r6"
+SAT_NAME = {"TERRA": ("Terra", "MODIS"), "AQUA": ("Aqua", "MODIS"), "SNPP": ("Suomi NPP", "VIIRS"), "N20": ("NOAA-20", "VIIRS"), "N21": ("NOAA-21", "VIIRS")}
 
 
 def main() -> None:
@@ -35,7 +38,8 @@ def main() -> None:
         viirs = "N20" if start >= dt.date(2026, 11, 1) else "SNPP"
         filt = sql_path(path("clean") / f"{region}_filtered.parquet")
         rows = con.execute(f"""
-            SELECT round(lat,5), round(lon,5), strftime(t_utc, '%Y-%m-%dT%H:%MZ'), solar_date, stream, conf, frp, daynight, product
+            SELECT round(lat,5), round(lon,5), strftime(t_utc, '%Y-%m-%dT%H:%MZ'), solar_date, stream, conf, frp, daynight, product,
+                   h3r6, strftime(t_utc + to_seconds(CAST(round(lon / 15.0 * 3600) AS BIGINT)), '%H:%M')
             FROM '{filt}' WHERE solar_date BETWEEN DATE '{start}' AND DATE '{end}' AND stream IN ('TERRA','AQUA','{viirs}')
             ORDER BY t_utc, lat, lon""").fetchall()
         name = cfg["regions"][region]["name"]
@@ -47,14 +51,28 @@ def main() -> None:
                      f"dropped; known-static + persistent H3 res-9 mask; days by solar date (UTC + lon/15 h) · {CITATION}\n")
             fh.write(COLS + "\n")
             for r in rows:
-                fh.write(",".join("" if v is None else str(v) for v in r) + "\n")
+                fh.write(",".join("" if v is None else str(v) for v in r[:9]) + "\n")
+        import h3
+        with (out_dir / f"{base}_download.csv").open("w", encoding="utf-8", newline="") as fh:
+            fh.write(f"# Source: NASA FIRMS (MODIS C6.1 / VIIRS 375 m), raw detections — not harmonized; for the harmonized record use "
+                     f"the fire-days CSV · request: {name}, {start} to {end} (solar dates), satellites record · retrieved: pre-saved "
+                     f"from the NASA FIRMS archive download (standard SP files) for the demo · complete for {start} to {end} · filters: "
+                     f"low confidence dropped; FIRMS type 1/2/3 dropped; known-static + persistent H3 res-9 mask; days by solar date "
+                     f"(UTC + lon/15 h) · confidence: N nominal, H high (low dropped) · times: acq_time_utc in UTC, local_solar_time = "
+                     f"UTC + longitude/15 h · {CITATION}\n")
+            fh.write(DL_COLS + "\n")
+            for r in rows:
+                sat, inst = SAT_NAME.get(r[4], (r[4], ""))
+                cell = r[9] if isinstance(r[9], str) else h3.int_to_str(int(r[9]))
+                fh.write(",".join(str(v) for v in (r[0], r[1], r[2][:10], r[2][11:16], f"{r[3]} {r[10]}", sat, inst, r[5],
+                                                    "" if r[6] is None else r[6], r[7] or "", cell)) + "\n")
         dots = [[round(r[0], 4), round(r[1], 4), 0 if r[4] in ("TERRA", "AQUA") else 1, r[3].day] for r in rows]
         n_modis = sum(1 for d in dots if d[2] == 0)
         write_json(out_dir / f"{base}.json", {
             "ok": True, "query": {"region": region, "bbox": None, "start": str(start), "end": str(end), "satellites": "record", "format": "json"},
             "source": "pre-saved from the Fire Rings record (FIRMS archive download)", "count": len(dots),
             "fields": ["lat", "lon", "sensor(0=MODIS,1=VIIRS)", "solar_day"], "rows": dots}, compact=True)
-        index.append({"region": region, "month": month, "start": str(start), "end": str(end), "csv": f"{base}.csv",
+        index.append({"region": region, "month": month, "start": str(start), "end": str(end), "csv": f"{base}.csv", "csv_download": f"{base}_download.csv",
                       "json": f"{base}.json", "rows": len(rows), "modis": n_modis, "viirs": len(rows) - n_modis,
                       "note": item.get("note", "")})
         print(f"{base}: {len(rows):,} detections (MODIS {n_modis:,}, VIIRS {len(rows) - n_modis:,})")
