@@ -201,6 +201,7 @@ def collect(rid: str, start: dt.date, end: dt.date, key: str, use_cache: bool, o
     live = read_json(WEB / "live" / f"{rid}.json")
     foot, res, static = set(live["footprint"]), int(live["footprint_res"]), set(live["static_r9"])
     out = {}
+    tim: dict = {}          # Round 7 agent Tool A: (satellite, day/night) → {(H3 r6, solar day)} and VIIRS daytime solar hours
     for stream, source in SOURCES.items():
         days: dict = {}
         hot: dict = {}
@@ -221,11 +222,26 @@ def collect(rid: str, start: dt.date, end: dt.date, key: str, use_cache: bool, o
                 if h3.latlng_to_cell(lat, lon, res) not in foot or h3.latlng_to_cell(lat, lon, 9) in static:
                     continue
                 sd = t.date()
-                days.setdefault(sd, set()).add(h3.latlng_to_cell(lat, lon, 6))
+                c6 = h3.latlng_to_cell(lat, lon, 6)
+                days.setdefault(sd, set()).add(c6)
                 hot[sd] = hot.get(sd, 0) + 1
+                dn = (r.get("daynight") or "").strip().upper()
+                tim.setdefault((sat, dn), set()).add((c6, sd))
+                if sat == "N20" and dn == "D":
+                    tim.setdefault("hours", []).append((sd, t.hour + t.minute / 60.0))
             cur += dt.timedelta(days=n)
         out[stream] = {"days": days, "hot": hot}
+    out["_timing"] = tim
     return out
+
+
+def timing_summary(tim: dict, y: int, m: int) -> dict:
+    """Same summary as agent/timing.build_from_clean for one month (VIIRS = NOAA-20 from Nov 2026)."""
+    inm = lambda sd: sd.year == y and sd.month == m  # noqa: E731
+    cnt = lambda key: sum(1 for _, sd in tim.get(key, ()) if inm(sd))  # noqa: E731
+    hrs = [h for sd, h in tim.get("hours", ()) if inm(sd)]
+    return {"aqua_day": cnt(("AQUA", "D")), "terra_day": cnt(("TERRA", "D")), "viirs_day": cnt(("N20", "D")),
+            "viirs_night": cnt(("N20", "N")), "viirs_day_hour": round(float(np.mean(hrs)), 3) if hrs else None, "source": "NRT (daily.py)"}
 
 
 def measure(obs: dict, op: dict, y: int, m: int, D: int, min_ratio: float) -> dict:
@@ -485,7 +501,7 @@ def update_region(rid: str, obs_by_month: dict, op: dict, data_end: dt.date, cfg
 
 
 # ------------------------------------------------------------------------------------------------ "did anything change?"
-STAMPS = {"updated", "last_update", "generated"}
+STAMPS = {"updated", "last_update", "generated", "checked_at"}
 
 
 def snapshot() -> dict:
@@ -576,7 +592,10 @@ def main() -> None:
             months.add((last["y"], last["m"]))
         plan[rid] = sorted(t for t in months if mkey(*t) >= first_owned)
     print(f"daily update: data end {data_end} · " + " · ".join(f"{r} {[mkey(*t) for t in plan[r]]}" for r in rids), flush=True)
-    watch_before = {r: v["status"] for r, v in read_json(WEB / "watch.json")["regions"].items()}
+    def watch_state() -> dict:   # status + current agent verdicts: a briefing is regenerated when either changes (Round 7)
+        return {r: (v["status"], tuple((t["month"], t["verdict"]) for t in (v.get("timing_check") or [])))
+                for r, v in read_json(WEB / "watch.json")["regions"].items()}
+    watch_before = watch_state()
     before = snapshot()
     op: dict = {}
     obs = {}
@@ -604,17 +623,26 @@ def main() -> None:
     meta["update_cadence"] = "daily (current month, NRT); model monthly; Long-term record fixed"
     write_json(WEB / "meta.json", meta)
     write_dataset(docs)
-    for step in ("09_watch.py", "10_api.py"):
-        r = subprocess.run([sys.executable, str(PIPE / step)], cwd=ROOT, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    tcache = ROOT / "pipeline" / "assets" / "agent" / "timing.json"
+    if tcache.exists():
+        tc = json.loads(tcache.read_text(encoding="utf-8"))
+        for rid in rids:
+            for (y, m) in plan.get(rid, []):
+                if rid in obs and rid in tc:
+                    tc[rid][mkey(y, m)] = timing_summary(obs[rid]["_timing"], y, m)
+        tcache.write_text(json.dumps(tc, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+    # Round 7: the agentic check runs after Fire Watch (A always; B/C only where secrets exist — never fails the run)
+    for step, args in (("09_watch.py", []), ("10_api.py", []), ("12_agent.py", ["--fetch"])):
+        r = subprocess.run([sys.executable, str(PIPE / step), *args], cwd=ROOT, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
         if r.returncode != 0:
             raise SystemExit(f"{step} failed")
     if restore_if_unchanged(before):
         print("no change except timestamps — files restored, nothing to commit", flush=True)
-    after = {r: v["status"] for r, v in read_json(WEB / "watch.json")["regions"].items()}
+    after = watch_state()
     changed = [r for r in rids if watch_before.get(r) != after.get(r)]
     (ROOT / "data").mkdir(exist_ok=True)
     (ROOT / "data" / "daily_status_changed.txt").write_text(",".join(changed), encoding="utf-8")
-    print(f"Fire Watch status changed: {changed or 'none'}", flush=True)
+    print(f"Fire Watch status or agent verdict changed: {changed or 'none'}", flush=True)
 
 
 if __name__ == "__main__":

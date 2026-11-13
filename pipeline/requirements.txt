@@ -10,3 +10,7 @@ pyarrow==26.0.1
 python-dotenv==1.2.4
 pytest==9.2.0
 scikit-learn==1.9.1   # Round 5B prediction model (11_model.py)
+earthaccess==0.17.0  # Round 7 agent: NASA Earthdata login + MCD64A1 search/download
+pyhdf==0.11.7  # Round 7 agent: MCD64A1 is HDF4
+h5py==3.16.0  # Round 7 agent: GOES FDCF (netCDF4) and LSA SAF FRP-PIXEL (HDF5)
+s3fs==2026.9.0  # Round 7 agent: anonymous reads of the NOAA GOES AWS Open Data buckets

@@ -28,6 +28,7 @@ STEPS = [
     ("08b_demo_hotspots", [PIPE / "08b_demo_hotspots.py"]),
     ("09_watch", [PIPE / "09_watch.py"]),
     ("10_api", [PIPE / "10_api.py"]),
+    ("12_agent", [PIPE / "12_agent.py"]),    # Round 7 agentic check (cached tool summaries; --fetch / --build-timing by hand)
     ("11_model", [PIPE / "11_model.py"]),   # Round 5B prediction model (deterministic; ~10 min)
 ]
 

@@ -129,7 +129,9 @@ def backtest(doc: dict, w: dict, base_years: list[int], g_med: float = 5, g_val:
             "harmonized_only_alerts": len(hh - rh), "raw_lows": len(rl), "harmonized_lows": len(hl), "lows_missed_by_raw": len(hl - rl),
             "per_year": {str(y): {"raw": sum(1 for k in rh if k[0] == y), "harmonized": sum(1 for k in hh if k[0] == y),
                                   "raw_only": sum(1 for k in rh - hh if k[0] == y)} for y in years},
-            "raw_only_months": [f"{yy}-{mm:02d}" for yy, mm in sorted(rh - hh)]}
+            "raw_only_months": [f"{yy}-{mm:02d}" for yy, mm in sorted(rh - hh)],
+            # Round 7: the months the harmonized agent flags — the agentic check (12_agent.py) verifies exactly these
+            "harmonized_flagged": {"up": [f"{yy}-{mm:02d}" for yy, mm in sorted(hh)], "down": [f"{yy}-{mm:02d}" for yy, mm in sorted(hl)]}}
 
 
 def relevant(region: str, checks: list[dict], w: dict) -> str:
