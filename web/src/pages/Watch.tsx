@@ -51,7 +51,7 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
           <p className="text-[15px] leading-relaxed text-text">{formatNumbersInText(shown.answer)}</p>
           {shown.caveat && <p className="mt-1.5 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {shown.caveat}</p>}
         </div>
-      ) : st.status !== 'Normal' ? <p className="text-xs text-faint">Briefing: run the agent to generate one.</p> : null}
+      ) : st.status !== 'Normal' ? <AutoSummary st={st} /> : null}
       {st.status !== 'Normal' && st.timing_check?.length ? <AgentCheck checks={st.timing_check} /> : null}
       <details className="text-sm" open={st.status !== 'Normal'}>
         <summary className="cursor-pointer text-xs text-accent-2">Numbers used</summary>
@@ -72,6 +72,28 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
       {st.flags.length > 0 && <p className="text-[11px] text-faint">Flags: {st.flags.map((f) => f.replace(/_/g, ' ')).join(' · ')}</p>}
       <Link to={`/r/${id}`} className="mt-auto text-sm">Explore {name.split(' (')[0]} →</Link>
     </article>
+  )
+}
+
+/** Round 8: flagged region without a saved AI briefing → a short non-AI summary built ONLY from the stored rule checks and the
+ *  stored agent verdict (watch.json). Clearly labelled; replaced by the AI briefing once fill_ai.yml saves one. */
+function AutoSummary({ st }: { st: RegionState }) {
+  const fired = st.checks.filter((c) => c.rule && c.rule !== 'low_activity_guard' && c.id !== 'live')
+  const lines = fired.map((c) => {
+    const what = c.id === 'mtd' ? `${c.month} so far${c.days ? ` (days 1–${c.days})` : ''}` : `${c.month} (last full month)`
+    const typ = c.median != null ? `, typical ${fmtInt(c.median)}${c.id === 'mtd' ? ' for the same days' : ''}` : ''
+    return `${what}: ${fmtInt(c.value)} fire-days${c.ratio != null ? ` (${fmtRatio(c.ratio)} typical${typ})` : typ ? ` (${typ.slice(2)})` : ''}, ${pctWords(c.pct)} — ${c.rule!.replace(/_/g, ' ')}.`
+  })
+  const ag = (st.timing_check ?? []).map((t) => `${t.month}: ${t.verdict} (${t.rule.replace(/^R\d: /, '')})`)
+  return (
+    <div className="rounded-sm border border-dashed border-border-strong bg-surface-2 p-3" data-testid="watch-autosummary">
+      <p className="mb-1.5"><span className="rounded-full bg-surface-3 px-2 py-px text-[11px] text-muted">Automatic summary — AI briefing pending</span></p>
+      <ul className="space-y-1 text-[14px] leading-relaxed text-text">
+        {lines.map((l) => <li key={l}>{l}</li>)}
+        {ag.length > 0 && <li className="text-muted">Agent check — {ag.join(' · ')}.</li>}
+      </ul>
+      <p className="mt-1.5 text-[11px] text-faint">Built from the stored rule checks and agent verdicts only (no AI). Fire-days are MODIS-equivalent; provisional near-real-time data.</p>
+    </div>
   )
 }
 

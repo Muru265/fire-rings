@@ -218,6 +218,13 @@ try {
   check('Fire Watch: every region card has a status', statuses.length === N_REGIONS && statuses.every((s) => ['Normal', 'Watch', 'Alert', 'Unusually low'].includes(s)))
   const flaggedNoBrief = await page.locator('[data-testid="watch-card"]:not([data-status="Normal"])').evaluateAll((els) => els.filter((e) => !e.querySelector('[data-testid="watch-briefing"]')).length)
   check('Fire Watch: every flagged region shows a briefing', flaggedNoBrief === 0)
+  { // Round 8: a flagged region without a saved AI briefing shows the labelled automatic (non-AI) summary — never an empty card
+    const noAi = await page.locator('[data-testid="watch-card"]:not([data-status="Normal"])').evaluateAll((els) => els
+      .filter((e) => !e.querySelector('[data-testid="watch-briefing"]'))
+      .map((e) => ({ id: e.getAttribute('data-region'), auto: e.querySelector('[data-testid="watch-autosummary"]')?.textContent ?? '' })))
+    check(`Fire Watch: flagged regions without an AI briefing show "Automatic summary — AI briefing pending" (${noAi.map((x) => x.id).join(', ') || 'none'})`,
+      noAi.every((x) => x.auto.includes('Automatic summary — AI briefing pending') && /fire-days/.test(x.auto) && x.auto.includes('Agent check')))
+  }
   const trig = await page.locator('[data-testid="watch-card"][data-region="punjab"] [data-testid="status-trigger"]').innerText().catch(() => '')
   check(`#75 status badge names the month (${trig.trim()})`, /\((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(trig))
   const tr = await page.getByTestId('watch-trace').locator('li').allInnerTexts()

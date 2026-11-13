@@ -521,6 +521,20 @@ detection-time change); Oct 2026 (Aqua÷VIIRS ×2.12, night share ×20.8, burned
 likely; November 2026 so far (updated daily) gives the same verdict. Round 7 (148 months, 7 regions, no GOES): 94 / 13 /
 22 / 19. Numbers: `api/agent_check/{region}.json`.
 
+## 9l. Filling missing AI texts (`.github/workflows/fill_ai.yml`) and the automatic summary — Round 8
+
+- **Self-healing job.** Daily at 08:37 UTC (12:37 Mauritius, after the Gemini free-tier quota resets) and on demand. It fills
+  ONLY what is missing: Fire Watch briefings for flagged regions without a saved one (`watch_cache.ts --missing`), then
+  saved Ask answers absent from `ask_cache.json` (`ask_cache.ts --missing`). Every answer passes the same server-side number
+  verification as the live app (`api/_lib/core.ts`); unverified answers are never saved. At the first quota error (HTTP 429
+  / "quota" / RESOURCE_EXHAUSTED) the script stops and leaves the rest for the next day. The cache files are written only
+  if something new was saved, and the job commits only then (`Fill missing AI texts YYYY-MM-DD`, author Muru265). It shares
+  the `data-updates` concurrency group with the daily and monthly jobs and is skipped when GEMINI_API_KEY is not set.
+- **Automatic summary (no AI).** While a flagged region has no saved briefing, its Fire Watch card shows a short text built
+  only from the stored rule checks (month, fire-days, ratio and typical value, percentile words, the rule that fired) and the
+  stored agent verdicts, labelled "Automatic summary — AI briefing pending". e2e and claims_check still report the missing
+  saved briefing until the job fills it.
+
 ## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and

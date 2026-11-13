@@ -66,6 +66,14 @@ no overflow, no page errors) · key-string grep clean.
 **Pending:** 35 saved Ask answers + briefings for Sudan / Mato Grosso (after the Gemini quota resets); Meteosat access;
 burned area for Oct/Nov 2026; companion e2e after deployment.
 
+**Round 8 follow-up (13 Nov, evening):**
+
+| Item | Status | Notes |
+|---|---|---|
+| Automatic summary fallback | done | Flagged regions without a saved briefing (now Sudan, Mato Grosso) show a non-AI summary from the stored rule checks + agent verdicts, labelled "Automatic summary — AI briefing pending". e2e checks it (passes); the "every flagged region shows a briefing" e2e check and claims_check still report the missing saved briefings, as intended. |
+| Self-healing workflow `.github/workflows/fill_ai.yml` | done | Daily 08:37 UTC (12:37 Mauritius) + workflow_dispatch; `watch_cache.ts --missing` then `ask_cache.ts --missing` (fill only absent keys, same number verification, stop at first quota error, write/commit only if something new; commit "Fill missing AI texts YYYY-MM-DD" as Muru265); concurrency group `data-updates`; skipped if GEMINI_API_KEY is unset. Tested locally with an invalid key: only missing items attempted, FILLED=0, both cache files unchanged (checksums). Not yet run on GitHub — first scheduled run 14 Nov 08:37 UTC, or run it by hand under Actions. |
+| Tests | done | build + lint OK · e2e 97 pass / 1 expected fail (missing saved briefings) · screenshot `docs/screens/r8_autosummary_sudan_*`. |
+
 ## Round 7 — agentic check + Brazil (13 Nov)
 
 | Item | Status | Notes |

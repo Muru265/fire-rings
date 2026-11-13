@@ -147,6 +147,15 @@ conversion (METHODS.md §7, `docs/validation_report.md` → Gate history). GOES 
 Madagascar, Sudan) waits for data access. Explore offers **Download hotspots (CSV)** (raw FIRMS detections, ≤ 62 days,
 server-side) next to **Fire-days CSV (harmonized)**.
 
+## Missing AI texts fill themselves (Round 8)
+
+`.github/workflows/fill_ai.yml` runs daily at 08:37 UTC (after the Gemini quota resets) and on demand: it fills only missing
+saved Ask answers and missing Fire Watch briefings (same number verification; stops at the first quota error; commits only
+if something new was saved). Until a briefing exists, the Fire Watch card shows a labelled, non-AI "Automatic summary — AI
+briefing pending" built from the stored numbers and agent verdict. Run by hand: GitHub → **Actions** → **Fill missing AI
+texts** → **Run workflow**. Locally: `cd web; npx tsx --env-file=../.env scripts/watch_cache.ts --missing` and
+`npx tsx --env-file=../.env scripts/ask_cache.ts --missing`.
+
 ## Prediction model and monthly retraining
 
 `python pipeline/11_model.py` trains and tests the "fire likelihood for the scored month" model (rolling origin 2018–2025,
