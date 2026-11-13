@@ -50,7 +50,7 @@ export default function WatchProof({ doc: given }: { doc?: WatchDoc | null }) {
       </p>
       <p className="mt-1 max-w-4xl text-sm text-muted">
         Raw data also hides real drops: it flags <span className="num text-text">{t.raw_lows}</span> “far below normal” months, the harmonized record <span className="num text-text">{t.harmonized_lows}</span>.
-        Same thresholds, same 2003–2022 baseline, every month {y0}–{y1}, all four regions.
+        Same thresholds, same 2003–2022 baseline, every month {y0}–{y1}, all {Object.keys(doc.regions).length} regions.
       </p>
       {chart}
       {legend}

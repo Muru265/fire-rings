@@ -320,7 +320,7 @@ export default function GlobeTimelapse({ docs, live }: Props) {
   const f = frames[i]
   return (
     <div className="relative flex h-full w-full flex-col">
-      <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label="Globe showing monthly fire activity in the four hero regions"
+      <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label={`Globe showing monthly fire activity in the ${docs.length} hero regions`}
         data-testid="globe-map" />
       {near && (
         <Link to={`/r/${near.id}`} className="absolute top-3 left-3 z-10 rounded-full border border-accent/60 bg-surface/90 px-3 py-1 text-xs font-semibold text-text no-underline backdrop-blur hover:bg-surface-2" data-testid="globe-explore-chip">

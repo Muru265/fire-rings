@@ -1,4 +1,4 @@
-// Precompute answers for 4 chips × 4 regions × 2 styles → public/data/v1/ask_cache.json (keys "region|question|voice").
+// Precompute answers for 4 chips × every published region (7) × 2 styles → public/data/v1/ask_cache.json (keys "region|question|voice").
 // The frontend uses these if /api/ask errors or is rate-limited (QA #33). Only verified answers are cached.
 // Keys "region|question|voice" (Long-term) and "region|question|voice|detail" (High detail, #85).
 // Usage: npx tsx --env-file=../.env scripts/ask_cache.ts [--mode longterm|detail|both] [--only "mauritius|*"]   (existing entries kept unless regenerated)
@@ -16,7 +16,8 @@ const modeArg = process.argv.indexOf('--mode')
 const MODES: Mode[] = modeArg > 0 && process.argv[modeArg + 1] !== 'both' ? [process.argv[modeArg + 1] as Mode] : ['longterm', 'detail']
 const onlyArg = process.argv.indexOf('--only')
 const only = onlyArg > 0 ? process.argv[onlyArg + 1].split(',').map((s) => s.trim()) : null
-const wanted = (key: string) => !only || only.some((o) => key === o || key.startsWith(o.replace(/\*$/, '')))
+// exact key, or a prefix when it ends in * (Round 6: a plain key no longer also matches its '|detail' twin)
+const wanted = (key: string) => !only || only.some((o) => (o.endsWith('*') ? key.startsWith(o.slice(0, -1)) : key === o))
 
 const meta = await load('meta.json')
 const path = resolve(DATA, 'ask_cache.json')
@@ -47,4 +48,4 @@ for (const r of meta.regions as { id: string }[]) {
   }
 }
 await writeFile(path, JSON.stringify({ data_end: meta.data_end, chips: CHIPS, voices: VOICES, modes: ['longterm', 'detail'], entries }), 'utf-8')
-console.log(`cache now has ${Object.keys(entries).length}/64 answers${failed.length ? `; missing: ${failed.join(' · ')}` : ''}`)
+console.log(`cache now has ${Object.keys(entries).length}/${meta.regions.length * CHIPS.length * VOICES.length * 2} answers${failed.length ? `; missing: ${failed.join(' · ')}` : ''}`)

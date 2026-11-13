@@ -175,6 +175,10 @@ This supports late-afternoon burning that the 13:30 overpasses increasingly miss
 **Harmonized values are not adjusted** (burning between overpasses cannot be measured); Punjab Oct–Nov months from 2022
 carry the caveat "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons
 may be undercounted" in the app, the AI tools and the Proof page.
+They also carry the machine-readable flag value **`overpass_timing`** in the `flags` column of the open CSV/Parquet
+(`dataset/harmonized_monthly_regions_v1.*`), the calendar CSV export, `regions/punjab.json` → `months[].flags` and
+`api/series/punjab.json` → `flags` (Round 6). It is a flag only: no number changes because of it. Rule: region `punjab`,
+months October and November, years 2022 onward (Aqua's overpass drift after Dec 2021 shifts the detection time).
 
 ## 8c. Live layer (`web/api/live.ts`) — separate from the record
 
@@ -341,7 +345,7 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   unchanged inputs and `test_longterm_unchanged.py` confirms the four original regions' Long-term values are identical.
 - **Tanzania study check.** See `docs/sources.md`.
 
-## 9h. Prediction model: fire likelihood next month (`11_model.py`, `lib/model_data.py`)
+## 9h. Prediction model: fire likelihood for the scored month (`11_model.py`, `lib/model_data.py`)
 
 - **Unit and data.** H3 res-6 cell × month for all validated regions together (region is a feature): 16,366,896 cell-months,
   built only from committed files (`hexes/{id}/*.json` primary-stream fire-days, published k / q / k′, NASA POWER), so the
@@ -360,7 +364,7 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   = fire in the cell in month m.
 - **Evaluation (test data only).** Primary rolling origin: for each test year 2018–2025, train on target years before it
   (asserted in code and tested). Secondary leave-one-region-out (2018–2025, region feature removed). Metrics: ROC-AUC, PR-AUC,
-  precision/recall/F1 at the F1-maximising threshold of each fold's TRAINING data, Brier, and capture = share of next month's
+  precision/recall/F1 at the F1-maximising threshold of each fold's TRAINING data, Brier, and capture = share of the following month's
   fire cells inside the top 10 % (20 %) of cells ranked within each region and month (seeded random tie-break). 90 %
   intervals: test years resampled with replacement (300 times; AUCs on a fixed 4 % row sample per year).
 - **Results (pooled rolling origin).** Model PR-AUC 0.7271 (90 % [0.7167, 0.7418]), ROC-AUC 0.9214,
@@ -376,8 +380,8 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   where a fixed exchange rate changes little, and raw VIIRS counts keep small-fire detail. Harmonization matters for
   comparing amounts across years (the record).
 - **Publish gate.** Likelihood maps are published only if the model beats b1 on pooled rolling-origin PR-AUC AND top-10 %
-  capture: **passed**. Outputs: `api/likelihood/{id}.json` (next month = the month
-  after the last full month: 2026-11), `api/model_card.json`, `api/model_history.json`.
+  capture: **passed**. Outputs: `api/likelihood/{id}.json` (scored month = `target_month`, the month
+  after the last full month: during November it scores November using data up to October), `api/model_card.json`, `api/model_history.json`.
 - **Limitations.** Ranks the likelihood of at least one detection, not size, timing, damage or cause; a planning aid, not a
   warning service; the Punjab Oct–Nov overpass-timing caveat applies; 7 regions only.
 
@@ -397,7 +401,33 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   retraining with a fixed test, not reinforcement learning. Local test: `python pipeline/retrain.py --dry-run`
   (12 Nov: holdout Aug–Oct 2026, champion PR-AUC 0.7625 vs challenger 0.7596, so the current model was kept).
 
-## 9. Lat/lon boxes in the app
+## 9j. Daily data update (`daily.py`, `.github/workflows/daily.yml`) — Round 6
+
+Three speeds, never mixed:
+
+| What | How often | Writes | Never touches |
+|---|---|---|---|
+| **Historical record** (Long-term, every month before `daily.first_month` = 2026-11) | fixed; changes only with a documented re-run of the full pipeline | — | — (guarded by `test_longterm_unchanged.py`, which must stay green) |
+| **This month so far** (current month; the previous month until it is complete) | **daily**, 04:40 UTC + on demand | current-month row, `latest`/`latest_complete`, this year's annual total, `daily/`, current-month hexes/globe, `watch.json`, `api/series`, `api/projection`, `meta.json` (`last_update`), the open CSV/Parquet rows of that month | historical months, the model |
+| **Fire-likelihood model** | **monthly**, 2nd of the month (§9i) | `api/likelihood`, `api/model_card.json`, `api/model_history.json` | the record |
+
+- Fetches this month's FIRMS NRT detections for every region box: VIIRS NOAA-20 (the record's stream from Nov 2026,
+  H = k · k′ · NOAA-20) and MODIS (shown next to it); 5-day chunks, hard budget 260 calls, FIRMS_MAP_KEY from the
+  repository secret (never printed). Solar date, low-confidence/type filters, known-static H3 res-9 mask and region
+  footprint exactly as the record (`live/{id}.json`). Coverage adjustment as in `04_cube` (operating days proxy: ≥1
+  detection in any region box that day).
+- Uses the FROZEN published ratios and bootstrap draws (`pipeline/assets/daily/{id}.json`, written once by
+  `daily.py --build-assets` from the full pipeline and checked against the published k, k′ and intervals) — no
+  recalibration. "Is this normal?" for the month so far = the same days 1..D of the 2003–2022 baseline years (07_stats).
+- Then `09_watch.py` (Fire Watch status) and `10_api.py`. The Fire Watch AI briefing is regenerated only for regions whose
+  status changed (`watch_cache.ts --only …`); if Gemini fails, the previous saved briefing is kept.
+- Commits only if something other than timestamps changed (`Daily data update YYYY-MM-DD`, author Muru265), after pytest
+  (incl. the snapshot test) and a check that only current-month output paths changed. Daily and monthly jobs share one
+  concurrency group, so they never run at the same time.
+- Months after the S-NPP end are NOAA-20 based; a month becomes complete on the first run of the next month and stays
+  "provisional" until NASA reprocesses it.
+
+
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and
 coverage factors. Boxes have no bootstrap interval or percentiles (stated in the UI).

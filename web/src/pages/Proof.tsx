@@ -18,6 +18,7 @@ import WatchProof from '../components/WatchProof'
 import VolcanoCard from '../components/VolcanoCard'
 import StudyCheck from '../components/StudyCheck'
 import ModelCard from '../components/ModelCard'
+import type { ModelCardDoc } from '../components/ModelCard'
 import links from '../../content/links.json'
 
 const C_HARM = '#D97706'
@@ -36,6 +37,15 @@ export default function Proof() {
   const [rid, setRid] = useState<string>(() => { const q = new URLSearchParams(window.location.search).get('region'); return REGIONS.some((r) => r.id === q) ? q! : 'punjab' })
   const doc = useRegion(rid)
 
+  // Round 6 #12: model limitation card numbers come from api/model_card.json (pooled rolling-origin results)
+  const mc = useJson<ModelCardDoc>('api/model_card.json')
+  const fillModel = (t: string) => {
+    if (mc.status !== 'ready') return t
+    const P = mc.data.evaluation.pooled, g = mc.data.evaluation.intervals.model_minus?.b1?.capture10
+    return t.replace('{m_cap10}', `${Math.round(P.model.capture10)}%`).replace('{c_cap10}', `${Math.round(P.climatology.capture10)}%`)
+      .replace('{gain}', g ? `${g[0]}–${g[1]} percentage points` : `${(P.model.capture10 - P.climatology.capture10).toFixed(1)} percentage points`)
+      .replace('{years}', `${mc.data.training_years[0]}–${mc.data.training_years[1]}`)
+  }
   return (
     <div className="space-y-8">
       <header className="max-w-3xl">
@@ -75,14 +85,14 @@ export default function Proof() {
       <WatchProof />
       <VolcanoCard />
 
-      <section aria-labelledby="lim-h">
+      <section aria-labelledby="lim-h" id="limitations-list">
         <h2 id="lim-h" className="font-display text-xl font-semibold">Limitations and what we do about them<Help id="limitations" /></h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {LIMITS.map((l) => (
-            <article key={l.t} className="card flex flex-col gap-3">
+          {LIMITS.filter((l) => !l.model || mc.status === 'ready').map((l) => (
+            <article key={l.t} className="card flex flex-col gap-3" data-testid={l.id ? `limit-${l.id}` : undefined}>
               <h3 className="flex items-center gap-2 font-display text-base font-semibold text-text"><span aria-hidden="true" className="text-xl">{l.i}</span>{l.t}</h3>
-              <div><p className="eyebrow !text-[10px] !text-warn">The problem</p><p className="mt-1 text-sm text-muted">{l.p.replace('{provisional}', (doc.status === 'ready' && provisionalSpan(doc.data.months)) || 'The most recent months')}</p></div>
-              <div><p className="eyebrow !text-[10px] !text-ok">What we do about it</p><p className="mt-1 text-sm text-muted">{l.m}</p></div>
+              <div><p className="eyebrow !text-[10px] !text-warn">The problem</p><p className="mt-1 text-sm text-muted">{fillModel(l.p.replace('{provisional}', (doc.status === 'ready' && provisionalSpan(doc.data.months)) || 'The most recent months'))}</p></div>
+              <div><p className="eyebrow !text-[10px] !text-ok">What we do about it</p><p className="mt-1 text-sm text-muted">{fillModel(l.m)}</p></div>
             </article>
           ))}
         </div>
@@ -111,16 +121,17 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
       )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Out-of-sample annual error (V1)" value={`${res.V1.mape_pct}%`} status={low ? 'low' : res.V1.pass ? 'pass' : 'fail'}
-          plain={low ? 'Too few fires for this test to mean much here.' : `We hid one year at a time (2012–2019), predicted it from the other years and compared with what the old satellite saw: off by ${res.V1.mape_pct}% on average.`}
+          plain={low ? 'Too few fires for this test to mean much here.' : `We hid one year at a time (2012–2019), converted that year’s VIIRS counts to MODIS scale with ratios fitted on the other years, and compared these converted values with what the old satellite saw: off by ${res.V1.mape_pct}% on average.`}
           sub={`goal: error under 20% and bias within ±10% · bias ${res.V1.bias_pct}% (not always too high or too low)`} />
         <Stat label="Step at 2012 (V3)" value={`${s.step_raw_pct > 0 ? '+' : ''}${fmtInt(s.step_raw_pct)}% → ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%`} status={low ? 'low' : res.V3.pass ? 'pass' : 'fail'}
           plain={low ? 'Too few fires for a reliable jump test.' : `Raw data says fire jumped ${fmtInt(s.step_raw_pct)}% when VIIRS arrived in 2012. After the fix: ${s.step_harm_pct > 0 ? '+' : ''}${s.step_harm_pct}%, close to the old satellite alone (${s.step_modis_pct > 0 ? '+' : ''}${s.step_modis_pct}%) — the fake jump is gone.`}
           sub={`jump test: before the fix p ${res.V3.pettitt_p_raw} (jump found); after p ${res.V3.pettitt_p_harm} (${res.V3.pettitt_p_harm > 0.05 ? 'no jump' : 'jump remains'})`} />
         <Stat label="Seasonal shape (r)" value={s.shape_r.toFixed(2)} status="info"
-          plain={`Our predicted months follow the real seasonal pattern${s.shape_r >= 0.95 ? ' almost perfectly' : s.shape_r >= 0.85 ? ' closely' : ' only loosely'} (1.00 = perfect).`}
-          sub="correlation of out-of-sample monthly predictions with MODIS, 2012–2019 · information, no fixed target" />
+          plain={`Our converted values (VIIRS converted to MODIS scale) follow the real seasonal pattern${s.shape_r >= 0.95 ? ' almost perfectly' : s.shape_r >= 0.85 ? ' closely' : ' only loosely'} (1.00 = perfect).`}
+          sub="correlation of out-of-sample monthly converted values with MODIS, 2012–2019 · information, no fixed target" />
         <V9Card v9={res.V9} rid={rid} />
       </div>
+      {doc && <TargetNote doc={doc} errPct={res.V1.mape_pct} stepRaw={s.step_raw_pct} low={low} />}
       <p className="text-sm text-muted">
         <strong className="text-text">{doc?.name ?? ''} exchange rate:</strong> {doc ? calibrationSummary(doc) : ''}{' '}
         Different landscapes have different fire sizes, so each region gets its own rate.
@@ -211,7 +222,7 @@ export function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
       return [
         { id: 'raw', label: 'Raw (MODIS → VIIRS)', color: C_RAW, dashed: true, points: v3.years.map((y, i) => ({ x: y, y: v3.raw[i] })) },
         { id: 'modis', label: 'MODIS only', color: C_MODIS, width: 1.5, points: v3.years.map((y, i) => ({ x: y, y: v3.modis_only[i] })) },
-        { id: 'harm', label: 'Harmonized', color: C_HARM, width: 2.5, points: v3.years.map((y, i) => ({ x: y, y: v3.harmonized[i] })) },
+        { id: 'harm', label: 'Harmonized (converted values)', color: C_HARM, width: 2.5, points: v3.years.map((y, i) => ({ x: y, y: v3.harmonized[i] })) },
       ]
     }
     const years = [...new Set(doc.months.map((r) => r.y))].filter((y) => y < 2026)
@@ -223,7 +234,7 @@ export function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
     return [
       { id: 'raw', label: 'Raw (MODIS → VIIRS)', color: C_RAW, dashed: true, points: agg((r) => (r.flags.includes('insufficient') ? null : r.y < VIIRS_START ? r.raw_modis : r.raw_viirs)) },
       { id: 'modis', label: 'MODIS only (drifts after 2020)', color: C_MODIS, width: 1.5, points: agg((r) => r.raw_modis) },
-      { id: 'harm', label: 'Harmonized', color: C_HARM, width: 2.5, points: agg((r) => r.H) },
+      { id: 'harm', label: 'Harmonized (converted values)', color: C_HARM, width: 2.5, points: agg((r) => r.H) },
     ]
   }, [doc, v3])
   const [raw, modis, harm] = series
@@ -273,6 +284,7 @@ export function BeforeAfter({ v3, doc }: { v3: V3; doc: RegionDoc | null }) {
       <LineChart series={drawn} yFormat={fmtCompact} annotations={[{ x: 2012, label: raw.points.find((p) => p.x === 2012)?.y == null ? `2012 skipped (partial VIIRS year, S-NPP from 20 Jan) · raw +${fmtInt(v3.step_raw_pct)}%` : `VIIRS arrives · raw +${fmtInt(v3.step_raw_pct)}%` }]} yLabel="fire-days per year" />
       <p className="fig-hide mt-2 text-sm text-text" data-testid="ba-takeaway">{baTakeaway(v3, series)}</p>
       <p className="fig-hide mt-1 text-xs text-muted">Where the orange line is hidden behind the blue one (2012–2019) the two agree — that overlap is the point. In the table you can see both values.</p>
+      <p className="mt-1 text-xs text-muted" data-testid="converted-note">Converted values = VIIRS converted to MODIS scale. Converted values are the harmonization, not the fire-likelihood prediction model.</p>
     </ChartCard>
   )
 }
@@ -318,7 +330,7 @@ function MethodFlow({ doc }: { doc: RegionDoc | null }) {
 function Drift({ v4 }: { v4: V4 }) {
   const pts = (k: 'ratio' | 'terra' | 'aqua') => v4.drift.map((d) => ({ x: d.y, y: d[k] }))
   const series: Series[] = [
-    { id: 'modis', label: 'MODIS (Terra+Aqua) ÷ S-NPP', color: C_HARM, width: 2.5, points: pts('ratio') },
+    { id: 'modis', label: 'Actual MODIS (Terra+Aqua) ÷ unconverted S-NPP', color: C_HARM, width: 2.5, points: pts('ratio') },
     { id: 'aqua', label: 'Aqua ÷ S-NPP', color: C_RAW, points: pts('aqua') },
     { id: 'terra', label: 'Terra ÷ S-NPP', color: C_MODIS, points: pts('terra') },
   ]
@@ -334,6 +346,7 @@ function Drift({ v4 }: { v4: V4 }) {
         <strong className="text-text">After the drift the ratio changed by only {v4.post2020_mean_rel_pct}% on average — small, but we still freeze the exchange rate before it, to be safe.</strong></>}>
       <LineChart series={series} yFormat={(v) => v.toFixed(2)} xBand={[2012.5, 2019.5, 'calibration window (Jul 2012–Dec 2019)']} height={300}
         annotations={[{ x: 2020, label: 'Terra drift' }, { x: 2021.95, label: 'Aqua drift' }, { x: 2023, label: 'MODIS 6.03 → 61.03' }]} yLabel="old ÷ new satellite" />
+      <p className="mt-2 text-xs text-muted" data-testid="drift-what">What the line is: each year’s actual MODIS fire-days divided by the unconverted VIIRS S-NPP fire-days. Converted VIIRS = VIIRS × the ratio fitted in the shaded window, so where the thick line stays near its window level, converted VIIRS matches actual MODIS; where it moves (after the drift), actual MODIS no longer matches converted VIIRS. Converted values are the harmonization, not the fire-likelihood prediction model.</p>
       <p className="mt-2 text-xs text-muted">Dashed lines: Terra starts drifting (2020) · Aqua starts drifting (Dec 2021) · “MODIS 6.03 → 61.03” = NASA changed the MODIS processing version on 1 Jan 2023 (same product, new label).</p>
     </ChartCard>
   )
@@ -509,7 +522,31 @@ export function DetectionTiming() {
   )
 }
 
-const LIMITS = [
+/** Round 6 #9: where the "<20% error, |bias| ≤ 10%" goal comes from. Every number is computed from the published region JSON. */
+function TargetNote({ doc, errPct, stepRaw, low }: { doc: RegionDoc; errPct: number; stepRaw: number; low: boolean }) {
+  const b0 = doc.baseline[0], b1 = doc.baseline[1]
+  const yrs = doc.annual.filter((a) => a.complete && a.rankable !== false && a.H != null && a.y >= b0 && a.y <= b1).map((a) => a.H!)
+  const med = (xs: number[]) => { const v = [...xs].sort((x, y) => x - y); const n = v.length; return n ? (n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2) : null }
+  const m = med(yrs)
+  const swing = m ? med(yrs.map((h) => Math.abs(h / m - 1) * 100)) : null
+  return (
+    <p className="rounded-sm border border-border bg-surface-2 px-4 py-3 text-xs text-muted" data-testid="target-note">
+      <strong className="text-text">Why “under 20%”?</strong> The V1 goal (error under 20%, bias within ±10%) was set by us before testing — it is not an external standard.
+      It is meant to keep the conversion error well below both real changes and the satellite artefact.{' '}
+      {swing != null && <>In {doc.name.split(' (')[0]} a typical year differs from the median year by about <strong className="num text-text">±{fmtInt(swing)}%</strong> ({b0}–{b1}, complete years), </>}
+      the raw satellite switch alone adds a fake <strong className="num text-text">{stepRaw > 0 ? '+' : ''}{fmtInt(stepRaw)}%</strong> step, and the out-of-sample error is <strong className="num text-text">{errPct}%</strong>.
+      {' '}{low ? 'Here fires are too few for the test to be judged (low-activity region).'
+        : swing != null && errPct < swing ? 'So the error is smaller than a normal year-to-year swing and tiny next to the artefact: real anomalies stay visible.'
+        : 'Here the error is not clearly smaller than a normal year-to-year swing, so small anomalies should be read with care.'}
+    </p>
+  )
+}
+
+const LIMITS: { i: string; t: string; p: string; m: string; id?: string; model?: boolean }[] = [
+  { id: 'fire-days', i: '🔢', t: 'Fire-days are not burned area', p: 'A fire-day counts days with at least one satellite detection per hexagon (~36 km²). It is not hectares burned, not damage and not emissions: one huge fire and one small fire in the same hexagon on the same day both count as one fire-day.',
+    m: 'The unit is named on every chart, table and download. Use it to compare fire activity across months and years; for burned area, damage or emissions use dedicated products.' },
+  { id: 'model', model: true, i: '🧭', t: 'The model is a planning aid', p: 'The fire-likelihood model ranks hexagons, one month at a time — it does not forecast individual fires, dates or sizes, and it uses no weather forecasts (only past fire and past NASA POWER rain/temperature). Its gain over the usual season is modest: watching the top 10% of hexagons would have caught {m_cap10} of the following month’s fire hexagons vs {c_cap10} for the usual season alone ({gain} better, unseen years 2018–2025).',
+    m: 'Labelled “planning aid” wherever it appears; tested only on years it never saw; published only while it beats the usual season; retrained monthly and replaced only if a challenger scores better.' },
   { i: '🕓', t: 'Fires lit after the overpass are missed', p: 'Polar orbiters see a place about twice a day. In Punjab, burning has shifted to late afternoon since 2022, after the ~13:30 VIIRS overpass, so recent Oct–Nov seasons are likely undercounted.',
     m: 'Measured from the data (Aqua÷VIIRS rise after Aqua drifted later), shown as a caveat on every affected month and in AI answers; numbers are not adjusted.' },
   { i: '🛰️', t: 'MODIS is ending and drifting', p: 'Terra (from 2020) and Aqua (from Dec 2021) drift to different overpass times, so MODIS counts after 2020 are not comparable with earlier years.',

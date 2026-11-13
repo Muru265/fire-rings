@@ -74,11 +74,11 @@ Note: Is it right? Every year from 2012 to 2019 is held out and predicted: singl
 | “within a selected area of interest” | draw a box on the map (+ date range) |
 
 **Built for:**
-- **Fire service** — watch the top 10% of hexagons → **{{model.cap10}}%** of next month’s fire hexagons.
+- **Fire service** — watch the top 10% of hexagons → **{{model.cap10}}%** of the following month’s fire hexagons.
 - **Air-quality officer** — Punjab Oct–Nov carries the satellite-timing caveat (×{{timing.aqua_rel}}).
 - **Insurer** — raw data alone would trigger **{{ins.raw_only}}** payouts from the satellite switch.
 
-Note: Relevance, line by line against the challenge text. A web application: yes. A harmonized burning-activity calendar: the rings and calendar. Early warning: Fire Watch, where fixed rules decide and the AI only explains. Plain language for responders, scientists and land managers. History, unusual conditions and critical periods. And any area you draw on the map. Who it is built for: a fire service planning next month, which would have caught {{model.cap10}} percent of next month's fire hexagons by watching the top ten percent; an air-quality officer, who sees Punjab's timing caveat; and an insurer, who sees that raw data would have paid out {{ins.raw_only}} times for the satellite switch alone.
+Note: Relevance, line by line against the challenge text. A web application: yes. A harmonized burning-activity calendar: the rings and calendar. Early warning: Fire Watch, where fixed rules decide and the AI only explains. Plain language for responders, scientists and land managers. History, unusual conditions and critical periods. And any area you draw on the map. Who it is built for: a fire service planning next month, which would have caught {{model.cap10}} percent of the following month's fire hexagons by watching the top ten percent; an air-quality officer, who sees Punjab's timing caveat; and an insurer, who sees that raw data would have paid out {{ins.raw_only}} times for the satellite switch alone.
 
 ---
 
@@ -86,12 +86,12 @@ Note: Relevance, line by line against the challenge text. A web application: yes
 
 - {{n_regions}} regions · {{region_months}} region-months · {{rows_read}} detections read → {{rows_kept}} kept.
 - Hotspot API vs the record: **{{parity.diff}}%** apart (Punjab, Oct 2016).
-- Next-month model, tested on unseen years 2018–2025: top 10% of hexagons caught **{{model.cap10}}%** of next month’s fire hexagons vs **{{model.clim_cap10}}%** for the usual season · PR-AUC **{{model.pr_auc}}** vs {{model.clim_pr_auc}} · harmonized vs raw history: **{{model.abl_pr}}** PR-AUC.
+- Fire-likelihood model, tested on unseen years 2018–2025: top 10% of hexagons caught **{{model.cap10}}%** of the following month’s fire hexagons vs **{{model.clim_cap10}}%** for the usual season · PR-AUC **{{model.pr_auc}}** vs {{model.clim_pr_auc}} · harmonized vs raw history: **{{model.abl_pr}}** PR-AUC.
 - Retrains itself monthly, published only if it beats the current model — next to the open API, six apps and the control room.
 
 ::figure img /slides/control-room.png
 
-Note: Results. {{n_regions}} regions, every month since 2001, millions of detections filtered the same way. The live hotspot API agrees with the record to {{parity.diff}} percent. New this round: a model of where fire is more likely next month. Tested on years it never saw, watching its top ten percent of hexagons would have caught {{model.cap10}} percent of next month's fire hexagons, against {{model.clim_cap10}} percent using the usual season. Fed raw instead of harmonized history, its PR-AUC changes by {{model.abl_pr}}. It retrains itself every month and a new version goes live only if it beats the current one. Six apps on a separate site use only the open API — live in the control room.
+Note: Results. {{n_regions}} regions, every month since 2001, millions of detections filtered the same way. The live hotspot API agrees with the record to {{parity.diff}} percent. New this round: a fire-likelihood model, which scores the month after the last complete month of data. Tested on years it never saw, watching its top ten percent of hexagons would have caught {{model.cap10}} percent of the following month's fire hexagons, against {{model.clim_cap10}} percent using the usual season. Fed raw instead of harmonized history, its PR-AUC changes by {{model.abl_pr}}. It retrains itself every month and a new version goes live only if it beats the current one. Six apps on a separate site use only the open API — live in the control room.
 
 ---
 

@@ -12,6 +12,11 @@ import { fmtInt, fmtRatio } from '../lib/format'
 import { REGIONS } from '../lib/regions'
 import { MONTHS, toGrid } from '../lib/series'
 import type { RegionDoc } from '../lib/types'
+import type { StudyCheckDoc } from '../components/StudyCheck'
+import type { WatchDoc } from '../../api/_lib/watch'
+
+/** Round 6: extra published inputs some stories use (Fire Watch status, fire-likelihood map). Missing → step says so. */
+interface Extras { watch: WatchDoc | null; lik: Record<string, { target_month: string; features_through: string; cells: [string, number, number, number][] } | null> }
 
 // Stories (QA #51): one stepper for every region; every number is read from the published JSON at run time.
 
@@ -24,13 +29,15 @@ interface Step {
   t?: 0 | 1
   emphasis?: (y: number, m: number) => boolean
 }
-interface Story { id: string; kicker: string; title: string; blurb: string; steps: (docs: Record<string, RegionDoc>) => Step[] }
+interface Story { id: string; kicker: string; title: string; blurb: string; steps: (docs: Record<string, RegionDoc>, ex: Extras) => Step[] }
 
 const sign = (v: number) => `${v > 0 ? '+' : ''}${v}`
 const ranked = (d: RegionDoc) => d.annual.filter((a) => a.complete && a.rankable !== false && a.H != null)
 const sumMed = (d: RegionDoc, ms: number[]) => ms.reduce((a, m) => a + d.climatology!.median[m - 1], 0)
 const share = (d: RegionDoc, ms: number[]) => Math.round((100 * sumMed(d, ms)) / sumMed(d, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]))
 const rec = (d: RegionDoc, y: number, m: number) => d.months.find((r) => r.y === y && r.m === m)
+const FULL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const monthKey = (k: string) => `${FULL_MONTHS[+k.slice(5, 7) - 1]} ${k.slice(0, 4)}`
 const explore = (id: string, name: string) => (
   <span className="mt-4 flex flex-wrap gap-2">
     <Link to={`/r/${id}`} className="rounded-sm bg-accent px-4 py-2 text-sm font-semibold text-bg no-underline">Explore {name} →</Link>
@@ -119,12 +126,45 @@ const STORIES: Story[] = [
         { h: 'Now explore', p: <>The map shows every detection on the main island, with a Rodrigues inset.{explore('mauritius', 'Mauritius')}</> },
       ]
     } },
+  { id: 'tanzania', kicker: 'Story · East Africa', title: 'Tanzania: the dry-season burn', blurb: 'June to October burning, a fake “fire explosion” in 2012 — and the real trend underneath.',
+    steps: (D, ex) => {
+      const t = D.tanzania
+      const c = t.climatology!
+      const dry = [6, 7, 8, 9, 10]
+      const peak = c.median.map((v, i) => [v, i + 1] as const).sort((a, b) => b[0] - a[0])[0][1]
+      const yrs = [...ranked(t)].sort((a, b) => b.H! - a.H!)
+      const top = yrs.slice(0, 3)
+      const top3 = new Set(top.map((x) => x.y))
+      const sc = (t as RegionDoc & { study_check?: StudyCheckDoc }).study_check
+      const pc = (v: number) => `${v > 0 ? '+' : ''}${v}%`
+      const w = ex.watch?.regions.tanzania
+      const mtd = w?.checks.find((k) => k.id === 'mtd')
+      const lik = ex.lik.tanzania
+      const avgScore = (dec: number) => { const xs = lik ? lik.cells.filter((x) => x[2] === dec) : []; return xs.length ? xs.reduce((a, x) => a + x[1], 0) / xs.length : null }
+      const topCells = lik ? lik.cells.filter((x) => x[2] === 10).length : null
+      const topAvg = avgScore(10), lowAvg = avgScore(1)
+      return [
+        { h: 'A dry-season clock', emphasis: (_y, m) => dry.includes(m), p: <>Each ring is a year, months run clockwise from January at the top. Tanzania’s bright wedge is the dry season: <strong className="text-text">June–October</strong> holds <strong className="text-text">{share(t, dry)}%</strong> of a typical year’s fire-days (median, {t.baseline[0]}–{t.baseline[1]}), and {FULL_MONTHS[peak - 1]} is the usual peak with about {fmtInt(c.median[peak - 1])} fire-days.</> },
+        { h: 'The biggest years', emphasis: (y) => top3.has(y), p: <>The biggest complete years were <strong className="text-text">{top.map((x) => x.y).join(', ')}</strong> ({top.map((x) => fmtInt(x.H)).join(' · ')} fire-days, MODIS-equivalent). Same ruler throughout, so these years can be compared directly.</> },
+        { ...stepRaw(t), h: 'The fake fire explosion of 2012', p: <>Joined naively, Tanzania’s record jumps <strong className="text-text">{t.validation ? `+${fmtInt(t.validation.step_raw_pct)}%` : '—'}</strong> in 2012 — it would look like a fire explosion. It is the new VIIRS camera, which sees many more small fires, not more fire. The rings on the left show that naive join.</> },
+        { h: 'Fixed: the real trend is down', t: 1, p: <>Converted to one ruler, the 2012 change is {t.validation ? <strong className="text-text">{pc(t.validation.step_harm_pct)}</strong> : '—'}, matching the old MODIS camera alone ({t.validation ? pc(t.validation.step_modis_pct) : '—'}).{sc && <> Average fire-days per year went from {fmtInt(sc.harmonized.mean_a)} ({sc.years_a[0]}–{sc.years_a[1]}) to <strong className="text-text">{fmtInt(sc.harmonized.mean_b)}</strong> ({sc.years_b[0]}–{sc.years_b[1]}): <strong className="text-text">{pc(sc.harmonized.change_pct)}</strong> harmonized, {pc(sc.modis_only.change_pct)} for MODIS alone, instead of the naive join’s jump.</>} Tarimo et al. (2015) also reported fewer fires over the past decade in Tanzania’s miombo woodlands from MODIS (<a href="https://doi.org/10.1186/s13021-015-0029-2" target="_blank" rel="noreferrer">Carbon Balance and Management 10:18</a>) — a different area, so a consistency check, not a replication.</> },
+        { h: 'This month and the next', emphasis: (y) => y === t.months.at(-1)!.y, p: <>{mtd && mtd.value != null ? <>{mtd.month} so far ({mtd.days} days): <strong className="text-text">{fmtInt(mtd.value)}</strong> fire-days{mtd.ratio != null ? `, ${fmtRatio(mtd.ratio)} a typical ${mtd.m != null ? FULL_MONTHS[mtd.m - 1] : "month"} for the same days` : ''} (provisional). </> : 'This month’s numbers are not available yet. '}
+          Fire Watch status: <strong className="text-text">{w?.status ?? 'unavailable'}</strong>.{' '}
+          {lik && topCells != null && topAvg != null && lowAvg != null ? <>The fire-likelihood model scores <strong className="text-text">{monthKey(lik.target_month)}</strong> (data up to {monthKey(lik.features_through)}) across {fmtInt(lik.cells.length)} hexagons: the top 10% ({fmtInt(topCells)} hexagons) average a likelihood score of {topAvg?.toFixed(2)}, the bottom 10% {lowAvg?.toFixed(2)} (0–1). A planning aid, not a forecast of individual fires.</> : 'The fire-likelihood map is not published right now.'}</> },
+        { h: 'Now explore', p: <>Open Tanzania, switch on the fire-likelihood layer under the map, or see the study check on the Proof page.{explore('tanzania', 'Tanzania')}</> },
+      ]
+    } },
 ]
 
 export default function StoryPage() {
   const { regionId } = useParams()
   const [docs, setDocs] = useState<Record<string, RegionDoc> | null>(null)
   const [err, setErr] = useState<string | null>(null)
+  const [ex, setEx] = useState<Extras>({ watch: null, lik: {} })
+  useEffect(() => {
+    fetchJson<WatchDoc>('watch.json').then((watch) => setEx((x) => ({ ...x, watch }))).catch(() => {})
+    if (regionId) fetchJson<Extras['lik'][string]>(`api/likelihood/${regionId}.json`).then((l) => setEx((x) => ({ ...x, lik: { ...x.lik, [regionId]: l } }))).catch(() => {})
+  }, [regionId])
   useEffect(() => {
     Promise.all(REGIONS.map((r) => fetchJson<RegionDoc>(`regions/${r.id}.json`).then((d): [string, RegionDoc] => [r.id, d])))
       .then((xs) => setDocs(Object.fromEntries(xs))).catch((e: Error) => setErr(e.message))
@@ -134,7 +174,7 @@ export default function StoryPage() {
   const story = STORIES.find((s) => s.id === regionId)
   if (!story) return <EmptyState title="No story for this region"><Link to="/story">Pick a story</Link></EmptyState>
   if (!docs) return <div className="card h-[60vh] animate-pulse" />
-  return <StoryView key={story.id} story={story} docs={docs} />
+  return <StoryView key={story.id} story={story} docs={docs} ex={ex} />
 }
 
 function StoryPicker({ docs }: { docs: Record<string, RegionDoc> | null }) {
@@ -169,9 +209,9 @@ function StoryPicker({ docs }: { docs: Record<string, RegionDoc> | null }) {
   )
 }
 
-function StoryView({ story, docs }: { story: Story; docs: Record<string, RegionDoc> }) {
+function StoryView({ story, docs, ex }: { story: Story; docs: Record<string, RegionDoc>; ex: Extras }) {
   const [step, setStep] = useState(0)
-  const steps = useMemo(() => story.steps(docs), [story, docs])
+  const steps = useMemo(() => story.steps(docs, ex), [story, docs, ex])
   useEffect(() => {
     const sc = scrollama()
     sc.setup({ step: '[data-step]', offset: 0.5 }).onStepEnter(({ index }: { index: number }) => setStep(index))

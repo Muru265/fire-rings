@@ -5,6 +5,8 @@
 NASA Space Apps 2026 · Challenge: *Harmonization of MODIS and VIIRS Hot Spots* · Port Louis, Mauritius
 Live: **https://fire-rings.vercel.app**
 
+**New here? Start with the plain-English [project overview](docs/PROJECT_OVERVIEW.md)** (problem, method, real validation numbers, limitations, 25 likely judge questions).
+
 ![Seam slider: raw MODIS→VIIRS record (jump at 2012) morphing into the harmonized record](docs/screens/seam.gif)
 
 ## What it does
@@ -54,7 +56,7 @@ the same ruler. It then answers one question for responders and land managers: *
   annotated real charts, a glossary and typo-tolerant search. Every chart title on the site has an ⓘ linking to its entry.
 - **Globe time-lapse** with real fire hexagons (Dark / Night lights / Day; zoom 0–3 of the NASA GIBS layers are served
   from `web/public/tiles`, fetched once by `web/scripts/fetch_gibs_tiles.mjs`; zoom capped at a country view with an
-  "Explore {region} →" chip), **stories** for the four original regions (`/story`; new regions show "no story yet") and a **60-day NRT pull** of NOAA-20/21 for Punjab.
+  "Explore {region} →" chip), **stories** for Madagascar, Punjab–Haryana, SE Australia, Mauritius and Tanzania (`/story`; Northern Australia savanna and Northeast India show "no story yet") and a **60-day NRT pull** of NOAA-20/21 for Punjab.
 - **QA**: `docs/QA_WALKTHROUGH.md` (click-by-click test script with the expected value and JSON path for every element)
   and `npm run test:e2e` (keyboard/drawer/box/mode checks, a claims check comparing 340+ on-screen numbers with the published
   JSON, every Ask chip × region × style × data mode through the saved-answer fallback, and the Guide/ⓘ coverage check).
@@ -77,7 +79,7 @@ the same ruler. It then answers one question for responders and land managers: *
 | Tanzania | monthly ratios | 1.8 % | +183 % → −17.3 % (−17.1 %) | pass (Round 5B); study check vs Tarimo et al. 2015 |
 | Sudan (today's border) | monthly ratios | 2.8 % | +123 % → −14.6 % (−14.5 %) | **not validated** (Pettitt p 0.013) — not shown |
 
-**Prediction model** (next month, per hexagon, tested 2018–2025 on unseen years): top-10 % capture 30.5 % vs 27.2 % for the
+**Prediction model** (fire likelihood for the scored month — the month after the last complete month — per hexagon, tested 2018–2025 on unseen years): top-10 % capture 30.5 % vs 27.2 % for the
 usual season; PR-AUC 0.73 vs 0.59; harmonized vs raw history −0.008 PR-AUC (harmonization does not help this ranking task).
 
 Calibration uses **July 2012 – December 2019 only**: MODIS orbits drift after 2020 (Terra) and Dec 2021 (Aqua).
@@ -115,9 +117,20 @@ npm run screens                        # screenshots of every page at 1440 px an
 # AI: GEMINI_API_KEY (+ optional GEMINI_MODEL) as Vercel env vars; scripts/ask_cache.ts precomputes offline answers
 ```
 
+## What updates when
+
+| Part | Cadence | Where |
+|---|---|---|
+| Historical harmonized record (2001 → last month before Nov 2026) | fixed (snapshot-tested) | `python pipeline/run_all.py` |
+| This month so far, Fire Watch, projection, freshness ("Updated daily · last update …") | **daily** 04:40 UTC | `.github/workflows/daily.yml` → `python pipeline/daily.py` |
+| Fire-likelihood model | **monthly** (2nd) | `.github/workflows/retrain.yml` → `python pipeline/retrain.py` |
+
+Run the daily update by hand: GitHub → **Actions** → **Daily data update** → **Run workflow**. Locally:
+`python pipeline/daily.py` (reads FIRMS_MAP_KEY from `.env`; `--no-fetch` uses cached files only). Details: METHODS.md §9j.
+
 ## Prediction model and monthly retraining
 
-`python pipeline/11_model.py` trains and tests the "fire likelihood next month" model (rolling origin 2018–2025,
+`python pipeline/11_model.py` trains and tests the "fire likelihood for the scored month" model (rolling origin 2018–2025,
 leave-one-region-out, harmonized-vs-raw ablation, publish gate vs climatology) and writes `api/likelihood/{region}.json`,
 `api/model_card.json` and `api/model_history.json`. Details: METHODS.md §9h–9i.
 
