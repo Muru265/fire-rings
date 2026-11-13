@@ -4,6 +4,68 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 8 — gate v1.2 + Sudan & Brazil + hotspot CSV (13 Nov)
+
+| Item | Status | Notes |
+|---|---|---|
+| Gate v1.2 | done | `lib.calib.v3_gate` + `06_validate.py`: V3 = step consistent with MODIS-only AND (no harmonized Pettitt break, OR break outside 2011–2013 that MODIS alone also shows, same year ±1). Both v1.1 and v1.2 stored per region (`v3_pass_v11`, `v3_pass`). Caveat stated in METHODS §7, validation report and Proof: before 2012 the harmonized series is MODIS, so the history branch is not an independent test of pre-2012 breaks. 13 unit tests (every branch) in `test_gate.py`. |
+| Validation report "Gate history" | done | v1.1 → v1.2, 13 Nov 2026, why, table for all 9 regions under both rules. |
+| Proof "Gate history" note | done | Text only, under the validation cards; numbers read from `regions/{id}.json`; e2e checks them against the JSON. |
+| Sudan + Mato Grosso published | done | Full pipeline 07 → 10, POWER, model, agent, daily. The 7 original regions: **0 historical months changed** (compared with the last commit); snapshot now covers all 9 regions (old fixture had the original 4; their values unchanged). |
+| Fire-likelihood model | done | Retrained with 9 regions (version 2, `11_model.py`): see the table below. Publish gate passed. |
+| Region counts | done | "seven"/"7 regions" → 9 in README, METHODS, overview, CITATION.cff, paper, glossary, model-card limitation, code comments; FIRMS call budgets resized (daily 330, retrain 140). |
+| Companion repo | done | `src/lib/api.ts` region list + `Land.tsx` default boxes for Sudan / Mato Grosso (1.5° around each region's busiest H3 res-3 area in the published hexes — data-driven, not hand-placed). Builds; its e2e reads the live main site, so run it after deployment. |
+| Agent backtest incl. new regions | done | See below. GOES live for Mato Grosso; Meteosat (Tanzania, Madagascar, **Sudan**) still pending access. |
+| Hotspot CSV button | done | Explore export: **Fire-days CSV (harmonized)** next to **Download hotspots (CSV)** (range + region or box). Server-side `/api/hotspots?layout=download`: ≤ 62 days, fetched in ≤ 31-day chunks inside a 50 s budget; anything not fetched (time, FIRMS busy, 4.2 MB size limit) is stated in the CSV's first line, an `x-fire-rings-truncated` header and a message under the button. Columns: latitude, longitude, acq_date, acq_time_utc, local_solar_time, satellite, instrument, confidence, frp_mw, daynight, h3_r6. Demo months served from static files (`*_download.csv`, written by `08b_demo_hotspots.py`). Date-range card offers it for any range. Data page explains both CSVs. Tests: 12 new unit tests in `scripts/hotspots_test.ts`, e2e (button, columns, header line, mocked truncation, > 62 days refused). |
+| Saved Ask answers | **partly — Gemini quota** | Job stopped on request (quota exhausted until ~12:00 Mauritius on 14 Nov). **109/144** saved. Missing 35: ne_india "How reliable is this?" responder, scientist, scientist·detail (3) + all 16 Sudan + all 16 Mato Grosso. Rerun: `cd web; npx tsx --env-file=../.env scripts/ask_cache.ts --only "sudan|*,mato_grosso|*,ne_india|How reliable is this?|responder,ne_india|How reliable is this?|scientist,ne_india|How reliable is this?|scientist|detail"` |
+| Fire Watch briefings | **skipped — Gemini quota** | Not regenerated (no Gemini calls this run). Existing saved briefings kept; Sudan and Mato Grosso (both flagged) have none yet. Rerun: `cd web; npx tsx --env-file=../.env scripts/watch_cache.ts --only sudan,mato_grosso,punjab,madagascar,ne_india` |
+
+**V3 under gate v1.1 vs v1.2** (step consistent with MODIS-only in all 9):
+
+| region | harmonized Pettitt p (year) | MODIS-only p (year) | v1.1 | v1.2 |
+|---|---|---|---|---|
+| punjab | 0.9171 (2004) | 1.0 (2006) | pass | pass |
+| madagascar | 1.0 (2008) | 1.0 (2008) | pass | pass |
+| se_australia | 0.6139 (2016) | 0.6139 (2016) | pass | pass |
+| mauritius | 0.8627 (2008) | 1.0 (2008) | pass | pass |
+| nt_savanna | 1.0 (2010) | 1.0 (2010) | pass | pass |
+| ne_india | 0.0884 (2014) | 0.0884 (2014) | pass | pass |
+| tanzania | 0.0692 (2010) | 0.0692 (2010) | pass | pass |
+| sudan | 0.0132 (2009) | 0.0132 (2009) | fail | **pass** |
+| mato_grosso | 0.0413 (2007) | 0.0413 (2007) | fail | **pass** |
+
+**Model, old vs new** (pooled rolling origin 2018–2025, unseen years):
+
+| | v1 (Round 5B, 7 regions) | v2 (Round 8, 9 regions) |
+|---|---|---|
+| PR-AUC model / usual season / persistence | 0.7271 / 0.5899 / 0.3258 | 0.6867 / 0.5343 / 0.2949 |
+| Top-10 % capture model / usual season | 30.5 % / 27.2 % | 31.9 % / 28.0 % |
+| Gain over usual season, capture (90 %) | 3.0–3.5 pts | 3.8–4.1 pts |
+| Leave-one-region-out wins | 7 of 7 | 9 of 9 |
+| Harmonized − raw history, PR-AUC | −0.008 | −0.008 |
+
+Pooled numbers are not directly comparable: the region mix changed.
+
+**Agent backtest** (2013–2025): **227 flagged months, 9 regions — Real change 144 · Detection issue likely 19 · Unclear 43 ·
+Not checkable yet 21** (Round 7: 148 months, 94 / 13 / 22 / 19). Timing thresholds recalibrated over 9 regions (same
+method): Aqua÷VIIRS ×2.062, night share ×3.098, hour 0.198 h; Punjab's Oct–Nov verdicts unchanged. Tools: detection times
++ MCD64A1 for all 9; **GOES for Mato Grosso** — 36 backtest months: fires match the polar overpass hours in 21, more fire
+outside them than in 2018–2019 in 7 (mostly wet-season months with few fires), not covered in 7 (before GOES-16 FDCF data,
+or Dec 2017 with only 96/192 sampled images archived), too few detections in 1. GOES sampling: first image of every hour
+on days 1, 5, 9, 13, 17, 21, 25, 29 (8 days × 24 = 192 images/month), month stored only if ≥ 80 % read. Current flags:
+Punjab Oct + Nov 2026 Detection issue likely (timing); Sudan Oct 2026 Detection issue likely (timing); Mato Grosso Nov 2026
+so far Detection issue likely (GOES: 58 % of sampled fire pixels outside polar hours), Oct 2026 Not checkable yet;
+Madagascar and NE India Oct 2026 Not checkable yet (burned area not published).
+
+**Tests (13 Nov):** pytest 136 passed (incl. snapshot for 9 regions, 13 gate tests, 27 agent tests) · daily.py local run
+(9 regions, agent + GOES) · build + lint OK · hotspot unit tests pass · e2e **96 pass / 1 fail** — "every flagged region
+shows a briefing" (Sudan, Mato Grosso: no briefing, Gemini quota) · claims_check **410/412** — the same 2 missing briefings ·
+guide_check pass · ask_e2e **109/144** (= the 35 missing answers) · PDFs + screenshots `docs/screens/r8_*` (1440 + 390 px,
+no overflow, no page errors) · key-string grep clean.
+
+**Pending:** 35 saved Ask answers + briefings for Sudan / Mato Grosso (after the Gemini quota resets); Meteosat access;
+burned area for Oct/Nov 2026; companion e2e after deployment.
+
 ## Round 7 — agentic check + Brazil (13 Nov)
 
 | Item | Status | Notes |

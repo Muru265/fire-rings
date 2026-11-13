@@ -5,7 +5,7 @@ import ChartCard from '../components/ChartCard'
 import EmptyState from '../components/EmptyState'
 import LineChart from '../components/LineChart'
 import type { Series } from '../components/LineChart'
-import { useJson, useRegion } from '../lib/api'
+import { fetchJson, useJson, useRegion } from '../lib/api'
 import { provisionalSpan } from '../lib/provisional'
 import { fmtCompact, fmtInt } from '../lib/format'
 import { REGIONS } from '../lib/regions'
@@ -132,6 +132,7 @@ function ProofBody({ val, rid, doc }: { val: ValDoc; rid: string; doc: RegionDoc
         <V9Card v9={res.V9} rid={rid} />
       </div>
       {doc && <TargetNote doc={doc} errPct={res.V1.mape_pct} stepRaw={s.step_raw_pct} low={low} />}
+      <GateHistory />
       <p className="text-sm text-muted">
         <strong className="text-text">{doc?.name ?? ''} exchange rate:</strong> {doc ? calibrationSummary(doc) : ''}{' '}
         Different landscapes have different fire sizes, so each region gets its own rate.
@@ -539,6 +540,33 @@ function TargetNote({ doc, errPct, stepRaw, low }: { doc: RegionDoc; errPct: num
         : swing != null && errPct < swing ? 'So the error is smaller than a normal year-to-year swing and tiny next to the artefact: real anomalies stay visible.'
         : 'Here the error is not clearly smaller than a normal year-to-year swing, so small anomalies should be read with care.'}
     </p>
+  )
+}
+
+/** Round 8: "Gate history" — v1.1 → v1.2, text only; every number from the published regions/{id}.json validation. */
+type GateV = { loyo_err_pct: number; step_harm_pct: number; step_modis_pct: number; step_p: number; v3_pass: boolean; v3_pass_v11?: boolean; step_cp?: number; step_p_modis?: number; step_cp_modis?: number }
+type G = { id: string; name: string; v: GateV }
+function GateHistory() {
+  const [docs, setDocs] = useState<G[] | null>(null)
+  useEffect(() => {
+    Promise.all(REGIONS.map((r) => fetchJson<RegionDoc>(`regions/${r.id}.json`).then((d): G | null => ({ id: r.id as string, name: r.name as string, v: d.validation as unknown as GateV })).catch((): G | null => null)))
+      .then((xs) => setDocs(xs.filter((x): x is G => !!x && x.v?.v3_pass_v11 !== undefined)))
+  }, [])
+  if (!docs?.length) return null
+  const flipped = docs.filter((d) => d.v.v3_pass && !d.v.v3_pass_v11)
+  const changedPublished = docs.filter((d) => d.v.v3_pass_v11 && !d.v.v3_pass)   // passed v1.1, fail v1.2
+  const sg = (x: number) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x)}%`
+  return (
+    <div className="rounded-sm border border-border bg-surface-2 px-4 py-3 text-xs text-muted" data-testid="gate-history">
+      <p><strong className="text-text">Gate history.</strong> Until 13 Nov 2026 (gate v1.1) V3 rejected a region if its harmonized annual series had
+        any Pettitt change point — even real fire history that MODIS alone records years before VIIRS existed. V3 exists to catch the MODIS→VIIRS seam,
+        so gate v1.2 keeps the step test unchanged and accepts a change point only if it lies outside 2011–2013 and MODIS alone shows the same
+        break (same year ±1). The rule was fixed first and checked on all {docs.length} regions before adoption: {changedPublished.length ? `${changedPublished.length} region(s) changed — see the validation report` : 'no previously published region changed'}; {flipped.length
+          ? <>{flipped.map((d, i) => <span key={d.id}>{i ? '; ' : ''}{d.name.split(',')[0]} now passes (out-of-sample error {d.v.loyo_err_pct}%, 2012 step harmonized {sg(d.v.step_harm_pct)} vs MODIS-only {sg(d.v.step_modis_pct)}, break year {d.v.step_cp} in both, Pettitt p {d.v.step_p})</span>)}</>
+          : 'no region changed status'}.
+        {' '}<em>Caveat:</em> before 2012 the harmonized series is MODIS, so this branch is not an independent test of pre-2012 breaks; the seam is checked by the step test plus “no break at 2011–2013”.
+        {' '}<a href="https://github.com/Muru265/fire-rings/blob/main/docs/validation_report.md#gate-history" target="_blank" rel="noreferrer">Full table →</a></p>
+    </div>
   )
 }
 

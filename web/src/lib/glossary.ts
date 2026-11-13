@@ -319,7 +319,7 @@ export const ENTRIES: Entry[] = [
     where: { to: '/watch', label: 'Open Fire Watch →' } },
   { id: 'model-card', title: 'Prediction model, tested (Proof card)', group: 'Proof', aliases: ['model card', 'capture', 'top 10%', 'pr-auc', 'roc-auc', 'f1', 'rolling origin', 'leave one region out', 'ablation', 'harmonized vs raw'],
     short: 'How well the fire-likelihood model did on years it never saw, compared with simply using the usual season.',
-    what: 'Rolling origin: for each year 2018–2025 the model is trained only on earlier years and then scores that year. Leave-one-region-out: trained on six regions, tested on the seventh.',
+    what: 'Rolling origin: for each year 2018–2025 the model is trained only on earlier years and then scores that year. Leave-one-region-out: trained on all regions but one, tested on the seventh.',
     steps: ['“Top 10% capture” = the share of the following month’s fire hexagons that were inside the 10% of hexagons the model ranked highest.', 'PR-AUC and ROC-AUC: overall ranking quality (1 = perfect). F1: balance of precision and recall at a threshold chosen on training data.', 'Harmonized vs raw: the same model fed unconverted satellite counts — the difference shows what harmonization adds.'],
     watch: ['Numbers come from model_card.json; the 90% ranges come from resampling test years.'],
     where: { to: '/proof#model', label: 'Open on Proof →' } },

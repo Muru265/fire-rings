@@ -38,10 +38,9 @@ units, with uncertainty — and then makes it useful:
 - **Open data + open API**: CSV/Parquet, JSON per region, no key, CORS open.
 - **Stories**: guided scrolls for Madagascar, Punjab–Haryana, SE Australia, Mauritius and Tanzania.
 
-**7 regions**: Punjab–Haryana (India), Madagascar, SE Australia (NSW + Victoria), Mauritius (incl. Rodrigues, an honest
-low-fire case), Northern Australia savanna (NT), Northeast India (7 states) and Tanzania. Two more regions were run
-through the full pipeline but **failed the publish gate and are hidden**: Sudan and Mato Grosso, Brazil (Round 7; the
-harmonized series still has a change point, Pettitt p = 0.041, although its 2012 step matches MODIS alone).
+**9 regions**: Punjab–Haryana (India), Madagascar, SE Australia (NSW + Victoria), Mauritius (incl. Rodrigues, an honest
+low-fire case), Northern Australia savanna (NT), Northeast India (7 states), Tanzania, Sudan and Mato Grosso (Brazil).
+Sudan and Mato Grosso were first hidden by the publish gate and are published since Round 8 under **gate v1.2** (see §5).
 
 ## 3. Data used
 
@@ -53,7 +52,7 @@ harmonized series still has a change point, Pettitt p = 0.041, although its 2012
 | NASA FIRMS — VIIRS 375 m NOAA-21 | detections | cross-check of recent months |
 | NASA POWER | monthly rainfall and 2 m temperature per region | model features and context |
 
-About **42 million** detections are kept after filtering across the 7 regions (sum of `quality.rows_kept`). All
+About **54 million** detections are kept after filtering across the 9 regions (sum of `quality.rows_kept`). All
 sources and libraries are listed in `DATA_SOURCES.md`.
 
 ## 4. Method in 6 steps
@@ -83,17 +82,24 @@ sources and libraries are listed in `DATA_SOURCES.md`.
 | Northern Australia savanna | 3.5 % | +75 % → −1.7 % (−0.9 %) |
 | Northeast India | 5.6 % | +113 % → −17.9 % (−16.9 %) |
 | Tanzania | 1.8 % | +183 % → −17.3 % (−17.1 %) |
+| Sudan | 2.8 % | +123 % → −14.6 % (−14.5 %) |
+| Mato Grosso, Brazil | 3.7 % | +4 % → −41.7 % (−42.0 %) |
 
 - The goal (error under 20 %, bias within ±10 %) was **set by us before testing**; it is not an external standard. In
   every validated region the error is smaller than a normal year-to-year swing (about ±8 % to ±23 % depending on the region,
   2003–2022) and tiny next to the raw switch artefact.
+- **Gate v1.2 (13 Nov 2026).** The 2012-step test V3 used to reject any change point in the harmonized series, even real
+  fire history. Sudan (break 2009) and Mato Grosso (break 2007) were hidden for that reason, although MODIS alone shows
+  the same break in the same year. v1.2 keeps the step test and accepts a break only if it lies outside 2011–2013 and
+  MODIS alone shows it too. It was fixed before computing and checked on all 9 regions: no published region changed.
+  Caveat: before 2012 the harmonized series is MODIS, so this is not an independent test of pre-2012 breaks.
 - **Black Summer 2019–20** ranks **#1 of 23** fire seasons in SE Australia.
 - **Tanzania study check**: Tarimo et al. (2015) reported fewer fires in Tanzania's miombo woodlands over the past
   decade; our harmonized record shows −20.9 % (2003–2011 vs 2016–2025) and MODIS alone −21.6 %, while the naive join
   would suggest an explosion. Different areas, so a consistency check, not a replication.
-- **Why harmonization matters for alerts**: run the same Fire Watch rules on 2012–2025 and raw data raises **183**
-  "far above normal" alerts, **104** of them caused only by the satellite switch; harmonized data raises **79**. Raw data
-  also hides real drops: it flags **16** "far below normal" months, the harmonized record **80**.
+- **Why harmonization matters for alerts**: run the same Fire Watch rules on 2012–2025 (9 regions) and raw data raises
+  **243** "far above normal" alerts, **128** of them caused only by the satellite switch; harmonized data raises **119**.
+  Raw data also hides real drops: it flags **37** "far below normal" months, the harmonized record **125**.
 - **Live API parity**: the hotspot API agrees with the record to 0.15 % (Punjab, October 2016: 48,666 vs 48,595).
 
 ## 6. The fire-likelihood model and how it retrains
@@ -103,9 +109,10 @@ sources and libraries are listed in `DATA_SOURCES.md`.
 - **Inputs**: the hexagon's own fire history (harmonized), its neighbours, the season, and NASA POWER rain/temperature
   anomalies. **No weather forecasts.**
 - **Tested on years it never saw** (each year 2018–2025 predicted by a model trained only on earlier years):
-  watching the top 10 % of hexagons would have caught **30.5 %** of the following month's fire hexagons, vs **27.2 %**
-  for the usual season (gain 3.0–3.5 percentage points, 90 % range) and 19.9 % for "last month's fire". PR-AUC
-  **0.73** vs 0.59. Trained on the other regions only, it beat the usual season in **7 of 7** held-out regions.
+  watching the top 10 % of hexagons would have caught **31.9 %** of the following month's fire hexagons, vs **28.0 %**
+  for the usual season (gain 3.8–4.1 percentage points, 90 % range) and 21.1 % for "last month's fire". PR-AUC
+  **0.69** vs 0.53. Trained on the other regions only, it beat the usual season in **9 of 9** held-out regions
+  (model version 2, retrained in Round 8 with all 9 regions).
 - **Honest finding**: fed raw instead of harmonized history, PR-AUC changes by −0.008 — harmonization does not help this
   ranking task (it matters for comparing amounts across years, which is the record itself).
 - **Monthly retraining** (GitHub Actions, 2nd of each month): a challenger is trained and tested on months neither model
@@ -115,7 +122,7 @@ sources and libraries are listed in `DATA_SOURCES.md`.
 ## 7. Daily updates
 
 A GitHub Actions job runs **every day at 04:40 UTC**: it fetches this month's NASA FIRMS near-real-time detections for
-all 7 regions, recomputes *this month so far* with the frozen published ratios (no recalibration), the comparison with
+all 9 regions, recomputes *this month so far* with the frozen published ratios (no recalibration), the comparison with
 the same days of past years, Fire Watch statuses, the end-of-month projection and the API files, and commits only if
 something changed. Historical months are never touched (a snapshot test checks every value). AI briefings are
 regenerated only when a region's status or agent verdict changes. The model stays monthly. The site shows "Updated daily · last update …".
@@ -142,7 +149,7 @@ on a separate site use nothing but these calls.
 - **Recent months are provisional** (near-real-time data, may be revised).
 - **Low-fire places** (Mauritius) get "too little fire to judge" instead of big percentages.
 - **The model is a planning aid**: monthly, per hexagon, modest gain over the usual season, no weather forecasts.
-- **7 regions only**; Fire Rings is a planning and analysis tool, **not an emergency alert service**.
+- **9 regions only**; Fire Rings is a planning and analysis tool, **not an emergency alert service**.
 
 ## 10. Future work
 
@@ -155,7 +162,7 @@ on a separate site use nothing but these calls.
 
 ---
 
-## 11. 28 questions judges may ask — short, honest answers
+## 11. 29 questions judges may ask — short, honest answers
 
 1. **What exactly is harmonized?** VIIRS fire-days are converted down to MODIS-equivalent with region × month ratios
    fitted on Jul 2012 – Dec 2019, so 2001 and 2026 use the same ruler.
@@ -179,12 +186,12 @@ on a separate site use nothing but these calls.
 13. **Does the AI make up numbers?** It may only use tool results; the server checks every number and withholds an
     answer that contains an unverified one. Fire Watch rules decide; the AI only explains.
 14. **Is Fire Watch an alert system?** No — situational awareness for planning, with fixed published rules. Not an emergency service.
-15. **What does harmonization change for alerts?** On 2012–2025, raw data gives 183 "far above normal" alerts, 104 of
-    them from the satellite switch; harmonized gives 79. Raw flags only 16 real drops, harmonized 80.
+15. **What does harmonization change for alerts?** On 2012–2025 (9 regions), raw data gives 243 "far above normal"
+    alerts, 128 of them from the satellite switch; harmonized gives 119. Raw flags only 37 real drops, harmonized 125.
 16. **What does the model predict?** Which hexagons are more likely to have at least one fire-day in the scored month — not
     when, how big, damage or cause.
-17. **Is the model better than just using the season?** Modestly: top-10 % capture 30.5 % vs 27.2 % on unseen years
-    (+3.0 to +3.5 points), PR-AUC 0.73 vs 0.59, and better in 7 of 7 held-out regions.
+17. **Is the model better than just using the season?** Modestly: top-10 % capture 31.9 % vs 28.0 % on unseen years
+    (+3.8 to +4.1 points), PR-AUC 0.69 vs 0.53, and better in 9 of 9 held-out regions.
 18. **Does harmonization help the model?** Not for this ranking task (−0.008 PR-AUC with harmonized vs raw history). We report it rather than hide it.
 19. **How does it stay current?** Daily GitHub Actions update of this month from FIRMS NRT; monthly model retraining
     that only publishes a challenger if it beats both the current model and the usual season.
@@ -194,17 +201,23 @@ on a separate site use nothing but these calls.
     days, and months under 60 % coverage get no value.
 22. **What about industrial heat sources?** Persistent hot spots (steelworks, refineries) are masked the same way for both sensors.
 23. **Can I use the data?** Yes: CSV/Parquet/JSON, CC BY 4.0, an open API with no key; cite via `CITATION.cff`.
-24. **Why these 7 regions?** Different fire regimes (crop burning, savanna and dry-season burning, bushfires) plus an
-    honest low-fire case; a region is shown only if it passes the validation tests (Sudan did not, so it is not shown).
+24. **Why these 9 regions?** Different fire regimes (crop burning, savanna and dry-season burning, bushfires, Brazilian
+    deforestation and agricultural fire) plus an honest low-fire case; a region is shown only if it passes the validation
+    tests. Sudan and Mato Grosso were hidden until the gate stopped rejecting real pre-2012 fire history (gate v1.2, §5).
 25. **What would you do next?** Worldwide coverage on a database, switching on the Meteosat check (built, waiting for
     data access), Himawari for Australia and 3-hourly updates.
 26. **How does the agent decide whether a flagged drop is real?** Fixed, unit-tested rules, not the AI: "Real change"
     when NASA burned area (MCD64A1) moves the same way and detection times have not shifted; "Detection issue likely"
     when detection times shifted, geostationary data show fires at hours polar satellites miss, or fire-days fell but
     burned area did not; "Unclear" when signals conflict; "Not checkable yet" otherwise.
-27. **What did the agent find on past flags?** Over the 148 months Fire Watch flagged in 2013–2025: Real change 94,
-    Detection issue likely 13, Unclear 22, Not checkable yet 19 (detection times and burned area for all 7 regions;
-    no geostationary data yet).
+27. **What did the agent find on past flags?** Over the 227 months Fire Watch flagged in 2013–2025 (9 regions): Real
+    change 144, Detection issue likely 19, Unclear 43, Not checkable yet 21. Detection times and burned area ran for all
+    regions; NOAA GOES ran for Mato Grosso (fires matched the polar overpass hours in 21 of 36 months, more fire outside
+    them in 7); Meteosat still waits for data access.
+29. **Why did you change the validation gate?** Because it rejected real fire history: Sudan's and Mato Grosso's breaks
+    (2009, 2007) appear in MODIS alone, years before VIIRS. We fixed the new rule before computing, checked it on all 9
+    regions (no published region changed) and publish both results, with the caveat that it is not an independent test of
+    pre-2012 breaks.
 28. **Does it confirm the Punjab stubble-burning caveat?** Partly, and it says so: Oct 2023 – Nov 2025 show a big rise
     in the share of night detections (×3.7 to ×15.9 vs 2013–2019) while burned area also fell, so the verdict is
     "Unclear" — a real drop and a detection-time change together. October 2026 (Aqua÷VIIRS ×2.12, night share ×20.8,

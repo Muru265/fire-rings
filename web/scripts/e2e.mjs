@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const N_REGIONS = JSON.parse(readFileSync(resolve(here, '../public/data/v1/meta.json'), 'utf-8')).regions.length   // Round 5B: 7 published regions
+const N_REGIONS = JSON.parse(readFileSync(resolve(here, '../public/data/v1/meta.json'), 'utf-8')).regions.length   // published regions (9 since Round 8)
 const out = resolve(here, '../../docs/screens')
 const PORT = 4179
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: resolve(here, '..'), stdio: 'ignore', shell: process.platform === 'win32' })
@@ -45,7 +45,7 @@ try {
   await page.waitForTimeout(500)
   check('anomaly legend shown', await page.getByText('Ratio to typical month').first().isVisible())
   await page.locator('section[aria-labelledby="rings-h"]').screenshot({ path: resolve(out, 'e2e_anomaly.png') })
-  await page.getByRole('button', { name: 'Fire-days' }).click()
+  await page.getByRole('button', { name: 'Fire-days', exact: true }).click()
 
   // seam slider halfway and raw
   const slider = page.locator('input.seam')
@@ -146,7 +146,7 @@ try {
   check('range: survives High detail', page.url().includes('from=2015-01') && (await page.getByTestId('range-summary').isVisible()))
   await page.getByTestId('mode-longterm').click(); await page.waitForTimeout(300)
   const dl = page.waitForEvent('download')
-  await page.locator('section[aria-labelledby="rings-h"]').getByRole('button', { name: 'CSV', exact: true }).click()
+  await page.locator('section[aria-labelledby="rings-h"]').getByTestId('firedays-csv').click()
   const csv = await (await dl).path().then((f) => import('node:fs').then((fs) => fs.readFileSync(f, 'utf-8')))
   const rows = csv.trim().split(/\r?\n/).slice(2)
   check(`range: CSV limited to the range (${rows.length} rows, first ${rows[0]?.slice(0, 7)})`, rows[0]?.startsWith('2015,1,') && rows.at(-1)?.startsWith('2020,3,'))
@@ -165,11 +165,39 @@ try {
   await page.locator('[role="grid"] [role="gridcell"][aria-label^="Oct 2016"]').last().click()
   await page.waitForSelector('[role="dialog"]', { timeout: 5000 })
   const dl2 = page.waitForEvent('download', { timeout: 20000 })
-  await page.getByTestId('hotspot-download').click()
+  await page.locator('[role="dialog"]').getByTestId('hotspot-download').click()
   const f2 = await (await dl2).path()
   const csv2 = (await import('node:fs')).readFileSync(f2, 'utf-8')
-  check('hotspots: drawer CSV for Oct 2016 (demo file) has source + filters line', csv2.startsWith('# Fire Rings hotspots · Punjab') && csv2.includes('filters:') && csv2.split(String.fromCharCode(10)).length > 1000)
+  const L2 = csv2.split(String.fromCharCode(10))
+  check('hotspots: drawer CSV for Oct 2016 (demo file) — source line (raw, not harmonized) + filters + columns', csv2.startsWith('# Source: NASA FIRMS (MODIS C6.1 / VIIRS 375 m), raw detections — not harmonized') && L2[0].includes('filters:') && L2[0].includes('request: Punjab') && L2.length > 1000)
+  check('hotspots: download columns', L2[1] === 'latitude,longitude,acq_date,acq_time_utc,local_solar_time,satellite,instrument,confidence,frp_mw,daynight,h3_r6')
   await page.keyboard.press('Escape')
+
+  // Round 8: Explore export — "Fire-days CSV (harmonized)" next to "Download hotspots (CSV)"; >62 days → plain message; truncation stated
+  {
+    const exp = page.locator('[role="group"][aria-label="Export"]')
+    check('export: "Fire-days CSV (harmonized)" button', await exp.getByTestId('firedays-csv').innerText() === 'Fire-days CSV (harmonized)')
+    check('export: "Download hotspots (CSV)" button visible', await exp.getByTestId('hotspot-download').isVisible())
+    // a non-demo month → the API (mocked here: the preview has no /api) — the UI must surface a truncation notice
+    await page.route('**/api/hotspots*', (r) => {
+      const u = new URL(r.request().url())
+      const ok = u.searchParams.get('layout') === 'download'
+      r.fulfill({ status: ok ? 200 : 400, contentType: 'text/csv; charset=utf-8', headers: { 'x-fire-rings-truncated': 'yes', 'access-control-expose-headers': 'x-fire-rings-truncated' },
+        body: `# Source: NASA FIRMS (MODIS C6.1 / VIIRS 375 m), raw detections — not harmonized; for the harmonized record use the fire-days CSV · request: test · TRUNCATED — test\nlatitude,longitude,acq_date,acq_time_utc,local_solar_time,satellite,instrument,confidence,frp_mw,daynight,h3_r6\n` })
+    })
+    await page.goto(`http://localhost:${PORT}/r/punjab?mode=longterm&from=2020-01&to=2020-02`, { waitUntil: 'load' })
+    await page.waitForSelector('[role="group"][aria-label="Export"] [data-testid="hotspot-download"]')
+    const dl3 = page.waitForEvent('download', { timeout: 15000 }).catch(() => null)
+    await exp.getByTestId('hotspot-download').click()
+    const got = await dl3
+    const msg = await exp.getByTestId('hotspot-msg').innerText().catch(() => '')
+    check('export: Jan–Feb 2020 hotspot download goes to /api/hotspots?layout=download and the truncation is stated in the UI', !!got && /NOT complete/.test(msg))
+    await page.unroute('**/api/hotspots*')
+    await page.goto(`http://localhost:${PORT}/r/punjab?mode=longterm&from=2020-01&to=2020-04`, { waitUntil: 'load' })
+    await page.waitForSelector('[role="group"][aria-label="Export"] [data-testid="hotspot-download"]')
+    check('export: > 62 days → button disabled with a plain message', await exp.getByTestId('hotspot-download').isDisabled() && /at most 62 days/.test(await exp.getByTestId('hotspot-toolong').innerText()))
+    await page.goto(`http://localhost:${PORT}/r/punjab?mode=longterm`, { waitUntil: 'load' })
+  }
   const mapSec = page.locator('section[aria-labelledby="map-h"]')
   await mapSec.scrollIntoViewIfNeeded()
   await page.waitForTimeout(1500)
@@ -370,6 +398,21 @@ try {
     check(`#84 home cards: Fire Watch note exactly where the card label and Fire Watch differ (${cards.filter((c) => c.note).length} of ${cards.length})`, cards.length === N_REGIONS && bad.length === 0)
   }
 
+  // Round 8: Proof "Gate history" note — text from the published validation (v1.1 vs v1.2), no invented numbers
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+    await pg.goto(`http://localhost:${PORT}/proof`, { waitUntil: 'load' })
+    const gh = pg.getByTestId('gate-history')
+    await gh.waitFor({ timeout: 15000 }).catch(() => {})
+    const t = (await gh.innerText().catch(() => '')).replace(/\s+/g, ' ')
+    const ok = ['sudan', 'mato_grosso'].every((id) => {
+      const v = JSON.parse(readFileSync(resolve(here, `../public/data/v1/regions/${id}.json`), 'utf-8')).validation
+      return v.v3_pass && !v.v3_pass_v11 && t.includes(`out-of-sample error ${v.loyo_err_pct}%`) && t.includes(`break year ${v.step_cp}`) && t.includes(`Pettitt p ${v.step_p}`)
+    })
+    check(`Proof: Gate history note with Sudan + Mato Grosso numbers from the JSON, caveat, "no previously published region changed"`, ok && t.includes('no previously published region changed') && t.includes('not an independent test'))
+    await pg.close()
+  }
+
   // Final check: Mauritius on the globe — a small dot at world zoom, ~36 km² hexagons when zoomed in
   {
     const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } })
@@ -378,8 +421,9 @@ try {
     const dot = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('small').filter((f) => f.properties.name === 'Mauritius').length)
     check('globe: Mauritius is a small dot at world zoom', dot >= 1)
     await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 6 }) })
-    await pg.waitForTimeout(4000)
-    const hexN = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('hex6').filter((f) => f.properties.name === 'Mauritius').length)
+    // 9 regions' res-6 files load lazily when zoomed in: poll up to 15 s instead of a fixed wait
+    let hexN = 0
+    for (let i = 0; i < 30 && !hexN; i++) { await pg.waitForTimeout(500); hexN = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('hex6').filter((f) => f.properties.name === 'Mauritius').length) }
     check(`globe: zoomed on Mauritius shows ~36 km² hexagons (${hexN})`, hexN >= 1)
     await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_zoom.png') })
     await pg.close()

@@ -11,8 +11,8 @@ url: "https://fire-rings.vercel.app"
 abstract: >-
   A harmonized monthly record of MODIS (2001-) and VIIRS (2012-) active-fire hotspots from NASA FIRMS, expressed in
   MODIS-equivalent fire cell-days on an H3 resolution-6 grid, with bootstrap uncertainty, out-of-sample validation and
-  "is this normal?" statistics for seven regions (Punjab-Haryana, Madagascar, SE Australia, Mauritius, Northern
-  Australia savanna, Northeast India, Tanzania), updated daily for the current month.
+  "is this normal?" statistics for nine regions (Punjab-Haryana, Madagascar, SE Australia, Mauritius, Northern
+  Australia savanna, Northeast India, Tanzania, Sudan, Mato Grosso (Brazil)), updated daily for the current month.
 keywords: [MODIS, VIIRS, active fire, FIRMS, harmonization, hotspots, H3]
 references:
   - type: data

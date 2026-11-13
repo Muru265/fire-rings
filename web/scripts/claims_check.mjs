@@ -185,7 +185,10 @@ try {
       const card = page.locator(`[data-testid="watch-card"][data-region="${id}"]`)
       check('/watch', `${id} status`, (await card.getAttribute('data-status')) ?? '', r.status)
       const b = cache.briefings[`${id}|responder`]
-      if (r.status !== 'Normal') {
+      if (r.status !== 'Normal' && !b) {
+        // Round 8: no saved briefing yet (Gemini quota) — reported as a failed claim, but the rest of the check still runs
+        check('/watch', `${id} briefing shown (no saved briefing — rerun watch_cache.ts)`, 'missing', 'saved briefing')
+      } else if (r.status !== 'Normal') {
         check('/watch', `${id} briefing shown`, (await card.getByTestId('watch-briefing').innerText()).replace(/,(?=\d{3})/g, ''), b.answer.slice(0, 60).replace(/,(?=\d{3})/g, ''))
         // every number in a saved briefing appears in its lookups (same rule as the server-side check)
         for (const k of ['responder', 'scientist']) {

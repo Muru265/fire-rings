@@ -130,8 +130,17 @@ count gets a Poisson draw. The interval is the 5th–95th percentile of the draw
 
 - **V1** leave-one-year-out annual error over 2012–2019 (target |bias| < 10 %, MAPE < 20 % in active regions).
 - **V3** step test: step = mean(2012–19)/mean(2003–11) − 1 for the raw concatenation, the harmonized series and MODIS alone.
-  Harmonized 2012–2019 values use leave-one-year-out ratios (out of sample). Pass = Pettitt p > 0.05 on the harmonized
-  series and the MODIS-only step inside the harmonized step's 90 % bootstrap interval.
+  Harmonized 2012–2019 values use leave-one-year-out ratios (out of sample). **Gate v1.2** (adopted 13 Nov 2026,
+  `lib.calib.v3_gate`): pass = the MODIS-only step inside the harmonized step's 90 % bootstrap interval (unchanged) AND
+  either (a) no Pettitt change point in the harmonized 2003–2019 annual series (p > 0.05), or (b) the change year lies
+  outside 2011–2013 (not at the MODIS→VIIRS seam) and the MODIS-only series has a significant change point (p ≤ 0.05) in
+  the same year ±1. **Gate v1.1** (until 13 Nov 2026) required (a) without exception, so it also rejected real fire
+  history that MODIS alone records years before VIIRS existed; V3 exists to catch the seam, and v1.2 restricts it to that.
+  The rule was fixed first and checked read-only on all 9 regions: no published region changed, Sudan (break 2009) and
+  Mato Grosso (break 2007) flipped fail → pass, and an exact-year window (±0) gave the same result as ±1. **Caveat:** before
+  2012 the harmonized series IS MODIS (and Pettitt is rank-based), so branch (b) is not an independent test of pre-2012
+  breaks; the seam is guarded by the step test plus "no break at 2011–2013". Both results are stored per region
+  (`v3_pass_v11`, `v3_pass`) and tabulated in `docs/validation_report.md` → Gate history.
 - **V4** yearly MODIS ÷ S-NPP ratio 2012–2025 (orbit drift), also Terra and Aqua separately.
 - **V9** famous seasons: Black Summer (Jul 2019 – Jun 2020) must rank top 3 in SE Australia (it ranks #1).
 - Method choice: monthly ratios unless they fail V1 or V3 *and* the single ratio validates better (SE Australia, v1).
@@ -337,10 +346,11 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   shrinkage, bootstrap and High detail. The world files run to 12 Nov 2026, but the record ends on the same day as the
   other regions (`record.data_end`), and months after the last standard-processing date are provisional exactly as before.
 - **Validation gate** (`gate: true` in config, `lib.common.gate_passed`). A new region is published only if its method
-  passes V1 (MAPE < 20 %, |bias| ≤ 10 %) and V3 (harmonized 2012 step consistent with MODIS-only, Pettitt p > 0.05). The
-  pooled-ratio fallback is used only if it validates better. Results: Northern Territory, Northeast India and Tanzania
-  pass (monthly ratios); **Sudan fails V3** (harmonized Pettitt p = 0.013, change year 2009; harmonized step −14.6 % vs
-  MODIS-only −14.5 %; the pooled fallback also fails) and is not shown anywhere. Numbers: `docs/validation_report.md`.
+  passes V1 (MAPE < 20 %, |bias| ≤ 10 %) and V3 (§7; gate v1.2 since 13 Nov 2026). The pooled-ratio fallback is used only
+  if it validates better. Results: Northern Territory, Northeast India and Tanzania pass (monthly ratios). **Sudan** failed
+  V3 under gate v1.1 (harmonized Pettitt p = 0.013, change year 2009; harmonized step −14.6 % vs MODIS-only −14.5 %) and
+  was hidden in Round 5B; MODIS alone shows the same 2009 break (p = 0.013), so it **passes gate v1.2 and is published
+  from Round 8**. Numbers: `docs/validation_report.md`.
 - **Existing regions untouched.** Steps 02–05 were run only for the new regions; steps 06+ recompute everything from
   unchanged inputs and `test_longterm_unchanged.py` confirms the four original regions' Long-term values are identical.
 - **Tanzania study check.** See `docs/sources.md`.
@@ -348,11 +358,10 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   [W −61.8, S −18.2, E −50.0, N −7.1] (`config.yaml` `world_box`; the Natural Earth state extent 61.61–50.24 °W,
   18.03–7.34 °S padded by ~0.2°), then the Mato Grosso state polygon (admin-1, adm0_a3 BRA): 14.7 M rows in the box,
   7.70 M after the polygon and de-duplication, 6.88 M after filters and masks. Steps 02–05 were run for this region only.
-  **Result: fails V3, not published** — V1 passes (MAPE 3.7 %, bias −0.1 %) and the harmonized 2012 step (−41.7 %, 90 % CI
-  −43.1 to −40.0) matches MODIS-only (−42.0 %), but the harmonized annual series still has a Pettitt change point
-  (p = 0.0413 ≤ 0.05, change year 2007); the pooled fallback also fails (p = 0.0315). This looks like a real decline in
-  detected fire rather than a sensor artefact, but the gate is not loosened: like Sudan it is hidden everywhere.
-  The GOES geostationary tool (§9k) is kept; the site states that there is no published Americas region.
+  **Round 7 result: failed V3 under gate v1.1, not published** — V1 passes (MAPE 3.7 %, bias −0.1 %) and the harmonized
+  2012 step (−41.7 %, 90 % CI −43.1 to −40.0) matches MODIS-only (−42.0 %), but the harmonized annual series has a
+  Pettitt change point (p = 0.0413, change year 2007). **Round 8:** MODIS alone shows the same 2007 break (p = 0.0413),
+  outside 2011–2013, so it **passes gate v1.2 and is published** (the first Americas region; GOES check live, §9k).
 
 ## 9h. Prediction model: fire likelihood for the scored month (`11_model.py`, `lib/model_data.py`)
 
@@ -376,12 +385,13 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   precision/recall/F1 at the F1-maximising threshold of each fold's TRAINING data, Brier, and capture = share of the following month's
   fire cells inside the top 10 % (20 %) of cells ranked within each region and month (seeded random tie-break). 90 %
   intervals: test years resampled with replacement (300 times; AUCs on a fixed 4 % row sample per year).
-- **Results (pooled rolling origin).** Model PR-AUC 0.7271 (90 % [0.7167, 0.7418]), ROC-AUC 0.9214,
-  F1 0.668, top-10 % capture 30.5 % ([29.7, 31.2]), top-20 % 49.7 %.
-  Climatology: PR-AUC 0.5899, capture 27.2 %. Persistence: PR-AUC 0.3258,
-  capture 19.9 %. Model minus climatology (90 %): PR-AUC [0.1287, 0.1511],
-  capture [3.0, 3.5] points. The model beats climatology in every region and in 7 of 7
-  leave-one-region-out tests. Capture is bounded: when more than 10 % of a region's cells burn in a month, the top 10 %
+- **Results (pooled rolling origin; model version 2, Round 8, 9 regions).** Model PR-AUC 0.6867 (90 % [0.6762, 0.7003]),
+  ROC-AUC 0.9113, F1 0.632, top-10 % capture 31.9 % ([31.3, 32.6]), top-20 % 51.7 %.
+  Climatology: PR-AUC 0.5343, capture 28.0 %. Persistence: PR-AUC 0.2949,
+  capture 21.1 %. Model minus climatology (90 %): PR-AUC [0.1453, 0.163],
+  capture [3.8, 4.1] points. The model beats climatology in every region and in 9 of 9
+  leave-one-region-out tests. (Version 1, Round 5B, 7 regions: PR-AUC 0.7271 vs 0.5899, capture 30.5 % vs 27.2 %,
+  7 of 7 leave-one-region-out.) Pooled numbers are not directly comparable across versions: the region mix changed. Capture is bounded: when more than 10 % of a region's cells burn in a month, the top 10 %
   cannot hold them all.
 - **Harmonization ablation (headline, reported as found).** Same model and folds with RAW history (MODIS up to 2011 mixed with
   unconverted VIIRS): PR-AUC 0.735, capture 30.9 %. Harmonized minus raw: -0.0079 PR-AUC,
@@ -392,7 +402,7 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
   capture: **passed**. Outputs: `api/likelihood/{id}.json` (scored month = `target_month`, the month
   after the last full month: during November it scores November using data up to October), `api/model_card.json`, `api/model_history.json`.
 - **Limitations.** Ranks the likelihood of at least one detection, not size, timing, damage or cause; a planning aid, not a
-  warning service; the Punjab Oct–Nov overpass-timing caveat applies; 7 regions only.
+  warning service; the Punjab Oct–Nov overpass-timing caveat applies; 9 regions only.
 
 ## 9i. Automatic monthly retraining (`retrain.py`, `.github/workflows/retrain.yml`)
 
@@ -450,7 +460,8 @@ the mean local solar hour of VIIRS daytime detections, each vs the same month in
 from Nov 2026). `too_few_detections` if < 30 VIIRS day cell-days or < 3 usable baseline years. Thresholds are calibrated
 on the null distribution: every 2013–2019 month, each year vs the mean of the other baseline years, pooled over the 7
 published regions; threshold = 97.5th percentile of each metric's deviation (so each metric fires in ~2.5 % of
-baseline months). Values: Aqua÷VIIRS beyond ×1.875 (either way), night share beyond ×3.538, mean hour shift > 0.198 h.
+baseline months). Values (Round 8, recalibrated over the 9 published regions): Aqua÷VIIRS beyond ×2.062 (either way),
+night share beyond ×3.098, mean hour shift > 0.198 h (Round 7, 7 regions: ×1.875, ×3.538, 0.198 h).
 *Why calibrated:* the first fixed thresholds (×1.3, ×1.5, 0.5 h) fired in 24 % of unflagged 2013–2019 months, i.e. on
 ordinary noise; they were replaced before any verdict was published.
 
@@ -465,15 +476,17 @@ many small agricultural fires, so it is weakest exactly where crop burning domin
 
 **Tool C — geostationary** (`agent/goes.py`, `agent/meteosat.py`, `agent/geo_common.py`). C1 NOAA GOES-R ABI L2 Fire
 Detection full disk (ABI-L2-FDCF), anonymous AWS buckets `noaa-goes16` until 7 Apr 2025 15:10 UTC and `noaa-goes19`
-after (NOAA OSPO); Americas regions only. C2 EUMETSAT LSA SAF FRP-PIXEL (MSG, LSA-502) for Tanzania and Madagascar,
-login LSASAF_USER / LSASAF_PASS. Sampling: one image per hour, every day of the month; only fire pixels inside the
-footprint; stored as a 24-bin local-solar-hour profile. `fires_outside_overpass_hours` if the share of detections outside
+after (NOAA OSPO); Americas regions only (Mato Grosso). C2 EUMETSAT LSA SAF FRP-PIXEL (MSG, LSA-502) for Tanzania,
+Madagascar and Sudan (MSG 0° disk), login LSASAF_USER / LSASAF_PASS. Sampling (GOES): the first full-disk image of every
+hour on 8 fixed days of each month (1, 5, 9, 13, 17, 21, 25, 29), identical for flagged and baseline months; a month is
+stored only if ≥ 80 % of its 192 sampled images were read (GOES-16 FDCF starts 24 May 2017, so earlier months are
+`not_covered`). Meteosat: the HH:00 slot of every hour. Only fire pixels inside the footprint; stored as a 24-bin
+local-solar-hour profile. `fires_outside_overpass_hours` if the share of detections outside
 the polar windows (09–15 h and 21–03 h local solar time) is ≥ 0.10 above the same month in 2018–2019 (or ≥ 0.50 when no
 baseline month is readable, stated in the result); `fires_match_overpass` otherwise; `too_few_detections` < 50;
-`pending_access` without LSA SAF login; `not_covered` elsewhere (Himawari/INSAT: future work). **Status:** no published
-Americas region (Mato Grosso failed the gate), so C1 has no published result (reader tested on 1 Sep 2019: 982 sampled
-fire-pixel detections over Mato Grosso, 39 % outside polar hours); C2 is pending access (reader tested on the public
-Zenodo sample doi:10.5281/zenodo.5717106, 909 fire pixels). The attribution "EUMETSAT LSA SAF [FRPPixel, LSA-502]" appears
+`pending_access` without LSA SAF login; `not_covered` elsewhere (Himawari/INSAT: future work). **Status:** C1 runs for
+Mato Grosso since Round 8 (published under gate v1.2) — results in the backtest paragraph below; C2 is pending access
+(reader tested on the public Zenodo sample doi:10.5281/zenodo.5717106, 909 fire pixels). The attribution "EUMETSAT LSA SAF [FRPPixel, LSA-502]" appears
 only once real Meteosat data are used.
 
 **Verdict rules** (`agent/verdict.py`, unit-tested row by row). Evidence of a detection issue D = A is `timing_shift`,
@@ -493,7 +506,20 @@ tool's signal + numbers, step-by-step trace, sources, checked_at; CORS * like al
 in the open CSV/Parquet (verdict for checked months, empty otherwise). Fire Watch shows an "Agent check" box with the
 trace; Proof shows the backtest counts.
 
-**Backtest result** (2013–2025, 148 flagged months): Real change 94 · Detection issue likely 13 · Unclear 22 · Not checkable yet 19 (far above: 46 / 2 / 11 / 11; far below: 48 / 11 / 11 / 8). Tools that ran: detection times and MCD64A1 burned area for all 7 regions; geostationary for none (no published Americas region; Meteosat pending access). Punjab, the natural timing test case: Oct 2021 and Oct 2022 show no timing shift and burned area agrees (Real change); Oct 2023 – Nov 2025 show a VIIRS night-share rise (×3.7 to ×15.9 vs 2013–2019; Aqua÷VIIRS ×1.96 in Nov 2025) while MCD64A1 burned area is also down (×0.10–0.78) → Unclear (both a real drop and a detection-time change); Oct 2026 (Aqua÷VIIRS ×2.12, night share ×20.8, burned area not yet published) → Detection issue likely; November 2026 so far (updated daily) gives the same verdict. Numbers: `api/agent_check/punjab.json`.
+**Backtest result** (Round 8, 2013–2025, 227 flagged months in 9 regions): Real change 144 · Detection issue likely 19 ·
+Unclear 43 · Not checkable yet 21 (far above: 67 / 2 / 29 / 11; far below: 77 / 17 / 14 / 10). Tools that ran: detection
+times and MCD64A1 burned area for all 9 regions; GOES for Mato Grosso; Meteosat pending access (Tanzania, Madagascar,
+Sudan). **GOES, Mato Grosso** (36 backtest months): fires match the polar overpass hours in 21, more fire outside them
+than in 2018–2019 in 7 (Mar 2020, Nov 2021, Apr 2022, Nov 2022, Mar 2024, Apr 2025, Dec 2025 — mostly wet-season months
+with few fires; verdicts 6 Unclear, 1 Detection issue likely), not covered in 7 (before GOES-16 FDCF data or, for Dec 2017,
+only 96/192 sampled images archived), too few detections in 1. Mato Grosso verdicts: Real change 21, Unclear 8, Detection
+issue likely 7; Sudan (43 months): Real change 29, Unclear 12, Detection issue likely 1, Not checkable yet 1.
+Punjab, the natural timing test case (verdicts unchanged by the recalibration): Oct 2021 and Oct 2022 show no timing shift
+and burned area agrees (Real change); Oct 2023 – Nov 2025 show a VIIRS night-share rise (×3.7 to ×15.9 vs 2013–2019;
+Aqua÷VIIRS ×1.96 in Nov 2025) while MCD64A1 burned area is also down (×0.10–0.78) → Unclear (both a real drop and a
+detection-time change); Oct 2026 (Aqua÷VIIRS ×2.12, night share ×20.8, burned area not yet published) → Detection issue
+likely; November 2026 so far (updated daily) gives the same verdict. Round 7 (148 months, 7 regions, no GOES): 94 / 13 /
+22 / 19. Numbers: `api/agent_check/{region}.json`.
 
 ## 9. Lat/lon boxes in the app
 

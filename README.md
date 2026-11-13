@@ -5,7 +5,7 @@
 NASA Space Apps 2026 · Challenge: *Harmonization of MODIS and VIIRS Hot Spots* · Port Louis, Mauritius
 Live: **https://fire-rings.vercel.app**
 
-**New here? Start with the plain-English [project overview](docs/PROJECT_OVERVIEW.md)** (problem, method, real validation numbers, limitations, 28 likely judge questions).
+**New here? Start with the plain-English [project overview](docs/PROJECT_OVERVIEW.md)** (problem, method, real validation numbers, limitations, 29 likely judge questions).
 
 ![Seam slider: raw MODIS→VIIRS record (jump at 2012) morphing into the harmonized record](docs/screens/seam.gif)
 
@@ -77,10 +77,11 @@ the same ruler. It then answers one question for responders and land managers: *
 | Northern Australia savanna (NT) | monthly ratios | 3.5 % | +75 % → −1.7 % (−0.9 %) | pass (Round 5B, world archive) |
 | Northeast India (7 states) | monthly ratios | 5.6 % | +113 % → −17.9 % (−16.9 %) | pass (Round 5B) |
 | Tanzania | monthly ratios | 1.8 % | +183 % → −17.3 % (−17.1 %) | pass (Round 5B); study check vs Tarimo et al. 2015 |
-| Sudan (today's border) | monthly ratios | 2.8 % | +123 % → −14.6 % (−14.5 %) | **not validated** (Pettitt p 0.013) — not shown |
+| Sudan (today's border) | monthly ratios | 2.8 % | +123 % → −14.6 % (−14.5 %) | pass under gate v1.2 (break 2009 also in MODIS alone; failed v1.1) |
+| Mato Grosso, Brazil | monthly ratios | 3.7 % | +4 % → −41.7 % (−42.0 %) | pass under gate v1.2 (break 2007 also in MODIS alone; failed v1.1) |
 
-**Prediction model** (fire likelihood for the scored month — the month after the last complete month — per hexagon, tested 2018–2025 on unseen years): top-10 % capture 30.5 % vs 27.2 % for the
-usual season; PR-AUC 0.73 vs 0.59; harmonized vs raw history −0.008 PR-AUC (harmonization does not help this ranking task).
+**Prediction model** (fire likelihood for the scored month — the month after the last complete month — per hexagon, tested 2018–2025 on unseen years): top-10 % capture 31.9 % vs 28.0 % for the
+usual season; PR-AUC 0.69 vs 0.53 (model version 2, 9 regions); harmonized vs raw history −0.008 PR-AUC (harmonization does not help this ranking task).
 
 Calibration uses **July 2012 – December 2019 only**: MODIS orbits drift after 2020 (Terra) and Dec 2021 (Aqua).
 
@@ -140,8 +141,11 @@ Run: `python pipeline/12_agent.py` (cached summaries) · `--fetch` (network) · 
 the daily workflow runs it after the daily update. Secrets: `EARTHDATA_USERNAME`, `EARTHDATA_PASSWORD` (burned area),
 optional `LSASAF_USER`, `LSASAF_PASS` (Meteosat). Missing secrets give "unavailable" / "pending access", never a failure.
 
-**Mato Grosso, Brazil** was cut from the world archive and run through the full pipeline, but **fails the V3 publish gate**
-(Pettitt p = 0.041; METHODS.md §9g), so it is not shown — like Sudan.
+**Sudan and Mato Grosso, Brazil** are published since Round 8 under **validation gate v1.2**: their harmonized series have
+a change point (2009, 2007) that MODIS alone also shows, outside the 2011–2013 seam, so it is real fire history, not the
+conversion (METHODS.md §7, `docs/validation_report.md` → Gate history). GOES runs for Mato Grosso; Meteosat (Tanzania,
+Madagascar, Sudan) waits for data access. Explore offers **Download hotspots (CSV)** (raw FIRMS detections, ≤ 62 days,
+server-side) next to **Fire-days CSV (harmonized)**.
 
 ## Prediction model and monthly retraining
 

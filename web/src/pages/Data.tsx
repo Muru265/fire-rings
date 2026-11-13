@@ -76,7 +76,7 @@ function CopyUrl({ url }: { url: string }) {
 type Col = [string, string, string, string?]
 const DICT_GROUPS: { title: string; note?: string; cols: Col[] }[] = [
   { title: 'Identity — which place and month', cols: [
-    ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania'],
+    ['region', '—', 'Region id: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania, sudan, mato_grosso'],
     ['year, month', '—', 'Calendar month, counted on the local solar day (UTC + longitude/15 h)'],
   ] },
   { title: 'Counts — how much fire', cols: [
@@ -178,6 +178,13 @@ export default function Data() {
             </li>
           ))}
         </ul>
+        <div className="card mt-3" data-testid="csv-two-kinds">
+          <h3 className="font-display text-sm font-semibold">Two kinds of CSV on Explore</h3>
+          <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs text-muted">
+            <li><span className="text-text">Fire-days CSV (harmonized)</span><Help id="fire-day" /> — the record itself: monthly MODIS-equivalent fire-days with 90% range, flags and comparison with typical, for the selected date range (or your box). Same columns as the dictionary below. Use it for trends and “is this normal?”.</li>
+            <li><span className="text-text">Download hotspots (CSV)</span><Help id="hotspot" /> — raw NASA FIRMS detections (MODIS C6.1 + VIIRS 375 m) for the selected range and region or map box, filtered like the record but <strong>not harmonized</strong>. Columns: latitude, longitude, acq_date, acq_time_utc, local_solar_time, satellite, instrument, confidence, frp_mw, daynight, h3_r6. The first line states the source, the request and the retrieval time. Up to 62 days per download (fetched server-side in ≤31-day pieces); if anything could not be fetched, the file and the page say so — nothing is cut silently. API: <code className="num">/api/hotspots?region=…&start=…&end=…&layout=download</code>.</li>
+          </ul>
+        </div>
         {meta.status === 'ready' && (
           <div className="card mt-3">
             <h3 className="font-display text-sm font-semibold">Per region</h3>
