@@ -4,6 +4,30 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 7 — agentic check + Brazil (13 Nov)
+
+| Item | Status | Notes |
+|---|---|---|
+| Part 1 · Mato Grosso, Brazil | **done — fails the gate, hidden** | Cut from the world archive like Round 5B: box W −61.8 S −18.2 E −50.0 N −7.1 (`config.yaml` `world_box`, Natural Earth extent padded ~0.2°) → state polygon. 14.7 M rows in box → 7.70 M in the state → 6.88 M after filters. Pipeline 02–06: V1 passes (MAPE 3.7 %, bias −0.1 %); harmonized 2012 step −41.7 % (CI −43.1 to −40.0) matches MODIS-only −42.0 %, but **Pettitt p = 0.0413 (change year 2007) → V3 fails**; pooled fallback p = 0.0315, also fails. Gate not loosened: hidden like Sudan. Consequences: no 8-region model retrain, no saved Ask answers, no region card, no daily update, no companion change (companion has no hard-coded list needing it). Snapshot unchanged. GOES code kept; site says "no published Americas region". |
+| Part 2 · Tool A detection times | done | `pipeline/agent/timing.py`, summaries `pipeline/assets/agent/timing.json` (built from data/clean; current month from NRT in daily.py). **Thresholds calibrated on the 2013–2019 null distribution** (leave-one-year-out, P97.5, pooled over 7 regions): Aqua÷VIIRS ×1.875, night share ×3.538, mean hour 0.198 h. First fixed thresholds (×1.3 / ×1.5 / 0.5 h) fired in 24 % of *unflagged* 2013–2019 months, so they were replaced before any verdict was published (documented in METHODS §9k). |
+| Part 2 · Tool B burned area | done | NASA MCD64A1 C6.1 via earthaccess (Earthdata login from .env). 2003-01 → 2026-09 (newest published month) for all 7 regions, tiles downloaded → summarised (footprint + static mask) → deleted; only summaries committed (`burned_area.json`, ~1,995 region-months). Retry added after one LP DAAC HTTP 500. Sanity: SE Australia Dec 2019 18,973 km² vs typical Dec 234 km². |
+| Part 2 · Tool C1 GOES | built, **no published result** | ABI-L2-FDCF, anonymous S3, goes16 → goes19 at 2025-04-07 15:10 UTC (NOAA OSPO message). Reader tested on 1 Sep 2019 over Mato Grosso: 982 sampled fire-pixel detections, 39 % outside polar hours. Not shown (Mato Grosso unpublished). |
+| Part 2 · Tool C2 Meteosat | built, **pending access** | LSA SAF FRP-PIXEL reader tested on the Zenodo sample (909 pixels, CC BY 4.0, committed as a test fixture). No LSASAF_USER/PASS → "Meteosat check ready — waiting for data access"; no Meteosat attribution shown. Himawari: future work. |
+| Verdict rules | done | `agent/verdict.py`, rule table R1–R5 copied into METHODS §9k; 13 parametrised unit tests (every row) + tool tests (mocked caches) → `test_agent.py` 27 tests. |
+| Backtest 2013–2025 | done | 148 harmonized-flagged months: **Real change 94 · Detection issue likely 13 · Unclear 22 · Not checkable yet 19** (far above 46/2/11/11, far below 48/11/11/8). Tools that ran: A + B for all 7 regions; C for none. **Punjab Oct–Nov:** 2021 and Oct 2022 no timing shift, burned area agrees → Real change; Oct 2023 – Nov 2025 night share ×3.7–×15.9 (Aqua÷VIIRS ×1.96 in Nov 2025) *and* burned area down ×0.10–0.78 → **Unclear**; Oct 2026 Aqua÷VIIRS ×2.12, night ×20.8, burned area not yet published → **Detection issue likely** (Nov 2026 so far: same). Reported as the tools say — not forced. |
+| Current flags | done | Punjab Oct + Nov 2026 Detection issue likely; Madagascar Oct 2026 Not checkable yet; NE India Oct 2026 Not checkable yet (burned area for Oct published ~Dec). |
+| Outputs | done | `watch.json` regions[id].timing_check + backtest.agent; `/data/v1/api/agent_check/{id}.json` (static, CORS *, chosen over a function: no new server code); `timing_check` column in CSV/Parquet; Fire Watch "Agent check" box (badge, evidence, 4-step trace); Proof line under the Fire Watch backtest; Data page dictionary + API entry; Ask tool `get_agent_check`; briefings add one agent sentence (5/6 regenerated; ne_india responder kept its previous text — Gemini 429). |
+| Docs / sources | done | METHODS §9k (+ Brazil in §9g; restored the "§9 Lat/lon boxes" heading a Round 6 edit had dropped), README, PROJECT_OVERVIEW (daily, Brazil, future work, Q26–28), DATA_SOURCES + docs/sources.md (MCD64A1 doi:10.5067/MODIS/MCD64A1.061, GOES AWS, LSA SAF, Zenodo sample). |
+| Automation | done | daily.yml passes EARTHDATA_* and LSASAF_* (all optional), runs the agent inside daily.py, allows agent paths, regenerates briefings when status OR verdict changes. Missing secrets → "unavailable"/"pending access", run still succeeds. |
+| Missing saved Ask answers | partly | Retried with backoff: 2 more saved (**109/112**). Still missing (Gemini 429): ne_india "How reliable is this?" responder, scientist, scientist·detail. |
+
+**Secrets to add in GitHub** (Settings → Secrets and variables → Actions → New repository secret): `EARTHDATA_USERNAME`,
+`EARTHDATA_PASSWORD` (burned area for new months), optional `LSASAF_USER`, `LSASAF_PASS` (Meteosat).
+
+**Tests (13 Nov):** pytest 123 passed (incl. snapshot + 27 agent tests) · daily.py local run OK (agent step, LSA SAF pending) · build + lint OK · e2e 83/83 (14 new agent checks) · claims_check 342/342 · guide_check pass · ask_e2e 109/112 (= the 3 missing answers) · PDFs regenerated · screenshots `docs/screens/r7_*` 1440 + 390 px, no overflow, no page errors · key-string grep clean · daily.yml parses as YAML (actionlint not installed).
+
+**Pending:** Meteosat data access; burned area for Oct/Nov 2026 (published ~Dec/Jan — the daily job fetches it once the Earthdata secrets exist); 3 saved Ask answers.
+
 ## Round 6 — fixes (13 Nov)
 
 | # | Item | Status | Notes |

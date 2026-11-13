@@ -344,6 +344,15 @@ eruption (+3 days); reported whatever the result. Not an eruption forecast. Resu
 - **Existing regions untouched.** Steps 02–05 were run only for the new regions; steps 06+ recompute everything from
   unchanged inputs and `test_longterm_unchanged.py` confirms the four original regions' Long-term values are identical.
 - **Tanzania study check.** See `docs/sources.md`.
+- **Round 7 — Mato Grosso, Brazil (`mato_grosso`).** Same two-stage cut: world-archive rows inside the box
+  [W −61.8, S −18.2, E −50.0, N −7.1] (`config.yaml` `world_box`; the Natural Earth state extent 61.61–50.24 °W,
+  18.03–7.34 °S padded by ~0.2°), then the Mato Grosso state polygon (admin-1, adm0_a3 BRA): 14.7 M rows in the box,
+  7.70 M after the polygon and de-duplication, 6.88 M after filters and masks. Steps 02–05 were run for this region only.
+  **Result: fails V3, not published** — V1 passes (MAPE 3.7 %, bias −0.1 %) and the harmonized 2012 step (−41.7 %, 90 % CI
+  −43.1 to −40.0) matches MODIS-only (−42.0 %), but the harmonized annual series still has a Pettitt change point
+  (p = 0.0413 ≤ 0.05, change year 2007); the pooled fallback also fails (p = 0.0315). This looks like a real decline in
+  detected fire rather than a sensor artefact, but the gate is not loosened: like Sudan it is hidden everywhere.
+  The GOES geostationary tool (§9k) is kept; the site states that there is no published Americas region.
 
 ## 9h. Prediction model: fire likelihood for the scored month (`11_model.py`, `lib/model_data.py`)
 
@@ -427,7 +436,66 @@ Three speeds, never mixed:
 - Months after the S-NPP end are NOAA-20 based; a month becomes complete on the first run of the next month and stays
   "provisional" until NASA reprocesses it.
 
+## 9k. Agentic check of Fire Watch flags (`12_agent.py`, `agent/`) — Round 7: "rules decide, AI explains"
 
+When Fire Watch flags a region-month — far above normal / above every baseline year ("up") or far below normal
+("down") — an agent runs three verification tools and fixed rules record a verdict. Gemini never decides; it only
+explains the stored verdict (briefings, Ask tool `get_agent_check`), with the usual server-side number verification.
+It runs in the daily job for the current flagged months and as a backtest over the months the harmonized Fire Watch
+backtest flags in 2013–2025 (`watch.json` → `backtest.harmonized_flagged`, same percentile rules).
+
+**Tool A — detection times** (`agent/timing.py`; NASA FIRMS acq_time / day-night of the record's own detections,
+the Punjab method of §8b). Per region-month, cell-days after all filters: Aqua÷VIIRS daytime, VIIRS night share, and
+the mean local solar hour of VIIRS daytime detections, each vs the same month in 2013–2019 (VIIRS = S-NPP; NOAA-20
+from Nov 2026). `too_few_detections` if < 30 VIIRS day cell-days or < 3 usable baseline years. Thresholds are calibrated
+on the null distribution: every 2013–2019 month, each year vs the mean of the other baseline years, pooled over the 7
+published regions; threshold = 97.5th percentile of each metric's deviation (so each metric fires in ~2.5 % of
+baseline months). Values: Aqua÷VIIRS beyond ×1.875 (either way), night share beyond ×3.538, mean hour shift > 0.198 h.
+*Why calibrated:* the first fixed thresholds (×1.3, ×1.5, 0.5 h) fired in 24 % of unflagged 2013–2019 months, i.e. on
+ordinary noise; they were replaced before any verdict was published.
+
+**Tool B — burned area** (`agent/burned_area.py`; NASA MCD64A1 C6.1, doi:10.5067/MODIS/MCD64A1.061, via `earthaccess`
+with EARTHDATA_USERNAME / EARTHDATA_PASSWORD). Only tiles intersecting the region box are downloaded, summarised and
+deleted. Burned km² = pixels with Burn Date > 0 whose centre lies in the record's footprint (H3 cells of `live/{id}.json`)
+and outside the known-static H3 res-9 cells, × 0.21466 km². Compared with the median of the same month in 2003–2022
+(≥ 10 years): `burned_area_agrees` if up and ratio ≥ 1.25, or down and ratio ≤ 0.80; otherwise `burned_area_disagrees`;
+`not_yet_published` for months ≤ 4 months old without granules (MCD64A1 latency ~1–2 months); `unavailable` without
+credentials or when burned area is too small to compare (median < 5 km² and month < 10 km²). Caveat: MCD64A1 misses
+many small agricultural fires, so it is weakest exactly where crop burning dominates (e.g. Punjab).
+
+**Tool C — geostationary** (`agent/goes.py`, `agent/meteosat.py`, `agent/geo_common.py`). C1 NOAA GOES-R ABI L2 Fire
+Detection full disk (ABI-L2-FDCF), anonymous AWS buckets `noaa-goes16` until 7 Apr 2025 15:10 UTC and `noaa-goes19`
+after (NOAA OSPO); Americas regions only. C2 EUMETSAT LSA SAF FRP-PIXEL (MSG, LSA-502) for Tanzania and Madagascar,
+login LSASAF_USER / LSASAF_PASS. Sampling: one image per hour, every day of the month; only fire pixels inside the
+footprint; stored as a 24-bin local-solar-hour profile. `fires_outside_overpass_hours` if the share of detections outside
+the polar windows (09–15 h and 21–03 h local solar time) is ≥ 0.10 above the same month in 2018–2019 (or ≥ 0.50 when no
+baseline month is readable, stated in the result); `fires_match_overpass` otherwise; `too_few_detections` < 50;
+`pending_access` without LSA SAF login; `not_covered` elsewhere (Himawari/INSAT: future work). **Status:** no published
+Americas region (Mato Grosso failed the gate), so C1 has no published result (reader tested on 1 Sep 2019: 982 sampled
+fire-pixel detections over Mato Grosso, 39 % outside polar hours); C2 is pending access (reader tested on the public
+Zenodo sample doi:10.5281/zenodo.5717106, 909 fire pixels). The attribution "EUMETSAT LSA SAF [FRPPixel, LSA-502]" appears
+only once real Meteosat data are used.
+
+**Verdict rules** (`agent/verdict.py`, unit-tested row by row). Evidence of a detection issue D = A is `timing_shift`,
+OR C is `fires_outside_overpass_hours`, OR (direction down AND B is `burned_area_disagrees`). First match wins:
+
+| # | Condition | Verdict |
+|---|---|---|
+| R1 | B agrees, A is not `timing_shift`, C is not `fires_outside_overpass_hours` | **Real change** |
+| R2 | D and B agrees | **Unclear** (burned area confirms, timing does not) |
+| R3 | D | **Detection issue likely** |
+| R4 | direction up and B disagrees | **Unclear** (fire-days up, burned area not) |
+| R5 | otherwise (no burned-area answer yet, no detection-issue evidence) | **Not checkable yet** |
+
+**Outputs** (fields added only; no harmonized number changes): `watch.json` → `regions[id].timing_check` (current flagged
+months) and `backtest.agent` (verdict counts); `api/agent_check/{id}.json` (every checked month: verdict, rule, each
+tool's signal + numbers, step-by-step trace, sources, checked_at; CORS * like all of `/data/v1`); column `timing_check`
+in the open CSV/Parquet (verdict for checked months, empty otherwise). Fire Watch shows an "Agent check" box with the
+trace; Proof shows the backtest counts.
+
+**Backtest result** (2013–2025, 148 flagged months): Real change 94 · Detection issue likely 13 · Unclear 22 · Not checkable yet 19 (far above: 46 / 2 / 11 / 11; far below: 48 / 11 / 11 / 8). Tools that ran: detection times and MCD64A1 burned area for all 7 regions; geostationary for none (no published Americas region; Meteosat pending access). Punjab, the natural timing test case: Oct 2021 and Oct 2022 show no timing shift and burned area agrees (Real change); Oct 2023 – Nov 2025 show a VIIRS night-share rise (×3.7 to ×15.9 vs 2013–2019; Aqua÷VIIRS ×1.96 in Nov 2025) while MCD64A1 burned area is also down (×0.10–0.78) → Unclear (both a real drop and a detection-time change); Oct 2026 (Aqua÷VIIRS ×2.12, night share ×20.8, burned area not yet published) → Detection issue likely; November 2026 so far (updated daily) gives the same verdict. Numbers: `api/agent_check/punjab.json`.
+
+## 9. Lat/lon boxes in the app
 
 Drawing a box inside a hero region sums the region's H3 res-6 cell-days inside the box and applies the same ratios and
 coverage factors. Boxes have no bootstrap interval or percentiles (stated in the UI).

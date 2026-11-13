@@ -5,7 +5,7 @@
 NASA Space Apps 2026 · Challenge: *Harmonization of MODIS and VIIRS Hot Spots* · Port Louis, Mauritius
 Live: **https://fire-rings.vercel.app**
 
-**New here? Start with the plain-English [project overview](docs/PROJECT_OVERVIEW.md)** (problem, method, real validation numbers, limitations, 25 likely judge questions).
+**New here? Start with the plain-English [project overview](docs/PROJECT_OVERVIEW.md)** (problem, method, real validation numbers, limitations, 28 likely judge questions).
 
 ![Seam slider: raw MODIS→VIIRS record (jump at 2012) morphing into the harmonized record](docs/screens/seam.gif)
 
@@ -127,6 +127,21 @@ npm run screens                        # screenshots of every page at 1440 px an
 
 Run the daily update by hand: GitHub → **Actions** → **Daily data update** → **Run workflow**. Locally:
 `python pipeline/daily.py` (reads FIRMS_MAP_KEY from `.env`; `--no-fetch` uses cached files only). Details: METHODS.md §9j.
+
+## Agentic check of Fire Watch flags (Round 7)
+
+When Fire Watch flags a month, an agent verifies it with three tools and **fixed rules** record a verdict
+(Real change · Detection issue likely · Unclear · Not checkable yet); Gemini only explains the stored verdict.
+A: detection times from the record's own FIRMS data · B: NASA MCD64A1 burned area (Earthdata login) ·
+C: geostationary fire detections — NOAA GOES (Americas; no published Americas region yet) and EUMETSAT LSA SAF Meteosat
+(Tanzania, Madagascar; waiting for data access). Results: Fire Watch "Agent check" box with a step-by-step trace,
+`/data/v1/api/agent_check/{region}.json`, column `timing_check` in the open CSV. Rules and thresholds: METHODS.md §9k.
+Run: `python pipeline/12_agent.py` (cached summaries) · `--fetch` (network) · `--build-timing` (local, needs `data/`);
+the daily workflow runs it after the daily update. Secrets: `EARTHDATA_USERNAME`, `EARTHDATA_PASSWORD` (burned area),
+optional `LSASAF_USER`, `LSASAF_PASS` (Meteosat). Missing secrets give "unavailable" / "pending access", never a failure.
+
+**Mato Grosso, Brazil** was cut from the world archive and run through the full pipeline, but **fails the V3 publish gate**
+(Pettitt p = 0.041; METHODS.md §9g), so it is not shown — like Sudan.
 
 ## Prediction model and monthly retraining
 

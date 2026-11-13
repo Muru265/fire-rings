@@ -29,6 +29,9 @@ units, with uncertainty — and then makes it useful:
 - **"Is this month normal?"**: a plain headline and gauge (ratio to typical, percentile, rank, 1-in-N years).
 - **Month drill-down, map with region presets and any lat/lon box, CSV/PNG export.**
 - **Fire Watch**: fixed, published rules flag unusual months; an AI only explains them, with verified numbers.
+- **Agent check** (Round 7): every flagged month is verified with three independent tools — detection times, NASA
+  burned area, geostationary satellites — and fixed rules give a verdict (Real change / Detection issue likely /
+  Unclear / Not checkable yet). The AI explains the stored verdict; it never decides it.
 - **Ask Fire Rings**: an AI analyst (Gemini function calling) that may only use numbers returned by its tools; the
   server rejects any answer containing a number not found in those tools' results.
 - **Fire-likelihood model**: which hexagons are more likely to burn in the scored month, retrained monthly.
@@ -36,7 +39,9 @@ units, with uncertainty — and then makes it useful:
 - **Stories**: guided scrolls for Madagascar, Punjab–Haryana, SE Australia, Mauritius and Tanzania.
 
 **7 regions**: Punjab–Haryana (India), Madagascar, SE Australia (NSW + Victoria), Mauritius (incl. Rodrigues, an honest
-low-fire case), Northern Australia savanna (NT), Northeast India (7 states) and Tanzania.
+low-fire case), Northern Australia savanna (NT), Northeast India (7 states) and Tanzania. Two more regions were run
+through the full pipeline but **failed the publish gate and are hidden**: Sudan and Mato Grosso, Brazil (Round 7; the
+harmonized series still has a change point, Pettitt p = 0.041, although its 2012 step matches MODIS alone).
 
 ## 3. Data used
 
@@ -113,7 +118,10 @@ A GitHub Actions job runs **every day at 04:40 UTC**: it fetches this month's NA
 all 7 regions, recomputes *this month so far* with the frozen published ratios (no recalibration), the comparison with
 the same days of past years, Fire Watch statuses, the end-of-month projection and the API files, and commits only if
 something changed. Historical months are never touched (a snapshot test checks every value). AI briefings are
-regenerated only when a region's status changes. The model stays monthly. The site shows "Updated daily · last update …".
+regenerated only when a region's status or agent verdict changes. The model stays monthly. The site shows "Updated daily · last update …".
+The same job runs the **agent check** on the current flagged months: detection times every day; NASA MCD64A1 burned
+area as soon as the month is published (about 1–2 months later — until then "Not checkable yet" unless the timing data
+already show a shift); Meteosat once data access is granted.
 
 ## 8. Open API
 
@@ -139,13 +147,15 @@ on a separate site use nothing but these calls.
 ## 10. Future work
 
 - An **Oracle database** behind the API and **worldwide coverage** (every country/region, not 7 presets).
-- A **geostationary timing check** with Meteosat (every 10–15 minutes) to measure how much fire the polar overpasses miss.
-- A **burned-area** cross-check, so fire-days can be related to hectares burned.
+- **Switch on the geostationary checks**: the Meteosat (LSA SAF FRP-PIXEL) reader is built and tested and waits for data
+  access; the GOES reader works but there is no published Americas region yet; Himawari for Australia and INSAT for
+  India are not built.
+- Use the **burned-area** summaries beyond verification, to relate fire-days to hectares burned.
 - **3-hourly updates** of the current month instead of daily.
 
 ---
 
-## 11. 25 questions judges may ask — short, honest answers
+## 11. 28 questions judges may ask — short, honest answers
 
 1. **What exactly is harmonized?** VIIRS fire-days are converted down to MODIS-equivalent with region × month ratios
    fitted on Jul 2012 – Dec 2019, so 2001 and 2026 use the same ruler.
@@ -186,5 +196,16 @@ on a separate site use nothing but these calls.
 23. **Can I use the data?** Yes: CSV/Parquet/JSON, CC BY 4.0, an open API with no key; cite via `CITATION.cff`.
 24. **Why these 7 regions?** Different fire regimes (crop burning, savanna and dry-season burning, bushfires) plus an
     honest low-fire case; a region is shown only if it passes the validation tests (Sudan did not, so it is not shown).
-25. **What would you do next?** Worldwide coverage on a database, a Meteosat timing check, a burned-area cross-check
-    and 3-hourly updates.
+25. **What would you do next?** Worldwide coverage on a database, switching on the Meteosat check (built, waiting for
+    data access), Himawari for Australia and 3-hourly updates.
+26. **How does the agent decide whether a flagged drop is real?** Fixed, unit-tested rules, not the AI: "Real change"
+    when NASA burned area (MCD64A1) moves the same way and detection times have not shifted; "Detection issue likely"
+    when detection times shifted, geostationary data show fires at hours polar satellites miss, or fire-days fell but
+    burned area did not; "Unclear" when signals conflict; "Not checkable yet" otherwise.
+27. **What did the agent find on past flags?** Over the 148 months Fire Watch flagged in 2013–2025: Real change 94,
+    Detection issue likely 13, Unclear 22, Not checkable yet 19 (detection times and burned area for all 7 regions;
+    no geostationary data yet).
+28. **Does it confirm the Punjab stubble-burning caveat?** Partly, and it says so: Oct 2023 – Nov 2025 show a big rise
+    in the share of night detections (×3.7 to ×15.9 vs 2013–2019) while burned area also fell, so the verdict is
+    "Unclear" — a real drop and a detection-time change together. October 2026 (Aqua÷VIIRS ×2.12, night share ×20.8,
+    burned area not published yet) is "Detection issue likely", and so is November 2026 so far (updated daily).
