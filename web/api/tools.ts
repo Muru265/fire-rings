@@ -76,6 +76,9 @@ export const TOOL_DECLARATIONS = [
     parameters: { type: 'object', properties: { region: { type: 'string' }, mode: MODE_PARAM }, required: ['region'] } },
   { name: 'get_quality', description: 'How reliable the record is for a region: validation results, calibration method, uncertainty, provisional months, outages and masking.',
     parameters: { type: 'object', properties: { region: { type: 'string' }, mode: MODE_PARAM }, required: ['region'] } },
+  // Round 7: stored agentic check (read-only; computed by pipeline/12_agent.py — the tool never runs a check itself)
+  { name: 'get_agent_check', description: 'Is a flagged drop or spike real? The stored agentic check of a Fire Watch-flagged month: verdict (Real change / Detection issue likely / Unclear / Not checkable yet, set by fixed rules) and the evidence from detection times, MCD64A1 burned area and geostationary data. Omit year and month for the current flagged months.',
+    parameters: { type: 'object', properties: { region: { type: 'string' }, year: { type: 'integer' }, month: { type: 'integer', description: '1–12' } }, required: ['region'] } },
 ]
 
 async function region(load: Loader, id: string) {
@@ -305,6 +308,28 @@ export async function runTool(load: Loader, name: string, rawArgs: any): Promise
           }).catch(() => null) } } : {}),
         ...caveatsFor(doc, null, modeView(doc, mode), mode === 'detail' ? [] : [CAVEATS.terra_only]) }
     }
+    case 'get_agent_check': {
+      const doc = await region(load, args.region)
+      if (doc.error) return doc
+      const ac = await load(`api/agent_check/${args.region}.json`).catch(() => null)
+      if (!ac) return { region: doc.name, error: 'no agentic check published for this region' }
+      const all = Object.values(ac.checks ?? {}) as any[]
+      const pick = args.year && args.month
+        ? all.filter((c) => c.month === `${args.year}-${String(args.month).padStart(2, '0')}`)
+        : all.filter((c) => c.kind === 'current')
+      if (!pick.length) return { region: doc.name, note: args.year && args.month ? 'this month was not flagged by Fire Watch, so it was not checked' : 'no month is flagged right now' }
+      const slim = (c: any) => {
+        const t = Object.fromEntries(c.trace.slice(0, 3).map((s: any) => [s.tool, s.result])) as Record<string, any>
+        const a = t.check_detection_times ?? {}, b = t.check_burned_area ?? {}, g = t.check_geostationary ?? {}
+        return { month: c.month, flag: c.flag, verdict: c.verdict, rule: c.rule,
+          detection_times: { signal: a.signal, aqua_to_viirs_vs_baseline: a.aqua_viirs_rel ?? null, night_share_vs_baseline: a.night_share_rel ?? null, mean_hour_shift_h: a.mean_hour_shift ?? null, baseline: a.baseline },
+          burned_area: { signal: b.signal, burned_km2: b.burned_km2 ?? null, typical_km2: b.baseline_km2 ?? null, ratio: b.ratio ?? null, note: b.note ?? null },
+          geostationary: { signal: g.signal, share_outside_polar_hours: g.share_outside_polar_hours ?? null, note: g.note ?? null },
+          sources: c.sources, checked_at: c.checked_at }
+      }
+      return { region: doc.name, checks: pick.map(slim),
+        how: 'Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends.' }
+    }
     default:
       return { error: `unknown tool ${name}` }
   }
@@ -332,6 +357,7 @@ export function describeCall(tool: string, a: Record<string, unknown>): string {
     case 'get_season': return 'the seasonal cycle'
     case 'get_similar_years': return 'similar years'
     case 'get_quality': return 'the reliability checks'
+    case 'get_agent_check': return y && a.month ? `the agentic check of ${mon(Number(a.month))} ${y}` : 'the agentic check'
     case 'list_regions': return 'the list of regions'
     default: return tool
   }
@@ -348,6 +374,7 @@ export function describeResult(tool: string, r: any): string {
     case 'get_season': return `peak ${r.peak_month} (typical ${nf(r.peak_median)}) ✓`
     case 'get_similar_years': return `${(r.similar_years ?? []).map((s: any) => s.year).join(', ')} ✓`
     case 'get_quality': return r.low_activity_region ? 'low-activity region: not judged ✓' : `out-of-sample error ${r.out_of_sample_annual_error_pct}% ✓`
+    case 'get_agent_check': return r.checks?.length ? `${r.checks.map((c: any) => `${c.month}: ${c.verdict}`).join(' · ')} ✓` : `${r.note ?? 'no check'} ✓`
     default: return 'done ✓'
   }
 }

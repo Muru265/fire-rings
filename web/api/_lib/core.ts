@@ -47,7 +47,7 @@ function systemPrompt(voice: Voice, region: string | null, mode: Mode, dataEnd?:
 ${region ? `The question is about region id "${region}". Use this region id in every tool call.` : 'If no region is named, ask the user to pick one and call list_regions.'}
 Data mode: "${mode}" — pass mode="${mode}" to every tool that accepts it.
 Pick the most direct tool so ONE lookup usually answers: a year total → get_year_total; one month → get_month; what is normal
-→ get_typical; two years → compare_years; worst/biggest/lowest → get_rankings; reliability → get_quality; peak season → get_season.
+→ get_typical; two years → compare_years; worst/biggest/lowest → get_rankings; reliability → get_quality; peak season → get_season; "is this drop/spike real?" or detection problems → get_agent_check.
 Rules — follow all of them:
 1. Use ONLY numbers that appear in tool results in this conversation. Never compute new numbers (no sums, differences,
    percentages or conversions). Never round differently than the tool. If a number is not in a tool result, do not write it.

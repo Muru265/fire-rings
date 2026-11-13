@@ -4,7 +4,10 @@
   "punjab",
   "madagascar",
   "se_australia",
-  "mauritius"
+  "mauritius",
+  "nt_savanna",
+  "ne_india",
+  "tanzania"
  ],
  "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
  "endpoints": [
@@ -34,7 +37,11 @@
   },
   {
    "path": "/data/v1/watch.json",
-   "what": "Fire Watch statuses + raw-vs-harmonized alert backtest"
+   "what": "Fire Watch statuses + raw-vs-harmonized alert backtest + agentic-check verdict counts"
+  },
+  {
+   "path": "/data/v1/api/agent_check/{region}.json",
+   "what": "agentic check of every Fire Watch-flagged month: verdict (fixed rules), tool signals and numbers (detection times, NASA MCD64A1 burned area, geostationary), trace, sources"
   },
   {
    "path": "/data/v1/dataset/harmonized_monthly_regions_v1.csv",
@@ -65,5 +72,5 @@
    "what": "automatic monthly retraining runs and decisions"
   }
  ],
- "generated": "2026-11-13T10:43Z"
+ "generated": "2026-11-13T11:53Z"
 }

@@ -107,7 +107,56 @@
     "raw_only": 3
    }
   },
-  "method": "Same percentile rules on raw (MODIS to 2011, unconverted VIIRS after) and harmonized monthly fire-days, each vs its own 2003–2022 same-month baseline; point percentile; low-activity guard on both."
+  "method": "Same percentile rules on raw (MODIS to 2011, unconverted VIIRS after) and harmonized monthly fire-days, each vs its own 2003–2022 same-month baseline; point percentile; low-activity guard on both.",
+  "agent": {
+   "period": [
+    "2013-01",
+    "2025-12"
+   ],
+   "months_checked": 148,
+   "verdicts": {
+    "Real change": 94,
+    "Detection issue likely": 13,
+    "Unclear": 22,
+    "Not checkable yet": 19
+   },
+   "by_direction": {
+    "up": {
+     "Real change": 46,
+     "Detection issue likely": 2,
+     "Unclear": 11,
+     "Not checkable yet": 11
+    },
+    "down": {
+     "Real change": 48,
+     "Detection issue likely": 11,
+     "Unclear": 11,
+     "Not checkable yet": 8
+    }
+   },
+   "regions_with_data": {
+    "detection_times": [
+     "madagascar",
+     "mauritius",
+     "ne_india",
+     "nt_savanna",
+     "punjab",
+     "se_australia",
+     "tanzania"
+    ],
+    "burned_area": [
+     "madagascar",
+     "mauritius",
+     "ne_india",
+     "nt_savanna",
+     "punjab",
+     "se_australia",
+     "tanzania"
+    ],
+    "geostationary": []
+   },
+   "americas": null
+  }
  },
  "regions": {
   "punjab": {
@@ -278,8 +327,266 @@
      "2020-09",
      "2020-12",
      "2022-06"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-06",
+      "2016-11",
+      "2016-12",
+      "2017-08",
+      "2018-01",
+      "2019-05",
+      "2020-07",
+      "2021-02",
+      "2021-03",
+      "2021-07",
+      "2021-11",
+      "2022-04",
+      "2022-08",
+      "2023-08",
+      "2024-05",
+      "2024-06",
+      "2024-08"
+     ],
+     "down": [
+      "2013-07",
+      "2016-08",
+      "2018-09",
+      "2019-12",
+      "2020-04",
+      "2021-10",
+      "2022-01",
+      "2022-10",
+      "2023-10",
+      "2024-10",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+     ]
+    }
+   },
+   "timing_check": [
+    {
+     "region": "punjab",
+     "month": "2026-10",
+     "flag": "far below normal",
+     "direction": "down",
+     "kind": "current",
+     "check": "last_full",
+     "status": "Unusually low",
+     "verdict": "Detection issue likely",
+     "rule": "R3: detection times shifted",
+     "signals": {
+      "detection_times": "timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "not_covered"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×2.119, night share ×20.802 vs same month 2013–2019; mean VIIRS hour +0.15 h → shift.",
+      "Burned area (MCD64A1): not yet published for this month."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "punjab",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-10",
+        "baseline": "same month 2013–2019",
+        "signal": "timing_shift",
+        "reasons": [
+         "aqua_viirs",
+         "night_share"
+        ],
+        "viirs_day_celldays": 1008,
+        "baseline_years": 7,
+        "aqua_viirs": 0.675,
+        "aqua_viirs_baseline": 0.318,
+        "aqua_viirs_rel": 2.119,
+        "night_share": 0.083,
+        "night_share_baseline": 0.004,
+        "night_share_rel": 20.802,
+        "mean_hour": 13.32,
+        "mean_hour_baseline": 13.18,
+        "mean_hour_shift": 0.15,
+        "thresholds": {
+         "aqua_viirs_x": 1.875,
+         "night_share_x": 3.538,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T11:53Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "punjab",
+        "month": "2026-10",
+        "direction": "down"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-10",
+        "baseline": "median of 10 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "punjab",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "signal": "not_covered",
+        "month": "2026-10",
+        "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "down",
+        "A": "timing_shift",
+        "B": "not_yet_published",
+        "C": "not_covered"
+       },
+       "result": {
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)"
+     ],
+     "checked_at": "2026-11-13T11:53Z"
+    },
+    {
+     "region": "punjab",
+     "month": "2026-11",
+     "flag": "far below normal",
+     "direction": "down",
+     "kind": "current",
+     "check": "mtd",
+     "status": "Unusually low",
+     "verdict": "Detection issue likely",
+     "rule": "R3: detection times shifted",
+     "signals": {
+      "detection_times": "timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "not_covered"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×3.293, night share ×5.825 vs same month 2013–2019; mean VIIRS hour +0.06 h → shift.",
+      "Burned area (MCD64A1): not yet published for this month."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "punjab",
+        "month": "2026-11"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-11",
+        "baseline": "same month 2013–2019",
+        "signal": "timing_shift",
+        "reasons": [
+         "aqua_viirs",
+         "night_share"
+        ],
+        "viirs_day_celldays": 2024,
+        "baseline_years": 7,
+        "aqua_viirs": 1.151,
+        "aqua_viirs_baseline": 0.349,
+        "aqua_viirs_rel": 3.293,
+        "night_share": 0.053,
+        "night_share_baseline": 0.009,
+        "night_share_rel": 5.825,
+        "mean_hour": 13.3,
+        "mean_hour_baseline": 13.24,
+        "mean_hour_shift": 0.06,
+        "thresholds": {
+         "aqua_viirs_x": 1.875,
+         "night_share_x": 3.538,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T11:53Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "punjab",
+        "month": "2026-11",
+        "direction": "down"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-11",
+        "baseline": "median of 11 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "punjab",
+        "month": "2026-11"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "signal": "not_covered",
+        "month": "2026-11",
+        "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "down",
+        "A": "timing_shift",
+        "B": "not_yet_published",
+        "C": "not_covered"
+       },
+       "result": {
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)"
+     ],
+     "checked_at": "2026-11-13T11:53Z"
+    }
+   ]
   },
   "madagascar": {
    "name": "Madagascar",
@@ -450,8 +757,152 @@
      "2020-11",
      "2021-12",
      "2025-06"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2016-04",
+      "2016-05",
+      "2016-10",
+      "2017-01",
+      "2019-07",
+      "2019-08",
+      "2020-05",
+      "2020-06",
+      "2020-07",
+      "2021-01",
+      "2023-06",
+      "2024-05",
+      "2024-07",
+      "2024-12",
+      "2025-01"
+     ],
+     "down": [
+      "2012-04",
+      "2014-07",
+      "2015-02",
+      "2019-06",
+      "2021-10",
+      "2022-03",
+      "2024-02",
+      "2025-02",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+     ]
+    }
+   },
+   "timing_check": [
+    {
+     "region": "madagascar",
+     "month": "2026-10",
+     "flag": "far below normal",
+     "direction": "down",
+     "kind": "current",
+     "check": "last_full",
+     "status": "Unusually low",
+     "verdict": "Not checkable yet",
+     "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+     "signals": {
+      "detection_times": "no_timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "pending_access"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×1.034, night share ×1.304 vs same month 2013–2019; mean VIIRS hour +0.13 h → no shift.",
+      "Burned area (MCD64A1): not yet published for this month.",
+      "Geostationary: Meteosat check ready — waiting for data access."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "madagascar",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-10",
+        "baseline": "same month 2013–2019",
+        "signal": "no_timing_shift",
+        "reasons": [],
+        "viirs_day_celldays": 19057,
+        "baseline_years": 7,
+        "aqua_viirs": 0.22,
+        "aqua_viirs_baseline": 0.213,
+        "aqua_viirs_rel": 1.034,
+        "night_share": 0.157,
+        "night_share_baseline": 0.12,
+        "night_share_rel": 1.304,
+        "mean_hour": 13.79,
+        "mean_hour_baseline": 13.67,
+        "mean_hour_shift": 0.13,
+        "thresholds": {
+         "aqua_viirs_x": 1.875,
+         "night_share_x": 3.538,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T11:53Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "madagascar",
+        "month": "2026-10",
+        "direction": "down"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-10",
+        "baseline": "median of 10 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "madagascar",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "instrument": "Meteosat SEVIRI (LSA SAF FRP-PIXEL)",
+        "source": "EUMETSAT LSA SAF [FRPPixel, LSA-502]",
+        "month": "2026-10",
+        "signal": "pending_access",
+        "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "down",
+        "A": "no_timing_shift",
+        "B": "not_yet_published",
+        "C": "pending_access"
+       },
+       "result": {
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)"
+     ],
+     "checked_at": "2026-11-13T11:53Z"
+    }
+   ]
   },
   "se_australia": {
    "name": "SE Australia (NSW + VIC)",
@@ -617,8 +1068,36 @@
      "2022-03",
      "2023-04",
      "2025-09"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-10",
+      "2013-08",
+      "2015-03",
+      "2017-04",
+      "2017-08",
+      "2017-09",
+      "2018-07",
+      "2019-06",
+      "2019-07",
+      "2019-10",
+      "2019-11",
+      "2019-12",
+      "2020-01"
+     ],
+     "down": [
+      "2020-04",
+      "2020-05",
+      "2022-01",
+      "2022-05",
+      "2022-08",
+      "2022-09",
+      "2022-10",
+      "2023-03"
+     ]
+    }
+   },
+   "timing_check": null
   },
   "mauritius": {
    "name": "Mauritius (incl. Rodrigues)",
@@ -795,8 +1274,17 @@
      "2022-11",
      "2024-09",
      "2024-11"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2014-09"
+     ],
+     "down": [
+      "2021-10"
+     ]
+    }
+   },
+   "timing_check": null
   },
   "nt_savanna": {
    "name": "Northern Australia savanna (NT)",
@@ -961,8 +1449,43 @@
      "2019-12",
      "2023-05",
      "2023-11"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-02",
+      "2012-06",
+      "2012-07",
+      "2013-01",
+      "2014-08",
+      "2015-03",
+      "2015-04",
+      "2017-12",
+      "2018-04",
+      "2018-05",
+      "2019-01",
+      "2022-02",
+      "2022-03",
+      "2023-10",
+      "2023-12",
+      "2025-01",
+      "2025-02"
+     ],
+     "down": [
+      "2013-11",
+      "2016-05",
+      "2016-09",
+      "2016-10",
+      "2017-01",
+      "2020-08",
+      "2020-10",
+      "2020-12",
+      "2021-02",
+      "2021-03",
+      "2024-03"
+     ]
+    }
+   },
+   "timing_check": null
   },
   "ne_india": {
    "name": "Northeast India",
@@ -1138,8 +1661,148 @@
      "2023-04",
      "2023-05",
      "2024-05"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-02",
+      "2012-05",
+      "2012-08",
+      "2014-04",
+      "2016-08",
+      "2021-09",
+      "2022-08",
+      "2023-09",
+      "2024-09",
+      "2025-09"
+     ],
+     "down": [
+      "2012-06",
+      "2015-04",
+      "2017-03",
+      "2017-12",
+      "2018-05",
+      "2019-11",
+      "2019-12",
+      "2020-01",
+      "2020-02",
+      "2022-01",
+      "2023-12",
+      "2024-02",
+      "2024-07",
+      "2024-10",
+      "2025-05"
+     ]
+    }
+   },
+   "timing_check": [
+    {
+     "region": "ne_india",
+     "month": "2026-10",
+     "flag": "far above normal",
+     "direction": "up",
+     "kind": "current",
+     "check": "last_full",
+     "status": "Alert",
+     "verdict": "Not checkable yet",
+     "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+     "signals": {
+      "detection_times": "no_timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "not_covered"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×0.854, night share ×1.561 vs same month 2013–2019; mean VIIRS hour +0.14 h → no shift.",
+      "Burned area (MCD64A1): not yet published for this month."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "ne_india",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-10",
+        "baseline": "same month 2013–2019",
+        "signal": "no_timing_shift",
+        "reasons": [],
+        "viirs_day_celldays": 381,
+        "baseline_years": 7,
+        "aqua_viirs": 0.115,
+        "aqua_viirs_baseline": 0.135,
+        "aqua_viirs_rel": 0.854,
+        "night_share": 0.126,
+        "night_share_baseline": 0.081,
+        "night_share_rel": 1.561,
+        "mean_hour": 13.33,
+        "mean_hour_baseline": 13.2,
+        "mean_hour_shift": 0.14,
+        "thresholds": {
+         "aqua_viirs_x": 1.875,
+         "night_share_x": 3.538,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T11:53Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "ne_india",
+        "month": "2026-10",
+        "direction": "up"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-10",
+        "baseline": "median of 10 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "ne_india",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "signal": "not_covered",
+        "month": "2026-10",
+        "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "up",
+        "A": "no_timing_shift",
+        "B": "not_yet_published",
+        "C": "not_covered"
+       },
+       "result": {
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)"
+     ],
+     "checked_at": "2026-11-13T11:53Z"
+    }
+   ]
   },
   "tanzania": {
    "name": "Tanzania",
@@ -1317,8 +1980,42 @@
      "2023-10",
      "2024-09",
      "2025-09"
-    ]
-   }
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-02",
+      "2015-03",
+      "2021-11",
+      "2021-12",
+      "2022-10",
+      "2025-12"
+     ],
+     "down": [
+      "2014-08",
+      "2015-11",
+      "2017-08",
+      "2018-05",
+      "2018-06",
+      "2018-07",
+      "2018-10",
+      "2019-10",
+      "2019-12",
+      "2020-03",
+      "2022-02",
+      "2022-07",
+      "2023-05",
+      "2023-06",
+      "2023-07",
+      "2023-11",
+      "2023-12",
+      "2024-01",
+      "2024-07",
+      "2025-05",
+      "2025-07"
+     ]
+    }
+   },
+   "timing_check": null
   }
  }
 }

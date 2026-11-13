@@ -20,7 +20,10 @@ export interface WatchDoc {
   rules: { alert_pct: number; far_above_pct: number; far_below_pct: number; live_spike_ratio: number; live_min_expected: number; live_satellites: number }
   rule_text: Record<string, string>
   backtest: { period: [string, string]; baseline: [number, number]; method: string; per_year: Record<string, { raw: number; harmonized: number; raw_only: number }>
-    totals: { raw_alerts: number; harmonized_alerts: number; raw_only_alerts: number; both: number; harmonized_only_alerts: number; raw_lows: number; harmonized_lows: number; lows_missed_by_raw: number } }
+    totals: { raw_alerts: number; harmonized_alerts: number; raw_only_alerts: number; both: number; harmonized_only_alerts: number; raw_lows: number; harmonized_lows: number; lows_missed_by_raw: number }
+    /** Round 7: agentic check of the harmonized flags (pipeline/12_agent.py) */
+    agent?: { period: [string, string]; months_checked: number; verdicts: Record<'Real change' | 'Detection issue likely' | 'Unclear' | 'Not checkable yet', number>
+      by_direction: Record<'up' | 'down', Record<string, number>>; regions_with_data: { detection_times: string[]; burned_area: string[]; geostationary: string[] }; americas: string[] | null } }
   regions: Record<string, WatchRegion>
 }
 export interface Briefing { answer: string; caveat: string; trace: { tool: string; args: Record<string, unknown>; result_summary: string }[]; verified: boolean; model?: string; generated?: string; source: 'live' | 'saved' }
@@ -90,4 +93,5 @@ export function briefingQuestion(name: string, _reg: WatchRegion, status: Status
     + 'No opinions, no advice, no recommendations, no statements about what anyone should do or about effects on people, '
     + 'fire services, smoke, air quality, health or crops, and no forecast. '
     + (timing ? 'A detection-time caveat applies: say that part of the drop may be fires burning after the satellite pass that are no longer detected, and use that detection-time caveat in the CAVEAT line.' : '')
+    + ' Then call get_agent_check for this region and add exactly ONE sentence stating the agentic check verdict and its main evidence, using only numbers from that tool; if the verdict is "Not checkable yet", say which data are not available yet.'
 }

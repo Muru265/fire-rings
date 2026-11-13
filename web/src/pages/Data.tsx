@@ -31,6 +31,7 @@ const API_GROUPS: { id: GroupKind; title: string; eps: Ep[] }[] = [
     ['GET /data/v1/daily/{id}.json', 'Day-by-day raw fire-days per month for both satellite families (the current month is refreshed every day).', '/data/v1/daily/mauritius.json'],
     ['GET /data/v1/watch.json', 'Fire Watch: each region’s status, the fixed rules that set it, and the raw-vs-harmonized alert backtest.', '/data/v1/watch.json'],
     ['GET /data/v1/api/projection/{id}.json', '“What to expect”: an end-of-month projection from the month so far vs the typical month, with how well that worked in past years (days 5/10/15/20/25).', '/data/v1/api/projection/punjab.json'],
+    ['GET /data/v1/api/agent_check/{id}.json', 'Agent check of every Fire Watch-flagged month (current + 2013–2025): verdict set by fixed rules, each tool’s signal and numbers (detection times, NASA MCD64A1 burned area, geostationary), the step-by-step trace and sources.', '/data/v1/api/agent_check/punjab.json'],
     ['GET /api/live?region={id}', 'Last 72 hours of near-real-time detections (provisional — not part of the record).', '/api/live?region=punjab'],
     ['GET /api/hotspots?region=&start=&end=', 'The individual NASA FIRMS detections, filtered the same way as the record, for up to 31 days (CSV or JSON) — details below.', '/api/hotspots?region=punjab&start=2016-10-01&end=2016-10-31'],
   ] },
@@ -100,6 +101,7 @@ const DICT_GROUPS: { title: string; note?: string; cols: Col[] }[] = [
     ['flags: mtd', '—', 'Month to date — the month is not over yet', 'month-to-date'],
     ['flags: insufficient', '—', 'Coverage under 60% — no value given', 'insufficient-coverage'],
     ['flags: terra_only', '—', 'Jan 2001 – Jun 2002, before Aqua: Terra × q only, wider uncertainty, not ranked'],
+    ['timing_check', 'verdict', 'Agent check of a Fire Watch-flagged month: Real change · Detection issue likely · Unclear · Not checkable yet (empty for months that were not flagged). Details per month in api/agent_check/{id}.json', 'agent-check'],
     ['flags: overpass_timing', '—', 'Punjab, October–November, 2022 onward: Aqua’s orbit drift after Dec 2021 shifts the detection time and burning has reportedly moved later in the day, so these months may be undercounted. A flag only — no number is changed', 'flag-overpass-timing'],
   ] },
   { title: 'Model — fire likelihood (api/likelihood/{id}.json, not in the CSV)', cols: [

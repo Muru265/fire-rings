@@ -196,6 +196,32 @@ try {
   check('#74 trace has no repeated identical lines', new Set(tr).size === tr.length)
   check('Fire Watch: raw-vs-harmonized proof shown', await page.getByTestId('watch-proof-headline').isVisible())
 
+  // Round 7: Agent check box on flagged regions — renders, has a 4-step trace, and never shows a verdict the rules did not set
+  {
+    const W = JSON.parse(readFileSync(resolve(here, '../public/data/v1/watch.json'), 'utf-8'))
+    const flagged = Object.entries(W.regions).filter(([, r]) => r.status !== 'Normal' && r.timing_check?.length)
+    for (const [id, r] of flagged) {
+      const box = page.locator(`[data-testid="watch-card"][data-region="${id}"] [data-testid="agent-check"]`)
+      const ok = await box.isVisible().catch(() => false)
+      const shown = ok ? await box.locator('[data-testid="agent-verdict"]').allInnerTexts() : []
+      const expected = r.timing_check.map((c) => c.verdict)
+      check(`agent check ${id}: box visible, verdicts = stored (${expected.join(' / ')})`, ok && shown.length === expected.length && shown.every((s, i) => s.includes(expected[i])))
+      if (ok) {
+        await box.locator('summary').first().click()
+        const steps = await box.locator('[data-testid="agent-trace"]').first().locator('li').allInnerTexts()
+        check(`agent check ${id}: trace visible with ${steps.length} steps (tool → input → result)`, steps.length === 4 && steps.every((s) => s.includes('input') && s.includes('→')))
+      }
+      for (const c of r.timing_check) {
+        const pend = c.signals.geostationary === 'pending_access'
+        if (pend) check(`agent check ${id} ${c.month}: Meteosat pending shown as pending, no Meteosat attribution`, !c.sources.includes('EUMETSAT LSA SAF [FRPPixel, LSA-502]') && c.evidence.some((e) => e.includes('waiting for data access')))
+        if (c.signals.burned_area === 'not_yet_published') check(`agent check ${id} ${c.month}: burned area "not yet published" never yields "Real change"`, c.verdict !== 'Real change')
+      }
+    }
+    check(`agent check: at least one flagged region has a box (${flagged.length})`, flagged.length > 0)
+    const normalBoxes = await page.locator('[data-testid="watch-card"][data-status="Normal"] [data-testid="agent-check"]').count()
+    check('agent check: no box on Normal regions', normalBoxes === 0)
+  }
+
   // #86: a live run with interleaved parallel briefings → one block per region, each with only its own numbers
   {
     const D = resolve(here, '../public/data/v1')

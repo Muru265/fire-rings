@@ -10,9 +10,11 @@ import { fmtInt, fmtRatio } from '../lib/format'
 import StatusBadge from '../components/StatusBadge'
 import { formatNumbersInText } from '../../api/_lib/numfmt'
 import { collapseSteps } from '../lib/steps'
+import AgentCheck from '../components/AgentCheck'
+import type { TimingCheck } from '../components/AgentCheck'
 
 interface Step { region?: string; kind: string; text: string; ok?: boolean }
-interface RegionState { status: Status; checks: Check[]; relevant_for: string; flags: string[] }
+interface RegionState { status: Status; checks: Check[]; relevant_for: string; flags: string[]; timing_check?: TimingCheck[] | null }
 type Saved = Record<string, Omit<Briefing, 'source'>>
 
 function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; st: RegionState; brief?: Briefing; saved: Saved }) {
@@ -50,6 +52,7 @@ function RegionCard({ id, name, st, brief, saved }: { id: string; name: string; 
           {shown.caveat && <p className="mt-1.5 text-xs text-muted"><span className="font-semibold text-warn">Caveat:</span> {shown.caveat}</p>}
         </div>
       ) : st.status !== 'Normal' ? <p className="text-xs text-faint">Briefing: run the agent to generate one.</p> : null}
+      {st.status !== 'Normal' && st.timing_check?.length ? <AgentCheck checks={st.timing_check} /> : null}
       <details className="text-sm" open={st.status !== 'Normal'}>
         <summary className="cursor-pointer text-xs text-accent-2">Numbers used</summary>
         <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]" data-testid="watch-numbers">
@@ -116,7 +119,7 @@ export default function Watch() {
     Promise.all([fetchJson<WatchDoc>('watch.json'), fetchJson<{ briefings: Saved }>('watch_cache.json').catch(() => ({ briefings: {} }))]).then(([w, c]) => {
       setDoc(w)
       setSaved(c.briefings)
-      setRegions(Object.fromEntries(Object.entries(w.regions).map(([id, r]) => [id, { status: r.status, checks: r.checks, relevant_for: r.relevant_for, flags: r.flags }])))
+      setRegions(Object.fromEntries(Object.entries(w.regions).map(([id, r]) => [id, { status: r.status, checks: r.checks, relevant_for: r.relevant_for, flags: r.flags, timing_check: (r as { timing_check?: TimingCheck[] | null }).timing_check ?? null }])))
       setBriefs(Object.fromEntries(Object.entries(c.briefings).filter(([k]) => k.endsWith('|responder')).map(([k, b]) => [k.split('|')[0], { ...b, source: 'saved' as const }])))
     })
   }, [])
@@ -165,7 +168,7 @@ export default function Watch() {
           const ev = JSON.parse(line)
           if (ev.type === 'step') push({ region: ev.region, kind: ev.kind, text: ev.text, ok: ev.ok })
           else if (ev.type === 'region') {
-            setRegions((x) => ({ ...x, [ev.region]: { status: ev.status, checks: ev.checks, relevant_for: ev.relevant_for, flags: ev.flags } }))
+            setRegions((x) => ({ ...x, [ev.region]: { status: ev.status, checks: ev.checks, relevant_for: ev.relevant_for, flags: ev.flags, timing_check: x[ev.region]?.timing_check ?? null } }))
             if (ev.status === 'Normal') push(closeStep(ev.region, doc.regions[ev.region]?.name ?? ev.region, null, ev.status))
           } else if (ev.type === 'briefing') {
             setBriefs((x) => ({ ...x, [ev.region]: ev.briefing }))

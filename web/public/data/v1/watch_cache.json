@@ -1,44 +1,45 @@
 {
  "data_end": "2026-11-12",
- "generated": "2026-11-13T09:44:56.958Z",
+ "generated": "2026-11-13T11:51:47.680Z",
  "briefings": {
   "punjab|responder": {
-   "answer": "November 2026 has recorded 615 fire-days (0.2× typical), and October 2026 recorded 392 fire-days (0.1× typical). Both months are below every year in the 2003–2022 baseline.",
+   "answer": "November 2026 recorded 777 fire-days (0.3× typical, 3,002 fire-days), and October 2026 recorded 392 fire-days (0.1× typical, 4,904 fire-days). Part of the drop may be fires burning after the satellite pass that are no longer detected. The agentic check verdict is \"Detection issue likely\", with detection times showing a timing shift and MCD64A1 burned area not yet published.",
    "caveat": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-11T09:54:58.968Z",
+   "generated": "2026-11-13T11:50:40.218Z",
    "status": "Unusually low",
    "trace": [
     {
      "tool": "get_month",
      "args": {
+      "region": "punjab",
+      "year": 2026,
       "mode": "longterm",
-      "month": 11,
-      "region": "punjab"
+      "month": 11
      },
-     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–12 only, compared with the same days of baseline years\",\"fire_days\":777,\"range_90\":[732,828],\"typical_fire_days\":3002,\"baselin…",
      "result": {
       "region": "Punjab–Haryana",
       "month": "November 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–9 only, compared with the same days of baseline years",
-      "fire_days": 615,
+      "month_to_date": "days 1–12 only, compared with the same days of baseline years",
+      "fire_days": 777,
       "range_90": [
-       577,
-       654
+       732,
+       828
       ],
-      "typical_fire_days": 2539,
+      "typical_fire_days": 3002,
       "baseline": "2003–2022",
-      "ratio_to_typical": 0.2,
-      "percentile": "below every year in the 2003–2022 baseline",
+      "ratio_to_typical": 0.3,
+      "percentile": "0th–10th percentile",
       "return_period_years": null,
       "beyond_baseline_record": false,
       "rank_among_years_for_this_month": 21,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 3295,
-       "viirs": 2405
+       "modis": 4267,
+       "viirs": 3020
       },
       "flags": [
        "mtd",
@@ -50,39 +51,7 @@
        "This month is not over yet, so it is compared with the same days in past years.",
        "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ],
-      "last_complete_month": {
-       "region": "Punjab–Haryana",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 392,
-       "range_90": [
-        371,
-        417
-       ],
-       "typical_fire_days": 4904,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 0.1,
-       "percentile": "below every year in the 2003–2022 baseline",
-       "return_period_years": null,
-       "beyond_baseline_record": false,
-       "rank_among_years_for_this_month": 25,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 980,
-        "viirs": 1459
-       },
-       "flags": [
-        "provisional",
-        "overpass_timing"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
+      ]
      }
     },
     {
@@ -90,173 +59,157 @@
      "args": {
       "mode": "longterm",
       "month": 10,
-      "region": "punjab"
+      "region": "punjab",
+      "year": 2026
      },
-     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":392,\"range_90\":[371,417],\"typical_fire_days\":4904,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.1,\"percentile\":\"below e…",
      "result": {
       "region": "Punjab–Haryana",
-      "month": "November 2026",
+      "month": "October 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–9 only, compared with the same days of baseline years",
-      "fire_days": 615,
+      "month_to_date": false,
+      "fire_days": 392,
       "range_90": [
-       577,
-       654
+       371,
+       417
       ],
-      "typical_fire_days": 2539,
+      "typical_fire_days": 4904,
       "baseline": "2003–2022",
-      "ratio_to_typical": 0.2,
+      "ratio_to_typical": 0.1,
       "percentile": "below every year in the 2003–2022 baseline",
       "return_period_years": null,
       "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 21,
+      "rank_among_years_for_this_month": 25,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 3295,
-       "viirs": 2405
+       "modis": 980,
+       "viirs": 1459
       },
       "flags": [
-       "mtd",
        "provisional",
        "overpass_timing"
       ],
       "caveats": [
        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "This month is not over yet, so it is compared with the same days in past years.",
        "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ],
-      "last_complete_month": {
-       "region": "Punjab–Haryana",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 392,
-       "range_90": [
-        371,
-        417
-       ],
-       "typical_fire_days": 4904,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 0.1,
-       "percentile": "below every year in the 2003–2022 baseline",
-       "return_period_years": null,
-       "beyond_baseline_record": false,
-       "rank_among_years_for_this_month": 25,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 980,
-        "viirs": 1459
-       },
-       "flags": [
-        "provisional",
-        "overpass_timing"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
+      ]
      }
     },
     {
-     "tool": "get_quality",
+     "tool": "get_agent_check",
      "args": {
+      "mode": "longterm",
       "region": "punjab"
      },
-     "result_summary": "{\"region\":\"Punjab–Haryana\",\"calibration_window\":\"July 2012 – December 2019\",\"method\":\"monthly exchange rates shrunk toward the region-wide rate 0.347\",\"low_activity_region\":false,\"out_of_sample_annual_error_pct\":5.6,\"out_of_sample_bias_p…",
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far below normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":2.119,\"night…",
      "result": {
       "region": "Punjab–Haryana",
-      "calibration_window": "July 2012 – December 2019",
-      "method": "monthly exchange rates shrunk toward the region-wide rate 0.347",
-      "low_activity_region": false,
-      "out_of_sample_annual_error_pct": 5.6,
-      "out_of_sample_bias_pct": 0,
-      "validation_v1_pass": true,
-      "step_at_2012_raw_pct": 199.4,
-      "step_at_2012_harmonized_pct": 3.1,
-      "step_at_2012_modis_only_pct": 4.2,
-      "validation_v3_pass": true,
-      "uncertain_months_in_record": 61,
-      "provisional_months": [
-       "August 2026",
-       "September 2026",
-       "October 2026",
-       "November 2026"
-      ],
-      "static_source_detections_removed": 50179,
-      "data_through": "2026-11-09",
-      "famous_seasons": {
-       "season_definition": "July–June",
-       "seasons_ranked": 23,
-       "top3_seasons": [
-        "2016–17",
-        "2007–08",
-        "2021–22"
-       ],
-       "oct_nov_crop_burning_top3_years": [
-        2016,
-        2005,
-        2021
-       ]
-      },
-      "detection_time_caveat": {
-       "applies_to": "October–November from 2022",
-       "text": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
-       "evidence": {
-        "aqua_to_viirs_ratio_2022_2026_vs_2013_2019": 1.461,
-        "same_vs_noaa20": 1.336,
-        "note": "Aqua passes later in the afternoon since Dec 2021; numbers are not adjusted"
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far below normal",
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted",
+        "detection_times": {
+         "signal": "timing_shift",
+         "aqua_to_viirs_vs_baseline": 2.119,
+         "night_share_vs_baseline": 20.802,
+         "mean_hour_shift_h": 0.15,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "not_covered",
+         "share_outside_polar_hours": null,
+         "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       },
+       {
+        "month": "2026-11",
+        "flag": "far below normal",
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted",
+        "detection_times": {
+         "signal": "timing_shift",
+         "aqua_to_viirs_vs_baseline": 3.061,
+         "night_share_vs_baseline": 5.378,
+         "mean_hour_shift_h": 0.14,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "not_covered",
+         "share_outside_polar_hours": null,
+         "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
        }
-      },
-      "flags": [],
-      "caveats": [
-       "Months before July 2002 come from one satellite only (Terra), so they are less certain and are not ranked.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
      }
     }
    ]
   },
   "punjab|scientist": {
-   "answer": "In November 2026 (days 1–9 only), Punjab–Haryana recorded 615 fire-days compared with a typical 2,539 fire-days, a ratio of 0.2× typical, placing it below every year in the 2003–2022 baseline with a 90% range of [577, 654]. Last full month (October 2026) recorded 392 fire-days compared with a typical 4,904 fire-days, a ratio of 0.1× typical, ranking below every year in the 2003–2022 baseline with a 90% range of [371, 417]. All numbers are MODIS-equivalent fire-days on the 2003–2022 baseline. Method: see the Proof page.",
+   "answer": "In November 2026 (days 1–12), Punjab–Haryana recorded 777 MODIS-equivalent fire-days (0.3× typical, 90% range 732–828, 0th–10th percentile, rank 21 among years for this month), compared with a typical value of 3,002, while last full month October 2026 recorded 392 fire-days (0.1× typical, 90% range 371–417, below every year in the 2003–2022 baseline, rank 25), compared with a typical value of 4,904 (baseline 2003–2022, values are MODIS-equivalent fire-days). The agentic check verdict for November 2026 is Detection issue likely, based on detection times showing timing_shift (Aqua to VIIRS vs baseline 3.061, mean hour shift 0.14 h, night share vs baseline 5.378), while MCD64A1 burned area is not_yet_published and geostationary is not_covered. Method: see the Proof page.",
    "caveat": "Detected at satellite overpass times; burning has reportedly shifted to late afternoon, so recent seasons may be undercounted.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-11T09:55:11.033Z",
+   "generated": "2026-11-13T11:50:48.539Z",
    "status": "Unusually low",
    "trace": [
     {
      "tool": "get_month",
      "args": {
+      "month": 11,
       "year": 2026,
       "mode": "longterm",
-      "month": 11,
       "region": "punjab"
      },
-     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–9 only, compared with the same days of baseline years\",\"fire_days\":615,\"range_90\":[577,654],\"typical_fire_days\":2539,\"baseline…",
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–12 only, compared with the same days of baseline years\",\"fire_days\":777,\"range_90\":[732,828],\"typical_fire_days\":3002,\"baselin…",
      "result": {
       "region": "Punjab–Haryana",
       "month": "November 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–9 only, compared with the same days of baseline years",
-      "fire_days": 615,
+      "month_to_date": "days 1–12 only, compared with the same days of baseline years",
+      "fire_days": 777,
       "range_90": [
-       577,
-       654
+       732,
+       828
       ],
-      "typical_fire_days": 2539,
+      "typical_fire_days": 3002,
       "baseline": "2003–2022",
-      "ratio_to_typical": 0.2,
-      "percentile": "below every year in the 2003–2022 baseline",
+      "ratio_to_typical": 0.3,
+      "percentile": "0th–10th percentile",
       "return_period_years": null,
       "beyond_baseline_record": false,
       "rank_among_years_for_this_month": 21,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 3295,
-       "viirs": 2405
+       "modis": 4267,
+       "viirs": 3020
       },
       "flags": [
        "mtd",
@@ -274,8 +227,8 @@
     {
      "tool": "get_month",
      "args": {
-      "month": 10,
       "year": 2026,
+      "month": 10,
       "region": "punjab",
       "mode": "longterm"
      },
@@ -312,23 +265,68 @@
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
       ]
      }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "year": 2026,
+      "region": "punjab",
+      "month": 11
+     },
+     "result_summary": "{\"region\":\"Punjab–Haryana\",\"checks\":[{\"month\":\"2026-11\",\"flag\":\"far below normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":3.061,\"night…",
+     "result": {
+      "region": "Punjab–Haryana",
+      "checks": [
+       {
+        "month": "2026-11",
+        "flag": "far below normal",
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted",
+        "detection_times": {
+         "signal": "timing_shift",
+         "aqua_to_viirs_vs_baseline": 3.061,
+         "night_share_vs_baseline": 5.378,
+         "mean_hour_shift_h": 0.14,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "not_covered",
+         "share_outside_polar_hours": null,
+         "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
+     }
     }
    ]
   },
   "madagascar|responder": {
-   "answer": "October 2026 recorded 5,612 fire-days compared with a typical 7760, which is 0.7× typical. November 2026 (days 1–8) recorded 1,723 fire-days compared with a typical 1800, which is 1.0× typical.",
+   "answer": "October 2026 recorded 5,612 MODIS-equivalent fire-days compared with a typical 7,760 fire-days (0.7× typical), while November 2026 month-to-date recorded 2,193 fire-days compared with a typical 2,656 fire-days (0.8× typical). The agentic check verdict is Not checkable yet because MCD64A1 burned area is not yet published.",
    "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-11T09:55:24.228Z",
+   "generated": "2026-11-13T11:50:54.259Z",
    "status": "Unusually low",
    "trace": [
     {
      "tool": "get_month",
      "args": {
-      "year": 2026,
       "mode": "longterm",
       "region": "madagascar",
+      "year": 2026,
       "month": 10
      },
      "result_summary": "{\"region\":\"Madagascar\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":5612,\"range_90\":[5464,5739],\"typical_fire_days\":7760,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.7,\"percentile\":\"5th perc…",
@@ -366,33 +364,31 @@
     {
      "tool": "get_month",
      "args": {
-      "month": 11,
-      "year": 2026,
       "mode": "longterm",
       "region": "madagascar"
      },
-     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–8 only, compared with the same days of baseline years\",\"fire_days\":1723,\"range_90\":[1625,1807],\"typical_fire_days\":1800,\"baseline\"…",
+     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–12 only, compared with the same days of baseline years\",\"fire_days\":2193,\"range_90\":[2072,2304],\"typical_fire_days\":2656,\"baseline…",
      "result": {
       "region": "Madagascar",
       "month": "November 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–8 only, compared with the same days of baseline years",
-      "fire_days": 1723,
+      "month_to_date": "days 1–12 only, compared with the same days of baseline years",
+      "fire_days": 2193,
       "range_90": [
-       1625,
-       1807
+       2072,
+       2304
       ],
-      "typical_fire_days": 1800,
+      "typical_fire_days": 2656,
       "baseline": "2003–2022",
-      "ratio_to_typical": 1,
-      "percentile": "38th–48th percentile",
+      "ratio_to_typical": 0.8,
+      "percentile": "14th–29th percentile",
       "return_period_years": null,
       "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 12,
+      "rank_among_years_for_this_month": 16,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 2837,
-       "viirs": 15020
+       "modis": 3571,
+       "viirs": 18870
       },
       "flags": [
        "mtd",
@@ -402,25 +398,100 @@
        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
        "This month is not over yet, so it is compared with the same days in past years.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
+      ],
+      "last_complete_month": {
+       "region": "Madagascar",
+       "month": "October 2026",
+       "unit": "MODIS-equivalent fire-days",
+       "month_to_date": false,
+       "fire_days": 5612,
+       "range_90": [
+        5464,
+        5739
+       ],
+       "typical_fire_days": 7760,
+       "baseline": "2003–2022",
+       "ratio_to_typical": 0.7,
+       "percentile": "5th percentile",
+       "return_period_years": null,
+       "beyond_baseline_record": false,
+       "rank_among_years_for_this_month": 23,
+       "too_little_fire_to_judge": false,
+       "raw_hotspots": {
+        "modis": 8864,
+        "viirs": 46581
+       },
+       "flags": [
+        "provisional"
+       ],
+       "caveats": [
+        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+       ]
+      }
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "year": 2026,
+      "month": 10,
+      "region": "madagascar"
+     },
+     "result_summary": "{\"region\":\"Madagascar\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far below normal\",\"verdict\":\"Not checkable yet\",\"rule\":\"R5: no burned-area answer yet and no detection-issue evidence\",\"detection_times\":{\"signal\":\"no_timing_shift\",\"aqua_to_vii…",
+     "result": {
+      "region": "Madagascar",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far below normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 1.034,
+         "night_share_vs_baseline": 1.304,
+         "mean_hour_shift_h": 0.13,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
      }
     }
    ]
   },
   "madagascar|scientist": {
-   "answer": "In October 2026, Madagascar recorded 5,612 MODIS-equivalent fire-days, which is 0.7× typical with a 90% range of 5,464 to 5,739 fire-days and a typical value of 7,760 fire-days, ranking at the 5th percentile. For November 2026 (days 1–8 only, compared with the same days of baseline years), the region recorded 1,723 MODIS-equivalent fire-days, which is 1× typical with a 90% range of 1,625 to 1,807 fire-days and a typical value of 1,800 fire-days, ranking at the 38th–48th percentile. The baseline period is 2003–2022. Method: see the Proof page.",
+   "answer": "In October 2026, Madagascar recorded 5,612 MODIS-equivalent fire-days, which is 0.7× typical with a typical value of 7,760 fire-days and a 90% range of [5,464, 5,739], ranking at the 5th percentile. In November 2026 (days 1–12 only), it recorded 2,193 MODIS-equivalent fire-days compared with a typical value of 2,656 fire-days, ranking at the 14th–29th percentile with a ratio of 0.8× typical and a 90% range of [2,072, 2,304]. These are MODIS-equivalent fire-days with a baseline of 2003–2022. The agentic check verdict for 2026-10 is Not checkable yet, with MCD64A1 burned area published about 1–2 months after the month ends and Meteosat check pending access. Method: see the Proof page.",
    "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-11T09:55:31.087Z",
+   "generated": "2026-11-13T11:51:00.346Z",
    "status": "Unusually low",
    "trace": [
     {
      "tool": "get_month",
      "args": {
-      "year": 2026,
       "month": 10,
       "region": "madagascar",
+      "year": 2026,
       "mode": "longterm"
      },
      "result_summary": "{\"region\":\"Madagascar\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":5612,\"range_90\":[5464,5739],\"typical_fire_days\":7760,\"baseline\":\"2003–2022\",\"ratio_to_typical\":0.7,\"percentile\":\"5th perc…",
@@ -458,33 +529,31 @@
     {
      "tool": "get_month",
      "args": {
-      "region": "madagascar",
-      "year": 2026,
       "mode": "longterm",
-      "month": 11
+      "region": "madagascar"
      },
-     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–8 only, compared with the same days of baseline years\",\"fire_days\":1723,\"range_90\":[1625,1807],\"typical_fire_days\":1800,\"baseline\"…",
+     "result_summary": "{\"region\":\"Madagascar\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–12 only, compared with the same days of baseline years\",\"fire_days\":2193,\"range_90\":[2072,2304],\"typical_fire_days\":2656,\"baseline…",
      "result": {
       "region": "Madagascar",
       "month": "November 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–8 only, compared with the same days of baseline years",
-      "fire_days": 1723,
+      "month_to_date": "days 1–12 only, compared with the same days of baseline years",
+      "fire_days": 2193,
       "range_90": [
-       1625,
-       1807
+       2072,
+       2304
       ],
-      "typical_fire_days": 1800,
+      "typical_fire_days": 2656,
       "baseline": "2003–2022",
-      "ratio_to_typical": 1,
-      "percentile": "38th–48th percentile",
+      "ratio_to_typical": 0.8,
+      "percentile": "14th–29th percentile",
       "return_period_years": null,
       "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 12,
+      "rank_among_years_for_this_month": 16,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 2837,
-       "viirs": 15020
+       "modis": 3571,
+       "viirs": 18870
       },
       "flags": [
        "mtd",
@@ -494,7 +563,83 @@
        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
        "This month is not over yet, so it is compared with the same days in past years.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
+      ],
+      "last_complete_month": {
+       "region": "Madagascar",
+       "month": "October 2026",
+       "unit": "MODIS-equivalent fire-days",
+       "month_to_date": false,
+       "fire_days": 5612,
+       "range_90": [
+        5464,
+        5739
+       ],
+       "typical_fire_days": 7760,
+       "baseline": "2003–2022",
+       "ratio_to_typical": 0.7,
+       "percentile": "5th percentile",
+       "return_period_years": null,
+       "beyond_baseline_record": false,
+       "rank_among_years_for_this_month": 23,
+       "too_little_fire_to_judge": false,
+       "raw_hotspots": {
+        "modis": 8864,
+        "viirs": 46581
+       },
+       "flags": [
+        "provisional"
+       ],
+       "caveats": [
+        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+       ]
+      }
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "mode": "longterm",
+      "month": 10,
+      "region": "madagascar",
+      "year": 2026
+     },
+     "result_summary": "{\"region\":\"Madagascar\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far below normal\",\"verdict\":\"Not checkable yet\",\"rule\":\"R5: no burned-area answer yet and no detection-issue evidence\",\"detection_times\":{\"signal\":\"no_timing_shift\",\"aqua_to_vii…",
+     "result": {
+      "region": "Madagascar",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far below normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 1.034,
+         "night_share_vs_baseline": 1.304,
+         "mean_hour_shift_h": 0.13,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
      }
     }
    ]
@@ -664,20 +809,20 @@
    ]
   },
   "ne_india|scientist": {
-   "answer": "In Northeast India, October 2026 recorded 74 MODIS-equivalent fire-days, which is above every year in the 2003–2022 baseline, with a typical value of 33 fire-days, a 90% range of [64, 86], a ratio to typical of 2.3, and rank 1. For November 2026 (days 1–8 only, compared with the same days of baseline years), the region recorded 28 MODIS-equivalent fire-days, with a typical value of 15 fire-days, a 90% range of [23, 33], a ratio to typical of 1.9, rank 3, and the 76th–90th percentile. The baseline period is 2003–2022. Values are MODIS-equivalent fire-days (Long-term). Method: see the Proof page.",
+   "answer": "In Northeast India, October 2026 recorded 74 MODIS-equivalent fire-days, which is 2.3× typical (typical 33, 90% range 64 to 86, percentile above every year in the 2003–2022 baseline, rank 1, beyond baseline record). November 2026 (days 1–12) recorded 31 MODIS-equivalent fire-days, which is 1.3× typical (typical 23, 90% range 26 to 37, 48th–76th percentile, rank 9). All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale, using baseline 2003–2022. The agentic check verdict is Not checkable yet, because burned area is not available yet (MCD64A1 is published about 1–2 months after the month ends) and geostationary data is not covered. Method: see the Proof page.",
    "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
    "verified": true,
    "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-12T09:02:29.085Z",
+   "generated": "2026-11-13T11:51:46.169Z",
    "status": "Alert",
    "trace": [
     {
      "tool": "get_month",
      "args": {
-      "region": "ne_india",
       "month": 10,
-      "mode": "longterm",
-      "year": 2026
+      "year": 2026,
+      "region": "ne_india",
+      "mode": "longterm"
      },
      "result_summary": "{\"region\":\"Northeast India\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":74,\"range_90\":[64,86],\"typical_fire_days\":33,\"baseline\":\"2003–2022\",\"ratio_to_typical\":2.3,\"percentile\":\"above every…",
      "result": {
@@ -715,31 +860,32 @@
      "tool": "get_month",
      "args": {
       "mode": "longterm",
+      "year": 2026,
       "month": 11,
       "region": "ne_india"
      },
-     "result_summary": "{\"region\":\"Northeast India\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–8 only, compared with the same days of baseline years\",\"fire_days\":28,\"range_90\":[23,33],\"typical_fire_days\":15,\"baseline\":\"2…",
+     "result_summary": "{\"region\":\"Northeast India\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–12 only, compared with the same days of baseline years\",\"fire_days\":31,\"range_90\":[26,37],\"typical_fire_days\":23,\"baseline\":\"…",
      "result": {
       "region": "Northeast India",
       "month": "November 2026",
       "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–8 only, compared with the same days of baseline years",
-      "fire_days": 28,
+      "month_to_date": "days 1–12 only, compared with the same days of baseline years",
+      "fire_days": 31,
       "range_90": [
-       23,
-       33
+       26,
+       37
       ],
-      "typical_fire_days": 15,
+      "typical_fire_days": 23,
       "baseline": "2003–2022",
-      "ratio_to_typical": 1.9,
-      "percentile": "76th–90th percentile",
-      "return_period_years": 6,
+      "ratio_to_typical": 1.3,
+      "percentile": "48th–76th percentile",
+      "return_period_years": 3,
       "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 3,
+      "rank_among_years_for_this_month": 9,
       "too_little_fire_to_judge": false,
       "raw_hotspots": {
-       "modis": 12,
-       "viirs": 183
+       "modis": 13,
+       "viirs": 198
       },
       "flags": [
        "mtd",
@@ -749,37 +895,97 @@
        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
        "This month is not over yet, so it is compared with the same days in past years.",
        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "year": 2026,
+      "region": "ne_india",
+      "month": 10
+     },
+     "result_summary": "{\"region\":\"Northeast India\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Not checkable yet\",\"rule\":\"R5: no burned-area answer yet and no detection-issue evidence\",\"detection_times\":{\"signal\":\"no_timing_shift\",\"aqua_t…",
+     "result": {
+      "region": "Northeast India",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far above normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.854,
+         "night_share_vs_baseline": 1.561,
+         "mean_hour_shift_h": 0.14,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "not_covered",
+         "share_outside_polar_hours": null,
+         "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       }
       ],
-      "last_complete_month": {
-       "region": "Northeast India",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 74,
-       "range_90": [
-        64,
-        86
-       ],
-       "typical_fire_days": 33,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 2.3,
-       "percentile": "above every year in the 2003–2022 baseline",
-       "return_period_years": null,
-       "beyond_baseline_record": true,
-       "rank_among_years_for_this_month": 1,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 85,
-        "viirs": 596
-       },
-       "flags": [
-        "provisional"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "year": 2026,
+      "region": "ne_india",
+      "month": 10
+     },
+     "result_summary": "{\"region\":\"Northeast India\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Not checkable yet\",\"rule\":\"R5: no burned-area answer yet and no detection-issue evidence\",\"detection_times\":{\"signal\":\"no_timing_shift\",\"aqua_t…",
+     "result": {
+      "region": "Northeast India",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far above normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.854,
+         "night_share_vs_baseline": 1.561,
+         "mean_hour_shift_h": 0.14,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "not_covered",
+         "share_outside_polar_hours": null,
+         "note": "no geostationary check for this region yet (Himawari for Australia, INSAT for India: future work)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-13T11:49Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
      }
     }
    ]

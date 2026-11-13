@@ -64,6 +64,16 @@ export default function WatchProof({ doc: given }: { doc?: WatchDoc | null }) {
         </tbody>
       </table>
       <p className="mt-3 text-xs text-faint">{doc.backtest.method} Computed in <code>pipeline/09_watch.py</code>, published in <code>/data/v1/watch.json</code>.</p>
+      {doc.backtest.agent && (() => {
+        const ag = doc.backtest.agent, v = ag.verdicts, rw = ag.regions_with_data
+        return (
+          <p className="mt-2 max-w-4xl text-sm text-muted" data-testid="agent-backtest">
+            <strong className="text-text">Agent check of the harmonized flags ({ag.period[0].slice(0, 4)}–{ag.period[1].slice(0, 4)}, {ag.months_checked} months):</strong>{' '}
+            Real change <span className="num text-text">{v['Real change']}</span> · Detection issue likely <span className="num text-text">{v['Detection issue likely']}</span> · Unclear <span className="num text-text">{v['Unclear']}</span> · Not checkable yet <span className="num text-text">{v['Not checkable yet']}</span>.
+            {' '}Detection times checked in {rw.detection_times.length} regions, burned area (NASA MCD64A1) in {rw.burned_area.length}, geostationary in {rw.geostationary.length}
+            {ag.americas ? '' : ' (GOES: no published Americas region; Meteosat: waiting for data access)'}. Sources: NASA FIRMS (MODIS/VIIRS), NASA MCD64A1 burned area (LP DAAC).
+          </p>)
+      })()}
     </section>
   )
 }
