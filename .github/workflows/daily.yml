@@ -22,7 +22,7 @@ concurrency:
 jobs:
   daily:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45          # Round 8: GOES month-to-date sample for Mato Grosso (anonymous S3) adds a few minutes
     steps:
       - uses: actions/checkout@v4
 

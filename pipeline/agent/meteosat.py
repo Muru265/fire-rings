@@ -3,7 +3,7 @@
 Files: https://datalsasaf.lsasvcs.ipma.pt/PRODUCTS/MSG/FRP-PIXEL/HDF5/YYYY/MM/DD/ (one ListProduct per 15-min slot,
 named HDF5_LSASAF_MSG_FRP-PIXEL-ListProduct_MSG-Disk_YYYYMMDDHHMM, possibly .bz2). Login: LSASAF_USER / LSASAF_PASS from the
 environment (never printed). Without them, or if login fails, the tool returns "pending_access" and the site shows
-"Meteosat check ready — waiting for data access". Regions: tanzania, madagascar (MSG 0° disk).
+"Meteosat check ready — waiting for data access". Regions: tanzania, madagascar, sudan (MSG 0° disk).
 
 Reader (tested on the public sample HDF5_LSASAF_MSG_FRP-PIXEL-ListProduct_MSG-Disk_202009011045, Zenodo record 5717106,
 CC BY 4.0, S. Jackson — tests only, never shown as live data): per fire pixel LATITUDE, LONGITUDE (÷100), FRP (MW, ÷10),
@@ -25,7 +25,7 @@ from .common import load_cache, mkey, month_range, now_iso, parse_key
 from .geo_common import geo_signal, solar_hours
 
 BASE_URL = "https://datalsasaf.lsasvcs.ipma.pt/PRODUCTS/MSG/FRP-PIXEL/HDF5"
-REGIONS = {"tanzania", "madagascar"}
+REGIONS = {"tanzania", "madagascar", "sudan"}   # inside the MSG 0° disk
 SOURCE = "EUMETSAT LSA SAF [FRPPixel, LSA-502]"
 CACHE = "meteosat"
 BASELINE_YEARS = (2018, 2019)

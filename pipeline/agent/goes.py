@@ -3,7 +3,8 @@
 Public AWS Open Data buckets, anonymous access (no credentials):
   noaa-goes16  GOES-East until 7 Apr 2025 15:10 UTC        noaa-goes19  GOES-East from then on
 (NOAA OSPO message MSG_20250407_1510: "GOES-19 has been designated as the Operational GOES-East satellite".)
-Sampling: the first full-disk image of every hour, every day of the month; only the region window of the Fire Mask is read
+Sampling: the first full-disk image of every hour on 8 fixed days of each month (1, 5, 9, 13, 17, 21, 25, 29 — the same for
+flagged and baseline months); only the region window of the Fire Mask is read
 (the variable is chunked 226×226, so h5py fetches just the needed chunks). Fire pixels = mask codes 10–13 and 30–33
 (good, saturated, cloud-contaminated, high-probability fire, incl. temporally filtered); low/medium probability excluded.
 Each pixel centre is mapped to lat/lon (GOES-R PUG fixed-grid formulas) and kept if inside the region footprint.
@@ -83,33 +84,80 @@ def read_window(fs, path: str, bbox, in_region) -> tuple[np.ndarray, np.ndarray]
     return lat[keep], lon[keep]
 
 
-def month_profile(region: str, month: str, bbox, in_region, days: list[int] | None = None, log=print) -> dict:
-    """Hourly sample of one month → 24-bin local-solar profile of fire-pixel detections."""
+FIRST_DATA = dt.date(2017, 5, 24)     # first ABI-L2-FDCF day in noaa-goes16 (bucket listing, checked 13 Nov 2026)
+
+
+SAMPLE_DAYS = (1, 5, 9, 13, 17, 21, 25, 29)   # same 8 days in every month (flagged and baseline): documented sampling
+_FP: dict = {}
+
+
+def _in_region(region: str):
+    import h3
+    from .common import footprint
+    if region not in _FP:
+        fp = footprint(region)
+        _FP[region] = lambda la, lo: h3.latlng_to_cell(la, lo, fp["res"]) in fp["cells"] and h3.latlng_to_cell(la, lo, 9) not in fp["static"]
+    return _FP[region]
+
+
+def _day_profile(job):
+    """Worker (separate process: h5py serialises threads): one day → (24-bin profile, images read)."""
     import s3fs
+    region, y, m, d, bbox = job
     fs = s3fs.S3FileSystem(anon=True)
-    y, m = parse_key(month)
-    d0, d1 = month_range(y, m)
+    inr = _in_region(region)
     prof = np.zeros(24, dtype=int)
-    images = 0
-    for d in range(d0.day, d1.day + 1):
-        if days and d not in days:
-            continue
-        doy = dt.date(y, m, d).timetuple().tm_yday
-        for hr in range(24):
-            t = dt.datetime(y, m, d, hr, tzinfo=dt.timezone.utc)
-            prefix = f"{bucket_for(t)}/ABI-L2-FDCF/{y}/{doy:03d}/{hr:02d}/"
+    n = 0
+    listed: dict[str, list[str]] = {}
+    for hr in range(24):
+        t = dt.datetime(y, m, d, hr, tzinfo=dt.timezone.utc)
+        b = bucket_for(t)
+        if b not in listed:
             try:
-                files = sorted(fs.ls(prefix))
+                listed[b] = sorted(fs.find(f"{b}/ABI-L2-FDCF/{y}/{t.timetuple().tm_yday:03d}/"))
             except FileNotFoundError:
-                continue
-            if not files:
-                continue
-            lat, lon = read_window(fs, files[0], bbox, in_region)
-            images += 1
-            if len(lat):
-                h = solar_hours(np.full(len(lon), hr + 0.1), lon)    # first image starts at hh:00–hh:10 UTC
-                prof += np.bincount(h, minlength=24)
-    return {"profile": prof.tolist(), "images": images, "sampling": "first full-disk image of each hour" + (f", days {days}" if days else ", every day")}
+                listed[b] = []
+        files = [f for f in listed[b] if f.rsplit("/", 2)[-2] == f"{hr:02d}"]
+        if not files:
+            continue
+        lat = lon = None
+        for _ in range(3):
+            try:
+                lat, lon = read_window(fs, files[0], bbox, inr)
+                break
+            except Exception:  # noqa: BLE001 — transient S3 error: retry, then count the image as missing
+                lat = None
+        if lat is None:
+            continue
+        n += 1
+        if len(lat):
+            prof += np.bincount(solar_hours(np.full(len(lon), hr + 0.1), lon), minlength=24)
+    return prof, n
+
+
+def month_profiles(region: str, months: list[str], bbox, days: tuple[int, ...] = SAMPLE_DAYS, workers: int = 8, log=print) -> dict:
+    """Sampled hourly profiles for several months at once (process pool over all (month, day) jobs)."""
+    from concurrent.futures import ProcessPoolExecutor
+    jobs, owner = [], []
+    for k in months:
+        y, m = parse_key(k)
+        last = month_range(y, m)[1].day
+        for d in days:
+            if d <= last:
+                jobs.append((region, y, m, d, tuple(bbox)))
+                owner.append(k)
+    out = {k: {"profile": np.zeros(24, dtype=int), "images": 0, "images_expected": 0} for k in months}
+    for k in owner:
+        out[k]["images_expected"] += 24
+    with ProcessPoolExecutor(workers) as ex:
+        for k, (pr, n) in zip(owner, ex.map(_day_profile, jobs)):
+            out[k]["profile"] += pr
+            out[k]["images"] += n
+    for k in months:
+        out[k]["profile"] = out[k]["profile"].tolist()
+        out[k]["sampling"] = f"first full-disk image of each hour on days {', '.join(map(str, days))} of the month"
+        log(f"   GOES {region} {k}: {sum(out[k]['profile'])} sampled fire pixels from {out[k]['images']}/{out[k]['images_expected']} images")
+    return out
 
 
 def check_geostationary_goes(region: str, month: str, cache: dict | None = None) -> dict:
@@ -119,8 +167,14 @@ def check_geostationary_goes(region: str, month: str, cache: dict | None = None)
     cache = cache if cache is not None else load_cache(CACHE)
     reg = cache.get(region, {})
     if month not in reg:
-        return {**out, "signal": "not_covered", "note": "no GOES summary for this month"}
+        y, m = parse_key(month)
+        if dt.date(y, m, 1) < FIRST_DATA.replace(day=1):
+            return {**out, "signal": "not_covered", "note": f"no GOES-16 fire product before {FIRST_DATA:%d %b %Y}"}
+        return {**out, "signal": "not_covered", "note": "no GOES summary for this month yet"}
+    if reg[month].get("incomplete"):
+        return {**out, "signal": "not_covered", "note": f"too few GOES images archived for this month ({reg[month]['images']}/{reg[month]['images_expected']} sampled)"}
     _, m = parse_key(month)
-    base = [reg[mkey(yy, m)]["profile"] for yy in range(BASELINE_YEARS[0], BASELINE_YEARS[1] + 1) if mkey(yy, m) in reg and mkey(yy, m) != month]
+    base = [reg[mkey(yy, m)]["profile"] for yy in range(BASELINE_YEARS[0], BASELINE_YEARS[1] + 1)
+            if mkey(yy, m) in reg and mkey(yy, m) != month and not reg[mkey(yy, m)].get("incomplete")]
     return {**out, **geo_signal(reg[month]["profile"], base), "images": reg[month]["images"], "sampling": reg[month]["sampling"],
             "satellite": "GOES-16" if dt.datetime(*parse_key(month), 1, tzinfo=dt.timezone.utc) < SWITCH else "GOES-19", "checked_at": now_iso()}

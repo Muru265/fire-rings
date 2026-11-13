@@ -36,7 +36,7 @@ from agent.verdict import VERDICTS, verdict  # noqa: E402
 ROOT = PIPE.parent
 WEB = ROOT / "web" / "public" / "data" / "v1"
 BACKTEST_START = "2013-01"
-AMERICAS = {r for r in ("mato_grosso",)}
+AMERICAS = {"mato_grosso"}
 SOURCES = {"A": A.SOURCE, "B": B.SOURCE, "C1": C1.SOURCE, "C2": C2.SOURCE}
 
 
@@ -94,6 +94,40 @@ def fetch(items: list[dict], today: dt.date, log=print) -> None:
                 log(f"   burned area {r}: fetch failed ({type(e).__name__}) — reported as unavailable")
     else:
         log("   Earthdata credentials not set — burned area: cached months only, others 'unavailable'/'not_yet_published'")
+    # C1 GOES (anonymous, no secret): Americas regions — the flagged month and the same calendar month in the baseline years
+    cache = load_cache(C1.CACHE)
+    from agent.common import footprint
+    for r in sorted({it["region"] for it in items if it["region"] in C1.REGIONS}):
+        need = set()
+        for it in items:
+            if it["region"] != r:
+                continue
+            y, m = parse_key(it["month"])
+            need |= {it["month"]} | {mkey(yy, m) for yy in range(C1.BASELINE_YEARS[0], C1.BASELINE_YEARS[1] + 1)}
+        cur_key = mkey(today.year, today.month)
+        todo = sorted(k for k in need if (k not in cache.get(r, {}) or k == cur_key)       # month to date: refreshed every run
+                      and dt.date(*parse_key(k), 1) >= C1.FIRST_DATA.replace(day=1) and parse_key(k) <= (today.year, today.month))
+        for i in range(0, len(todo), 6):                       # save every 6 months (resume-safe)
+            try:
+                batch = todo[i:i + 6]
+                cur = [k for k in batch if parse_key(k) == (today.year, today.month)]   # month to date: only days ≤ data end
+                res = C1.month_profiles(r, [k for k in batch if k not in cur], footprint(r)["bbox"], log=log) if len(cur) < len(batch) else {}
+                for k in cur:
+                    days = tuple(d for d in C1.SAMPLE_DAYS if d <= today.day)
+                    if days:
+                        res.update(C1.month_profiles(r, [k], footprint(r)["bbox"], days=days, log=log))
+            except Exception as e:  # noqa: BLE001
+                log(f"   GOES {r}: {type(e).__name__} — skipped")
+                break
+            for k, prof in res.items():
+                if prof["images"] >= 0.8 * prof["images_expected"]:
+                    cache.setdefault(r, {})[k] = prof
+                elif k != cur_key:      # a past month with too few archived images: remember it, never re-read it daily
+                    cache.setdefault(r, {})[k] = {**prof, "incomplete": True}
+                    log(f"   GOES {r} {k}: only {prof['images']}/{prof['images_expected']} images archived — marked incomplete")
+                else:
+                    log(f"   GOES {r} {k}: only {prof['images']}/{prof['images_expected']} images — not stored")
+            save_cache(C1.CACHE, cache)
     if C2.credentials():
         cache = load_cache(C2.CACHE)
         for it in items:
