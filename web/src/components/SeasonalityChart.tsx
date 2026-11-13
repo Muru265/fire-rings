@@ -41,11 +41,18 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
   const x = scaleBand<number>().domain(MONTHS.map((_, i) => i)).range([M.l, w - M.r]).padding(0.28)
   const y = scaleLinear().domain([0, ymax]).nice(4).range([H - M.b, M.t])
   const cx = (i: number) => x(i)! + x.bandwidth() / 2
+  // Round 6: the month-to-date month is not comparable with full-month boxes → hollow dot "so far (N days)";
+  // the typical value for the same days 1–N comes from the pipeline (latest.median, same-days baseline) when published.
+  const mtdIdx = yr.findIndex((r) => r?.flags.includes('mtd'))
+  const lt = doc.latest
+  const ltMatch = mtdIdx >= 0 && lt != null && lt.mtd && lt.y === year && lt.m === mtdIdx + 1
+  const soFarDays = mtdIdx < 0 ? null : (ltMatch && lt!.days != null ? lt!.days : Number(doc.data_end.slice(8, 10)))
+  const sameDaysTypical = ltMatch && lt!.median != null ? lt!.median : null
   const table = {
     caption: `Typical fire-days by month (baseline ${doc.baseline[0]}–${doc.baseline[1]}) and ${year}`,
     columns: ['Month', 'P10', 'Median', 'P90', `${year}`, `${year} 90% range`, ...(compareYear ? [`${compareYear}`] : [])],
     rows: MONTHS.map((mn, i) => [mn, fmtInt(c.p10[i]), fmtInt(c.median[i]), fmtInt(c.p90[i]),
-      yr[i]?.H != null ? fmtInt(yr[i]!.H) : null, yr[i]?.lo != null ? `${fmtInt(yr[i]!.lo)}–${fmtInt(yr[i]!.hi)}` : null,
+      yr[i]?.H != null ? `${fmtInt(yr[i]!.H)}${i === mtdIdx ? ` (so far, ${soFarDays} days${sameDaysTypical != null ? `; typical for the same days ${fmtInt(sameDaysTypical)}` : ''})` : ''}` : null, yr[i]?.lo != null ? `${fmtInt(yr[i]!.lo)}–${fmtInt(yr[i]!.hi)}` : null,
       ...(cy ? [cy[i]?.H != null ? fmtInt(cy[i]!.H) : null] : [])]),
   }
   return (
@@ -55,6 +62,7 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
         <li className="flex items-center gap-1.5"><span className="h-3 w-4 rounded-[3px] bg-surface-3" />normal range (8 of 10 years, {doc.baseline[0]}–{doc.baseline[1]})</li>
         <li className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-text" />typical (median)</li>
         <li className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-accent" />{year}</li>
+        {mtdIdx >= 0 && <li className="flex items-center gap-1.5" data-testid="season-sofar-legend"><span className="h-2.5 w-2.5 rounded-full border-2 border-accent" />{MONTHS[mtdIdx]} so far ({soFarDays} days) — partial month</li>}
         {compareYear && <li className="flex items-center gap-1.5"><span className="h-0.5 w-4 border-t-2 border-dashed" style={{ borderColor: C_CMP }} />{compareYear} (similar year)</li>}
       </ul>
       <div ref={ref} className="relative">
@@ -75,9 +83,15 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
                 <rect x={bx} y={y(c.p90[i])} width={bw} height={Math.max(1, y(c.p10[i]) - y(c.p90[i]))} rx={4} fill="var(--surface-3)" />
                 <line x1={bx} x2={bx + bw} y1={y(c.median[i])} y2={y(c.median[i])} stroke="var(--text)" strokeWidth={2} />
                 {r?.lo != null && r?.hi != null && (
-                  <line x1={cx(i)} x2={cx(i)} y1={y(r.lo)} y2={y(r.hi)} stroke="var(--accent)" strokeWidth={1.5} />
+                  <line x1={cx(i)} x2={cx(i)} y1={y(r.lo)} y2={y(r.hi)} stroke="var(--accent)" strokeWidth={1.5} strokeDasharray={i === mtdIdx ? '2 2' : undefined} />
                 )}
-                {r?.H != null && <circle cx={cx(i)} cy={y(r.H)} r={4.5} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2} />}
+                {r?.H != null && i !== mtdIdx && <circle cx={cx(i)} cy={y(r.H)} r={4.5} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2} />}
+                {r?.H != null && i === mtdIdx && (
+                  <g data-testid="season-sofar">
+                    <circle cx={cx(i)} cy={y(r.H)} r={4.5} fill="var(--surface)" stroke="var(--accent)" strokeWidth={2} />
+                    <text x={cx(i)} y={y(r.H) - 9} textAnchor={i >= 10 ? 'end' : i <= 1 ? 'start' : 'middle'} className="fill-[var(--text-muted)] text-[10px]">so far ({soFarDays} days)</text>
+                  </g>
+                )}
                 <text x={cx(i)} y={H - 8} textAnchor="middle" className="fill-[var(--text-muted)] font-mono text-[10px]">{mn[0]}</text>
               </g>
             )
@@ -94,7 +108,13 @@ export default function SeasonalityChart({ doc, year, compareYear }: { doc: Regi
           <>
             <span className="font-semibold text-text">{MONTHS[hover]}</span> · typical <span className="num text-text">{fmtInt(c.median[hover])}</span>
             {' '}(normal range {fmtInt(c.p10[hover])}–{fmtInt(c.p90[hover])})
-            {yr[hover]?.H != null && <> · {year}: <span className="num text-text">{fmtInt(yr[hover]!.H)}</span></>}
+            {yr[hover]?.H != null && hover !== mtdIdx && <> · {year}: <span className="num text-text">{fmtInt(yr[hover]!.H)}</span></>}
+            {yr[hover]?.H != null && hover === mtdIdx && (
+              <> · {year} so far ({soFarDays} days): <span className="num text-text">{fmtInt(yr[hover]!.H)}</span>
+                {sameDaysTypical != null
+                  ? <> · typical for the same {soFarDays} days <span className="num text-text">{fmtInt(sameDaysTypical)}</span> (the box is a full month)</>
+                  : <> · partial month — not comparable to full months yet</>}</>
+            )}
             {cy?.[hover]?.H != null && <> · {compareYear}: <span className="num text-text">{fmtInt(cy[hover]!.H)}</span></>} {unitOf(doc)}
           </>
         ) : 'Hover a month for its values.'}

@@ -1,4 +1,4 @@
-"""11 — Prediction model: "where fire is more likely next month", per H3 res-6 cell (Round 5B, Part B).
+"""11 — Prediction model: "fire likelihood for the scored month" (the month after the last complete month), per H3 res-6 cell (Round 5B, Part B).
 
 Unit: cell × month, all validated regions together (region is a feature). Built only from committed files
 (lib/model_data.py), so the monthly GitHub Actions job can rerun it.
@@ -353,13 +353,20 @@ def append_history(row: dict, reset: bool = False) -> None:
     write_json(p, h)
 
 
+# Round 6 wording (also re-applied by retrain.py): the scored month is `next_month` — the month after the last complete month
+CARD_TEXT = {
+    "name": "Fire Rings — fire likelihood for the scored month (per H3 res-6 hexagon)",
+    "what_it_is": "Where fire is more likely in the scored month (field next_month), from 25 years of harmonized history. A planning aid — not a forecast of individual fires, damage or causes.",
+    "scored_month_rule": "Scores the month after the last complete month of data — e.g. during November it scores November using data up to October (features_through).",
+}
+
+
 def model_card(regions, D, best, sel, recipe, ev, loro, ab, g, thr, version, now) -> dict:
     meta = json.loads((md.WEB / "meta.json").read_text(encoding="utf-8"))
     nxt = {r.id: md.key(r.last_full + 1) for r in regions}
     return {
-        "name": "Fire Rings — fire likelihood next month (per H3 res-6 hexagon)", "version": version, "trained_at": now,
+        **CARD_TEXT, "version": version, "trained_at": now,
         "data_end": meta["data_end"], "next_month": sorted(set(nxt.values())), "features_through": md.key(regions[0].last_full),
-        "what_it_is": "Where fire is more likely next month, from 25 years of harmonized history. A planning aid — not a forecast of individual fires, damage or causes.",
         "unit": "H3 res-6 cell (~36 km²) × month, all validated regions together (region is a feature)",
         "target": "the cell has ≥ 1 VIIRS fire-day (High detail record: S-NPP; NOAA-20 after S-NPP data ended) in month m+1",
         "training_years": list(TRAIN_YEARS), "regions": [r.id for r in regions],

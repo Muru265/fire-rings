@@ -2,6 +2,7 @@
 // Usage: npx tsx scripts/format_test.ts   (npm run test:format)
 import assert from 'node:assert/strict'
 import { fmt1, fmtCompact, fmtInt, fmtRatio, noNegZero, pctDiff2sig } from '../src/lib/format'
+import { formatNumbersInText as F } from '../api/_lib/numfmt'
 import { STAR, TWINKLE, twinkle, twinkleShare } from '../src/lib/twinkle'
 
 const cases: [string, () => void][] = [
@@ -16,6 +17,19 @@ const cases: [string, () => void][] = [
   ['fmtInt / fmtRatio / fmtCompact never print "-0"', () => {
     assert.equal(fmtInt(-0.3), '0'); assert.equal(fmtRatio(-0.01), '0×'); assert.equal(fmtCompact(-0.2), '0')
     assert.equal(fmtInt(15346), '15,346')
+  }],
+  ['Round 6 #7: counts ≥1000 in AI text get commas, years never do', () => {
+    assert.equal(F('compared with a typical 7760, which is 0.7×'), 'compared with a typical 7,760, which is 0.7×')
+    assert.equal(F('recorded 2007 fire-days in October 2026'), 'recorded 2,007 fire-days in October 2026')
+    assert.equal(F('a typical 2007 and a ratio'), 'a typical 2,007 and a ratio')
+    assert.equal(F('recorded 2057 MODIS-equivalent fire-days'), 'recorded 2,057 MODIS-equivalent fire-days')
+    assert.equal(F('a 90% range of 1974 to 2144'), 'a 90% range of 1,974 to 2,144')
+    assert.equal(F('a 90% range of [1974, 2144]'), 'a 90% range of [1,974, 2,144]')
+    assert.equal(F('range 1,974–2144 fire-days'), 'range 1,974–2,144 fire-days')
+    assert.equal(F('below every year in the 2003–2022 baseline'), 'below every year in the 2003–2022 baseline')
+    assert.equal(F('between 2003 and 2022, the 2019 season'), 'between 2003 and 2022, the 2019 season')
+    assert.equal(F('Black Summer 2019–20 had 15346 fire-days; in 2012'), 'Black Summer 2019–20 had 15,346 fire-days; in 2012')
+    assert.equal(F('1.37× typical, 0.2×'), '1.37× typical, 0.2×')
   }],
   ['pctDiff2sig: 2 significant figures', () => {
     assert.equal(pctDiff2sig(48666, 48595), '0.15')

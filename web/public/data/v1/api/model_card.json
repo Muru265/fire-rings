@@ -1,5 +1,5 @@
 {
- "name": "Fire Rings — fire likelihood next month (per H3 res-6 hexagon)",
+ "name": "Fire Rings — fire likelihood for the scored month (per H3 res-6 hexagon)",
  "version": 1,
  "trained_at": "2026-11-12T09:35Z",
  "data_end": "2026-11-09",
@@ -7,7 +7,7 @@
   "2026-11"
  ],
  "features_through": "2026-10",
- "what_it_is": "Where fire is more likely next month, from 25 years of harmonized history. A planning aid — not a forecast of individual fires, damage or causes.",
+ "what_it_is": "Where fire is more likely in the scored month (field next_month), from 25 years of harmonized history. A planning aid — not a forecast of individual fires, damage or causes.",
  "unit": "H3 res-6 cell (~36 km²) × month, all validated regions together (region is a feature)",
  "target": "the cell has ≥ 1 VIIRS fire-day (High detail record: S-NPP; NOAA-20 after S-NPP data ended) in month m+1",
  "training_years": [
@@ -512,5 +512,6 @@
  ],
  "licence": "CC BY 4.0 (outputs) · code MIT",
  "code": "pipeline/11_model.py, pipeline/lib/model_data.py",
- "train_end": "2025-12"
+ "train_end": "2025-12",
+ "scored_month_rule": "Scores the month after the last complete month of data — e.g. during November it scores November using data up to October (features_through)."
 }

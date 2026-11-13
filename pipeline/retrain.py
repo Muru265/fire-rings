@@ -222,6 +222,7 @@ def main() -> None:
         model = res["champion"]
         card = json.loads((M11.API / "model_card.json").read_text(encoding="utf-8"))
     regs = md.load_all()
+    card.update(M11.CARD_TEXT)
     card.update({"data_end": res["row"]["data_end"], "features_through": md.key(min(r.last_full for r in regs)),
                  "next_month": sorted({md.key(r.last_full + 1) for r in regs}), "last_run": res["row"]["date"]})
     M11.write_json(M11.API / "model_card.json", card)

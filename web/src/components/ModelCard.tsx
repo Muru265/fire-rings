@@ -6,7 +6,7 @@ import Help from './Help'
 type M = { roc_auc: number; pr_auc: number; capture10: number; capture20: number; brier?: number; precision?: number; recall?: number; f1?: number }
 type CI = Record<string, [number, number]>
 export interface ModelCardDoc {
-  version: number; trained_at: string; data_end: string; next_month: string[]; regions: string[]; training_years: [number, number]
+  version: number; trained_at: string; data_end: string; next_month: string[]; features_through?: string; regions: string[]; training_years: [number, number]
   evaluation: { pooled: { model: M; climatology: M; persistence: M }; intervals: Record<string, CI> & { model_minus: Record<string, CI> }
     per_region: Record<string, { model: M; climatology: M; persistence: M }> }
   leave_one_region_out: Record<string, { model?: M; climatology?: M; skipped?: string }>
@@ -22,6 +22,9 @@ const pct = (v: number) => `${Math.round(v)}%`
 const f2 = (v: number) => v.toFixed(2)
 const sgn = (v: number, d = 2) => `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v).toFixed(d)}`
 const day = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+const MONTH_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+/** "November 2026" from a model-output key "2026-11" (read from model_card.json, never computed separately). */
+const monFull = (k: string) => `${MONTH_FULL[+k.slice(5, 7) - 1]} ${k.slice(0, 4)}`
 const mon = (k: string) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+k.slice(5, 7) - 1]} ${k.slice(0, 4)}`
 
 export function ModelHistory({ compact = false }: { compact?: boolean }) {
@@ -63,14 +66,16 @@ export default function ModelCard() {
   return (
     <section id="model" className="card scroll-mt-24" aria-labelledby="model-h" data-testid="model-card">
       <p className="eyebrow">Prediction model, tested<Help id="model-card" /></p>
-      <h2 id="model-h" className="mt-1 font-display text-xl font-semibold">Where fire is more likely next month</h2>
+      <h2 id="model-h" className="mt-1 font-display text-xl font-semibold">Fire likelihood for {d.next_month.map(monFull).join(' / ')}</h2>
+      <p className="mt-1 text-xs text-muted" data-testid="model-scores-note">Scores the month after the last complete month of data — e.g. during November it scores November using data up to October.
+        {d.features_through && <> Now: {d.next_month.map(monFull).join(' / ')}, using data up to {monFull(d.features_through)}.</>}</p>
       {d.gate.passed ? (
         <p className="mt-2 text-base text-text" data-testid="model-plain">
-          Watching the top 10% of hexagons would have covered <strong data-claim="m-cap10">{pct(P.model.capture10)}</strong> of next month’s fires,
+          Watching the top 10% of hexagons would have covered <strong data-claim="m-cap10">{pct(P.model.capture10)}</strong> of the following month’s fires,
           vs <strong data-claim="c-cap10">{pct(P.climatology.capture10)}</strong> using the usual season alone.
         </p>
       ) : (
-        <p className="mt-2 text-base text-warn" data-testid="model-plain">Does not beat the seasonal baseline yet — so no likelihood layer is shown. Watching the top 10% of hexagons would have covered {pct(P.model.capture10)} of next month’s fires, vs {pct(P.climatology.capture10)} using the usual season alone.</p>
+        <p className="mt-2 text-base text-warn" data-testid="model-plain">Does not beat the seasonal baseline yet — so no likelihood layer is shown. Watching the top 10% of hexagons would have covered {pct(P.model.capture10)} of the following month’s fires, vs {pct(P.climatology.capture10)} using the usual season alone.</p>
       )}
       <p className="mt-1 text-xs text-muted">Tested on years it never saw (each year 2018–2025 predicted by a model trained only on earlier years), {d.regions.length} regions, H3 hexagons of ~36 km². A planning aid, not a forecast of individual fires.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -96,7 +101,7 @@ export default function ModelCard() {
         <li><strong className="text-text">Per region (rolling origin, top-10% capture):</strong> {Object.entries(e.per_region).map(([id, v]) => `${id.replace('_', ' ')} ${pct(v.model.capture10)} vs ${pct(v.climatology.capture10)}`).join(' · ')}.</li>
       </ul>
       <p className="mt-3 text-xs text-faint" data-testid="model-version">
-        Last retrained {day(d.trained_at)} · version {d.version} · data to {d.data_end} · next month scored: {d.next_month.map(mon).join(', ')} ·{' '}
+        Last retrained {day(d.trained_at)} · version {d.version} · data to {d.data_end} · month scored: {d.next_month.map(mon).join(', ')} ·{' '}
         <a href="/data/v1/api/model_card.json" target="_blank" rel="noreferrer">model card (JSON)</a>
       </p>
       <div className="mt-4"><ModelHistory /></div>

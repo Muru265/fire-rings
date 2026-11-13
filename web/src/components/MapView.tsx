@@ -98,6 +98,14 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
   const [inputs, setInputs] = useState<string[]>(() => (box ?? view).map((v) => v.toFixed(2)))
   const navigate = useNavigate()
   const drawRef = useRef(false)
+  /** Public NASA FIRMS Fire Map centred on the current map view (or the region's default view before the map loads). */
+  const firmsUrl = () => {
+    const c = map.current?.getCenter()
+    const lon = c ? c.lng : (view[0] + view[2]) / 2
+    const lat = c ? c.lat : (view[1] + view[3]) / 2
+    const z = map.current ? Math.max(2, Math.min(14, map.current.getZoom() + 1)) : 6
+    return `https://firms.modaps.eosdis.nasa.gov/map/#d:24hrs;@${lon.toFixed(2)},${lat.toFixed(2)},${z.toFixed(1)}z`
+  }
   drawRef.current = drawing
   const [note, setNote] = useState<string | null>(null)
   const submitRef = useRef<(b: Box) => void>(() => {})
@@ -385,11 +393,14 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
         {lik && (
           <label className="flex items-center gap-1.5 text-muted" data-testid="lik-toggle">
             <input type="checkbox" checked={showLik} onChange={(e) => setShowLik(e.target.checked)} className="accent-[var(--accent-2)]" />
-            Next month: where fire is more likely ({monthLabel(lik.target_month)})<Help id="likelihood-layer" />
+            Fire likelihood for {monthLabel(lik.target_month)}<Help id="likelihood-layer" />
           </label>
         )}
+        <a href={firmsUrl()} target="_blank" rel="noreferrer" data-testid="open-firms"
+          onClick={(e) => { e.currentTarget.href = firmsUrl() }}
+          className="ml-auto text-muted hover:text-text" title="Open the public NASA FIRMS map centred on this view (new tab)">Open in FIRMS ↗</a>
         {live?.ok && (
-          <label className="ml-auto flex items-center gap-1.5 text-muted">
+          <label className="flex items-center gap-1.5 text-muted">
             <input type="checkbox" checked={showLive} onChange={(e) => setShowLive(e.target.checked)} className="accent-[var(--accent-2)]" />
             Live 72 h (provisional)
           </label>
@@ -399,7 +410,7 @@ export default function MapView({ doc, y, m, box, onBox, live }: Props) {
       {lik && showLik && (
         <p className="mt-2 rounded-sm border border-accent-2/40 bg-accent-2/10 px-3 py-1.5 text-xs text-text" role="note" data-testid="lik-caveat">
           Planning aid from 25 years of harmonized history — not a forecast of individual fires. Colours rank hexagons within {doc.name.split(' (')[0]} by how likely at least one
-          satellite fire detection is in {monthLabel(lik.target_month)} (features through {monthLabel(lik.features_through)}). Satellites detect heat, not causes. <a href="/proof#model">How it was tested →</a>
+          satellite fire detection is in {monthLabel(lik.target_month)}. It scores the month after the last complete month of data — here {monthLabel(lik.target_month)} using data up to {monthLabel(lik.features_through)}. Satellites detect heat, not causes. <a href="/proof#model">How it was tested →</a>
         </p>
       )}
       {/* QA #63: the footer follows the mode */}

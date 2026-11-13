@@ -1,5 +1,6 @@
 import { scaleBand, scaleLinear } from 'd3-scale'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useJson } from '../lib/api'
 import { pctRange } from '../lib/describe'
@@ -67,7 +68,8 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
 
   const baseVals = doc.months.filter((x) => x.m === rec.m && x.y >= doc.baseline[0] && x.y <= doc.baseline[1] && x.H != null)
 
-  return (
+  // QA round 6: portal to <body> so the drawer sits above the sticky nav (main is its own stacking context)
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-h">
       <button className="absolute inset-0 bg-black/50 backdrop-blur-[1px]" aria-label="Close month details" onClick={onClose} tabIndex={-1} />
       <aside className="fade-up relative flex h-full w-full max-w-[520px] flex-col overflow-y-auto border-l border-border bg-surface shadow-card">
@@ -148,7 +150,7 @@ export default function MonthDrawer({ doc, rec, onClose, onAsk }: { doc: RegionD
         </div>
       </aside>
     </div>
-  )
+  , document.body)
 }
 
 function DailyChart({ cur, band, n, off = [] }: { cur: number[]; band: ({ p10: number; p50: number; p90: number } | null)[]; n: number; off?: number[] }) {

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import AskPanel from './AskPanel'
 import type { DataMode } from '../lib/types'
 
@@ -10,7 +11,7 @@ export default function AskDrawer({ region, question, onClose, mode }: { region:
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)
   }, [onClose])
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="ask-h">
       <button className="absolute inset-0 bg-black/50" aria-label="Close Ask Fire Rings" onClick={onClose} tabIndex={-1} />
       <aside className="fade-up relative flex h-full w-full max-w-[480px] flex-col overflow-y-auto border-l border-border bg-surface p-5 shadow-card">
@@ -24,5 +25,5 @@ export default function AskDrawer({ region, question, onClose, mode }: { region:
         <AskPanel initialRegion={region} initialQuestion={question} compact mode={mode} />
       </aside>
     </div>
-  )
+  , document.body)
 }
