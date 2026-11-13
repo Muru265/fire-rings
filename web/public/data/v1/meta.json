@@ -2,7 +2,7 @@
  "version": "v1",
  "data_end": "2026-11-12",
  "citation": "Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.",
- "generated": "2026-11-12T09:06Z",
+ "generated": "2026-11-13T12:25Z",
  "regions": [
   {
    "id": "punjab",
@@ -434,8 +434,126 @@
     "mtd": false,
     "provisional": true
    }
+  },
+  {
+   "id": "sudan",
+   "name": "Sudan",
+   "bbox": [
+    21.82,
+    8.68,
+    38.4,
+    22.1
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 0.94,
+    "median": 3200.0,
+    "pct": [
+     33,
+     48
+    ],
+    "return_period": null,
+    "rp_range": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 13,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 2995.7,
+    "lo": 2910.3,
+    "hi": 3097.4,
+    "provisional": true,
+    "days": 12,
+    "baseline_kind": "same days 1–12 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 1.57,
+    "median": 2537.7,
+    "pct": [
+     95,
+     95
+    ],
+    "return_period": null,
+    "rp_range": null,
+    "beyond_record": true,
+    "guard": false,
+    "rank": 1,
+    "rank_of": 25,
+    "value": 3982.6,
+    "lo": 3831.2,
+    "hi": 4103.7,
+    "mtd": false,
+    "provisional": true
+   }
+  },
+  {
+   "id": "mato_grosso",
+   "name": "Mato Grosso, Brazil",
+   "bbox": [
+    -61.58,
+    -18.02,
+    -50.24,
+    -7.34
+   ],
+   "months": 311,
+   "method": "monthly",
+   "harmonized": true,
+   "first": "2001-01",
+   "last": "2026-11",
+   "latest": {
+    "y": 2026,
+    "m": 11,
+    "ratio": 0.47,
+    "median": 544.9,
+    "pct": [
+     10,
+     10
+    ],
+    "return_period": null,
+    "rp_range": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 19,
+    "rank_of": 21,
+    "mtd": true,
+    "value": 255.8,
+    "lo": 232.1,
+    "hi": 280.7,
+    "provisional": true,
+    "days": 12,
+    "baseline_kind": "same days 1–12 of baseline years"
+   },
+   "latest_complete": {
+    "y": 2026,
+    "m": 10,
+    "ratio": 0.19,
+    "median": 3845.6,
+    "pct": [
+     0,
+     0
+    ],
+    "return_period": null,
+    "rp_range": null,
+    "beyond_record": false,
+    "guard": false,
+    "rank": 25,
+    "rank_of": 25,
+    "value": 729.0,
+    "lo": 688.9,
+    "hi": 767.3,
+    "mtd": false,
+    "provisional": true
+   }
   }
  ],
- "last_update": "2026-11-13T11:53Z",
+ "last_update": "2026-11-13T14:07Z",
  "update_cadence": "daily (current month, NRT); model monthly; Long-term record fixed"
 }

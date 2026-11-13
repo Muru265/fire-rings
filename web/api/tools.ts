@@ -38,6 +38,8 @@ export const REGION_ALIASES: Record<string, string[]> = {
   nt_savanna: ['northern territory', 'northern australia', 'top end', 'darwin', 'kakadu', 'arnhem'],
   ne_india: ['northeast india', 'north-east india', 'north east india', 'assam', 'meghalaya', 'tripura', 'mizoram', 'manipur', 'nagaland', 'arunachal'],
   tanzania: ['tanzania', 'tanzanian', 'miombo', 'zanzibar', 'serengeti'],
+  sudan: ['sudan', 'sudanese', 'khartoum', 'darfur', 'kordofan'],
+  mato_grosso: ['mato grosso', 'brazil', 'brazilian', 'cuiabá', 'cuiaba', 'cerrado', 'pantanal'],
 }
 
 /** Region named in a question (QA #61), or null. */
@@ -55,7 +57,7 @@ export const TOOL_DECLARATIONS = [
     name: 'get_month',
     description: 'Fire-days for ONE month in a region, compared with the same month in the baseline. Omit year and month for the latest month (may be month-to-date).',
     parameters: { type: 'object', properties: {
-      region: { type: 'string', description: 'region id: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania' },
+      region: { type: 'string', description: 'region id: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania, sudan, mato_grosso' },
       year: { type: 'integer' }, month: { type: 'integer', description: '1–12' }, mode: MODE_PARAM,
     }, required: ['region'] },
   },

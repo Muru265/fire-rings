@@ -26,45 +26,45 @@
    2022
   ],
   "totals": {
-   "raw_alerts": 183,
-   "harmonized_alerts": 79,
-   "raw_only_alerts": 104,
-   "both": 79,
-   "harmonized_only_alerts": 0,
-   "raw_lows": 16,
-   "harmonized_lows": 80,
-   "lows_missed_by_raw": 64
+   "raw_alerts": 243,
+   "harmonized_alerts": 119,
+   "raw_only_alerts": 128,
+   "both": 115,
+   "harmonized_only_alerts": 4,
+   "raw_lows": 37,
+   "harmonized_lows": 125,
+   "lows_missed_by_raw": 95
   },
   "per_year": {
    "2012": {
-    "raw": 15,
-    "harmonized": 9,
-    "raw_only": 6
-   },
-   "2013": {
-    "raw": 16,
-    "harmonized": 2,
-    "raw_only": 14
-   },
-   "2014": {
-    "raw": 12,
-    "harmonized": 3,
+    "raw": 18,
+    "harmonized": 10,
     "raw_only": 9
    },
+   "2013": {
+    "raw": 18,
+    "harmonized": 2,
+    "raw_only": 16
+   },
+   "2014": {
+    "raw": 13,
+    "harmonized": 3,
+    "raw_only": 10
+   },
    "2015": {
-    "raw": 12,
-    "harmonized": 4,
-    "raw_only": 8
+    "raw": 17,
+    "harmonized": 7,
+    "raw_only": 10
    },
    "2016": {
-    "raw": 15,
-    "harmonized": 6,
+    "raw": 16,
+    "harmonized": 8,
     "raw_only": 9
    },
    "2017": {
-    "raw": 15,
-    "harmonized": 6,
-    "raw_only": 9
+    "raw": 17,
+    "harmonized": 7,
+    "raw_only": 10
    },
    "2018": {
     "raw": 11,
@@ -72,39 +72,39 @@
     "raw_only": 7
    },
    "2019": {
-    "raw": 15,
-    "harmonized": 9,
+    "raw": 16,
+    "harmonized": 10,
     "raw_only": 6
    },
    "2020": {
-    "raw": 16,
-    "harmonized": 5,
-    "raw_only": 11
+    "raw": 23,
+    "harmonized": 11,
+    "raw_only": 13
    },
    "2021": {
-    "raw": 13,
-    "harmonized": 8,
-    "raw_only": 5
+    "raw": 18,
+    "harmonized": 10,
+    "raw_only": 8
    },
    "2022": {
-    "raw": 13,
-    "harmonized": 6,
-    "raw_only": 7
+    "raw": 20,
+    "harmonized": 10,
+    "raw_only": 10
    },
    "2023": {
-    "raw": 11,
-    "harmonized": 5,
-    "raw_only": 6
+    "raw": 20,
+    "harmonized": 12,
+    "raw_only": 8
    },
    "2024": {
-    "raw": 11,
-    "harmonized": 7,
-    "raw_only": 4
+    "raw": 17,
+    "harmonized": 12,
+    "raw_only": 6
    },
    "2025": {
-    "raw": 8,
-    "harmonized": 5,
-    "raw_only": 3
+    "raw": 19,
+    "harmonized": 13,
+    "raw_only": 6
    }
   },
   "method": "Same percentile rules on raw (MODIS to 2011, unconverted VIIRS after) and harmonized monthly fire-days, each vs its own 2003–2022 same-month baseline; point percentile; low-activity guard on both.",
@@ -113,49 +113,57 @@
     "2013-01",
     "2025-12"
    ],
-   "months_checked": 148,
+   "months_checked": 227,
    "verdicts": {
-    "Real change": 94,
-    "Detection issue likely": 13,
-    "Unclear": 22,
-    "Not checkable yet": 19
+    "Real change": 144,
+    "Detection issue likely": 19,
+    "Unclear": 43,
+    "Not checkable yet": 21
    },
    "by_direction": {
     "up": {
-     "Real change": 46,
+     "Real change": 67,
      "Detection issue likely": 2,
-     "Unclear": 11,
+     "Unclear": 29,
      "Not checkable yet": 11
     },
     "down": {
-     "Real change": 48,
-     "Detection issue likely": 11,
-     "Unclear": 11,
-     "Not checkable yet": 8
+     "Real change": 77,
+     "Detection issue likely": 17,
+     "Unclear": 14,
+     "Not checkable yet": 10
     }
    },
    "regions_with_data": {
     "detection_times": [
      "madagascar",
+     "mato_grosso",
      "mauritius",
      "ne_india",
      "nt_savanna",
      "punjab",
      "se_australia",
+     "sudan",
      "tanzania"
     ],
     "burned_area": [
      "madagascar",
+     "mato_grosso",
      "mauritius",
      "ne_india",
      "nt_savanna",
      "punjab",
      "se_australia",
+     "sudan",
      "tanzania"
     ],
-    "geostationary": []
+    "geostationary": [
+     "mato_grosso"
+    ]
    },
-   "americas": null
+   "americas": [
+    "mato_grosso"
+   ]
   }
  },
  "regions": {
@@ -415,11 +423,11 @@
         "mean_hour_baseline": 13.18,
         "mean_hour_shift": 0.15,
         "thresholds": {
-         "aqua_viirs_x": 1.875,
-         "night_share_x": 3.538,
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-13T11:53Z"
+        "checked_at": "2026-11-13T14:12Z"
        }
       },
       {
@@ -474,7 +482,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-13T11:53Z"
+     "checked_at": "2026-11-13T14:12Z"
     },
     {
      "region": "punjab",
@@ -525,11 +533,11 @@
         "mean_hour_baseline": 13.24,
         "mean_hour_shift": 0.06,
         "thresholds": {
-         "aqua_viirs_x": 1.875,
-         "night_share_x": 3.538,
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-13T11:53Z"
+        "checked_at": "2026-11-13T14:12Z"
        }
       },
       {
@@ -584,7 +592,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-13T11:53Z"
+     "checked_at": "2026-11-13T14:12Z"
     }
    ]
   },
@@ -839,11 +847,11 @@
         "mean_hour_baseline": 13.67,
         "mean_hour_shift": 0.13,
         "thresholds": {
-         "aqua_viirs_x": 1.875,
-         "night_share_x": 3.538,
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-13T11:53Z"
+        "checked_at": "2026-11-13T14:12Z"
        }
       },
       {
@@ -900,7 +908,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-13T11:53Z"
+     "checked_at": "2026-11-13T14:12Z"
     }
    ]
   },
@@ -1741,11 +1749,11 @@
         "mean_hour_baseline": 13.2,
         "mean_hour_shift": 0.14,
         "thresholds": {
-         "aqua_viirs_x": 1.875,
-         "night_share_x": 3.538,
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-13T11:53Z"
+        "checked_at": "2026-11-13T14:12Z"
        }
       },
       {
@@ -1800,7 +1808,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-13T11:53Z"
+     "checked_at": "2026-11-13T14:12Z"
     }
    ]
   },
@@ -2016,6 +2024,845 @@
     }
    },
    "timing_check": null
+  },
+  "sudan": {
+   "name": "Sudan",
+   "status": "Alert",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 12,
+     "value": 2995.7,
+     "lo": 2910.3,
+     "hi": 3097.4,
+     "median": 3200.0,
+     "ratio": 0.94,
+     "pct": [
+      33,
+      48
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Normal",
+     "rule": null,
+     "rule_text": null
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 3982.6,
+     "lo": 3831.2,
+     "hi": 4103.7,
+     "median": 2537.7,
+     "ratio": 1.57,
+     "pct": [
+      95,
+      95
+     ],
+     "return_period": null,
+     "beyond_record": true,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Alert",
+     "rule": "above_every_baseline_year",
+     "rule_text": "above every year in the 2003–2022 baseline (percentile ≥ 95)"
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 47474,
+    "expected_72h": 9494.8,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 48,
+    "harmonized_alerts": 29,
+    "raw_only_alerts": 19,
+    "both": 29,
+    "harmonized_only_alerts": 0,
+    "raw_lows": 0,
+    "harmonized_lows": 19,
+    "lows_missed_by_raw": 19,
+    "per_year": {
+     "2012": {
+      "raw": 3,
+      "harmonized": 0,
+      "raw_only": 3
+     },
+     "2013": {
+      "raw": 2,
+      "harmonized": 0,
+      "raw_only": 2
+     },
+     "2014": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2015": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2016": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2017": {
+      "raw": 2,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2018": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2020": {
+      "raw": 6,
+      "harmonized": 5,
+      "raw_only": 1
+     },
+     "2021": {
+      "raw": 5,
+      "harmonized": 2,
+      "raw_only": 3
+     },
+     "2022": {
+      "raw": 4,
+      "harmonized": 1,
+      "raw_only": 3
+     },
+     "2023": {
+      "raw": 8,
+      "harmonized": 6,
+      "raw_only": 2
+     },
+     "2024": {
+      "raw": 5,
+      "harmonized": 4,
+      "raw_only": 1
+     },
+     "2025": {
+      "raw": 11,
+      "harmonized": 8,
+      "raw_only": 3
+     }
+    },
+    "raw_only_months": [
+     "2012-09",
+     "2012-10",
+     "2012-11",
+     "2013-07",
+     "2013-08",
+     "2017-10",
+     "2020-11",
+     "2021-01",
+     "2021-05",
+     "2021-06",
+     "2022-03",
+     "2022-05",
+     "2022-12",
+     "2023-03",
+     "2023-06",
+     "2024-05",
+     "2025-07",
+     "2025-08",
+     "2025-11"
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2015-08",
+      "2017-07",
+      "2019-12",
+      "2020-01",
+      "2020-02",
+      "2020-03",
+      "2020-04",
+      "2020-06",
+      "2021-04",
+      "2021-09",
+      "2022-02",
+      "2023-01",
+      "2023-02",
+      "2023-05",
+      "2023-07",
+      "2023-09",
+      "2023-12",
+      "2024-01",
+      "2024-02",
+      "2024-09",
+      "2024-12",
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-09",
+      "2025-12"
+     ],
+     "down": [
+      "2012-02",
+      "2012-03",
+      "2012-04",
+      "2012-05",
+      "2012-08",
+      "2013-11",
+      "2014-04",
+      "2014-07",
+      "2014-09",
+      "2015-10",
+      "2016-03",
+      "2016-05",
+      "2016-06",
+      "2016-07",
+      "2016-08",
+      "2017-01",
+      "2018-02",
+      "2022-11",
+      "2023-11"
+     ]
+    }
+   },
+   "timing_check": [
+    {
+     "region": "sudan",
+     "month": "2026-10",
+     "flag": "far above normal",
+     "direction": "up",
+     "kind": "current",
+     "check": "last_full",
+     "status": "Alert",
+     "verdict": "Detection issue likely",
+     "rule": "R3: detection times shifted",
+     "signals": {
+      "detection_times": "timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "pending_access"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×0.807, night share ×1.287 vs same month 2013–2019; mean VIIRS hour +0.22 h → shift.",
+      "Burned area (MCD64A1): not yet published for this month.",
+      "Geostationary: Meteosat check ready — waiting for data access."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "sudan",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-10",
+        "baseline": "same month 2013–2019",
+        "signal": "timing_shift",
+        "reasons": [
+         "mean_hour"
+        ],
+        "viirs_day_celldays": 10006,
+        "baseline_years": 7,
+        "aqua_viirs": 0.225,
+        "aqua_viirs_baseline": 0.279,
+        "aqua_viirs_rel": 0.807,
+        "night_share": 0.091,
+        "night_share_baseline": 0.071,
+        "night_share_rel": 1.287,
+        "mean_hour": 13.55,
+        "mean_hour_baseline": 13.33,
+        "mean_hour_shift": 0.22,
+        "thresholds": {
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T14:12Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "sudan",
+        "month": "2026-10",
+        "direction": "up"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-10",
+        "baseline": "median of 10 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "sudan",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "instrument": "Meteosat SEVIRI (LSA SAF FRP-PIXEL)",
+        "source": "EUMETSAT LSA SAF [FRPPixel, LSA-502]",
+        "month": "2026-10",
+        "signal": "pending_access",
+        "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "up",
+        "A": "timing_shift",
+        "B": "not_yet_published",
+        "C": "pending_access"
+       },
+       "result": {
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)"
+     ],
+     "checked_at": "2026-11-13T14:12Z"
+    }
+   ]
+  },
+  "mato_grosso": {
+   "name": "Mato Grosso, Brazil",
+   "status": "Unusually low",
+   "checks": [
+    {
+     "id": "mtd",
+     "label": "This month so far",
+     "y": 2026,
+     "m": 11,
+     "month": "Nov 2026",
+     "days": 12,
+     "value": 255.8,
+     "lo": 232.1,
+     "hi": 280.7,
+     "median": 544.9,
+     "ratio": 0.47,
+     "pct": [
+      10,
+      10
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "mtd",
+      "provisional"
+     ],
+     "status": "Unusually low",
+     "rule": "far_below_normal",
+     "rule_text": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty"
+    },
+    {
+     "id": "last_full",
+     "label": "Last full month",
+     "y": 2026,
+     "m": 10,
+     "month": "Oct 2026",
+     "days": null,
+     "value": 729.0,
+     "lo": 688.9,
+     "hi": 767.3,
+     "median": 3845.6,
+     "ratio": 0.19,
+     "pct": [
+      0,
+      0
+     ],
+     "return_period": null,
+     "beyond_record": false,
+     "guard": false,
+     "flags": [
+      "provisional"
+     ],
+     "status": "Unusually low",
+     "rule": "far_below_normal",
+     "rule_text": "far below normal: below the 10th percentile (P10) even at the high end of our uncertainty"
+    }
+   ],
+   "flags": [
+    "mtd",
+    "provisional"
+   ],
+   "relevant_for": "fire services, environmental agencies and land managers, researchers and journalists",
+   "live_expected": {
+    "month": "Nov",
+    "median_monthly_detections": 5449,
+    "expected_72h": 1089.8,
+    "baseline": [
+     2013,
+     2022
+    ]
+   },
+   "backtest": {
+    "raw_alerts": 12,
+    "harmonized_alerts": 11,
+    "raw_only_alerts": 5,
+    "both": 7,
+    "harmonized_only_alerts": 4,
+    "raw_lows": 21,
+    "harmonized_lows": 26,
+    "lows_missed_by_raw": 12,
+    "per_year": {
+     "2012": {
+      "raw": 0,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2013": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2014": {
+      "raw": 1,
+      "harmonized": 0,
+      "raw_only": 1
+     },
+     "2015": {
+      "raw": 4,
+      "harmonized": 2,
+      "raw_only": 2
+     },
+     "2016": {
+      "raw": 1,
+      "harmonized": 2,
+      "raw_only": 0
+     },
+     "2017": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2018": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2019": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2020": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2021": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     },
+     "2022": {
+      "raw": 3,
+      "harmonized": 3,
+      "raw_only": 0
+     },
+     "2023": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 0
+     },
+     "2024": {
+      "raw": 1,
+      "harmonized": 1,
+      "raw_only": 1
+     },
+     "2025": {
+      "raw": 0,
+      "harmonized": 0,
+      "raw_only": 0
+     }
+    },
+    "raw_only_months": [
+     "2014-10",
+     "2015-10",
+     "2015-11",
+     "2020-12",
+     "2024-08"
+    ],
+    "harmonized_flagged": {
+     "up": [
+      "2012-03",
+      "2015-01",
+      "2015-12",
+      "2016-02",
+      "2016-04",
+      "2020-03",
+      "2022-04",
+      "2022-05",
+      "2022-11",
+      "2023-12",
+      "2024-03"
+     ],
+     "down": [
+      "2015-05",
+      "2015-07",
+      "2017-12",
+      "2018-02",
+      "2018-08",
+      "2018-10",
+      "2018-11",
+      "2021-09",
+      "2021-11",
+      "2022-10",
+      "2023-01",
+      "2023-07",
+      "2023-08",
+      "2023-09",
+      "2023-10",
+      "2024-07",
+      "2024-11",
+      "2025-01",
+      "2025-04",
+      "2025-06",
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+     ]
+    }
+   },
+   "timing_check": [
+    {
+     "region": "mato_grosso",
+     "month": "2026-10",
+     "flag": "far below normal",
+     "direction": "down",
+     "kind": "current",
+     "check": "last_full",
+     "status": "Unusually low",
+     "verdict": "Not checkable yet",
+     "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+     "signals": {
+      "detection_times": "no_timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "fires_match_overpass"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×1.188, night share ×1.047 vs same month 2013–2019; mean VIIRS hour +0.19 h → no shift.",
+      "Burned area (MCD64A1): not yet published for this month.",
+      "Geostationary: 37% of sampled fire pixels outside polar overpass hours."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-10",
+        "baseline": "same month 2013–2019",
+        "signal": "no_timing_shift",
+        "reasons": [],
+        "viirs_day_celldays": 1366,
+        "baseline_years": 7,
+        "aqua_viirs": 0.317,
+        "aqua_viirs_baseline": 0.267,
+        "aqua_viirs_rel": 1.188,
+        "night_share": 0.298,
+        "night_share_baseline": 0.285,
+        "night_share_rel": 1.047,
+        "mean_hour": 13.85,
+        "mean_hour_baseline": 13.66,
+        "mean_hour_shift": 0.19,
+        "thresholds": {
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T14:12Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-10",
+        "direction": "down"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-10",
+        "baseline": "median of 10 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-10"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "instrument": "GOES-R ABI (FDCF)",
+        "source": "NOAA GOES-R ABI Fire Detection (AWS Open Data)",
+        "month": "2026-10",
+        "detections_sampled": 1322,
+        "share_outside_polar_hours": 0.373,
+        "hourly_profile_local_solar": [
+         14,
+         13,
+         6,
+         8,
+         7,
+         6,
+         4,
+         13,
+         37,
+         61,
+         101,
+         73,
+         123,
+         189,
+         184,
+         139,
+         115,
+         58,
+         44,
+         28,
+         34,
+         27,
+         20,
+         18
+        ],
+        "signal": "fires_match_overpass",
+        "baseline_share_outside": 0.428,
+        "baseline_months": 2,
+        "images": 192,
+        "sampling": "first full-disk image of each hour on days 1, 5, 9, 13, 17, 21, 25, 29 of the month",
+        "satellite": "GOES-19",
+        "checked_at": "2026-11-13T14:12Z"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "down",
+        "A": "no_timing_shift",
+        "B": "not_yet_published",
+        "C": "fires_match_overpass"
+       },
+       "result": {
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)",
+      "NOAA GOES-R ABI Fire Detection (AWS Open Data)"
+     ],
+     "checked_at": "2026-11-13T14:12Z"
+    },
+    {
+     "region": "mato_grosso",
+     "month": "2026-11",
+     "flag": "far below normal",
+     "direction": "down",
+     "kind": "current",
+     "check": "mtd",
+     "status": "Unusually low",
+     "verdict": "Detection issue likely",
+     "rule": "R3: geostationary sees fires outside polar overpass hours",
+     "signals": {
+      "detection_times": "no_timing_shift",
+      "burned_area": "not_yet_published",
+      "geostationary": "fires_outside_overpass_hours"
+     },
+     "evidence": [
+      "Detection times: Aqua÷VIIRS ×1.4, night share ×1.201 vs same month 2013–2019; mean VIIRS hour +0.07 h → no shift.",
+      "Burned area (MCD64A1): not yet published for this month.",
+      "Geostationary: 58% of sampled fire pixels outside polar overpass hours."
+     ],
+     "trace": [
+      {
+       "step": 1,
+       "tool": "check_detection_times",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-11"
+       },
+       "result": {
+        "tool": "check_detection_times",
+        "source": "NASA FIRMS (MODIS/VIIRS)",
+        "month": "2026-11",
+        "baseline": "same month 2013–2019",
+        "signal": "no_timing_shift",
+        "reasons": [],
+        "viirs_day_celldays": 407,
+        "baseline_years": 7,
+        "aqua_viirs": 0.447,
+        "aqua_viirs_baseline": 0.319,
+        "aqua_viirs_rel": 1.4,
+        "night_share": 0.323,
+        "night_share_baseline": 0.269,
+        "night_share_rel": 1.201,
+        "mean_hour": 13.73,
+        "mean_hour_baseline": 13.66,
+        "mean_hour_shift": 0.07,
+        "thresholds": {
+         "aqua_viirs_x": 2.062,
+         "night_share_x": 3.098,
+         "hour_shift_h": 0.198
+        },
+        "checked_at": "2026-11-13T14:12Z"
+       }
+      },
+      {
+       "step": 2,
+       "tool": "check_burned_area",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-11",
+        "direction": "down"
+       },
+       "result": {
+        "tool": "check_burned_area",
+        "source": "NASA MCD64A1 burned area (LP DAAC)",
+        "product": "MCD64A1 C6.1",
+        "month": "2026-11",
+        "baseline": "median of 11 in 2003–2022",
+        "baseline_years": 20,
+        "signal": "not_yet_published",
+        "note": "MCD64A1 is published about 1–2 months after the month ends"
+       }
+      },
+      {
+       "step": 3,
+       "tool": "check_geostationary",
+       "input": {
+        "region": "mato_grosso",
+        "month": "2026-11"
+       },
+       "result": {
+        "tool": "check_geostationary",
+        "instrument": "GOES-R ABI (FDCF)",
+        "source": "NOAA GOES-R ABI Fire Detection (AWS Open Data)",
+        "month": "2026-11",
+        "detections_sampled": 147,
+        "share_outside_polar_hours": 0.585,
+        "hourly_profile_local_solar": [
+         0,
+         1,
+         1,
+         1,
+         0,
+         0,
+         0,
+         1,
+         1,
+         1,
+         3,
+         2,
+         5,
+         25,
+         20,
+         29,
+         18,
+         14,
+         13,
+         8,
+         1,
+         1,
+         1,
+         1
+        ],
+        "signal": "fires_outside_overpass_hours",
+        "baseline_share_outside": 0.399,
+        "baseline_months": 2,
+        "images": 72,
+        "sampling": "first full-disk image of each hour on days 1, 5, 9 of the month",
+        "satellite": "GOES-19",
+        "checked_at": "2026-11-13T14:12Z"
+       }
+      },
+      {
+       "step": 4,
+       "tool": "verdict_rules",
+       "input": {
+        "direction": "down",
+        "A": "no_timing_shift",
+        "B": "not_yet_published",
+        "C": "fires_outside_overpass_hours"
+       },
+       "result": {
+        "verdict": "Detection issue likely",
+        "rule": "R3: geostationary sees fires outside polar overpass hours"
+       }
+      }
+     ],
+     "sources": [
+      "NASA FIRMS (MODIS/VIIRS)",
+      "NASA MCD64A1 burned area (LP DAAC)",
+      "NOAA GOES-R ABI Fire Detection (AWS Open Data)"
+     ],
+     "checked_at": "2026-11-13T14:12Z"
+    }
+   ]
   }
  }
 }

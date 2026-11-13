@@ -1,11 +1,11 @@
 {
- "version": 1,
- "recipe": "hgb_small",
- "trained_at": "2026-11-12T09:35Z",
+ "version": 2,
+ "recipe": "hgb",
+ "trained_at": "2026-11-13T12:37Z",
  "data_end": "2026-11-09",
  "train_end": "2025-12",
- "pr_auc": 0.7271,
- "capture10": 30.5,
- "clim_pr_auc": 0.5899,
- "clim_capture10": 27.2
+ "pr_auc": 0.6867,
+ "capture10": 31.9,
+ "clim_pr_auc": 0.5343,
+ "clim_capture10": 28.0
 }

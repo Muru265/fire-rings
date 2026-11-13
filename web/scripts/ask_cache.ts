@@ -1,4 +1,4 @@
-// Precompute answers for 4 chips × every published region (7) × 2 styles → public/data/v1/ask_cache.json (keys "region|question|voice").
+// Precompute answers for 4 chips × every published region (meta.json) × 2 styles → public/data/v1/ask_cache.json (keys "region|question|voice").
 // The frontend uses these if /api/ask errors or is rate-limited (QA #33). Only verified answers are cached.
 // Keys "region|question|voice" (Long-term) and "region|question|voice|detail" (High detail, #85).
 // Usage: npx tsx --env-file=../.env scripts/ask_cache.ts [--mode longterm|detail|both] [--only "mauritius|*"]   (existing entries kept unless regenerated)

@@ -400,7 +400,7 @@ def model_card(regions, D, best, sel, recipe, ev, loro, ab, g, thr, version, now
             "Cells are the hexagons with at least one detection in the record; never-burning land is not scored.",
             "Recent months are provisional (near-real-time data); NOAA-20 replaces S-NPP after Oct 2026.",
             "Punjab Oct–Nov: satellites pass at ~13:30 while burning has reportedly shifted later, so fire there may be undercounted.",
-            "Trained on 7 regions; other places need their own validation first."],
+            f"Trained on {len(regions)} regions; other places need their own validation first."],
         "licence": "CC BY 4.0 (outputs) · code MIT", "code": "pipeline/11_model.py, pipeline/lib/model_data.py",
     }
 

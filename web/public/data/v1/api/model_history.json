@@ -1,19 +1,19 @@
 {
  "runs": [
   {
-   "date": "2026-11-12T09:35Z",
+   "date": "2026-11-13T12:37Z",
    "data_end": "2026-11-09",
    "trigger": "pipeline (11_model.py)",
-   "version": 1,
+   "version": 2,
    "champion": null,
    "challenger": {
-    "recipe": "hgb_small",
-    "pr_auc": 0.7271,
-    "capture10": 30.5
+    "recipe": "hgb",
+    "pr_auc": 0.6867,
+    "capture10": 31.9
    },
    "climatology": {
-    "pr_auc": 0.5899,
-    "capture10": 27.2
+    "pr_auc": 0.5343,
+    "capture10": 28.0
    },
    "decision": "published (first model)"
   }

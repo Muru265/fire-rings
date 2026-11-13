@@ -7,6 +7,9 @@ export const REGIONS = [
   { id: 'nt_savanna', name: 'Northern Australia savanna', country: 'Australia', area: 'the Northern Territory (state border)' },
   { id: 'ne_india', name: 'Northeast India', country: 'India', area: '7 northeastern states (state borders)' },
   { id: 'tanzania', name: 'Tanzania', country: 'Tanzania', area: 'the whole country (incl. Zanzibar)' },
+  // Round 8: published under validation gate v1.2 (METHODS §7, docs/validation_report.md → Gate history)
+  { id: 'sudan', name: 'Sudan', country: 'Sudan', area: 'today’s Sudan border, used for all years' },
+  { id: 'mato_grosso', name: 'Mato Grosso, Brazil', country: 'Brazil', area: 'Mato Grosso state (state border)' },
 ] as const
 
 export type RegionId = (typeof REGIONS)[number]['id']

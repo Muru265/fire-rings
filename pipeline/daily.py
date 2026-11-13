@@ -52,7 +52,7 @@ ASSETS = PIPE / "assets" / "daily"
 CACHE = ROOT / "data" / "raw_daily"
 SOURCES = {"N20": "VIIRS_NOAA20_NRT", "MODIS": "MODIS_NRT"}
 CHUNK_DAYS = 5                 # the FIRMS area API accepts a day range of 1–5
-MAX_CALLS = 260                # hard budget per run (7 regions × 2 sources × ≤ 7 chunks × 2 months at a month change)
+MAX_CALLS = 330                # hard budget per run (9 regions × 2 sources × ≤ 7 chunks × 2 months at a month change = 252, + retries)
 TIMING_CAVEAT_REGIONS = {"punjab"}
 DETAIL_START, DETAIL_BASE = 2012, (2013, 2022)
 calls = 0

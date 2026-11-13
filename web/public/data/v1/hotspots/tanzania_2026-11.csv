@@ -1,4 +1,4 @@
-# Fire Rings v1 · Tanzania · 2026-11 · filtered hotspot detections (conf N/H, static sources masked) · provisional NRT · Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.
+# Fire Rings v1 · Tanzania · 2026-11 · filtered hotspot detections (conf N/H, static sources masked) · provisional NRT · Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.
 lat,lon,t_utc,solar_date,stream,conf,frp_mw,daynight,product
 -10.95934,37.6174,2026-10-31T22:08Z,2026-11-01,N20,N,1.12,N,NRT
 -9.54066,36.10295,2026-10-31T22:08Z,2026-11-01,N20,N,1.33,N,NRT

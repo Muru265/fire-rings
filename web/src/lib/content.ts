@@ -7,7 +7,7 @@ import { provisionalSpan } from './provisional'
 import type { RegionDoc } from './types'
 import type { WatchDoc } from '../../api/_lib/watch'
 
-export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania'] as const
+export const REGION_IDS = ['punjab', 'madagascar', 'se_australia', 'mauritius', 'nt_savanna', 'ne_india', 'tanzania', 'sudan', 'mato_grosso'] as const
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ContentData { values: Record<string, string>; docs: Record<string, RegionDoc>; watch: WatchDoc | null; reunion: boolean; val: Record<string, any> | null }
 

@@ -49,7 +49,7 @@ spec.loader.exec_module(M11)
 
 CACHE = PIPE.parent / "data" / "raw_retrain"
 SOURCE = "VIIRS_NOAA20_NRT"
-MAX_CALLS = 110         # hard budget per run (7 regions × 7 calls per month ≈ 49)
+MAX_CALLS = 140         # hard budget per run (9 regions × 7 calls per month ≈ 63, + retries)
 CHUNK_DAYS = 5          # the FIRMS area API accepts a day range of 1–5
 MAX_MONTHS_BACK = 2     # NRT archives keep only recent months
 HOLDOUT_MAX = 3         # newest complete target months used for the champion-vs-challenger head-to-head

@@ -126,7 +126,12 @@
       "2024": 23,
       "2025": 24
      }
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2004,
+    "step_p_modis": 1.0,
+    "step_cp_modis": 2006
    },
    "results": {
     "monthly": {
@@ -285,7 +290,12 @@
       "pettitt_p_harm": 0.9171,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2004,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2006,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -595,7 +605,12 @@
       "pettitt_p_harm": 0.9171,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2004,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2006,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -845,7 +860,12 @@
      ],
      "status": "info",
      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2008,
+    "step_p_modis": 1.0,
+    "step_cp_modis": 2008
    },
    "results": {
     "monthly": {
@@ -1004,7 +1024,12 @@
       "pettitt_p_harm": 1.0,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2008,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2008,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -1283,7 +1308,12 @@
       "pettitt_p_harm": 1.0,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2008,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2008,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -1512,7 +1542,12 @@
      "black_summer_rank_harmonized": 1,
      "black_summer_rank_raw": 1,
      "pass": true
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2016,
+    "step_p_modis": 0.6139,
+    "step_cp_modis": 2016
    },
    "results": {
     "monthly": {
@@ -1671,7 +1706,12 @@
       "pettitt_p_harm": 0.6139,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2006,
-      "pass": false
+      "pettitt_p_modis": 0.6139,
+      "pettitt_cp_modis": 2016,
+      "step_consistent": false,
+      "pass_v11": false,
+      "pass": false,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -1960,7 +2000,12 @@
       "pettitt_p_harm": 0.6139,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2016,
-      "pass": true
+      "pettitt_p_modis": 0.6139,
+      "pettitt_cp_modis": 2016,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -2189,7 +2234,12 @@
      ],
      "status": "info",
      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2008,
+    "step_p_modis": 1.0,
+    "step_cp_modis": 2008
    },
    "results": {
     "monthly": {
@@ -2348,7 +2398,12 @@
       "pettitt_p_harm": 0.8627,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2008,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2008,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -2627,7 +2682,12 @@
       "pettitt_p_harm": 1.0,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2008,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2008,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -2846,7 +2906,12 @@
      ],
      "status": "info",
      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2010,
+    "step_p_modis": 1.0,
+    "step_cp_modis": 2010
    },
    "results": {
     "monthly": {
@@ -3005,7 +3070,12 @@
       "pettitt_p_harm": 1.0,
       "pettitt_cp_raw": 2010,
       "pettitt_cp_harm": 2010,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2010,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -3284,7 +3354,12 @@
       "pettitt_p_harm": 1.0,
       "pettitt_cp_raw": 2010,
       "pettitt_cp_harm": 2010,
-      "pass": true
+      "pettitt_p_modis": 1.0,
+      "pettitt_cp_modis": 2010,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -3503,7 +3578,12 @@
      ],
      "status": "info",
      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2014,
+    "step_p_modis": 0.0884,
+    "step_cp_modis": 2014
    },
    "results": {
     "monthly": {
@@ -3662,7 +3742,12 @@
       "pettitt_p_harm": 0.0884,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2014,
-      "pass": true
+      "pettitt_p_modis": 0.0884,
+      "pettitt_cp_modis": 2014,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -3941,7 +4026,12 @@
       "pettitt_p_harm": 0.0884,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2014,
-      "pass": true
+      "pettitt_p_modis": 0.0884,
+      "pettitt_cp_modis": 2014,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -4160,7 +4250,12 @@
      ],
      "status": "info",
      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
-    }
+    },
+    "v3_pass_v11": true,
+    "gate_version": "v1.2",
+    "step_cp": 2010,
+    "step_p_modis": 0.0692,
+    "step_cp_modis": 2010
    },
    "results": {
     "monthly": {
@@ -4319,7 +4414,12 @@
       "pettitt_p_harm": 0.0692,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2010,
-      "pass": true
+      "pettitt_p_modis": 0.0692,
+      "pettitt_cp_modis": 2010,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -4598,7 +4698,12 @@
       "pettitt_p_harm": 0.0884,
       "pettitt_cp_raw": 2011,
       "pettitt_cp_harm": 2010,
-      "pass": true
+      "pettitt_p_modis": 0.0692,
+      "pettitt_cp_modis": 2010,
+      "step_consistent": true,
+      "pass_v11": true,
+      "pass": true,
+      "gate_version": "v1.2"
      },
      "V4": {
       "drift": [
@@ -4716,6 +4821,1350 @@
        "2016–17",
        "2012–13",
        "2021–22"
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+     }
+    }
+   }
+  },
+  "sudan": {
+   "region": "sudan",
+   "summary": {
+    "method": "monthly",
+    "method_reason": "primary method passes V1 and V3",
+    "low_activity": false,
+    "loyo_err_pct": 2.8,
+    "loyo_bias_pct": -0.1,
+    "step_raw_pct": 122.8,
+    "step_harm_pct": -14.6,
+    "step_modis_pct": -14.5,
+    "step_harm_ci": [
+     -16.2,
+     -13.1
+    ],
+    "step_p": 0.0132,
+    "step_p_raw": 0.0051,
+    "shape_r": 0.998,
+    "drift": [
+     {
+      "y": 2012,
+      "ratio": 0.4058
+     },
+     {
+      "y": 2013,
+      "ratio": 0.3936
+     },
+     {
+      "y": 2014,
+      "ratio": 0.3916
+     },
+     {
+      "y": 2015,
+      "ratio": 0.37
+     },
+     {
+      "y": 2016,
+      "ratio": 0.3925
+     },
+     {
+      "y": 2017,
+      "ratio": 0.3807
+     },
+     {
+      "y": 2018,
+      "ratio": 0.3734
+     },
+     {
+      "y": 2019,
+      "ratio": 0.3664
+     },
+     {
+      "y": 2020,
+      "ratio": 0.3733
+     },
+     {
+      "y": 2021,
+      "ratio": 0.3556
+     },
+     {
+      "y": 2022,
+      "ratio": 0.3516
+     },
+     {
+      "y": 2023,
+      "ratio": 0.3533
+     },
+     {
+      "y": 2024,
+      "ratio": 0.3661
+     },
+     {
+      "y": 2025,
+      "ratio": 0.3551
+     }
+    ],
+    "drift_post2020_rel_pct": -5.8,
+    "v1_pass": true,
+    "v3_pass": true,
+    "v9": {
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
+     "top3_harmonized": [
+      "2024–25",
+      "2025–26",
+      "2007–08"
+     ],
+     "top3_raw": [
+      "2024–25",
+      "2025–26",
+      "2023–24"
+     ],
+     "status": "info",
+     "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+    },
+    "v3_pass_v11": false,
+    "gate_version": "v1.2",
+    "step_cp": 2009,
+    "step_p_modis": 0.0132,
+    "step_cp_modis": 2009
+   },
+   "results": {
+    "monthly": {
+     "method": "monthly",
+     "tau": 10,
+     "V1": {
+      "bias_pct": -0.1,
+      "mape_pct": 2.8,
+      "max_abs_pct": 5.5,
+      "years": [
+       {
+        "y": 2012,
+        "months": 6,
+        "modis": 14930.0,
+        "pred": 14389.2,
+        "err_pct": -3.6
+       },
+       {
+        "y": 2013,
+        "months": 12,
+        "modis": 19584.0,
+        "pred": 18643.5,
+        "err_pct": -4.8
+       },
+       {
+        "y": 2014,
+        "months": 12,
+        "modis": 17871.0,
+        "pred": 17693.8,
+        "err_pct": -1.0
+       },
+       {
+        "y": 2015,
+        "months": 12,
+        "modis": 17057.0,
+        "pred": 17508.3,
+        "err_pct": 2.6
+       },
+       {
+        "y": 2016,
+        "months": 12,
+        "modis": 17119.9,
+        "pred": 16813.1,
+        "err_pct": -1.8
+       },
+       {
+        "y": 2017,
+        "months": 12,
+        "modis": 17436.0,
+        "pred": 17380.2,
+        "err_pct": -0.3
+       },
+       {
+        "y": 2018,
+        "months": 12,
+        "modis": 17420.0,
+        "pred": 17939.1,
+        "err_pct": 3.0
+       },
+       {
+        "y": 2019,
+        "months": 12,
+        "modis": 18731.0,
+        "pred": 19754.5,
+        "err_pct": 5.5
+       }
+      ],
+      "shape_r": 0.998,
+      "pass": true
+     },
+     "V3": {
+      "years": [
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019
+      ],
+      "raw": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       43037.8,
+       49759.0,
+       45631.0,
+       46104.0,
+       43622.0,
+       45797.0,
+       46658.0,
+       51125.0
+      ],
+      "harmonized": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       16816.1,
+       18643.5,
+       17693.8,
+       17508.3,
+       16813.1,
+       17380.2,
+       17939.1,
+       19754.5
+      ],
+      "modis_only": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       17464.0,
+       19584.0,
+       17871.0,
+       17057.0,
+       17119.9,
+       17436.0,
+       17420.0,
+       18731.0
+      ],
+      "step_raw_pct": 122.8,
+      "step_harm_pct": -14.6,
+      "step_modis_pct": -14.5,
+      "step_harm_ci": [
+       -16.2,
+       -13.1
+      ],
+      "pettitt_p_raw": 0.0051,
+      "pettitt_p_harm": 0.0132,
+      "pettitt_cp_raw": 2011,
+      "pettitt_cp_harm": 2009,
+      "pettitt_p_modis": 0.0132,
+      "pettitt_cp_modis": 2009,
+      "step_consistent": true,
+      "pass_v11": false,
+      "pass": true,
+      "gate_version": "v1.2"
+     },
+     "V4": {
+      "drift": [
+       {
+        "y": 2012,
+        "ratio": 0.4058,
+        "terra": 0.1813,
+        "aqua": 0.2751,
+        "rel_pct": 6.5
+       },
+       {
+        "y": 2013,
+        "ratio": 0.3936,
+        "terra": 0.1787,
+        "aqua": 0.2587,
+        "rel_pct": 3.3
+       },
+       {
+        "y": 2014,
+        "ratio": 0.3916,
+        "terra": 0.1729,
+        "aqua": 0.2662,
+        "rel_pct": 2.7
+       },
+       {
+        "y": 2015,
+        "ratio": 0.37,
+        "terra": 0.1747,
+        "aqua": 0.2417,
+        "rel_pct": -2.9
+       },
+       {
+        "y": 2016,
+        "ratio": 0.3925,
+        "terra": 0.1855,
+        "aqua": 0.2561,
+        "rel_pct": 3.0
+       },
+       {
+        "y": 2017,
+        "ratio": 0.3807,
+        "terra": 0.178,
+        "aqua": 0.2512,
+        "rel_pct": -0.1
+       },
+       {
+        "y": 2018,
+        "ratio": 0.3734,
+        "terra": 0.1763,
+        "aqua": 0.24,
+        "rel_pct": -2.0
+       },
+       {
+        "y": 2019,
+        "ratio": 0.3664,
+        "terra": 0.169,
+        "aqua": 0.2407,
+        "rel_pct": -3.9
+       },
+       {
+        "y": 2020,
+        "ratio": 0.3733,
+        "terra": 0.1729,
+        "aqua": 0.243,
+        "rel_pct": -2.1
+       },
+       {
+        "y": 2021,
+        "ratio": 0.3556,
+        "terra": 0.1659,
+        "aqua": 0.2292,
+        "rel_pct": -6.7
+       },
+       {
+        "y": 2022,
+        "ratio": 0.3516,
+        "terra": 0.1543,
+        "aqua": 0.2275,
+        "rel_pct": -7.8
+       },
+       {
+        "y": 2023,
+        "ratio": 0.3533,
+        "terra": 0.1491,
+        "aqua": 0.2344,
+        "rel_pct": -7.3
+       },
+       {
+        "y": 2024,
+        "ratio": 0.3661,
+        "terra": 0.1417,
+        "aqua": 0.2514,
+        "rel_pct": -4.0
+       },
+       {
+        "y": 2025,
+        "ratio": 0.3551,
+        "terra": 0.1286,
+        "aqua": 0.2505,
+        "rel_pct": -6.8
+       }
+      ],
+      "window_mean_ratio": 0.3812,
+      "post2020_mean_rel_pct": -5.8
+     },
+     "V9": {
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
+      "top3_harmonized": [
+       "2024–25",
+       "2025–26",
+       "2007–08"
+      ],
+      "top3_raw": [
+       "2024–25",
+       "2025–26",
+       "2023–24"
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+     }
+    },
+    "pooled": {
+     "method": "pooled",
+     "tau": 10,
+     "V1": {
+      "bias_pct": -0.1,
+      "mape_pct": 4.0,
+      "max_abs_pct": 9.9,
+      "years": [
+       {
+        "y": 2012,
+        "months": 6,
+        "modis": 14930.0,
+        "pred": 13450.8,
+        "err_pct": -9.9
+       },
+       {
+        "y": 2013,
+        "months": 12,
+        "modis": 19584.0,
+        "pred": 19090.8,
+        "err_pct": -2.5
+       },
+       {
+        "y": 2014,
+        "months": 12,
+        "modis": 17871.0,
+        "pred": 17525.6,
+        "err_pct": -1.9
+       },
+       {
+        "y": 2015,
+        "months": 12,
+        "modis": 17057.0,
+        "pred": 17851.7,
+        "err_pct": 4.7
+       },
+       {
+        "y": 2016,
+        "months": 12,
+        "modis": 17119.9,
+        "pred": 16751.2,
+        "err_pct": -2.2
+       },
+       {
+        "y": 2017,
+        "months": 12,
+        "modis": 17436.0,
+        "pred": 17661.1,
+        "err_pct": 1.3
+       },
+       {
+        "y": 2018,
+        "months": 12,
+        "modis": 17420.0,
+        "pred": 18044.3,
+        "err_pct": 3.6
+       },
+       {
+        "y": 2019,
+        "months": 12,
+        "modis": 18731.0,
+        "pred": 19840.0,
+        "err_pct": 5.9
+       }
+      ],
+      "shape_r": 0.996,
+      "pass": true
+     },
+     "V3": {
+      "years": [
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019
+      ],
+      "raw": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       43037.8,
+       49759.0,
+       45631.0,
+       46104.0,
+       43622.0,
+       45797.0,
+       46658.0,
+       51125.0
+      ],
+      "harmonized": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       16395.6,
+       19090.8,
+       17525.6,
+       17851.7,
+       16751.2,
+       17661.1,
+       18044.3,
+       19840.0
+      ],
+      "modis_only": [
+       22054.1,
+       21929.0,
+       22950.0,
+       19486.0,
+       25202.0,
+       23270.4,
+       19147.0,
+       16689.0,
+       17016.0,
+       17464.0,
+       19584.0,
+       17871.0,
+       17057.0,
+       17119.9,
+       17436.0,
+       17420.0,
+       18731.0
+      ],
+      "step_raw_pct": 122.8,
+      "step_harm_pct": -14.2,
+      "step_modis_pct": -14.5,
+      "step_harm_ci": [
+       -16.1,
+       -12.0
+      ],
+      "pettitt_p_raw": 0.0051,
+      "pettitt_p_harm": 0.0132,
+      "pettitt_cp_raw": 2011,
+      "pettitt_cp_harm": 2009,
+      "pettitt_p_modis": 0.0132,
+      "pettitt_cp_modis": 2009,
+      "step_consistent": true,
+      "pass_v11": false,
+      "pass": true,
+      "gate_version": "v1.2"
+     },
+     "V4": {
+      "drift": [
+       {
+        "y": 2012,
+        "ratio": 0.4058,
+        "terra": 0.1813,
+        "aqua": 0.2751,
+        "rel_pct": 6.5
+       },
+       {
+        "y": 2013,
+        "ratio": 0.3936,
+        "terra": 0.1787,
+        "aqua": 0.2587,
+        "rel_pct": 3.3
+       },
+       {
+        "y": 2014,
+        "ratio": 0.3916,
+        "terra": 0.1729,
+        "aqua": 0.2662,
+        "rel_pct": 2.7
+       },
+       {
+        "y": 2015,
+        "ratio": 0.37,
+        "terra": 0.1747,
+        "aqua": 0.2417,
+        "rel_pct": -2.9
+       },
+       {
+        "y": 2016,
+        "ratio": 0.3925,
+        "terra": 0.1855,
+        "aqua": 0.2561,
+        "rel_pct": 3.0
+       },
+       {
+        "y": 2017,
+        "ratio": 0.3807,
+        "terra": 0.178,
+        "aqua": 0.2512,
+        "rel_pct": -0.1
+       },
+       {
+        "y": 2018,
+        "ratio": 0.3734,
+        "terra": 0.1763,
+        "aqua": 0.24,
+        "rel_pct": -2.0
+       },
+       {
+        "y": 2019,
+        "ratio": 0.3664,
+        "terra": 0.169,
+        "aqua": 0.2407,
+        "rel_pct": -3.9
+       },
+       {
+        "y": 2020,
+        "ratio": 0.3733,
+        "terra": 0.1729,
+        "aqua": 0.243,
+        "rel_pct": -2.1
+       },
+       {
+        "y": 2021,
+        "ratio": 0.3556,
+        "terra": 0.1659,
+        "aqua": 0.2292,
+        "rel_pct": -6.7
+       },
+       {
+        "y": 2022,
+        "ratio": 0.3516,
+        "terra": 0.1543,
+        "aqua": 0.2275,
+        "rel_pct": -7.8
+       },
+       {
+        "y": 2023,
+        "ratio": 0.3533,
+        "terra": 0.1491,
+        "aqua": 0.2344,
+        "rel_pct": -7.3
+       },
+       {
+        "y": 2024,
+        "ratio": 0.3661,
+        "terra": 0.1417,
+        "aqua": 0.2514,
+        "rel_pct": -4.0
+       },
+       {
+        "y": 2025,
+        "ratio": 0.3551,
+        "terra": 0.1286,
+        "aqua": 0.2505,
+        "rel_pct": -6.8
+       }
+      ],
+      "window_mean_ratio": 0.3812,
+      "post2020_mean_rel_pct": -5.8
+     },
+     "V9": {
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
+      "top3_harmonized": [
+       "2024–25",
+       "2025–26",
+       "2007–08"
+      ],
+      "top3_raw": [
+       "2024–25",
+       "2025–26",
+       "2023–24"
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+     }
+    }
+   }
+  },
+  "mato_grosso": {
+   "region": "mato_grosso",
+   "summary": {
+    "method": "monthly",
+    "method_reason": "primary method passes V1 and V3",
+    "low_activity": false,
+    "loyo_err_pct": 3.7,
+    "loyo_bias_pct": -0.1,
+    "step_raw_pct": 4.2,
+    "step_harm_pct": -41.7,
+    "step_modis_pct": -42.0,
+    "step_harm_ci": [
+     -43.1,
+     -40.0
+    ],
+    "step_p": 0.0413,
+    "step_p_raw": 0.2144,
+    "shape_r": 0.994,
+    "drift": [
+     {
+      "y": 2012,
+      "ratio": 0.5299
+     },
+     {
+      "y": 2013,
+      "ratio": 0.5356
+     },
+     {
+      "y": 2014,
+      "ratio": 0.5199
+     },
+     {
+      "y": 2015,
+      "ratio": 0.5414
+     },
+     {
+      "y": 2016,
+      "ratio": 0.5811
+     },
+     {
+      "y": 2017,
+      "ratio": 0.5666
+     },
+     {
+      "y": 2018,
+      "ratio": 0.5679
+     },
+     {
+      "y": 2019,
+      "ratio": 0.6176
+     },
+     {
+      "y": 2020,
+      "ratio": 0.62
+     },
+     {
+      "y": 2021,
+      "ratio": 0.5979
+     },
+     {
+      "y": 2022,
+      "ratio": 0.5565
+     },
+     {
+      "y": 2023,
+      "ratio": 0.6316
+     },
+     {
+      "y": 2024,
+      "ratio": 0.6273
+     },
+     {
+      "y": 2025,
+      "ratio": 0.554
+     }
+    ],
+    "drift_post2020_rel_pct": 6.5,
+    "v1_pass": true,
+    "v3_pass": true,
+    "v9": {
+     "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+     "n_seasons": 23,
+     "top3_harmonized": [
+      "2004–05",
+      "2002–03",
+      "2003–04"
+     ],
+     "top3_raw": [
+      "2004–05",
+      "2020–21",
+      "2002–03"
+     ],
+     "status": "info",
+     "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+    },
+    "v3_pass_v11": false,
+    "gate_version": "v1.2",
+    "step_cp": 2007,
+    "step_p_modis": 0.0413,
+    "step_cp_modis": 2007
+   },
+   "results": {
+    "monthly": {
+     "method": "monthly",
+     "tau": 100,
+     "V1": {
+      "bias_pct": -0.1,
+      "mape_pct": 3.7,
+      "max_abs_pct": 10.5,
+      "years": [
+       {
+        "y": 2012,
+        "months": 6,
+        "modis": 20009.0,
+        "pred": 19919.1,
+        "err_pct": -0.4
+       },
+       {
+        "y": 2013,
+        "months": 12,
+        "modis": 19879.0,
+        "pred": 20945.1,
+        "err_pct": 5.4
+       },
+       {
+        "y": 2014,
+        "months": 12,
+        "modis": 25062.0,
+        "pred": 25860.9,
+        "err_pct": 3.2
+       },
+       {
+        "y": 2015,
+        "months": 12,
+        "modis": 28812.0,
+        "pred": 28709.6,
+        "err_pct": -0.4
+       },
+       {
+        "y": 2016,
+        "months": 12,
+        "modis": 27383.2,
+        "pred": 28765.4,
+        "err_pct": 5.0
+       },
+       {
+        "y": 2017,
+        "months": 12,
+        "modis": 27301.0,
+        "pred": 26153.8,
+        "err_pct": -4.2
+       },
+       {
+        "y": 2018,
+        "months": 12,
+        "modis": 17824.0,
+        "pred": 17960.7,
+        "err_pct": 0.8
+       },
+       {
+        "y": 2019,
+        "months": 12,
+        "modis": 28276.0,
+        "pred": 25312.1,
+        "err_pct": -10.5
+       }
+      ],
+      "shape_r": 0.994,
+      "pass": true
+     },
+     "V3": {
+      "years": [
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019
+      ],
+      "raw": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       47581.3,
+       37113.0,
+       48210.0,
+       53220.0,
+       47120.0,
+       48184.0,
+       31386.0,
+       45780.0
+      ],
+      "harmonized": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       26821.3,
+       20945.1,
+       25860.9,
+       28709.6,
+       28765.4,
+       26153.8,
+       17960.7,
+       25312.1
+      ],
+      "modis_only": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       25213.0,
+       19879.0,
+       25062.0,
+       28812.0,
+       27383.2,
+       27301.0,
+       17824.0,
+       28276.0
+      ],
+      "step_raw_pct": 4.2,
+      "step_harm_pct": -41.7,
+      "step_modis_pct": -42.0,
+      "step_harm_ci": [
+       -43.1,
+       -40.0
+      ],
+      "pettitt_p_raw": 0.2144,
+      "pettitt_p_harm": 0.0413,
+      "pettitt_cp_raw": 2007,
+      "pettitt_cp_harm": 2007,
+      "pettitt_p_modis": 0.0413,
+      "pettitt_cp_modis": 2007,
+      "step_consistent": true,
+      "pass_v11": false,
+      "pass": true,
+      "gate_version": "v1.2"
+     },
+     "V4": {
+      "drift": [
+       {
+        "y": 2012,
+        "ratio": 0.5299,
+        "terra": 0.2708,
+        "aqua": 0.3267,
+        "rel_pct": -5.6
+       },
+       {
+        "y": 2013,
+        "ratio": 0.5356,
+        "terra": 0.2783,
+        "aqua": 0.3104,
+        "rel_pct": -4.6
+       },
+       {
+        "y": 2014,
+        "ratio": 0.5199,
+        "terra": 0.2689,
+        "aqua": 0.3115,
+        "rel_pct": -7.4
+       },
+       {
+        "y": 2015,
+        "ratio": 0.5414,
+        "terra": 0.2818,
+        "aqua": 0.3163,
+        "rel_pct": -3.6
+       },
+       {
+        "y": 2016,
+        "ratio": 0.5811,
+        "terra": 0.301,
+        "aqua": 0.3425,
+        "rel_pct": 3.5
+       },
+       {
+        "y": 2017,
+        "ratio": 0.5666,
+        "terra": 0.2915,
+        "aqua": 0.3526,
+        "rel_pct": 0.9
+       },
+       {
+        "y": 2018,
+        "ratio": 0.5679,
+        "terra": 0.2864,
+        "aqua": 0.3345,
+        "rel_pct": 1.2
+       },
+       {
+        "y": 2019,
+        "ratio": 0.6176,
+        "terra": 0.3202,
+        "aqua": 0.3812,
+        "rel_pct": 10.0
+       },
+       {
+        "y": 2020,
+        "ratio": 0.62,
+        "terra": 0.348,
+        "aqua": 0.372,
+        "rel_pct": 10.4
+       },
+       {
+        "y": 2021,
+        "ratio": 0.5979,
+        "terra": 0.3258,
+        "aqua": 0.3455,
+        "rel_pct": 6.5
+       },
+       {
+        "y": 2022,
+        "ratio": 0.5565,
+        "terra": 0.2933,
+        "aqua": 0.3354,
+        "rel_pct": -0.9
+       },
+       {
+        "y": 2023,
+        "ratio": 0.6316,
+        "terra": 0.3438,
+        "aqua": 0.3629,
+        "rel_pct": 12.5
+       },
+       {
+        "y": 2024,
+        "ratio": 0.6273,
+        "terra": 0.3361,
+        "aqua": 0.4526,
+        "rel_pct": 11.7
+       },
+       {
+        "y": 2025,
+        "ratio": 0.554,
+        "terra": 0.2561,
+        "aqua": 0.3725,
+        "rel_pct": -1.3
+       }
+      ],
+      "window_mean_ratio": 0.5614,
+      "post2020_mean_rel_pct": 6.5
+     },
+     "V9": {
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
+      "top3_harmonized": [
+       "2004–05",
+       "2002–03",
+       "2003–04"
+      ],
+      "top3_raw": [
+       "2004–05",
+       "2020–21",
+       "2002–03"
+      ],
+      "status": "info",
+      "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
+     }
+    },
+    "pooled": {
+     "method": "pooled",
+     "tau": 100,
+     "V1": {
+      "bias_pct": 0.5,
+      "mape_pct": 5.9,
+      "max_abs_pct": 11.7,
+      "years": [
+       {
+        "y": 2012,
+        "months": 6,
+        "modis": 20009.0,
+        "pred": 22155.8,
+        "err_pct": 10.7
+       },
+       {
+        "y": 2013,
+        "months": 12,
+        "modis": 19879.0,
+        "pred": 20685.5,
+        "err_pct": 4.1
+       },
+       {
+        "y": 2014,
+        "months": 12,
+        "modis": 25062.0,
+        "pred": 27030.4,
+        "err_pct": 7.9
+       },
+       {
+        "y": 2015,
+        "months": 12,
+        "modis": 28812.0,
+        "pred": 29671.0,
+        "err_pct": 3.0
+       },
+       {
+        "y": 2016,
+        "months": 12,
+        "modis": 27383.2,
+        "pred": 25963.9,
+        "err_pct": -5.2
+       },
+       {
+        "y": 2017,
+        "months": 12,
+        "modis": 27301.0,
+        "pred": 26656.7,
+        "err_pct": -2.4
+       },
+       {
+        "y": 2018,
+        "months": 12,
+        "modis": 17824.0,
+        "pred": 17381.7,
+        "err_pct": -2.5
+       },
+       {
+        "y": 2019,
+        "months": 12,
+        "modis": 28276.0,
+        "pred": 24980.4,
+        "err_pct": -11.7
+       }
+      ],
+      "shape_r": 0.976,
+      "pass": true
+     },
+     "V3": {
+      "years": [
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019
+      ],
+      "raw": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       47581.3,
+       37113.0,
+       48210.0,
+       53220.0,
+       47120.0,
+       48184.0,
+       31386.0,
+       45780.0
+      ],
+      "harmonized": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       26702.1,
+       20685.5,
+       27030.4,
+       29671.0,
+       25963.9,
+       26656.7,
+       17381.7,
+       24980.4
+      ],
+      "modis_only": [
+       57363.5,
+       71684.0,
+       58161.0,
+       36085.0,
+       58852.0,
+       27627.4,
+       16006.0,
+       44202.0,
+       17177.0,
+       25213.0,
+       19879.0,
+       25062.0,
+       28812.0,
+       27383.2,
+       27301.0,
+       17824.0,
+       28276.0
+      ],
+      "step_raw_pct": 4.2,
+      "step_harm_pct": -42.2,
+      "step_modis_pct": -42.0,
+      "step_harm_ci": [
+       -44.2,
+       -40.0
+      ],
+      "pettitt_p_raw": 0.2144,
+      "pettitt_p_harm": 0.0315,
+      "pettitt_cp_raw": 2007,
+      "pettitt_cp_harm": 2008,
+      "pettitt_p_modis": 0.0413,
+      "pettitt_cp_modis": 2007,
+      "step_consistent": true,
+      "pass_v11": false,
+      "pass": true,
+      "gate_version": "v1.2"
+     },
+     "V4": {
+      "drift": [
+       {
+        "y": 2012,
+        "ratio": 0.5299,
+        "terra": 0.2708,
+        "aqua": 0.3267,
+        "rel_pct": -5.6
+       },
+       {
+        "y": 2013,
+        "ratio": 0.5356,
+        "terra": 0.2783,
+        "aqua": 0.3104,
+        "rel_pct": -4.6
+       },
+       {
+        "y": 2014,
+        "ratio": 0.5199,
+        "terra": 0.2689,
+        "aqua": 0.3115,
+        "rel_pct": -7.4
+       },
+       {
+        "y": 2015,
+        "ratio": 0.5414,
+        "terra": 0.2818,
+        "aqua": 0.3163,
+        "rel_pct": -3.6
+       },
+       {
+        "y": 2016,
+        "ratio": 0.5811,
+        "terra": 0.301,
+        "aqua": 0.3425,
+        "rel_pct": 3.5
+       },
+       {
+        "y": 2017,
+        "ratio": 0.5666,
+        "terra": 0.2915,
+        "aqua": 0.3526,
+        "rel_pct": 0.9
+       },
+       {
+        "y": 2018,
+        "ratio": 0.5679,
+        "terra": 0.2864,
+        "aqua": 0.3345,
+        "rel_pct": 1.2
+       },
+       {
+        "y": 2019,
+        "ratio": 0.6176,
+        "terra": 0.3202,
+        "aqua": 0.3812,
+        "rel_pct": 10.0
+       },
+       {
+        "y": 2020,
+        "ratio": 0.62,
+        "terra": 0.348,
+        "aqua": 0.372,
+        "rel_pct": 10.4
+       },
+       {
+        "y": 2021,
+        "ratio": 0.5979,
+        "terra": 0.3258,
+        "aqua": 0.3455,
+        "rel_pct": 6.5
+       },
+       {
+        "y": 2022,
+        "ratio": 0.5565,
+        "terra": 0.2933,
+        "aqua": 0.3354,
+        "rel_pct": -0.9
+       },
+       {
+        "y": 2023,
+        "ratio": 0.6316,
+        "terra": 0.3438,
+        "aqua": 0.3629,
+        "rel_pct": 12.5
+       },
+       {
+        "y": 2024,
+        "ratio": 0.6273,
+        "terra": 0.3361,
+        "aqua": 0.4526,
+        "rel_pct": 11.7
+       },
+       {
+        "y": 2025,
+        "ratio": 0.554,
+        "terra": 0.2561,
+        "aqua": 0.3725,
+        "rel_pct": -1.3
+       }
+      ],
+      "window_mean_ratio": 0.5614,
+      "post2020_mean_rel_pct": 6.5
+     },
+     "V9": {
+      "season_def": "Jul–Jun (seasons containing Terra-only months, i.e. before Jul 2002, are not ranked)",
+      "n_seasons": 23,
+      "top3_harmonized": [
+       "2004–05",
+       "2002–03",
+       "2003–04"
+      ],
+      "top3_raw": [
+       "2004–05",
+       "2020–21",
+       "2002–03"
       ],
       "status": "info",
       "status_reason": "Shown for information: we have no independently sourced list of this region's big fire years to test against, so this is not a pass/fail check."
