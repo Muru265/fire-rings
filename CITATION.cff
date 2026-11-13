@@ -1,17 +1,18 @@
 cff-version: 1.2.0
 message: "If you use this dataset or software, please cite it as below."
 title: "Fire Rings Harmonized Hotspot Record"
-version: 1.0.0
+version: 1.1.0
 date-released: 2026-11-15
 authors:
-  - name: "Fire Rings team (NASA Space Apps 2026, Port Louis)"
+  - name: "Murugun Sharma Roma Rishi"
 license: [MIT, CC-BY-4.0]
 repository-code: "https://github.com/Muru265/fire-rings"
 url: "https://fire-rings.vercel.app"
 abstract: >-
   A harmonized monthly record of MODIS (2001-) and VIIRS (2012-) active-fire hotspots from NASA FIRMS, expressed in
   MODIS-equivalent fire cell-days on an H3 resolution-6 grid, with bootstrap uncertainty, out-of-sample validation and
-  "is this normal?" statistics for four regions (Punjab-Haryana, Madagascar, SE Australia, Mauritius).
+  "is this normal?" statistics for seven regions (Punjab-Haryana, Madagascar, SE Australia, Mauritius, Northern
+  Australia savanna, Northeast India, Tanzania), updated daily for the current month.
 keywords: [MODIS, VIIRS, active fire, FIRMS, harmonization, hotspots, H3]
 references:
   - type: data

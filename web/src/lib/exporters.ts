@@ -1,6 +1,6 @@
 import type { MonthRec } from './types'
 
-export const CITATION = 'Fire Rings Harmonized Hotspot Record v1.0 (2026), NASA Space Apps 2026. Derived from NASA FIRMS MODIS C6.1 + VIIRS 375 m. CC BY 4.0.'
+export const CITATION = 'Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1, NASA Space Apps 2026. Derived from NASA FIRMS MODIS C6.1 + VIIRS 375 m. CC BY 4.0.'
 
 export function downloadText(name: string, text: string, type = 'text/csv;charset=utf-8') {
   const blob = new Blob([text], { type })

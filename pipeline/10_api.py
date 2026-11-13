@@ -60,7 +60,7 @@ def series_doc(doc: dict) -> dict:
         if "insufficient" in r["flags"]:
             raw = None
         rows.append([r["y"], r["m"], r["H"], r["lo"], r["hi"], raw, r["raw_modis"], r["raw_viirs"], r["src"],
-                     "|".join(f for f in r["flags"] if f in ("provisional", "mtd", "insufficient", "uncertain", "terra_only"))])
+                     "|".join(f for f in r["flags"] if f in ("provisional", "mtd", "insufficient", "uncertain", "terra_only", "overpass_timing"))])
     return {
         "region": doc["id"], "name": doc["name"], "data_end": doc["data_end"], "baseline": doc["baseline"],
         "fields": ["y", "m", "harmonized", "harmonized_lo90", "harmonized_hi90", "raw", "raw_modis", "raw_viirs", "src", "flags"],
@@ -187,8 +187,8 @@ def main() -> None:
          "what": "filtered NASA FIRMS detections for ≤31 days (server-side, cached)"},
         {"path": "/api/live?region={region}", "what": "last 72 h near-real-time detections (provisional)"},
         {"path": "/api/health?scope=data", "what": "service status (no AI call)"},
-        {"path": "/data/v1/api/likelihood/{region}.json", "what": "next month: where fire is more likely, per H3 res-6 cell [cell, score 0-1, decile 1-10, climatology]; planning aid, not a forecast of individual fires (only if the model passed its publish gate)"},
-        {"path": "/data/v1/api/model_card.json", "what": "prediction model card: target, features, training years, metrics, ablation, limitations, version"},
+        {"path": "/data/v1/api/likelihood/{region}.json", "what": "fire likelihood for the scored month (target_month = the month after the last complete month; during November it scores November using data up to October), per H3 res-6 cell [cell, score 0-1, decile 1-10, climatology]; planning aid, not a forecast of individual fires (only if the model passed its publish gate)"},
+        {"path": "/data/v1/api/model_card.json", "what": "fire-likelihood model card: scored month (next_month), target, features, training years, metrics, ablation, limitations, version"},
         {"path": "/data/v1/api/model_history.json", "what": "automatic monthly retraining runs and decisions"},
     ]
     write_json(api / "index.json", {"base": base, "regions": published_regions(), "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",

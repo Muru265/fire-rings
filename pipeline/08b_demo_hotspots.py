@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.common import config, connect, path, sql_path, write_json  # noqa: E402
 
-CITATION = ("Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. "
+CITATION = ("Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. "
             "Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.")
 COLS = "lat,lon,t_utc,solar_date,stream,conf,frp_mw,daynight,product"
 

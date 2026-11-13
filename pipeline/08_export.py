@@ -26,7 +26,7 @@ from lib.common import published_regions, config, connect, path, read_json, sql_
 from lib.common import data_end as region_end  # noqa: E402
 
 PROVISIONAL_AFTER = {"MODIS": dt.date(2026, 8, 31), "VIIRS": dt.date(2026, 7, 31)}  # archive ends → NRT after
-CITATION = ("Fire Rings Harmonized Hotspot Record v1.0 (2026). NASA Space Apps 2026, Port Louis. "
+CITATION = ("Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. "
             "Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.")
 HOTSPOT_MONTHS = 2
 TIMING_CAVEAT_REGIONS = {"punjab"}
