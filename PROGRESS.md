@@ -4,6 +4,16 @@ Resume any session with: **"Continue from PROGRESS.md"** (read this file + CLAUD
 Status keys: `todo` · `doing` · `done` · `blocked`
 Live: https://fire-rings.vercel.app (Vercel, root = web, auto-deploys on push to main)
 
+## Round 9 — home globe zoom (14 Nov)
+
+| Item | Status | Notes |
+|---|---|---|
+| Why the cap was 6 | checked | #78 capped zoom to stop the globe covering the hero text and to avoid grey boxes. Today the globe box starts right of the hero text (`lg:left-[620px]`), so zoom can't cover it at any size. NASA GIBS serves tiles up to Level 8, and MapLibre over-zooms above that, so no level gives grey tiles. They only soften. |
+| New cap: **9** (`GLOBE_MAX_ZOOM`) | done | Probed zoom 6–11 × 1280/1366/1440/1536/1920 × Dark/Night/Day over Mauritius, Madagascar, Punjab. At 9 the whole of Mauritius fits the box (just under it at 1366×768), each ~36 km² hexagon is ~52–59 px across, no grey tiles, no overlap with the hero text. At 10 the island no longer fits and Night/Day imagery is two levels over-zoomed (blurry), so 9 is the limit. No tile-source change needed. |
+| Prompt at the cap | done | "Zoom limit reached — open the detailed map →" links to `/r/{region}` (Explore) for the region in view. Chip logic is unchanged (within 1.5° of a region's box, zoom ≥ cap − 0.25). aria-label names the region. |
+| e2e #78 | done | Now 9 checks: Mauritius at 1280/1366/1440/1536/1920, plus Madagascar and Punjab at 1366 and 1920. Each one checks zoom = 9, the prompt text and link, hexagons ≥ 30 px, canvas clear of hero text, no grey corners. Also made "Mauritius is a small dot at world zoom" poll for up to 15 s; it failed once on a cold load (OpenFreeMap style slow). |
+| Tests | done | pytest 136 pass (snapshot green) · build + lint OK · e2e **103 pass / 1 known fail** (missing Sudan/Mato Grosso briefings, Gemini quota, as in Round 8) · claims_check 410/412 (same 2) · ask_e2e 109/144 (35 known missing answers) · guide_check pass. Flakes seen once each in earlier runs and passing on rerun: #76 default-view tiles, a region map legend timeout in claims_check. |
+
 ## Round 8 — gate v1.2 + Sudan & Brazil + hotspot CSV (13 Nov)
 
 | Item | Status | Notes |

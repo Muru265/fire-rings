@@ -425,7 +425,9 @@ try {
     const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } })
     await pg.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
     await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 }); await pg.waitForTimeout(2500)
-    const dot = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('small').filter((f) => f.properties.name === 'Mauritius').length)
+    // cold first load: the basemap style comes from OpenFreeMap, so poll up to 15 s instead of trusting the fixed wait
+    let dot = 0
+    for (let i = 0; i < 30 && !dot; i++) { dot = await pg.evaluate(() => window.__frGlobe.querySourceFeatures('small').filter((f) => f.properties.name === 'Mauritius').length); if (!dot) await pg.waitForTimeout(500) }
     check('globe: Mauritius is a small dot at world zoom', dot >= 1)
     await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 6 }) })
     // 9 regions' res-6 files load lazily when zoomed in: poll up to 15 s instead of a fixed wait
@@ -436,27 +438,49 @@ try {
     await pg.close()
   }
 
-  // #78: zoomed to the cap over Mauritius at 1280/1440/1920 — zoom capped, "Explore Mauritius →" chip, the map canvas never
-  // overlaps the hero text, and no opaque grey rectangle (corner pixels of the map box stay page-dark)
+  // #78 / Round 9: zoomed to the cap (9) at 1280/1366/1440/1536/1920 — zoom capped, "Zoom limit reached — open the detailed map →"
+  // prompt linking to the region in view, the ~36 km² hexagons clearly visible (≥ 30 px across), the map canvas never overlaps
+  // the hero text, and no opaque grey rectangle (corner pixels of the map box stay page-dark). Mauritius at every size;
+  // Madagascar and Punjab at 1366 (smallest laptop) and 1920.
   {
     const { PNG } = await import('pngjs')
-    for (const [w, h] of [[1280, 800], [1440, 900], [1920, 1080]]) {
+    const PLACES = { mauritius: [57.55, -20.25], madagascar: [46.9, -18.9], punjab: [75.5, 30.6] }
+    for (const [w, h] of [[1280, 800], [1366, 768], [1440, 900], [1536, 864], [1920, 1080]]) {
       const pg = await browser.newPage({ viewport: { width: w, height: h } })
       await pg.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' })
       await pg.waitForSelector('[data-testid="globe-panel"]', { timeout: 20000 }); await pg.waitForTimeout(2000)
-      await pg.evaluate(() => { const mp = window.__frGlobe; mp.fire('mousedown'); mp.jumpTo({ center: [57.55, -20.25], zoom: 20 }) })
-      await pg.waitForTimeout(3500)
-      const z = await pg.evaluate(() => window.__frGlobe.getZoom())
-      const chip = await pg.getByTestId('globe-explore-chip').innerText().catch(() => '')
-      const [cv, tx] = await pg.evaluate(() => [document.querySelector('[data-testid="hero-globe"] canvas').getBoundingClientRect().toJSON(), document.querySelector('[data-testid="hero-text"]').getBoundingClientRect().toJSON()])
-      const overlap = !(cv.left >= tx.right || cv.right <= tx.left || cv.top >= tx.bottom || cv.bottom <= tx.top)
-      const box = await pg.getByTestId('globe-map').boundingBox()
-      const png = PNG.sync.read(await pg.screenshot({ clip: box }))
-      const patch = (x0, y0) => { let r = 0, g = 0, b = 0, n = 0; for (let y = y0; y < y0 + 12; y++) for (let x = x0; x < x0 + 12; x++) { const k = (y * png.width + x) * 4; r += png.data[k]; g += png.data[k + 1]; b += png.data[k + 2]; n++ } return [r / n, g / n, b / n].map(Math.round) }
-      const corners = [patch(2, 2), patch(png.width - 14, 2), patch(2, png.height - 14), patch(png.width - 14, png.height - 14)]
-      const greyBox = corners.some((c) => Math.max(...c) > 26)
-      check(`#78 ${w}px: zoom capped (${z.toFixed(1)}), chip "${chip.trim()}", canvas clear of hero text, no grey box (corners ${corners.map((c) => c.join('/')).join(' ')})`, z <= 6.01 && /Explore Mauritius/.test(chip) && !overlap && !greyBox)
-      if (w === 1920) await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_cap_1920.png') })
+      await pg.evaluate(() => window.__frGlobe.fire('mousedown'))
+      for (const [id, c] of Object.entries(PLACES)) {
+        if (id !== 'mauritius' && w !== 1366 && w !== 1920) continue
+        await pg.evaluate((c) => window.__frGlobe.jumpTo({ center: c, zoom: 20 }), c)
+        let hex = { n: 0, px: 0 }
+        for (let i = 0; i < 40 && !hex.n; i++) {
+          await pg.waitForTimeout(500)
+          hex = await pg.evaluate(() => {
+            const mp = window.__frGlobe
+            const vis = mp.queryRenderedFeatures({ layers: ['hex6-fill'] })
+            if (!vis.length) return { n: 0, px: 0 }
+            const ring = vis[0].geometry.coordinates[0]; const a = mp.project(ring[0]), b = mp.project(ring[3])
+            return { n: vis.length, px: Math.round(Math.hypot(a.x - b.x, a.y - b.y)) }
+          })
+        }
+        await pg.waitForTimeout(800)
+        const z = await pg.evaluate(() => window.__frGlobe.getZoom())
+        const chipEl = pg.getByTestId('globe-explore-chip')
+        const chip = await chipEl.innerText().catch(() => '')
+        const href = await chipEl.getAttribute('href').catch(() => '')
+        const [cv, tx] = await pg.evaluate(() => [document.querySelector('[data-testid="hero-globe"] canvas').getBoundingClientRect().toJSON(), document.querySelector('[data-testid="hero-text"]').getBoundingClientRect().toJSON()])
+        const overlap = !(cv.left >= tx.right || cv.right <= tx.left || cv.top >= tx.bottom || cv.bottom <= tx.top)
+        const box = await pg.getByTestId('globe-map').boundingBox()
+        const png = PNG.sync.read(await pg.screenshot({ clip: box }))
+        const patch = (x0, y0) => { let r = 0, g = 0, b = 0, n = 0; for (let y = y0; y < y0 + 12; y++) for (let x = x0; x < x0 + 12; x++) { const k = (y * png.width + x) * 4; r += png.data[k]; g += png.data[k + 1]; b += png.data[k + 2]; n++ } return [r / n, g / n, b / n].map(Math.round) }
+        const corners = [patch(2, 2), patch(png.width - 14, 2), patch(2, png.height - 14), patch(png.width - 14, png.height - 14)]
+        const greyBox = corners.some((c) => Math.max(...c) > 26)
+        check(`#78 ${w}px ${id}: zoom capped (${z.toFixed(1)}), prompt "${chip.trim()}" → ${href}, hexagons ${hex.n} × ${hex.px}px, canvas clear of hero text, no grey box (corners ${corners.map((c) => c.join('/')).join(' ')})`,
+          z > 8.99 && z <= 9.01 && /Zoom limit reached — open the detailed map/.test(chip) && href === `/r/${id}` && hex.n >= 1 && hex.px >= 30 && !overlap && !greyBox)
+        if (w === 1920 && id === 'mauritius') await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_cap_1920.png') })
+        if (w === 1366 && id === 'mauritius') await pg.screenshot({ path: resolve(out, 'e2e_globe_mauritius_cap_1366.png') })
+      }
       await pg.close()
     }
   }

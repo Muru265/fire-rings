@@ -88,8 +88,10 @@ function useGlobe(ready: boolean): Globe | null {
 
 /** Zoom at which the globe switches from res-4 blocks / small-island dots to ~36 km² res-6 hexagons (QA #65). */
 const FINE_ZOOM = 3.6
-/** #78: the home globe stays a globe / country view; deeper zoom belongs to the region page (chip at the cap). */
-const GLOBE_MAX_ZOOM = 6
+/** #78 / Round 9: cap of the home globe. At 9 a whole island like Mauritius fits the box and each ~36 km² hexagon is
+ *  ~55 px across. GIBS serves up to Level 8, so 9 is one level over-zoomed (a little soft, never a grey tile); from 10
+ *  the NASA imagery blurs and small regions no longer fit, so deeper zoom belongs to the region page (prompt at the cap). */
+const GLOBE_MAX_ZOOM = 9
 // same Inferno family as the map, started bright so the lowest values never look like holes (QA #65b, like #18)
 const RAMP = ['interpolate', ['linear'], ['get', 't'], 0, '#A52C60', 0.3, '#D24A3E', 0.55, '#F07F17', 0.8, '#FBC12E', 1, '#FCFFA4']
 
@@ -323,8 +325,9 @@ export default function GlobeTimelapse({ docs, live }: Props) {
       <div ref={el} className="min-h-0 w-full flex-1" role="region" aria-label={`Globe showing monthly fire activity in the ${docs.length} hero regions`}
         data-testid="globe-map" />
       {near && (
-        <Link to={`/r/${near.id}`} className="absolute top-3 left-3 z-10 rounded-full border border-accent/60 bg-surface/90 px-3 py-1 text-xs font-semibold text-text no-underline backdrop-blur hover:bg-surface-2" data-testid="globe-explore-chip">
-          Explore {near.name} →</Link>
+        <Link to={`/r/${near.id}`} className="absolute top-3 left-3 z-10 rounded-full border border-accent/60 bg-surface/90 px-3 py-1 text-xs font-semibold text-text no-underline backdrop-blur hover:bg-surface-2" data-testid="globe-explore-chip"
+          data-region={near.id} aria-label={`Zoom limit reached — open the detailed map of ${near.name} in Explore`} title={`Open ${near.name} in Explore`}>
+          Zoom limit reached — open the detailed map →</Link>
       )}
         <div role="group" aria-label="Globe style" className="absolute top-3 right-3 z-10 flex rounded-sm border border-border bg-surface/85 p-0.5 text-[11px] backdrop-blur" data-testid="globe-style">
           {(['dark', 'night', 'day'] as GlobeStyle[]).map((k) => (
