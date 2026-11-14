@@ -4,12 +4,7 @@
   "punjab",
   "madagascar",
   "se_australia",
-  "mauritius",
-  "nt_savanna",
-  "ne_india",
-  "tanzania",
-  "sudan",
-  "mato_grosso"
+  "mauritius"
  ],
  "cors": "Access-Control-Allow-Origin: * on /data/v1/* and the GET APIs above",
  "endpoints": [
@@ -74,5 +69,5 @@
    "what": "automatic monthly retraining runs and decisions"
   }
  ],
- "generated": "2026-11-13T14:07Z"
+ "generated": "2026-11-14T11:45Z"
 }

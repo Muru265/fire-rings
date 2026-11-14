@@ -1,6 +1,6 @@
 {
  "version": "v1",
- "data_end": "2026-11-12",
+ "data_end": "2026-11-13",
  "citation": "Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0.",
  "generated": "2026-11-13T12:25Z",
  "regions": [
@@ -21,8 +21,8 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 0.26,
-    "median": 3001.6,
+    "ratio": 0.25,
+    "median": 3195.3,
     "pct": [
      0,
      10
@@ -34,12 +34,12 @@
     "rank": 21,
     "rank_of": 21,
     "mtd": true,
-    "value": 777.3,
-    "lo": 732.2,
-    "hi": 828.4,
+    "value": 795.2,
+    "lo": 748.4,
+    "hi": 843.0,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -80,25 +80,25 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 0.83,
-    "median": 2656.3,
+    "ratio": 0.79,
+    "median": 2897.2,
     "pct": [
-     14,
-     29
+     10,
+     24
     ],
     "return_period": null,
     "rp_range": null,
     "beyond_record": false,
     "guard": false,
-    "rank": 16,
+    "rank": 17,
     "rank_of": 21,
     "mtd": true,
-    "value": 2192.8,
-    "lo": 2072.1,
-    "hi": 2304.4,
+    "value": 2296.2,
+    "lo": 2170.0,
+    "hi": 2413.8,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -139,28 +139,28 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 1.56,
-    "median": 121.5,
+    "ratio": 1.55,
+    "median": 129.0,
     "pct": [
      67,
-     81
+     76
     ],
-    "return_period": 3.8,
+    "return_period": 3.5,
     "rp_range": [
      3.0,
-     5.3
+     4.2
     ],
     "beyond_record": false,
     "guard": false,
     "rank": 6,
     "rank_of": 21,
     "mtd": true,
-    "value": 189.5,
-    "lo": 169.0,
-    "hi": 211.4,
+    "value": 200.2,
+    "lo": 178.4,
+    "hi": 222.9,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -201,25 +201,25 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 0.34,
-    "median": 1.4,
+    "ratio": 0.4,
+    "median": 1.6,
     "pct": [
      5,
-     19
+     38
     ],
     "return_period": null,
     "rp_range": null,
     "beyond_record": false,
     "guard": true,
-    "rank": 20,
+    "rank": 18,
     "rank_of": 21,
     "mtd": true,
-    "value": 0.5,
-    "lo": 0.0,
-    "hi": 1.0,
+    "value": 0.6,
+    "lo": 0.2,
+    "hi": 1.3,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -260,28 +260,28 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 1.15,
-    "median": 1492.8,
+    "ratio": 1.18,
+    "median": 1574.0,
     "pct": [
      62,
-     76
+     71
     ],
-    "return_period": 3.2,
+    "return_period": 3.0,
     "rp_range": [
      2.6,
-     4.2
+     3.4
     ],
     "beyond_record": false,
     "guard": false,
     "rank": 7,
     "rank_of": 21,
     "mtd": true,
-    "value": 1710.5,
-    "lo": 1597.6,
-    "hi": 1838.6,
+    "value": 1850.2,
+    "lo": 1728.6,
+    "hi": 1989.1,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -325,28 +325,28 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 1.32,
-    "median": 23.4,
+    "ratio": 1.46,
+    "median": 25.8,
     "pct": [
-     48,
+     57,
      76
     ],
-    "return_period": 2.6,
+    "return_period": 3.0,
     "rp_range": [
-     1.9,
+     2.3,
      4.2
     ],
     "beyond_record": false,
     "guard": false,
-    "rank": 9,
+    "rank": 7,
     "rank_of": 21,
     "mtd": true,
-    "value": 30.9,
-    "lo": 25.9,
-    "hi": 36.6,
+    "value": 37.7,
+    "lo": 31.8,
+    "hi": 44.1,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -387,28 +387,28 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 1.37,
-    "median": 1505.7,
+    "ratio": 1.31,
+    "median": 1581.9,
     "pct": [
      71,
-     81
+     76
     ],
-    "return_period": 4.2,
+    "return_period": 3.8,
     "rp_range": [
      3.4,
-     5.3
+     4.2
     ],
     "beyond_record": false,
     "guard": false,
-    "rank": 5,
+    "rank": 6,
     "rank_of": 21,
     "mtd": true,
-    "value": 2057.6,
-    "lo": 1974.4,
-    "hi": 2144.1,
+    "value": 2071.4,
+    "lo": 1986.7,
+    "hi": 2156.5,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -452,25 +452,25 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 0.94,
-    "median": 3200.0,
+    "ratio": 0.92,
+    "median": 3499.6,
     "pct": [
      33,
-     48
+     43
     ],
     "return_period": null,
     "rp_range": null,
     "beyond_record": false,
     "guard": false,
-    "rank": 13,
+    "rank": 12,
     "rank_of": 21,
     "mtd": true,
-    "value": 2995.7,
-    "lo": 2910.3,
-    "hi": 3097.4,
+    "value": 3211.7,
+    "lo": 3115.7,
+    "hi": 3319.0,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -511,10 +511,10 @@
    "latest": {
     "y": 2026,
     "m": 11,
-    "ratio": 0.47,
-    "median": 544.9,
+    "ratio": 0.41,
+    "median": 642.9,
     "pct": [
-     10,
+     5,
      10
     ],
     "return_period": null,
@@ -524,12 +524,12 @@
     "rank": 19,
     "rank_of": 21,
     "mtd": true,
-    "value": 255.8,
-    "lo": 232.1,
-    "hi": 280.7,
+    "value": 262.2,
+    "lo": 237.5,
+    "hi": 289.2,
     "provisional": true,
-    "days": 12,
-    "baseline_kind": "same days 1–12 of baseline years"
+    "days": 13,
+    "baseline_kind": "same days 1–13 of baseline years"
    },
    "latest_complete": {
     "y": 2026,
@@ -554,6 +554,6 @@
    }
   }
  ],
- "last_update": "2026-11-13T14:07Z",
+ "last_update": "2026-11-14T11:45Z",
  "update_cadence": "daily (current month, NRT); model monthly; Long-term record fixed"
 }
