@@ -1,7 +1,7 @@
 {
  "region": "punjab",
  "name": "Punjab–Haryana",
- "data_end": "2026-11-13",
+ "data_end": "2026-11-14",
  "baseline": [
   2003,
   2022
@@ -848,18 +848,18 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 13,
-  "so_far": 795.2,
-  "typical_so_far": 3194.9,
-  "typical_so_far_app": 3195.3,
+  "days": 14,
+  "so_far": 812.8,
+  "typical_so_far": 3264.8,
+  "typical_so_far_app": 3265.0,
   "typical": 4130.1,
   "p10": 1513.5,
   "p90": 5447.8,
-  "projection": 1028.0,
+  "projection": 1028.2,
   "checkpoint": 15,
   "range": [
-   862.5,
-   1111.2
+   862.7,
+   1111.5
   ],
   "better": "projection",
   "reason": null,
