@@ -1,4 +1,4 @@
-# Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0. Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day); V_native = High detail, native VIIRS 375 m fire cell-days (S-NPP-equivalent, 2012+, not converted). Regions: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania, sudan, mato_grosso. Data through 2026-11-17. Dictionary: /data page. timing_check = agentic-check verdict for Fire Watch-flagged months (empty otherwise).
+# Murugun Sharma Roma Rishi (2026). Fire Rings Harmonized Hotspot Record v1.1. NASA Space Apps 2026, Port Louis. Derived from NASA FIRMS MODIS C6.1 and VIIRS 375 m active fire data. Licence CC BY 4.0. Units: H = fire cell-days (MODIS-equivalent; H3 res-6 cell x solar day); V_native = High detail, native VIIRS 375 m fire cell-days (S-NPP-equivalent, 2012+, not converted). Regions: punjab, madagascar, se_australia, mauritius, nt_savanna, ne_india, tanzania, sudan, mato_grosso. Data through 2026-11-18. Dictionary: /data page. timing_check = agentic-check verdict for Fire Watch-flagged months (empty otherwise).
 region,year,month,H,H_lo,H_hi,raw_modis_celldays,raw_viirs_celldays,hotspots_modis,hotspots_viirs,coverage_modis,coverage_viirs,source,flags,ratio_to_median,pct_lo,pct_hi,V_native,V_lo,V_hi,method,calib_version,timing_check
 punjab,2001,1,206.0,162.7,257.8,53.0,,59,,1.0,,T,terra_only,1.96,75,90,,,,monthly,v1,""
 punjab,2001,2,264.1,223.9,317.0,118.0,,133,,1.0,,T,terra_only,1.97,90,95,,,,monthly,v1,""
@@ -310,7 +310,7 @@ punjab,2026,7,21.3,14.5,32.5,9.0,67.0,10,66,1.0,0.8065,V,uncertain,1.39,43,71,67
 punjab,2026,8,22.2,13.8,34.1,3.0,18.6,3,19,1.0,0.9677,V,provisional|uncertain,1.63,48,90,18.6,11.0,26.0,monthly,v1,""
 punjab,2026,9,26.9,21.6,33.1,32.0,187.0,37,238,1.0,1.0,V,provisional,0.59,10,38,187.0,164.0,208.0,monthly,v1,""
 punjab,2026,10,392.3,370.5,416.9,716.0,1096.0,980,1459,1.0,1.0,V,provisional|overpass_timing,0.08,0,0,1096.0,1042.0,1149.1,monthly,v1,Detection issue likely
-punjab,2026,11,992.0,936.4,1046.8,2918.0,2712.0,5209,3819,1.0,1.0,V2,mtd|provisional|overpass_timing,0.29,10,10,2595.1,2519.5,2677.5,monthly,v1,Detection issue likely
+punjab,2026,11,1048.7,989.1,1115.3,3074.0,2867.0,5426,4065,1.0,1.0,V2,mtd|provisional|overpass_timing,0.3,10,10,2743.4,2665.0,2828.6,monthly,v1,Detection issue likely
 madagascar,2001,1,208.1,157.4,275.1,43.0,,53,,1.0,,T,uncertain|terra_only,0.8,15,55,,,,monthly,v1,""
 madagascar,2001,2,18.7,6.9,34.5,5.0,,5,,1.0,,T,uncertain|terra_only,0.25,0,10,,,,monthly,v1,""
 madagascar,2001,3,130.2,97.5,164.9,40.0,,50,,1.0,,T,uncertain|terra_only,1.29,48,67,,,,monthly,v1,""
@@ -621,7 +621,7 @@ madagascar,2026,7,5400.7,5277.6,5540.3,3701.0,18313.6,4964,25633,1.0,0.8065,V,""
 madagascar,2026,8,5665.0,5505.6,5809.4,4786.0,19791.4,7097,36499,1.0,0.9677,V,provisional,0.96,29,48,19791.4,19563.7,20025.3,monthly,v1,""
 madagascar,2026,9,6077.3,5951.8,6205.7,5696.0,22442.0,8478,45949,1.0,1.0,V,provisional,0.87,29,29,22442.0,22193.9,22691.0,monthly,v1,""
 madagascar,2026,10,5612.0,5463.9,5739.1,5578.0,21671.0,8864,46581,1.0,1.0,V,provisional,0.72,5,5,21671.0,21443.8,21910.0,monthly,v1,Not checkable yet
-madagascar,2026,11,2685.1,2545.7,2814.1,2720.0,11814.0,4131,22739,1.0,1.0,V2,mtd|provisional,0.77,10,19,11504.5,11343.7,11680.7,monthly,v1,""
+madagascar,2026,11,2791.0,2640.9,2929.1,2726.0,12280.0,4140,23481,1.0,1.0,V2,mtd|provisional,0.76,5,19,11958.3,11792.7,12137.4,monthly,v1,""
 se_australia,2001,1,553.1,455.8,678.5,197.0,,370,,1.0,,T,terra_only,2.17,70,80,,,,pooled,v1,""
 se_australia,2001,2,468.9,389.6,576.7,167.0,,287,,1.0,,T,terra_only,1.29,52,86,,,,pooled,v1,""
 se_australia,2001,3,1066.9,898.2,1288.8,380.0,,717,,1.0,,T,terra_only,1.29,52,76,,,,pooled,v1,""
@@ -932,7 +932,7 @@ se_australia,2026,7,922.5,848.9,1001.8,445.0,2251.8,650,3529,1.0,0.8065,V,"",1.8
 se_australia,2026,8,883.0,812.2,957.1,526.0,2155.5,780,4148,1.0,0.9677,V,provisional,0.95,33,48,2155.5,2072.0,2230.1,pooled,v1,""
 se_australia,2026,9,1261.8,1163.0,1375.1,873.0,3080.0,1640,10895,1.0,1.0,V,provisional,1.35,86,90,3080.0,2999.8,3172.1,pooled,v1,""
 se_australia,2026,10,283.9,256.0,312.5,171.0,693.0,274,1793,1.0,1.0,V,provisional,0.57,10,14,693.0,650.0,731.0,pooled,v1,""
-se_australia,2026,11,238.1,214.6,264.8,189.0,597.0,309,1537,1.0,1.0,V2,mtd|provisional,1.38,67,76,581.3,546.2,621.2,pooled,v1,""
+se_australia,2026,11,248.1,222.4,274.2,197.0,622.0,318,1585,1.0,1.0,V2,mtd|provisional,1.33,67,76,605.6,569.6,645.6,pooled,v1,""
 mauritius,2001,1,0.0,0.0,0.0,0.0,,0,,1.0,,T,terra_only,,60,60,,,,monthly,v1,""
 mauritius,2001,2,0.0,0.0,0.0,0.0,,0,,1.0,,T,terra_only,,52,52,,,,monthly,v1,""
 mauritius,2001,3,2.8,0.0,8.7,1.0,,1,,1.0,,T,uncertain|terra_only,43.07,48,95,,,,monthly,v1,""
@@ -1243,7 +1243,7 @@ mauritius,2026,7,0.7,0.2,1.3,0.0,3.7,0,3,1.0,0.8065,V,uncertain,0.37,0,33,3.7,1.
 mauritius,2026,8,1.6,0.6,2.7,2.0,7.2,3,8,1.0,0.9677,V,provisional|uncertain,0.58,5,48,7.2,4.0,12.0,monthly,v1,""
 mauritius,2026,9,4.9,2.8,7.3,4.0,14.0,5,20,1.0,1.0,V,provisional|uncertain,0.8,10,57,14.0,8.0,20.0,monthly,v1,""
 mauritius,2026,10,4.0,2.3,5.8,2.0,20.0,3,34,1.0,1.0,V,provisional|uncertain,0.59,10,43,20.0,13.0,28.0,monthly,v1,""
-mauritius,2026,11,0.8,0.3,1.5,3.0,5.0,4,5,1.0,1.0,V2,mtd|provisional|uncertain,0.4,5,33,4.2,1.7,7.6,monthly,v1,""
+mauritius,2026,11,0.9,0.3,1.7,3.0,6.0,4,6,1.0,1.0,V2,mtd|provisional|uncertain,0.46,5,38,5.0,2.5,8.4,monthly,v1,""
 nt_savanna,2001,1,1999.0,1897.1,2143.4,1211.0,,3369,,1.0,,T,terra_only,8.47,95,95,,,,monthly,v1,""
 nt_savanna,2001,2,227.3,197.7,272.6,130.0,,295,,1.0,,T,terra_only,2.04,76,90,,,,monthly,v1,""
 nt_savanna,2001,3,434.2,378.6,496.8,219.0,,485,,1.0,,T,terra_only,2.84,81,81,,,,monthly,v1,""
@@ -1554,7 +1554,7 @@ nt_savanna,2026,7,7394.7,7155.5,7634.3,6286.0,14033.1,11719,59474,1.0,0.8065,V,"
 nt_savanna,2026,8,3827.6,3683.4,3982.1,3538.0,6763.2,8248,39687,1.0,0.9677,V,provisional,1.04,43,62,6763.2,6620.8,6899.1,monthly,v1,""
 nt_savanna,2026,9,3630.3,3438.7,3767.8,3266.0,6045.0,7854,41382,1.0,1.0,V,provisional,1.16,52,57,6045.0,5931.7,6171.1,monthly,v1,""
 nt_savanna,2026,10,4061.3,3868.6,4218.4,3866.0,6628.0,10478,47978,1.0,1.0,V,provisional,1.17,52,52,6628.0,6496.9,6745.0,monthly,v1,""
-nt_savanna,2026,11,2139.0,2003.4,2296.9,1890.0,3689.0,4920,22813,1.0,1.0,V2,mtd|provisional,1.19,57,67,3547.3,3457.9,3644.5,monthly,v1,""
+nt_savanna,2026,11,2184.2,2044.3,2344.6,1950.0,3767.0,5092,23267,1.0,1.0,V2,mtd|provisional,1.19,57,67,3622.3,3532.9,3720.4,monthly,v1,""
 ne_india,2001,1,824.7,699.7,960.2,133.0,,194,,1.0,,T,terra_only,1.48,60,90,,,,monthly,v1,""
 ne_india,2001,2,1448.8,1299.4,1625.4,267.0,,410,,1.0,,T,terra_only,1.42,62,86,,,,monthly,v1,""
 ne_india,2001,3,6795.0,6117.4,7635.7,1397.0,,2355,,1.0,,T,terra_only,1.35,67,81,,,,monthly,v1,""
@@ -1865,7 +1865,7 @@ ne_india,2026,7,6.9,4.2,10.7,6.0,22.3,7,19,1.0,0.8065,V,uncertain,1.31,33,76,22.
 ne_india,2026,8,16.0,9.7,22.7,2.0,25.8,2,27,1.0,0.9677,V,provisional|uncertain,2.0,67,95,25.8,18.0,34.0,monthly,v1,""
 ne_india,2026,9,53.4,40.4,66.6,21.0,101.0,24,154,1.0,1.0,V,provisional,6.31,95,95,101.0,84.0,119.0,monthly,v1,""
 ne_india,2026,10,74.3,63.6,85.8,59.0,421.0,85,596,1.0,1.0,V,provisional,2.28,95,95,421.0,387.9,450.0,monthly,v1,Not checkable yet
-ne_india,2026,11,47.4,40.9,55.1,16.0,233.0,17,300,1.0,1.0,V2,mtd|provisional,1.38,57,76,225.9,203.6,250.2,monthly,v1,""
+ne_india,2026,11,49.5,42.6,57.2,16.0,243.0,17,312,1.0,1.0,V2,mtd|provisional,1.34,62,81,235.6,213.3,260.9,monthly,v1,""
 tanzania,2001,1,24.6,8.0,42.8,6.0,,13,,1.0,,T,uncertain|terra_only,0.18,0,0,,,,monthly,v1,""
 tanzania,2001,2,69.8,40.3,101.7,14.0,,14,,1.0,,T,uncertain|terra_only,0.31,0,14,,,,monthly,v1,""
 tanzania,2001,3,213.4,172.3,260.0,64.0,,84,,1.0,,T,terra_only,1.11,43,67,,,,monthly,v1,""
@@ -2176,7 +2176,7 @@ tanzania,2026,7,8041.7,7870.5,8204.8,5972.0,21897.2,9383,41714,1.0,0.8065,V,"",0
 tanzania,2026,8,8844.8,8583.8,9125.9,7872.0,28114.9,12561,64886,1.0,0.9677,V,provisional,0.81,10,14,28114.9,27833.8,28385.0,monthly,v1,""
 tanzania,2026,9,7874.3,7671.8,8041.5,7379.0,29794.0,10895,63611,1.0,1.0,V,provisional,0.9,38,38,29794.0,29522.9,30084.0,monthly,v1,""
 tanzania,2026,10,7427.4,7126.3,7669.9,8274.0,32326.0,13081,70638,1.0,1.0,V,provisional,1.08,57,67,32326.0,32038.0,32596.2,monthly,v1,""
-tanzania,2026,11,2258.6,2168.1,2352.4,2257.0,12128.0,3820,24912,1.0,1.0,V2,mtd|provisional,1.12,62,67,11986.1,11819.1,12167.0,monthly,v1,""
+tanzania,2026,11,2293.8,2200.1,2390.7,2333.0,12317.0,3909,25244,1.0,1.0,V2,mtd|provisional,1.1,52,62,12172.9,12005.9,12354.8,monthly,v1,""
 sudan,2001,1,2359.8,2255.6,2469.9,1214.0,,1870,,1.0,,T,terra_only,1.09,60,75,,,,monthly,v1,""
 sudan,2001,2,1789.6,1698.7,1889.6,939.0,,1452,,1.0,,T,terra_only,1.2,67,81,,,,monthly,v1,""
 sudan,2001,3,1021.0,948.5,1087.0,539.0,,843,,1.0,,T,terra_only,0.78,19,38,,,,monthly,v1,""
@@ -2487,7 +2487,7 @@ sudan,2026,7,46.7,39.5,56.4,57.0,388.1,77,528,1.0,0.8065,V,"",1.32,67,81,388.1,3
 sudan,2026,8,24.9,19.2,32.0,29.0,181.9,37,302,1.0,0.9677,V,provisional|uncertain,2.0,71,90,181.9,160.9,205.0,monthly,v1,""
 sudan,2026,9,26.6,21.1,31.9,22.0,117.0,27,205,1.0,1.0,V,provisional,0.76,10,38,117.0,100.0,133.0,monthly,v1,""
 sudan,2026,10,3982.6,3831.2,4103.7,2752.0,10594.0,4553,31934,1.0,1.0,V,provisional,1.57,95,95,10594.0,10440.0,10744.1,monthly,v1,Detection issue likely
-sudan,2026,11,4018.5,3904.9,4144.5,3187.0,9484.0,5513,28198,1.0,1.0,V2,mtd|provisional,0.95,38,43,9310.4,9165.1,9469.5,monthly,v1,""
+sudan,2026,11,4196.0,4077.8,4325.7,3325.0,9903.0,5761,29393,1.0,1.0,V2,mtd|provisional,0.96,29,43,9721.8,9573.4,9883.8,monthly,v1,""
 mato_grosso,2001,1,441.1,388.2,521.1,208.0,,233,,1.0,,T,terra_only,0.88,25,50,,,,monthly,v1,""
 mato_grosso,2001,2,869.2,774.1,986.2,393.0,,443,,1.0,,T,terra_only,2.5,86,90,,,,monthly,v1,""
 mato_grosso,2001,3,378.0,332.4,427.6,175.0,,199,,1.0,,T,terra_only,0.48,10,19,,,,monthly,v1,""
@@ -2798,4 +2798,4 @@ mato_grosso,2026,7,754.6,717.2,792.7,589.0,1485.5,1064,4226,1.0,0.8065,V,"",0.35
 mato_grosso,2026,8,2770.3,2696.6,2841.4,2350.0,5044.7,6072,27861,1.0,0.9677,V,provisional,0.57,14,14,5044.7,4929.9,5166.1,monthly,v1,""
 mato_grosso,2026,9,1963.0,1887.2,2031.4,1706.0,3703.0,3683,16467,1.0,1.0,V,provisional,0.25,0,0,3703.0,3604.9,3795.1,monthly,v1,""
 mato_grosso,2026,10,729.0,688.9,767.3,771.0,1801.0,1321,5121,1.0,1.0,V,provisional,0.19,0,0,1801.0,1736.0,1864.0,monthly,v1,Not checkable yet
-mato_grosso,2026,11,277.2,250.5,306.2,312.0,609.0,501,1419,1.0,1.0,V2,mtd|provisional,0.34,5,10,604.1,568.3,644.7,monthly,v1,Detection issue likely
+mato_grosso,2026,11,279.0,252.7,308.1,312.0,613.0,501,1423,1.0,1.0,V2,mtd|provisional,0.32,5,10,608.0,571.3,648.7,monthly,v1,Detection issue likely
