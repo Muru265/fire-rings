@@ -1,7 +1,7 @@
 {
  "region": "mauritius",
  "name": "Mauritius (incl. Rodrigues)",
- "data_end": "2026-11-18",
+ "data_end": "2026-11-19",
  "baseline": [
   2003,
   2022
@@ -258,8 +258,8 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 18,
-  "so_far": 0.9,
+  "days": 19,
+  "so_far": 1.1,
   "typical_so_far": 2.0,
   "typical_so_far_app": 2.0,
   "typical": 2.7,
