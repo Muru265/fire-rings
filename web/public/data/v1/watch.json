@@ -1,6 +1,6 @@
 {
  "version": "v1",
- "data_end": "2026-11-20",
+ "data_end": "2026-11-21",
  "rules": {
   "alert_pct": 95,
   "far_above_pct": 90,
@@ -175,12 +175,12 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 1155.5,
-     "lo": 1091.9,
-     "hi": 1217.3,
-     "median": 3688.5,
-     "ratio": 0.31,
+     "days": 21,
+     "value": 1174.6,
+     "lo": 1108.3,
+     "hi": 1238.1,
+     "median": 3721.1,
+     "ratio": 0.32,
      "pct": [
       10,
       10
@@ -425,7 +425,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -480,7 +480,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     },
     {
      "region": "punjab",
@@ -498,7 +498,7 @@
       "geostationary": "not_covered"
      },
      "evidence": [
-      "Detection times: Aqua÷VIIRS ×3.031, night share ×6.802 vs same month 2013–2019; mean VIIRS hour +0.05 h → shift.",
+      "Detection times: Aqua÷VIIRS ×3.053, night share ×6.878 vs same month 2013–2019; mean VIIRS hour +0.05 h → shift.",
       "Burned area (MCD64A1): not yet published for this month."
      ],
      "trace": [
@@ -519,14 +519,14 @@
          "aqua_viirs",
          "night_share"
         ],
-        "viirs_day_celldays": 2997,
+        "viirs_day_celldays": 3036,
         "baseline_years": 7,
-        "aqua_viirs": 1.059,
+        "aqua_viirs": 1.067,
         "aqua_viirs_baseline": 0.349,
-        "aqua_viirs_rel": 3.031,
-        "night_share": 0.062,
+        "aqua_viirs_rel": 3.053,
+        "night_share": 0.063,
         "night_share_baseline": 0.009,
-        "night_share_rel": 6.802,
+        "night_share_rel": 6.878,
         "mean_hour": 13.29,
         "mean_hour_baseline": 13.24,
         "mean_hour_shift": 0.05,
@@ -535,7 +535,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -590,7 +590,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     }
    ]
   },
@@ -604,15 +604,15 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 3090.4,
-     "lo": 2924.9,
-     "hi": 3243.3,
-     "median": 4089.0,
-     "ratio": 0.76,
+     "days": 21,
+     "value": 3306.8,
+     "lo": 3127.0,
+     "hi": 3469.4,
+     "median": 4137.5,
+     "ratio": 0.8,
      "pct": [
-      5,
-      19
+      10,
+      29
      ],
      "return_period": null,
      "beyond_record": false,
@@ -849,7 +849,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -906,7 +906,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     }
    ]
   },
@@ -920,17 +920,17 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 257.7,
-     "lo": 229.9,
-     "hi": 286.2,
-     "median": 216.1,
-     "ratio": 1.19,
+     "days": 21,
+     "value": 262.9,
+     "lo": 235.9,
+     "hi": 292.1,
+     "median": 228.2,
+     "ratio": 1.15,
      "pct": [
-      52,
+      48,
       71
      ],
-     "return_period": 2.6,
+     "return_period": 2.5,
      "beyond_record": false,
      "guard": false,
      "flags": [
@@ -1115,7 +1115,7 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
+     "days": 21,
      "value": 1.1,
      "lo": 0.4,
      "hi": 2.0,
@@ -1302,17 +1302,17 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 2293.2,
-     "lo": 2155.9,
-     "hi": 2458.3,
-     "median": 1953.4,
+     "days": 21,
+     "value": 2353.0,
+     "lo": 2203.5,
+     "hi": 2523.9,
+     "median": 2011.1,
      "ratio": 1.17,
      "pct": [
       57,
-      67
+      62
      ],
-     "return_period": 2.6,
+     "return_period": 2.5,
      "beyond_record": false,
      "guard": false,
      "flags": [
@@ -1503,17 +1503,17 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 51.5,
-     "lo": 44.1,
-     "hi": 59.4,
-     "median": 43.0,
-     "ratio": 1.2,
+     "days": 21,
+     "value": 52.7,
+     "lo": 45.2,
+     "hi": 61.4,
+     "median": 44.9,
+     "ratio": 1.18,
      "pct": [
-      57,
-      76
+      52,
+      71
      ],
-     "return_period": 3.0,
+     "return_period": 2.6,
      "beyond_record": false,
      "guard": false,
      "flags": [
@@ -1751,7 +1751,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -1806,7 +1806,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     }
    ]
   },
@@ -1820,17 +1820,17 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 2419.5,
-     "lo": 2323.8,
-     "hi": 2526.1,
-     "median": 2241.8,
-     "ratio": 1.08,
+     "days": 21,
+     "value": 2554.1,
+     "lo": 2453.0,
+     "hi": 2666.1,
+     "median": 2266.6,
+     "ratio": 1.13,
      "pct": [
-      57,
-      62
+      62,
+      67
      ],
-     "return_period": 2.5,
+     "return_period": 2.8,
      "beyond_record": false,
      "guard": false,
      "flags": [
@@ -2033,15 +2033,15 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 4484.6,
-     "lo": 4358.5,
-     "hi": 4621.3,
-     "median": 4755.6,
-     "ratio": 0.94,
+     "days": 21,
+     "value": 4618.5,
+     "lo": 4488.5,
+     "hi": 4758.8,
+     "median": 5003.5,
+     "ratio": 0.92,
      "pct": [
       5,
-      33
+      19
      ],
      "return_period": null,
      "beyond_record": false,
@@ -2306,7 +2306,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -2363,7 +2363,7 @@
       "NASA FIRMS (MODIS/VIIRS)",
       "NASA MCD64A1 burned area (LP DAAC)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     }
    ]
   },
@@ -2377,11 +2377,11 @@
      "y": 2026,
      "m": 11,
      "month": "Nov 2026",
-     "days": 20,
-     "value": 284.9,
-     "lo": 259.1,
-     "hi": 312.0,
-     "median": 967.0,
+     "days": 21,
+     "value": 293.1,
+     "lo": 265.1,
+     "hi": 322.7,
+     "median": 1012.0,
      "ratio": 0.29,
      "pct": [
       5,
@@ -2623,7 +2623,7 @@
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -2691,7 +2691,7 @@
         "images": 192,
         "sampling": "first full-disk image of each hour on days 1, 5, 9, 13, 17, 21, 25, 29 of the month",
         "satellite": "GOES-19",
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -2714,7 +2714,7 @@
       "NASA MCD64A1 burned area (LP DAAC)",
       "NOAA GOES-R ABI Fire Detection (AWS Open Data)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     },
     {
      "region": "mato_grosso",
@@ -2732,9 +2732,9 @@
       "geostationary": "fires_outside_overpass_hours"
      },
      "evidence": [
-      "Detection times: Aqua÷VIIRS ×1.409, night share ×1.158 vs same month 2013–2019; mean VIIRS hour +0.01 h → no shift.",
+      "Detection times: Aqua÷VIIRS ×1.407, night share ×1.206 vs same month 2013–2019; mean VIIRS hour +0.02 h → no shift.",
       "Burned area (MCD64A1): not yet published for this month.",
-      "Geostationary: 58% of sampled fire pixels outside polar overpass hours."
+      "Geostationary: 57% of sampled fire pixels outside polar overpass hours."
      ],
      "trace": [
       {
@@ -2751,23 +2751,23 @@
         "baseline": "same month 2013–2019",
         "signal": "no_timing_shift",
         "reasons": [],
-        "viirs_day_celldays": 458,
+        "viirs_day_celldays": 463,
         "baseline_years": 7,
-        "aqua_viirs": 0.45,
+        "aqua_viirs": 0.449,
         "aqua_viirs_baseline": 0.319,
-        "aqua_viirs_rel": 1.409,
-        "night_share": 0.311,
+        "aqua_viirs_rel": 1.407,
+        "night_share": 0.324,
         "night_share_baseline": 0.269,
-        "night_share_rel": 1.158,
+        "night_share_rel": 1.206,
         "mean_hour": 13.68,
         "mean_hour_baseline": 13.66,
-        "mean_hour_shift": 0.01,
+        "mean_hour_shift": 0.02,
         "thresholds": {
          "aqua_viirs_x": 2.062,
          "night_share_x": 3.098,
          "hour_shift_h": 0.198
         },
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -2801,8 +2801,8 @@
         "instrument": "GOES-R ABI (FDCF)",
         "source": "NOAA GOES-R ABI Fire Detection (AWS Open Data)",
         "month": "2026-11",
-        "detections_sampled": 155,
-        "share_outside_polar_hours": 0.581,
+        "detections_sampled": 166,
+        "share_outside_polar_hours": 0.572,
         "hourly_profile_local_solar": [
          0,
          1,
@@ -2817,9 +2817,9 @@
          3,
          3,
          5,
-         26,
-         22,
-         30,
+         29,
+         25,
+         35,
          19,
          15,
          13,
@@ -2832,10 +2832,10 @@
         "signal": "fires_outside_overpass_hours",
         "baseline_share_outside": 0.399,
         "baseline_months": 2,
-        "images": 120,
-        "sampling": "first full-disk image of each hour on days 1, 5, 9, 13, 17 of the month",
+        "images": 144,
+        "sampling": "first full-disk image of each hour on days 1, 5, 9, 13, 17, 21 of the month",
         "satellite": "GOES-19",
-        "checked_at": "2026-11-21T13:00Z"
+        "checked_at": "2026-11-22T12:52Z"
        }
       },
       {
@@ -2858,7 +2858,7 @@
       "NASA MCD64A1 burned area (LP DAAC)",
       "NOAA GOES-R ABI Fire Detection (AWS Open Data)"
      ],
-     "checked_at": "2026-11-21T13:00Z"
+     "checked_at": "2026-11-22T12:52Z"
     }
    ]
   }
