@@ -1,6 +1,6 @@
 {
- "data_end": "2026-11-13",
- "generated": "2026-11-14T15:20:19.062Z",
+ "data_end": "2026-11-22",
+ "generated": "2026-11-23T15:29:29.094Z",
  "briefings": {
   "punjab|responder": {
    "answer": "November 2026 recorded 777 fire-days (0.3× typical, 3,002 fire-days), and October 2026 recorded 392 fire-days (0.1× typical, 4,904 fire-days). Part of the drop may be fires burning after the satellite pass that are no longer detected. The agentic check verdict is \"Detection issue likely\", with detection times showing a timing shift and MCD64A1 burned area not yet published.",
@@ -990,380 +990,6 @@
     }
    ]
   },
-  "sudan|responder": {
-   "answer": "Last full month October 2026 recorded 3,983 MODIS-equivalent fire-days compared with a typical 2,538 fire-days, ranking above every year in the 2003–2022 baseline. November 2026 month-to-date recorded 3,212 MODIS-equivalent fire-days compared with a typical 3,500 fire-days. The agentic check verdict is \"Detection issue likely\" because detection times shifted, while burned area is not yet published and geostationary data access is pending.",
-   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-   "verified": true,
-   "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-14T15:20:04.628Z",
-   "status": "Alert",
-   "trace": [
-    {
-     "tool": "get_month",
-     "args": {
-      "mode": "longterm",
-      "region": "sudan",
-      "year": 2026,
-      "month": 10
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":3983,\"range_90\":[3831,4104],\"typical_fire_days\":2538,\"baseline\":\"2003–2022\",\"ratio_to_typical\":1.6,\"percentile\":\"above every y…",
-     "result": {
-      "region": "Sudan",
-      "month": "October 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": false,
-      "fire_days": 3983,
-      "range_90": [
-       3831,
-       4104
-      ],
-      "typical_fire_days": 2538,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 1.6,
-      "percentile": "above every year in the 2003–2022 baseline",
-      "return_period_years": null,
-      "beyond_baseline_record": true,
-      "rank_among_years_for_this_month": 1,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 4553,
-       "viirs": 31934
-      },
-      "flags": [
-       "provisional"
-      ],
-      "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
-     }
-    },
-    {
-     "tool": "get_month",
-     "args": {
-      "mode": "longterm",
-      "region": "sudan"
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–13 only, compared with the same days of baseline years\",\"fire_days\":3212,\"range_90\":[3116,3319],\"typical_fire_days\":3500,\"baseline\":\"20…",
-     "result": {
-      "region": "Sudan",
-      "month": "November 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–13 only, compared with the same days of baseline years",
-      "fire_days": 3212,
-      "range_90": [
-       3116,
-       3319
-      ],
-      "typical_fire_days": 3500,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 0.9,
-      "percentile": "33rd–43rd percentile",
-      "return_period_years": null,
-      "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 12,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 4377,
-       "viirs": 22837
-      },
-      "flags": [
-       "mtd",
-       "provisional"
-      ],
-      "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "This month is not over yet, so it is compared with the same days in past years.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ],
-      "last_complete_month": {
-       "region": "Sudan",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 3983,
-       "range_90": [
-        3831,
-        4104
-       ],
-       "typical_fire_days": 2538,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 1.6,
-       "percentile": "above every year in the 2003–2022 baseline",
-       "return_period_years": null,
-       "beyond_baseline_record": true,
-       "rank_among_years_for_this_month": 1,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 4553,
-        "viirs": 31934
-       },
-       "flags": [
-        "provisional"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
-     }
-    },
-    {
-     "tool": "get_quality",
-     "args": {
-      "region": "sudan",
-      "mode": "longterm"
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"calibration_window\":\"July 2012 – December 2019\",\"method\":\"monthly exchange rates shrunk toward the region-wide rate 0.385\",\"low_activity_region\":false,\"out_of_sample_annual_error_pct\":2.8,\"out_of_sample_bias_pct\":-0.1,…",
-     "result": {
-      "region": "Sudan",
-      "calibration_window": "July 2012 – December 2019",
-      "method": "monthly exchange rates shrunk toward the region-wide rate 0.385",
-      "low_activity_region": false,
-      "out_of_sample_annual_error_pct": 2.8,
-      "out_of_sample_bias_pct": -0.1,
-      "validation_v1_pass": true,
-      "step_at_2012_raw_pct": 122.8,
-      "step_at_2012_harmonized_pct": -14.6,
-      "step_at_2012_modis_only_pct": -14.5,
-      "validation_v3_pass": true,
-      "uncertain_months_in_record": 39,
-      "provisional_months": [
-       "August 2026",
-       "September 2026",
-       "October 2026",
-       "November 2026"
-      ],
-      "static_source_detections_removed": 43082,
-      "data_through": "2026-11-13",
-      "famous_seasons": {
-       "season_definition": "July–June",
-       "seasons_ranked": 23,
-       "top3_seasons": [
-        "2024–25",
-        "2025–26",
-        "2007–08"
-       ]
-      },
-      "flags": [],
-      "caveats": [
-       "Months before July 2002 come from one satellite only (Terra), so they are less certain and are not ranked.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
-     }
-    },
-    {
-     "tool": "get_agent_check",
-     "args": {
-      "year": 2026,
-      "region": "sudan",
-      "month": 10
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":0.807,\"night_share_vs…",
-     "result": {
-      "region": "Sudan",
-      "checks": [
-       {
-        "month": "2026-10",
-        "flag": "far above normal",
-        "verdict": "Detection issue likely",
-        "rule": "R3: detection times shifted",
-        "detection_times": {
-         "signal": "timing_shift",
-         "aqua_to_viirs_vs_baseline": 0.807,
-         "night_share_vs_baseline": 1.287,
-         "mean_hour_shift_h": 0.22,
-         "baseline": "same month 2013–2019"
-        },
-        "burned_area": {
-         "signal": "not_yet_published",
-         "burned_km2": null,
-         "typical_km2": null,
-         "ratio": null,
-         "note": "MCD64A1 is published about 1–2 months after the month ends"
-        },
-        "geostationary": {
-         "signal": "pending_access",
-         "share_outside_polar_hours": null,
-         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
-        },
-        "sources": [
-         "NASA FIRMS (MODIS/VIIRS)",
-         "NASA MCD64A1 burned area (LP DAAC)"
-        ],
-        "checked_at": "2026-11-14T11:45Z"
-       }
-      ],
-      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
-     }
-    }
-   ]
-  },
-  "sudan|scientist": {
-   "answer": "In October 2026, Sudan recorded 3,983 MODIS-equivalent fire-days, which is 1.6× typical (typical: 2,538) and above every year in the 2003–2022 baseline. For November 2026 (days 1–13 only), the region recorded 3,212 MODIS-equivalent fire-days, which is 0.9× typical (typical: 3,500) and in the 33rd–43rd percentile. These values are MODIS-equivalent fire-days (Long-term) with a 90% range of 3,831 to 4,104 for October and 3,116 to 3,319 for November. The stored agentic check verdict for October 2026 is Detection issue likely, based on detection-time signals showing a timing shift with a mean hour shift of 0.22 hours and a night-share ratio of 1.287, while burned area is not yet published and geostationary check is pending access. Method: see the Proof page.",
-   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-   "verified": true,
-   "model": "gemini-3.5-flash-lite",
-   "generated": "2026-11-14T15:20:09.761Z",
-   "status": "Alert",
-   "trace": [
-    {
-     "tool": "get_month",
-     "args": {
-      "mode": "longterm",
-      "month": 10,
-      "region": "sudan",
-      "year": 2026
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":3983,\"range_90\":[3831,4104],\"typical_fire_days\":2538,\"baseline\":\"2003–2022\",\"ratio_to_typical\":1.6,\"percentile\":\"above every y…",
-     "result": {
-      "region": "Sudan",
-      "month": "October 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": false,
-      "fire_days": 3983,
-      "range_90": [
-       3831,
-       4104
-      ],
-      "typical_fire_days": 2538,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 1.6,
-      "percentile": "above every year in the 2003–2022 baseline",
-      "return_period_years": null,
-      "beyond_baseline_record": true,
-      "rank_among_years_for_this_month": 1,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 4553,
-       "viirs": 31934
-      },
-      "flags": [
-       "provisional"
-      ],
-      "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ]
-     }
-    },
-    {
-     "tool": "get_month",
-     "args": {
-      "mode": "longterm",
-      "region": "sudan"
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–13 only, compared with the same days of baseline years\",\"fire_days\":3212,\"range_90\":[3116,3319],\"typical_fire_days\":3500,\"baseline\":\"20…",
-     "result": {
-      "region": "Sudan",
-      "month": "November 2026",
-      "unit": "MODIS-equivalent fire-days",
-      "month_to_date": "days 1–13 only, compared with the same days of baseline years",
-      "fire_days": 3212,
-      "range_90": [
-       3116,
-       3319
-      ],
-      "typical_fire_days": 3500,
-      "baseline": "2003–2022",
-      "ratio_to_typical": 0.9,
-      "percentile": "33rd–43rd percentile",
-      "return_period_years": null,
-      "beyond_baseline_record": false,
-      "rank_among_years_for_this_month": 12,
-      "too_little_fire_to_judge": false,
-      "raw_hotspots": {
-       "modis": 4377,
-       "viirs": 22837
-      },
-      "flags": [
-       "mtd",
-       "provisional"
-      ],
-      "caveats": [
-       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-       "This month is not over yet, so it is compared with the same days in past years.",
-       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-      ],
-      "last_complete_month": {
-       "region": "Sudan",
-       "month": "October 2026",
-       "unit": "MODIS-equivalent fire-days",
-       "month_to_date": false,
-       "fire_days": 3983,
-       "range_90": [
-        3831,
-        4104
-       ],
-       "typical_fire_days": 2538,
-       "baseline": "2003–2022",
-       "ratio_to_typical": 1.6,
-       "percentile": "above every year in the 2003–2022 baseline",
-       "return_period_years": null,
-       "beyond_baseline_record": true,
-       "rank_among_years_for_this_month": 1,
-       "too_little_fire_to_judge": false,
-       "raw_hotspots": {
-        "modis": 4553,
-        "viirs": 31934
-       },
-       "flags": [
-        "provisional"
-       ],
-       "caveats": [
-        "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
-        "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
-       ]
-      }
-     }
-    },
-    {
-     "tool": "get_agent_check",
-     "args": {
-      "year": 2026,
-      "region": "sudan",
-      "month": 10
-     },
-     "result_summary": "{\"region\":\"Sudan\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":0.807,\"night_share_vs…",
-     "result": {
-      "region": "Sudan",
-      "checks": [
-       {
-        "month": "2026-10",
-        "flag": "far above normal",
-        "verdict": "Detection issue likely",
-        "rule": "R3: detection times shifted",
-        "detection_times": {
-         "signal": "timing_shift",
-         "aqua_to_viirs_vs_baseline": 0.807,
-         "night_share_vs_baseline": 1.287,
-         "mean_hour_shift_h": 0.22,
-         "baseline": "same month 2013–2019"
-        },
-        "burned_area": {
-         "signal": "not_yet_published",
-         "burned_km2": null,
-         "typical_km2": null,
-         "ratio": null,
-         "note": "MCD64A1 is published about 1–2 months after the month ends"
-        },
-        "geostationary": {
-         "signal": "pending_access",
-         "share_outside_polar_hours": null,
-         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
-        },
-        "sources": [
-         "NASA FIRMS (MODIS/VIIRS)",
-         "NASA MCD64A1 burned area (LP DAAC)"
-        ],
-        "checked_at": "2026-11-14T11:45Z"
-       }
-      ],
-      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
-     }
-    }
-   ]
-  },
   "mato_grosso|responder": {
    "answer": "November 2026 has 262 fire-days so far, which is 0.4× typical (typical is 643 fire-days). October 2026 had 729 fire-days, which is 0.2× typical (typical is 3,846 fire-days). The agentic check verdict for October 2026 is Not checkable yet because MCD64A1 burned area is not available yet.",
    "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
@@ -1737,6 +1363,338 @@
          "NOAA GOES-R ABI Fire Detection (AWS Open Data)"
         ],
         "checked_at": "2026-11-14T11:45Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
+     }
+    }
+   ]
+  },
+  "sudan|responder": {
+   "answer": "November 2026 recorded 4,736 fire-days compared with the typical 5,247 fire-days, while October 2026 reached 3,983 fire-days compared with the typical 2,538 fire-days. For October 2026, the verdict is Detection issue likely based on detection times shifted.",
+   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+   "verified": true,
+   "model": "gemini-3.5-flash-lite",
+   "generated": "2026-11-23T15:27:27.318Z",
+   "status": "Alert",
+   "trace": [
+    {
+     "tool": "get_month",
+     "args": {
+      "year": 2026,
+      "month": 11,
+      "region": "sudan",
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–22 only, compared with the same days of baseline years\",\"fire_days\":4736,\"range_90\":[4603,4879],\"typical_fire_days\":5247,\"baseline\":\"20…",
+     "result": {
+      "region": "Sudan",
+      "month": "November 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": "days 1–22 only, compared with the same days of baseline years",
+      "fire_days": 4736,
+      "range_90": [
+       4603,
+       4879
+      ],
+      "typical_fire_days": 5247,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 0.9,
+      "percentile": "5th percentile",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 20,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 6330,
+       "viirs": 32624
+      },
+      "flags": [
+       "mtd",
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "This month is not over yet, so it is compared with the same days in past years.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_month",
+     "args": {
+      "region": "sudan",
+      "mode": "longterm",
+      "year": 2026,
+      "month": 10
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":3983,\"range_90\":[3831,4104],\"typical_fire_days\":2538,\"baseline\":\"2003–2022\",\"ratio_to_typical\":1.6,\"percentile\":\"above every y…",
+     "result": {
+      "region": "Sudan",
+      "month": "October 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": false,
+      "fire_days": 3983,
+      "range_90": [
+       3831,
+       4104
+      ],
+      "typical_fire_days": 2538,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 1.6,
+      "percentile": "above every year in the 2003–2022 baseline",
+      "return_period_years": null,
+      "beyond_baseline_record": true,
+      "rank_among_years_for_this_month": 1,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 4553,
+       "viirs": 31934
+      },
+      "flags": [
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "region": "sudan",
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":0.807,\"night_share_vs…",
+     "result": {
+      "region": "Sudan",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far above normal",
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted",
+        "detection_times": {
+         "signal": "timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.807,
+         "night_share_vs_baseline": 1.287,
+         "mean_hour_shift_h": 0.22,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-23T15:26Z"
+       },
+       {
+        "month": "2026-11",
+        "flag": "far below normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.876,
+         "night_share_vs_baseline": 1.118,
+         "mean_hour_shift_h": 0.04,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-23T15:26Z"
+       }
+      ],
+      "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
+     }
+    }
+   ]
+  },
+  "sudan|scientist": {
+   "answer": "For November 2026 so far (days 1–22), Sudan recorded 4,736 MODIS-equivalent fire-days compared with the typical 5,247 fire-days (0.9× typical, 90% range 4,603 to 4,879, baseline 2003–2022). October 2026 recorded 3,983 MODIS-equivalent fire-days compared with the typical 2,538 fire-days (1.6× typical, 90% range 3,831 to 4,104, baseline 2003–2022), ranking 1st and sitting above every year in the 2003–2022 baseline. The agentic check verdict for November 2026 is \"Not checkable yet\" because MCD64A1 burned area is not available yet (published about 1–2 months after the month ends). Method: see the Proof page.",
+   "caveat": "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+   "verified": true,
+   "model": "gemini-3.5-flash-lite",
+   "generated": "2026-11-23T15:29:27.592Z",
+   "status": "Alert",
+   "trace": [
+    {
+     "tool": "get_month",
+     "args": {
+      "region": "sudan",
+      "month": 11,
+      "year": 2026,
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"month\":\"November 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":\"days 1–22 only, compared with the same days of baseline years\",\"fire_days\":4736,\"range_90\":[4603,4879],\"typical_fire_days\":5247,\"baseline\":\"20…",
+     "result": {
+      "region": "Sudan",
+      "month": "November 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": "days 1–22 only, compared with the same days of baseline years",
+      "fire_days": 4736,
+      "range_90": [
+       4603,
+       4879
+      ],
+      "typical_fire_days": 5247,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 0.9,
+      "percentile": "5th percentile",
+      "return_period_years": null,
+      "beyond_baseline_record": false,
+      "rank_among_years_for_this_month": 20,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 6330,
+       "viirs": 32624
+      },
+      "flags": [
+       "mtd",
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "This month is not over yet, so it is compared with the same days in past years.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_month",
+     "args": {
+      "year": 2026,
+      "region": "sudan",
+      "month": 10,
+      "mode": "longterm"
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"month\":\"October 2026\",\"unit\":\"MODIS-equivalent fire-days\",\"month_to_date\":false,\"fire_days\":3983,\"range_90\":[3831,4104],\"typical_fire_days\":2538,\"baseline\":\"2003–2022\",\"ratio_to_typical\":1.6,\"percentile\":\"above every y…",
+     "result": {
+      "region": "Sudan",
+      "month": "October 2026",
+      "unit": "MODIS-equivalent fire-days",
+      "month_to_date": false,
+      "fire_days": 3983,
+      "range_90": [
+       3831,
+       4104
+      ],
+      "typical_fire_days": 2538,
+      "baseline": "2003–2022",
+      "ratio_to_typical": 1.6,
+      "percentile": "above every year in the 2003–2022 baseline",
+      "return_period_years": null,
+      "beyond_baseline_record": true,
+      "rank_among_years_for_this_month": 1,
+      "too_little_fire_to_judge": false,
+      "raw_hotspots": {
+       "modis": 4553,
+       "viirs": 31934
+      },
+      "flags": [
+       "provisional"
+      ],
+      "caveats": [
+       "This month is provisional: it uses NASA’s quick-look data, which can change when the final data arrive about five months later.",
+       "All numbers are MODIS-equivalent fire-days: one ~36 km² tile with at least one fire on one day, on the old satellite’s scale."
+      ]
+     }
+    },
+    {
+     "tool": "get_agent_check",
+     "args": {
+      "mode": "longterm",
+      "region": "sudan"
+     },
+     "result_summary": "{\"region\":\"Sudan\",\"checks\":[{\"month\":\"2026-10\",\"flag\":\"far above normal\",\"verdict\":\"Detection issue likely\",\"rule\":\"R3: detection times shifted\",\"detection_times\":{\"signal\":\"timing_shift\",\"aqua_to_viirs_vs_baseline\":0.807,\"night_share_vs…",
+     "result": {
+      "region": "Sudan",
+      "checks": [
+       {
+        "month": "2026-10",
+        "flag": "far above normal",
+        "verdict": "Detection issue likely",
+        "rule": "R3: detection times shifted",
+        "detection_times": {
+         "signal": "timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.807,
+         "night_share_vs_baseline": 1.287,
+         "mean_hour_shift_h": 0.22,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-23T15:26Z"
+       },
+       {
+        "month": "2026-11",
+        "flag": "far below normal",
+        "verdict": "Not checkable yet",
+        "rule": "R5: no burned-area answer yet and no detection-issue evidence",
+        "detection_times": {
+         "signal": "no_timing_shift",
+         "aqua_to_viirs_vs_baseline": 0.876,
+         "night_share_vs_baseline": 1.118,
+         "mean_hour_shift_h": 0.04,
+         "baseline": "same month 2013–2019"
+        },
+        "burned_area": {
+         "signal": "not_yet_published",
+         "burned_km2": null,
+         "typical_km2": null,
+         "ratio": null,
+         "note": "MCD64A1 is published about 1–2 months after the month ends"
+        },
+        "geostationary": {
+         "signal": "pending_access",
+         "share_outside_polar_hours": null,
+         "note": "Meteosat check ready — waiting for data access (LSA SAF login)"
+        },
+        "sources": [
+         "NASA FIRMS (MODIS/VIIRS)",
+         "NASA MCD64A1 burned area (LP DAAC)"
+        ],
+        "checked_at": "2026-11-23T15:26Z"
        }
       ],
       "how": "Fixed rules decide the verdict from the three tool signals; the AI only explains it. Burned area is published 1–2 months after the month ends."
