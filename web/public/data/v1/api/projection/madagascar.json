@@ -1,7 +1,7 @@
 {
  "region": "madagascar",
  "name": "Madagascar",
- "data_end": "2026-11-23",
+ "data_end": "2026-11-24",
  "baseline": [
   2003,
   2022
@@ -848,18 +848,18 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 23,
-  "so_far": 3796.5,
-  "typical_so_far": 4426.5,
-  "typical_so_far_app": 4426.5,
+  "days": 24,
+  "so_far": 3959.7,
+  "typical_so_far": 4568.5,
+  "typical_so_far_app": 4568.5,
   "typical": 5357.5,
   "p10": 3968.0,
   "p90": 6300.9,
-  "projection": 4595.0,
+  "projection": 4643.6,
   "checkpoint": 25,
   "range": [
-   4144.7,
-   4843.1
+   4188.5,
+   4894.3
   ],
   "better": "projection",
   "reason": null,
