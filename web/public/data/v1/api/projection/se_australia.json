@@ -1,7 +1,7 @@
 {
  "region": "se_australia",
  "name": "SE Australia (NSW + VIC)",
- "data_end": "2026-11-25",
+ "data_end": "2026-11-26",
  "baseline": [
   2003,
   2022
@@ -848,18 +848,18 @@
  "current": {
   "y": 2026,
   "m": 11,
-  "days": 25,
-  "so_far": 304.3,
-  "typical_so_far": 270.2,
-  "typical_so_far_app": 270.2,
+  "days": 26,
+  "so_far": 309.5,
+  "typical_so_far": 282.8,
+  "typical_so_far_app": 282.8,
   "typical": 332.9,
   "p10": 120.9,
   "p90": 534.3,
-  "projection": 375.0,
+  "projection": 364.3,
   "checkpoint": 25,
   "range": [
-   314.6,
-   396.7
+   305.7,
+   385.4
   ],
   "better": "projection",
   "reason": null,
